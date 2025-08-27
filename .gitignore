@@ -1,0 +1,15 @@
+# common
+_backups/
+_drafts/
+.env
+.env.*
+
+# backend
+__pycache__
+.venv/
+
+
+# frontend
+node_modules/
+.next/
+next.config.js
