@@ -4,19 +4,67 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Star, Loader2 } from 'lucide-react';
+import { Search, Star, Loader2, Edit3 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 import { useBidFilterStore } from '@/store/bidFilterStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { filterBids } from '@/lib/utils/filterBids';
 import { useNavigation } from '@/hooks/useNavigation';
 
 const BID_STAGES = [
-  { value: '준비', label: '준비' },
-  { value: '응찰', label: '진행' },
-  { value: '완료', label: '완료' },
+  { value: 'progress', label: '진행' },
+  { value: 'bidding', label: '응찰' },
+  { value: 'awarded', label: '낙찰' },
+  { value: 'failed', label: '패찰' },
+  { value: 'abandoned', label: '포기' },
 ];
+
+// 각 단계별 변경 가능한 상태 옵션 (워크플로우 문서 기준)
+const getStatusChangeOptions = (currentStatus) => {
+  switch (currentStatus) {
+    case 'progress': // 진행: 응찰, 제외 가능
+      return [
+        { value: 'bidding', label: '응찰' },
+        { value: 'excluded', label: '제외' },
+      ];
+    case 'bidding': // 응찰: 낙찰, 패찰, 진행, 포기 가능
+      return [
+        { value: 'awarded', label: '낙찰' },
+        { value: 'failed', label: '패찰' },
+        { value: 'progress', label: '진행' },
+        { value: 'abandoned', label: '포기' },
+      ];
+    case 'awarded': // 낙찰: 패찰, 진행, 응찰, 제외, 포기 가능
+      return [
+        { value: 'failed', label: '패찰' },
+        { value: 'progress', label: '진행' },
+        { value: 'bidding', label: '응찰' },
+        { value: 'excluded', label: '제외' },
+        { value: 'abandoned', label: '포기' },
+      ];
+    case 'failed': // 패찰: 낙찰, 진행, 응찰, 제외, 포기 가능
+      return [
+        { value: 'awarded', label: '낙찰' },
+        { value: 'progress', label: '진행' },
+        { value: 'bidding', label: '응찰' },
+        { value: 'excluded', label: '제외' },
+        { value: 'abandoned', label: '포기' },
+      ];
+    case 'abandoned': // 포기: 모든 상태로 변경 가능
+      return [
+        { value: 'progress', label: '진행' },
+        { value: 'bidding', label: '응찰' },
+        { value: 'awarded', label: '낙찰' },
+        { value: 'failed', label: '패찰' },
+        { value: 'excluded', label: '제외' },
+      ];
+    default:
+      return [];
+  }
+};
 
 export default function BidTable({ bids, currentStatus }) {
   const { navigate } = useNavigation();
@@ -34,6 +82,9 @@ export default function BidTable({ bids, currentStatus }) {
   const { perPage } = useSettingsStore();
   const [isComposing, setIsComposing] = useState(false);
   const [favorites, setFavorites] = useState<number[]>([]);
+  const [isFavoriteModalOpen, setIsFavoriteModalOpen] = useState(false);
+  const [isStatusChangeModalOpen, setIsStatusChangeModalOpen] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState('');
 
   // 검색어 입력 핸들러 수정
   const handleSearchInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,8 +110,8 @@ export default function BidTable({ bids, currentStatus }) {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // 상태 변경 핸들러
-  const handleStatusChange = async (value) => {
+  // 상태 선택 핸들러 (드롭다운)
+  const handleStatusSelection = async (value) => {
     try {
       // 1. UI 상태 즉시 업데이트
       // 2. URL 업데이트 준비
@@ -198,9 +249,50 @@ export default function BidTable({ bids, currentStatus }) {
     setSelectedBids((prev) => (prev.includes(bid) ? prev.filter((id) => id !== bid) : [...prev, bid]));
   };
 
-  // 즐겨찾기 토글 함수
+  // 즐겨찾기 추가 모달 열기
   const handleAddToFavorites = () => {
+    if (selectedBids.length === 0) {
+      alert('선택된 항목이 없습니다.');
+      return;
+    }
+    setIsFavoriteModalOpen(true);
+  };
+
+  // 즐겨찾기 확인 처리
+  const handleConfirmAddToFavorites = () => {
     setFavorites((prev) => [...prev, ...selectedBids]);
+    setSelectedBids([]);
+    setIsFavoriteModalOpen(false);
+    alert('즐겨찾기에 추가되었습니다.');
+  };
+
+  // 입찰 단계 변경 모달 열기
+  const handleStatusChangeModal = () => {
+    if (selectedBids.length === 0) {
+      alert('선택된 항목이 없습니다.');
+      return;
+    }
+    setSelectedStatus('');
+    setIsStatusChangeModalOpen(true);
+  };
+
+  // 입찰 단계 변경 확인 처리
+  const handleConfirmStatusChange = () => {
+    if (!selectedStatus) {
+      alert('변경할 단계를 선택해주세요.');
+      return;
+    }
+    
+    // TODO: API 호출하여 단계 변경
+    console.log('입찰 단계 변경:', {
+      bids: selectedBids,
+      newStatus: selectedStatus
+    });
+    
+    setSelectedBids([]);
+    setIsStatusChangeModalOpen(false);
+    const statusLabel = getStatusChangeOptions(currentStatus).find(option => option.value === selectedStatus)?.label || selectedStatus;
+    alert(`입찰 단계가 '${statusLabel}'로 변경되었습니다.`);
   };
 
   return (
@@ -215,10 +307,10 @@ export default function BidTable({ bids, currentStatus }) {
       )}
       <div className="flex items-center justify-between gap-4 mb-0">
         <div className="flex items-center gap-4 flex-1">
-        <Select value={currentStatus} onValueChange={handleStatusChange}>
+        <Select value={currentStatus} onValueChange={handleStatusSelection}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="단계 선택">
-                {decodeURIComponent(currentStatus)}
+                {BID_STAGES.find(stage => stage.value === currentStatus)?.label || currentStatus}
               </SelectValue>
             </SelectTrigger>
             <SelectContent className="bg-white">
@@ -264,6 +356,14 @@ export default function BidTable({ bids, currentStatus }) {
           </div>
         </div>
         <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          onClick={handleStatusChangeModal}
+          className="bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200 h-10 w-10 flex items-center justify-center"
+          title="입찰 단계 변경"
+        >
+          <Edit3 className="h-4 w-4 text-gray-500" />
+        </Button>
         <Button
           variant="outline"
           onClick={handleAddToFavorites}
@@ -399,6 +499,71 @@ export default function BidTable({ bids, currentStatus }) {
           {renderPaginationButtons()}
         </div>
       )}
+
+      {/* 입찰 단계 변경 모달 */}
+      <Dialog open={isStatusChangeModalOpen} onOpenChange={setIsStatusChangeModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>입찰 단계 변경</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label>변경할 단계</Label>
+              <div className="flex flex-wrap gap-4">
+                {getStatusChangeOptions(currentStatus).map((option) => (
+                  <div key={option.value} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`status-${option.value}`}
+                      checked={selectedStatus === option.value}
+                      onCheckedChange={() => setSelectedStatus(option.value)}
+                    />
+                    <Label htmlFor={`status-${option.value}`}>{option.label}</Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="text-sm text-gray-600">
+              선택된 {selectedBids.length}개 항목의 단계를 변경합니다.
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsStatusChangeModalOpen(false)}
+            >
+              취소
+            </Button>
+            <Button onClick={handleConfirmStatusChange}>
+              변경
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 즐겨찾기 추가 확인 모달 */}
+      <Dialog open={isFavoriteModalOpen} onOpenChange={setIsFavoriteModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>즐겨찾기 추가</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-gray-600">
+              선택된 {selectedBids.length}개 항목을 즐겨찾기에 추가하시겠습니까?
+            </p>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsFavoriteModalOpen(false)}
+            >
+              취소
+            </Button>
+            <Button onClick={handleConfirmAddToFavorites}>
+              예
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 } 

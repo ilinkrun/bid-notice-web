@@ -26,6 +26,9 @@ import {
   ChevronDown,
   Menu,
   X,
+  Clock,
+  Target,
+  Award,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -54,22 +57,34 @@ const notices = [
 
 const bids = [
   {
-    title: '준비',
-    href: '/bids/준비',
-    description: '입찰 준비중인 목록',
-    icon: PlayCircle,
-  },
-  {
     title: '진행',
-    href: '/bids/응찰',
-    description: '입찰 진행중인 목록',
-    icon: CheckCircle,
+    href: '/bids/progress',
+    description: '입찰 준비중인 공고 목록',
+    icon: Clock,
   },
   {
-    title: '완료',
-    href: '/bids/완료',
-    description: '입찰 완료 목록',
-    icon: CheckCircle,
+    title: '응찰',
+    href: '/bids/bidding',
+    description: '응찰 완료된 공고 목록',
+    icon: Target,
+  },
+  {
+    title: '낙찰',
+    href: '/bids/awarded',
+    description: '낙찰된 공고 목록',
+    icon: Award,
+  },
+  {
+    title: '패찰',
+    href: '/bids/failed',
+    description: '패찰된 공고 목록',
+    icon: AlertCircle,
+  },
+  {
+    title: '포기',
+    href: '/bids/abandoned',
+    description: '포기한 공고 목록',
+    icon: Archive,
   },
 ];
 

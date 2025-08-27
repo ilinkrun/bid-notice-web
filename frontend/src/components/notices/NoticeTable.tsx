@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Star, Loader2 } from 'lucide-react';
+import { Search, Star, Loader2, Edit3 } from 'lucide-react';
 import { type Notice } from '@/types/notice';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -63,6 +63,8 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
   const { perPage } = useSettingsStore();
   const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
   const [isFavoriteModalOpen, setIsFavoriteModalOpen] = useState(false);
+  const [isCategoryEditModalOpen, setIsCategoryEditModalOpen] = useState(false);
+  const [isBidProcessModalOpen, setIsBidProcessModalOpen] = useState(false);
   const [localCategory, setLocalCategory] = useState(currentCategory || '공사점검');
   const [selectedBidStage, setSelectedBidStage] = useState<string>(currentCategory === '무관' ? '무관' : '관심');
   const [isComposing, setIsComposing] = useState(false);
@@ -330,19 +332,40 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
     setSelectedNids((prev) => (prev.includes(nid) ? prev.filter((id) => id !== nid) : [...prev, nid]));
   };
 
-  // 즐겨찾기 추가
-  const handleAddToFavorites = () => {
+  // 입찰 진행 모달 열기
+  const handleBidProcess = () => {
     if (selectedNids.length === 0) {
       alert('선택된 공고가 없습니다.');
       return;
     }
-    // 현재 카테고리와 입찰 단계 설정
-    setLocalCategory(currentCategory || '공사점검');
-    setSelectedBidStage(currentCategory === '무관' ? '무관' : '관심');
-    setIsFavoriteModalOpen(true);
+    setIsBidProcessModalOpen(true);
   };
 
-  // 즐겨찾기 저장
+  // 입찰 진행 확인 처리
+  const handleConfirmBidProcess = () => {
+    // TODO: API 호출하여 입찰 진행 처리
+    console.log('입찰 진행 처리:', {
+      nids: selectedNids,
+      status: '진행'
+    });
+    
+    // 처리 후 선택 초기화
+    setSelectedNids([]);
+    setIsBidProcessModalOpen(false);
+    alert('입찰 진행이 설정되었습니다.');
+  };
+
+  // 유형 변경 모달 열기
+  const handleCategoryEdit = () => {
+    if (selectedNids.length === 0) {
+      alert('선택된 공고가 없습니다.');
+      return;
+    }
+    setLocalCategory(currentCategory || '공사점검');
+    setIsCategoryEditModalOpen(true);
+  };
+
+  // 즐겨찾기 저장 (기존 기능 유지)
   const handleSaveFavorites = async () => {
     try {
       // TODO: API 호출하여 즐겨찾기 저장
@@ -358,6 +381,25 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
     } catch (error) {
       console.error('즐겨찾기 저장 중 오류 발생:', error);
       alert('즐겨찾기 저장 중 오류가 발생했습니다.');
+    }
+  };
+
+  // 유형 변경 저장
+  const handleSaveCategoryChange = async () => {
+    try {
+      // TODO: API 호출하여 카테고리 변경
+      console.log('유형 변경 데이터:', {
+        nids: selectedNids,
+        category: localCategory
+      });
+      
+      // 저장 후 모달 닫기
+      setIsCategoryEditModalOpen(false);
+      setSelectedNids([]); // 선택 초기화
+      alert('유형이 변경되었습니다.');
+    } catch (error) {
+      console.error('유형 변경 중 오류 발생:', error);
+      alert('유형 변경 중 오류가 발생했습니다.');
     }
   };
 
@@ -446,10 +488,18 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
         </div>
         <div className="flex items-center gap-2">
           <Button 
-            onClick={handleAddToFavorites} 
+            onClick={handleCategoryEdit} 
             variant="outline" 
             className="bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200 h-10 w-10 flex items-center justify-center"
-            title="즐겨찾기에 추가"
+            title="유형 변경"
+          >
+            <Edit3 className="h-4 w-4" />
+          </Button>
+          <Button 
+            onClick={handleBidProcess} 
+            variant="outline" 
+            className="bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200 h-10 w-10 flex items-center justify-center"
+            title="입찰 진행"
           >
             <Star className="h-4 w-4" />
           </Button>
@@ -589,7 +639,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
         />
       )}
 
-      {/* 즐겨찾기 모달 */}
+      {/* 즐겨찾기 모달 (기존 기능 유지) */}
       <Dialog open={isFavoriteModalOpen} onOpenChange={setIsFavoriteModalOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -632,6 +682,63 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
               취소
             </Button>
             <Button onClick={handleSaveFavorites}>저장</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 유형 변경 모달 */}
+      <Dialog open={isCategoryEditModalOpen} onOpenChange={setIsCategoryEditModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>유형 변경</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label>공고 유형</Label>
+              <div className="flex flex-wrap gap-4">
+                {CATEGORIES.map((category) => (
+                  <div key={category.value} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`edit-category-${category.value}`}
+                      checked={localCategory === category.value}
+                      onCheckedChange={() => setLocalCategory(category.value)}
+                    />
+                    <Label htmlFor={`edit-category-${category.value}`}>{category.label}</Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsCategoryEditModalOpen(false)}>
+              취소
+            </Button>
+            <Button onClick={handleSaveCategoryChange}>저장</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 입찰 진행 확인 모달 */}
+      <Dialog open={isBidProcessModalOpen} onOpenChange={setIsBidProcessModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>입찰 진행</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-gray-600">
+              선택된 {selectedNids.length}개 공고의 입찰 단계를 '진행'으로 변경하시겠습니까?
+            </p>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsBidProcessModalOpen(false)}
+            >
+              취소
+            </Button>
+            <Button onClick={handleConfirmBidProcess}>
+              예
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
