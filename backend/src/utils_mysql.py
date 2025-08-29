@@ -7,7 +7,6 @@ import os, sys
 import re
 import pymysql
 from pymysql import cursors
-from utils_data import csv_from_dicts, csv_from_dict
 from dotenv import load_dotenv
 
 # .env 파일의 경로 설정 (상위 디렉토리에 있는 .env 파일을 로드)
@@ -231,6 +230,7 @@ class Mysql(object):
         if inType == "csv":
             csv = data
         elif inType == "dicts":
+            from utils_data import csv_from_dicts
             csv = csv_from_dicts(data)
 
         values = ",".join(["(" + _join_vals(csv[i]) + ")" for i in range(1, len(csv))])
@@ -250,6 +250,7 @@ class Mysql(object):
         if inType == "csv":
             csv = data
         elif inType == "dicts":
+            from utils_data import csv_from_dicts
             csv = csv_from_dicts(data)
 
         fields = csv[0]

@@ -8,7 +8,7 @@ import uvicorn
 import os
 from dotenv import load_dotenv
 
-from spider_bid import scrape_list, ERROR_CODES
+from spider_list import scrape_list, ERROR_CODES
 import json
 
 # 환경 변수 로드

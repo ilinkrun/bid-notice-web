@@ -143,45 +143,6 @@ export default async function Home() {
           </Card>
         </div>
 
-        {/* 알림 */}
-        <div className="container px-8 py-6">
-          <div className="grid gap-6 lg:grid-cols-4">
-            {/* 공지사항 */}
-            <Card className="m-1">
-              <CardHeader>
-                <CardTitle>공지사항</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {notices.map((notice, index) => (
-                  <Alert key={index} variant="destructive" className="mb-0">
-                    <AlertTitle>{notice.title}</AlertTitle>
-                    <AlertDescription>{notice.description}</AlertDescription>
-                  </Alert>
-                ))}
-              </CardContent>
-            </Card>
-
-            {/* 최근 스크랩 */}
-            <Card className="lg:col-span-2 m-1">
-              <CardHeader>
-                <CardTitle>최근 스크랩</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p>최근 스크랩된 공고 목록이 표시됩니다.</p>
-              </CardContent>
-            </Card>
-
-            {/* 최근 입찰 */}
-            <Card className="lg:col-span-2 m-1">
-              <CardHeader>
-                <CardTitle>최근 입찰</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p>최근 입찰 목록이 표시됩니다.</p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
       </ApolloWrapper>
     </div>
   );

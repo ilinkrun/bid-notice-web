@@ -6,7 +6,7 @@ from fastapi import FastAPI, HTTPException, Query
 import uvicorn
 import os
 from dotenv import load_dotenv
-from mysql_basic import Mysql
+from utils_mysql import Mysql
 from mysql_bid import (
     # 설정 관련 함수들
     find_settings_list,
@@ -28,8 +28,8 @@ from mysql_bid import (
     upsert_notices,
 
     # 입찰 관련 함수들
-    find_bids,
-    find_bids_by_status,
+    # find_bids,
+    # find_bids_by_status,
     # category 업데이트 함수들
     update_all_category,
     
@@ -48,7 +48,8 @@ from mysql_bid import (
     find_logs_scraping,
     find_errors_scraping
 )
-from spider_bid import scrape_list, ERROR_CODES
+from spider_list import scrape_list, ERROR_CODES
+from spider_detail import update_notice_status
 import json
 from fastapi.middleware.cors import CORSMiddleware
 import time
@@ -385,6 +386,19 @@ def upsert_notices_endpoint(data: List[Dict]):
     try:
         upsert_notices(data)
         return {"success": True, "message": f"notices updated"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# !!! 수정중
+@app.post("/notices/status")
+def _update_notice_status(data: Dict):
+    """
+    공고의 status를 업데이트합니다.
+    data: {nid: 1234, from: "제외", to: "진행"}
+    """
+    try:
+        update_notice_status(data)
+        return {"success": True, "message": f"notice status updated"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

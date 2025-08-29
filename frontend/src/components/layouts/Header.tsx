@@ -279,9 +279,6 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ label, icon: Icon, items, a
                 <item.icon className="h-5 w-5 mt-0.5" />
                 <div>
                   <div className="font-medium">{item.title}</div>
-                  {item.description && (
-                    <div className="text-sm text-muted-foreground">{item.description}</div>
-                  )}
                 </div>
               </button>
             ))}

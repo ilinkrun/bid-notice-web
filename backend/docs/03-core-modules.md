@@ -3,12 +3,12 @@
 ## Table of Contents
 
 1. [Spider Modules](#spider-modules)
-   - [spider_bid.py](#spider_bidpy)
+   - [spider_list.py](#spider_listpy)
    - [spider_detail.py](#spider_detailpy)
    - [spider_lxml.py](#spider_lxmlpy)
 
 2. [MySQL Modules](#mysql-modules)
-   - [mysql_basic.py](#mysql_basicpy)
+   - [utils_mysql.py](#utils_mysqlpy)
    - [mysql_bid.py](#mysql_bidpy)
    - [mysql_board.py](#mysql_boardpy)
 
@@ -28,7 +28,7 @@
 
 ## Spider Modules
 
-### spider_bid.py
+### spider_list.py
 
 **Purpose**: Main scraping module for government bid notices from various Korean public institutions.
 
@@ -90,7 +90,7 @@
 #### Dependencies
 - `requests`: HTTP requests
 - `playwright`: Browser automation as fallback
-- `mysql_basic.Mysql`: Database operations
+- `utils_mysql.Mysql`: Database operations
 - `utils_lxml`: HTML parsing utilities
 
 ---
@@ -132,7 +132,7 @@
 #### Dependencies
 - `requests`: HTTP requests
 - `playwright`: Browser automation
-- `mysql_basic.Mysql`: Database operations
+- `utils_mysql.Mysql`: Database operations
 - `spider_lxml`: HTML parsing
 
 ---
@@ -201,7 +201,7 @@
 
 ## MySQL Modules
 
-### mysql_basic.py
+### utils_mysql.py
 
 **Purpose**: Base MySQL database wrapper providing core CRUD operations.
 
@@ -856,15 +856,15 @@ CREATE TABLE channel_dev (
 
 ### Module Dependencies
 
-1. **spider_bid.py** → mysql_basic, mysql_bid, utils_lxml, utils_data
-2. **spider_detail.py** → mysql_basic, mysql_bid, spider_lxml
-3. **mysql_bid.py** → mysql_basic, utils_data
-4. **server_bid.py** → mysql_bid, spider_bid (comprehensive API)
-5. **utils_search.py** → mysql_basic, utils_data
+1. **spider_list.py** → utils_mysql, mysql_bid, utils_lxml, utils_data
+2. **spider_detail.py** → utils_mysql, mysql_bid, spider_lxml
+3. **mysql_bid.py** → utils_mysql, utils_data
+4. **server_bid.py** → mysql_bid, spider_list (comprehensive API)
+5. **utils_search.py** → utils_mysql, utils_data
 
 ### Data Flow
 
-1. **Scraping**: spider_bid → spider_detail → database
+1. **Scraping**: spider_list → spider_detail → database
 2. **Search**: utils_search → mysql_bid → filtered results
 3. **API**: server_bid → mysql_bid → database operations
 4. **File Operations**: spider_detail → utils_lxml → file downloads
@@ -872,7 +872,7 @@ CREATE TABLE channel_dev (
 ### Error Handling
 
 All modules implement comprehensive error handling with:
-- Standardized error codes in spider_bid.py
+- Standardized error codes in spider_list.py
 - Try-catch blocks with graceful fallbacks
 - Logging for debugging and monitoring
 - HTTP status codes in server modules

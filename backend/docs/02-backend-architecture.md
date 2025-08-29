@@ -38,7 +38,7 @@
 
 **핵심 모듈**:
 ```
-spider_bid.py          # 메인 스크래핑 로직
+spider_list.py          # 메인 스크래핑 로직
 spider_detail.py       # 상세 페이지 처리
 spider_lxml.py         # lxml 기반 파싱
 utils_lxml.py          # XML/HTML 유틸리티
@@ -60,7 +60,7 @@ API 요청 → 스크래핑 설정 조회 → 브라우저 실행 → 페이지 
 
 **핵심 모듈**:
 ```
-mysql_basic.py         # 기본 MySQL 래퍼
+utils_mysql.py         # 기본 MySQL 래퍼
 mysql_bid.py           # 입찰 관련 쿼리
 mysql_board.py         # 게시판 관련 쿼리
 ```

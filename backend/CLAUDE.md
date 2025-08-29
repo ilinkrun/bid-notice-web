@@ -56,16 +56,16 @@ python server_board.py     # Port 11307
 ### Scraping Operations
 ```bash
 # Manual scraping test
-python spider_bid.py
+python spider_list.py
 
 # Check scraping logs
-tail -f logs/spider_bid.log
+tail -f logs/spider_list.log
 ```
 
 ### Database Operations
 ```bash
 # Test database connection
-python mysql_basic.py
+python utils_mysql.py
 
 # Run bid processing
 python mysql_bid.py
@@ -111,7 +111,7 @@ python mysql_bid.py
 ### Database Connections
 Always use connection context managers:
 ```python
-from mysql_basic import get_connection
+from utils_mysql import get_connection
 with get_connection() as conn:
     # Database operations
     pass

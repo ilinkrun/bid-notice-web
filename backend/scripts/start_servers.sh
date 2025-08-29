@@ -1,59 +1,64 @@
-#!/bin/bash
-set -e
+# start backend servers in parallel
+cd /_exp/projects/bid-notice-web/backend/src && uv run server_spider.py &
+cd /_exp/projects/bid-notice-web/backend/src && uv run server_bid.py &
+cd /_exp/projects/bid-notice-web/backend/src && uv run server_mysql.py &
 
-echo "Starting multiple FastAPI servers..."
+# #!/bin/bash
+# set -e
 
-cd /app || cd $(dirname "$0")/../app
+# echo "Starting multiple FastAPI servers..."
 
-# 필요한 디렉토리 생성
-mkdir -p logs
+# cd /app || cd $(dirname "$0")/../app
 
-# 필요한 도구 설치 확인
-if ! command -v netstat &> /dev/null; then
-    echo "Installing net-tools for netstat..."
-    apt-get update && apt-get install -y net-tools
-    apt-get clean
-fi
+# # 필요한 디렉토리 생성
+# mkdir -p logs
 
-# uv 동기화
-echo "Syncing dependencies with uv..."
-uv sync
+# # 필요한 도구 설치 확인
+# if ! command -v netstat &> /dev/null; then
+#     echo "Installing net-tools for netstat..."
+#     apt-get update && apt-get install -y net-tools
+#     apt-get clean
+# fi
 
-# 서버 시작 함수
-start_server() {
-    local port=$1
-    local module=$2
+# # uv 동기화
+# echo "Syncing dependencies with uv..."
+# uv sync
+
+# # 서버 시작 함수
+# start_server() {
+#     local port=$1
+#     local module=$2
     
-    if ! netstat -tuln | grep ":$port" > /dev/null; then
-        echo "Starting $module on port $port..."
-        nohup uv run uvicorn $module --reload --host=0.0.0.0 --port=$port > logs/$module-$port.log 2>&1 &
-        sleep 2
-        if netstat -tuln | grep ":$port" > /dev/null; then
-            echo "$module successfully started on port $port"
-        else
-            echo "Warning: $module may have failed to start on port $port"
-        fi
-    else
-        echo "Port $port is already in use, skipping $module"
-    fi
-}
+#     if ! netstat -tuln | grep ":$port" > /dev/null; then
+#         echo "Starting $module on port $port..."
+#         nohup uv run uvicorn $module --reload --host=0.0.0.0 --port=$port > logs/$module-$port.log 2>&1 &
+#         sleep 2
+#         if netstat -tuln | grep ":$port" > /dev/null; then
+#             echo "$module successfully started on port $port"
+#         else
+#             echo "Warning: $module may have failed to start on port $port"
+#         fi
+#     else
+#         echo "Port $port is already in use, skipping $module"
+#     fi
+# }
 
-# 각 서버 시작
-start_server 11301 server_spider:app
-start_server 11302 server_mysql:app
-start_server 11303 server_bid:app
-start_server 11307 server_board:app
+# # 각 서버 시작
+# start_server 11301 server_spider:app
+# start_server 11302 server_mysql:app
+# start_server 11303 server_bid:app
+# start_server 11307 server_board:app
 
-# 서버 상태 확인
-echo "Server status:"
-ps aux | grep -v grep | grep uvicorn || echo "No uvicorn processes found"
+# # 서버 상태 확인
+# echo "Server status:"
+# ps aux | grep -v grep | grep uvicorn || echo "No uvicorn processes found"
 
-# cron 다시 시작 (시스템에서 사용 가능한 경우)
-if command -v service &> /dev/null; then
-    echo "Restarting cron service..."
-    service cron restart
-else
-    echo "Cron service not available, skipping..."
-fi
+# # cron 다시 시작 (시스템에서 사용 가능한 경우)
+# if command -v service &> /dev/null; then
+#     echo "Restarting cron service..."
+#     service cron restart
+# else
+#     echo "Cron service not available, skipping..."
+# fi
 
-echo "All servers have been started!"
+# echo "All servers have been started!"

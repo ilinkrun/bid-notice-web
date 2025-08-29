@@ -4,7 +4,7 @@ import pymysql
 import json
 from pymysql import cursors
 from datetime import datetime, timezone, timedelta
-from mysql_basic import Mysql, _where_like_unit, _where_eq_unit
+from utils_mysql import Mysql, _where_like_unit, _where_eq_unit
 from utils_data import arr_from_csv, dict_from_tuple, dicts_from_tuples, csv_from_dicts, csv_added_defaults, _now
 
 
@@ -827,6 +827,13 @@ def update_notices_status(data):
             upsert_bids([data])
     mysql.close()
 
+# details
+def find_details_by_status(status, fields=["nid", "status", "제목", "scraped_at"], addStr=""):
+    mysql = Mysql()
+    details = mysql.find("details", fields=fields, addStr=f"WHERE status = '{status}' {addStr}")
+    mysql.close()
+    return dicts_from_tuples(fields, details)
+
 ## ** bids
 #--------------------------------------------------------------------
 def find_notice_by_nid(nid, fields=["기관명", "category", "status", "작성일"], out_type="dict"):
@@ -862,21 +869,13 @@ def find_bids_by_status(status, fields=["bid", "nid", "status", "title", "starte
     dicts = find_bids(fields=fields, addStr=f"WHERE status = '{status}' {addStr}")
     return dicts
 
-# settings = find_settings_list(fields=["기관명", "지역"], out_type="dicts")
-#         for setting in settings:
-#             if setting.get("기관명") == org_name:  # 기관명이 일치하면
-#                 # 결과에 설정 키 추가
-#                 for key in keys:
-#                     notice[key] = setting.get(key, "")
-#                 break
-#         else:  # 일치하는 기관명이 없으면 빈 문자열로 설정
-#             for key in keys:
-#                 notice[key] = ""
 
 def upsert_bids(data):
     mysql = Mysql()
     mysql.upsert("bids", data, inType="dicts")
     mysql.close()
+
+
 
 
 ## ** logs, errors
@@ -973,6 +972,10 @@ def find_errors_scraping(day_gap=15, out_type="dicts"):
   else:
     return errors
 
+## ** settings_nas_folder
+#--------------------------------------------------------------------
+
+
 ## ** DATABASE
 #--------------------------------------------------------------------
 def delete_old_notices(day_gap=15, condition="category IS NULL"):
@@ -1060,5 +1063,7 @@ def get_notices_gap(gap=3):
 
 if __name__ == "__main__":
     pass
-    name = "강화군청"
-    print(find_settings_detail_by_name(name))
+    # print(find_details_by_status("진행"))
+    print(find_details_by_status("제외"))
+    # name = "강화군청"
+    # print(find_settings_detail_by_name(name))

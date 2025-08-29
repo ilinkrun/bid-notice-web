@@ -19,7 +19,7 @@ import pytz
 from playwright.sync_api import Playwright, sync_playwright
 
 from utils_lxml import get_rows, get_dict, get_val, remove_scripts_from_html, remove_els_from_html
-from mysql_basic import Mysql
+from utils_mysql import Mysql
 from mysql_bid import find_settings_list, find_settings_list_by_name, find_last_notice, update_all_category, insert_all_logs, insert_all_errors
 from utils_data import save_html, load_html, valid_str, arr_from_csv, dict_from_tuple, dicts_from_tuples, csv_from_dict, csv_from_dicts, csv_added_defaults, fix_encoding_response, _now
 
@@ -555,7 +555,7 @@ def scrape_list_with_playwright(org_name, start_page, end_page, url, rowXpath, p
           # 추가 대기 시간 (동적 콘텐츠 로드를 위해)
           time.sleep(3)
           
-          # spider_lxml을 사용하여 데이터 추출
+          # utils_lxml을 사용하여 데이터 추출
           try:
             page_data = get_rows(html_content, rowXpath, elements, _get_rows_after_row, _get_rows_after_rows)
             
@@ -816,7 +816,7 @@ def fetch_list_pages(names, save=True):
 if __name__ == "__main__":
     # print(find_settings_list(fields=["기관명"], addStr="WHERE `use`=1"))
     # ** fetch list
-    print("[SCARPING] 공고 고시 게시판(spider_bid)")
+    print("[SCARPING] 공고 고시 게시판(spider_list)")
     names = find_org_names()
     # names = ["서울시", "양천구", "용인시청", "인천광역시남부교육지원청", "인천도시공사", "한국공항공사"]
     # names = ["새만금개발청"]

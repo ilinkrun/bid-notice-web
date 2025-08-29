@@ -4,7 +4,7 @@
 export PATH=/usr/local/bin:/usr/bin:/bin
 export PYTHONPATH=/app
 cd /app
-/usr/local/bin/python3 /app/spider_bid.py
+/usr/local/bin/python3 /app/spider_list.py
 ```
 
 위의 `/app/spider.sh`를 실행하면, playwright 에러 없이 잘 스크랩이 되는데,
@@ -40,12 +40,12 @@ export PYTHONPATH=/app
 export PLAYWRIGHT_BROWSERS_PATH=/volume1/docker/platforms/ubuntu/app/ms-playwright
 
 cd /app
-/usr/local/bin/python3 /app/spider_bid.py
+/usr/local/bin/python3 /app/spider_list.py
 ```
 
 ### 2. Python 코드에서 환경변수 설정
 
-`spider_bid.py` 파일 상단에 다음 코드를 추가하세요:
+`spider_list.py` 파일 상단에 다음 코드를 추가하세요:
 
 ```python
 import os
@@ -127,7 +127,7 @@ export PYTHONPATH=/app
 export PLAYWRIGHT_BROWSERS_PATH=/app/ms-playwright
 
 cd /app
-/usr/local/bin/python3 /app/spider_bid.py
+/usr/local/bin/python3 /app/spider_list.py
 ```
 
 ## 경로 확인 방법
@@ -253,7 +253,7 @@ sudo service cron restart
 `crontab -e`를 실행하면
 
 """
-0 8,22 * * * /app/spider.sh  >> /logs/spider_bid.log 2>&1
+0 8,22 * * * /app/spider.sh  >> /logs/spider_list.log 2>&1
 """
 와 같이 나오는데, cron 실행이 안되는 경우가 많아요.
 
@@ -344,13 +344,13 @@ pip3 install --upgrade requests chardet charset_normalizer
 
 root@9ab324351a07:/app# ./spider.sh
 Traceback (most recent call last):
-  File "/app/spider_bid.py", line 7, in <module>
+  File "/app/spider_list.py", line 7, in <module>
     import requests
 ModuleNotFoundError: No module named 'requests'
 ```
 
 
-이 문제는 **도커 컨테이너 내부에서 직접 python3 spider_bid.py**는 잘 되지만,  
+이 문제는 **도커 컨테이너 내부에서 직접 python3 spider_list.py**는 잘 되지만,  
 **./spider.sh**(쉘 스크립트)로 실행하면 `ModuleNotFoundError: No module named 'requests'`가 발생하는 상황입니다.
 
 ---
@@ -386,7 +386,7 @@ which python3
 #!/bin/bash
 export PATH=/usr/local/bin:/usr/bin:/bin
 export PYTHONPATH=/usr/local/lib/python3.10/site-packages
-/usr/local/bin/python3 /app/spider_bid.py
+/usr/local/bin/python3 /app/spider_list.py
 ```
 
 - 위의 `/usr/local/bin/python3` 부분은 실제 `which python3` 결과로 바꿔주세요.
@@ -401,7 +401,7 @@ export PYTHONPATH=/usr/local/lib/python3.10/site-packages
 ```bash
 #!/bin/bash
 source /app/venv/bin/activate
-python /app/spider_bid.py
+python /app/spider_list.py
 ```
 
 ---
@@ -438,7 +438,7 @@ root@9ab324351a07:/app# which python3
 /usr/local/bin/python3
 root@9ab324351a07:/app# export PATH=/usr/local/bin:/usr/bin:/bin
 root@9ab324351a07:/app# export PYTHONPATH=/usr/local/lib/python3.10/site-packages
-root@9ab324351a07:/app# /usr/local/bin/python3 /app/spider_bid.py
+root@9ab324351a07:/app# /usr/local/bin/python3 /app/spider_list.py
 Traceback (most recent call last):
   File "/usr/local/lib/python3.10/site-packages/requests/compat.py", line 11, in <module>
     import chardet
@@ -447,7 +447,7 @@ ModuleNotFoundError: No module named 'chardet'
 During handling of the above exception, another exception occurred:
 
 Traceback (most recent call last):
-  File "/app/spider_bid.py", line 7, in <module>
+  File "/app/spider_list.py", line 7, in <module>
     import requests
   File "/usr/local/lib/python3.10/site-packages/requests/__init__.py", line 45, in <module>
     from .exceptions import RequestsDependencyWarning
@@ -546,7 +546,7 @@ pip3 install --upgrade requests chardet charset_normalizer
 #!/bin/bash
 export PATH=/usr/local/bin:/usr/bin:/bin
 export PYTHONPATH=/usr/local/lib/python3.10/site-packages
-/usr/local/bin/python3 /app/spider_bid.py
+/usr/local/bin/python3 /app/spider_list.py
 ```
 
 ---
@@ -574,18 +574,18 @@ export PYTHONPATH=/usr/local/lib/python3.10/site-packages
 `/volume1/docker/platforms/ubuntu/scripts/entrypoint.sh`
 `/volume1/docker/platforms/ubuntu/docker-compose.yml`
 `/volume1/docker/platforms/ubuntu/Dockerfile`
-`/volume1/docker/platforms/ubuntu/app/spider_bid.py`
+`/volume1/docker/platforms/ubuntu/app/spider_list.py`
 
 
-도커 내부로 들어가 `/app# python3 spider_bid.py` 를 실행하면, 에러 없이 잘 작동합니다.
+도커 내부로 들어가 `/app# python3 spider_list.py` 를 실행하면, 에러 없이 잘 작동합니다.
 
 그런데, cron으로 예약된
 
-`0 8,22 * * * /app/spider.sh  >> /logs/spider_bid.log 2>&1` 는 실행될 때마다, 아래와 같은 로그가 생기고, 실행이 실패합니다.
+`0 8,22 * * * /app/spider.sh  >> /logs/spider_list.log 2>&1` 는 실행될 때마다, 아래와 같은 로그가 생기고, 실행이 실패합니다.
 
 """
 Traceback (most recent call last):
-  File "/app/spider_bid.py", line 7, in <module>
+  File "/app/spider_list.py", line 7, in <module>
     import requests
 ModuleNotFoundError: No module named 'requests'
 """
@@ -626,7 +626,7 @@ which python3
 예를 들어 `/usr/local/bin/python3`라면, 크론탭을 아래처럼 수정합니다.
 
 ```
-0 8,22 * * * /usr/local/bin/python3 /app/spider_bid.py >> /logs/spider_bid.log 2>&1
+0 8,22 * * * /usr/local/bin/python3 /app/spider_list.py >> /logs/spider_list.log 2>&1
 ```
 
 ---
@@ -650,7 +650,7 @@ PYTHONPATH=/usr/local/lib/python3.10/site-packages
 
 예시:
 ```
-0 8,22 * * * source /app/venv/bin/activate && python /app/spider_bid.py >> /logs/spider_bid.log 2>&1
+0 8,22 * * * source /app/venv/bin/activate && python /app/spider_list.py >> /logs/spider_list.log 2>&1
 ```
 
 ---
@@ -665,7 +665,7 @@ PYTHONPATH=/usr/local/lib/python3.10/site-packages
 #!/bin/bash
 export PATH=/usr/local/bin:/usr/bin:/bin
 export PYTHONPATH=/usr/local/lib/python3.10/site-packages
-python3 /app/spider_bid.py
+python3 /app/spider_list.py
 ```
 
 ---

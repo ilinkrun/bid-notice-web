@@ -293,39 +293,6 @@ def find_files(root_path, search = '', recursive = False, file_extension = None)
     return [file.replace(f'{root_path}/', '') for file in _find_files(root_path, search, recursive, file_extension)]
 
 
-def get_com_sn_org_from_folder(folder='[일맥] 15. 종로구청(60)'):
-    (com, sn, org) = ('', 1, '')
-    if folder[0] == '[':
-       com = folder[1:].split(']')[0]
-    if '.' in folder:
-       sn = folder.replace(f"[{com}]", "").split('.')[0].strip()
-    org = folder.replace(f"[{com}]", "").replace(f"{sn}.", "").replace(f"{sn} .", "").strip().split("(")[0]
-    return (com, sn, org)
-
-def get_folder_from_com_sn_org(com="일맥", sn=1, org="가평군청"):
-   return f"[{com}] {str(sn).zfill(3)}. {org}"
-
-def get_max_sn_org_folder(root_path = '/nas/24_공사점검/3 . 용역 입찰공고', com="일맥"):
-    try:
-       return max([int(get_com_sn_org_from_folder(folder)[1]) for folder in find_folders(root_path, search=f"[{com}]")])
-    except:
-       return 0
-
-def _find_notice_folder_by_org(root_path = '/nas/24_공사점검/3 . 용역 입찰공고', company='일맥', org_name='종로구청'):
-    dirs = list(filter(lambda folder: org_name == get_com_sn_org_from_folder(folder)[2], find_folders(root_path)))
-    if len(dirs) == 1:
-        return dirs[0]
-    else: # 없거나 여러개(?) 이면
-       sn = get_max_sn_org_folder(root_path, company)
-       return f"{root_path}/[{company}] {sn+1}. {org_name}"
-
-# * find notice folder
-def find_notice_folder(category="공사점검", company='일맥', org_name='종로구청'):
-    return _find_notice_folder_by_org(find_dir_bid_notice(category), company, org_name)
-
-def get_max_sn_notice_folder(category="공사점검", company='일맥', org_name='종로구청'):
-    root_path = find_notice_folder(category, company, org_name)
-
 if __name__ == "__main__":
     pass
     # print(find_folder_by_category(category="기타1"))

@@ -12,7 +12,7 @@
 ## 데이터베이스 연결 설정
 
 ```python
-# 환경변수 설정 (from mysql_basic.py)
+# 환경변수 설정 (from utils_mysql.py)
 MYSQL_HOST = '1.2.3.4'          # 기본값
 MYSQL_PORT = 2306               # 기본값  
 MYSQL_USER = 'root'             # 기본값

@@ -37,14 +37,34 @@ export const boardResolvers = {
           writer: input.writer,
           password: input.password,
         });
-        if (response.data && response.data.id) {
-          // 생성된 게시글 id 반환
-          input.id = response.data.id;
-          return input;
+        
+        console.log('게시글 생성 응답:', response.data);
+        
+        if (response.data) {
+          // 응답 데이터 구조에 따라 처리
+          if (response.data.id) {
+            input.id = response.data.id;
+          } else if (response.data.success === true) {
+            // success가 true이면 임시 ID 생성
+            input.id = Date.now();
+          }
+          
+          return {
+            ...input,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            is_visible: 1
+          };
+        } else {
+          throw new Error('서버 응답이 올바르지 않습니다.');
         }
       } catch (error) {
         console.error('게시글 생성 오류:', error);
-        throw new Error('게시글 생성에 실패했습니다.');
+        if (error instanceof Error) {
+          throw new Error(`게시글 생성에 실패했습니다: ${error.message}`);
+        } else {
+          throw new Error('게시글 생성에 실패했습니다.');
+        }
       }
     },
     updatePost: async (_: any, { board, input }: { board: string, input: any }) => {

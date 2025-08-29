@@ -51,8 +51,24 @@ import {
   ArrowLeft, 
   ArrowRight,
   Code,
-  Eye
+  Eye,
+  FileText,
+  Hash
 } from 'lucide-react';
+
+import dynamic from 'next/dynamic';
+
+// MDEditor 동적 임포트 (SSR 방지)
+const MDEditor = dynamic(
+  () => import('@uiw/react-md-editor'),
+  { ssr: false }
+);
+
+// markdown-to-jsx로 대체
+const ReactMarkdown = dynamic(
+  () => import('react-markdown'),
+  { ssr: false }
+);
 
 // GraphQL 쿼리
 const GET_POSTS = `
@@ -167,6 +183,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
   const [isSourceMode, setIsSourceMode] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [editorMode, setEditorMode] = useState<'html' | 'markdown'>('html'); // 에디터 모드 추가
   const contentRef = useRef<HTMLTextAreaElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
 
@@ -618,6 +635,31 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
     }
   };
 
+  // 전역 드래그 앤 드롭 기본 동작 방지
+  useEffect(() => {
+    const preventDefault = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    const preventDrop = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    };
+
+    // 전체 document에서 드래그 앤 드롭 기본 동작 방지
+    document.addEventListener('dragover', preventDefault, false);
+    document.addEventListener('dragenter', preventDefault, false);
+    document.addEventListener('drop', preventDrop, false);
+
+    return () => {
+      document.removeEventListener('dragover', preventDefault, false);
+      document.removeEventListener('dragenter', preventDefault, false);
+      document.removeEventListener('drop', preventDrop, false);
+    };
+  }, []);
+
   // 검색 필터링
   const filteredPosts = posts.filter(post => 
     post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -636,76 +678,142 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
   // 이미지 드래그 앤 드롭 이벤트 핸들러
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'copy';
+    setIsDragging(true);
+  };
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setIsDragging(true);
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
-    setIsDragging(false);
+    e.stopPropagation();
+    // 드래그 영역을 완전히 벗어날 때만 false로 설정
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+    
+    if (x < rect.left || x >= rect.right || y < rect.top || y >= rect.bottom) {
+      setIsDragging(false);
+    }
   };
 
   const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsDragging(false);
+    
+    console.log('드롭 이벤트 발생:', e.dataTransfer.files.length, '개 파일');
     
     const files = Array.from(e.dataTransfer.files).filter(file => 
       file.type.startsWith('image/')
     );
     
-    if (files.length === 0) return;
+    console.log('이미지 파일 필터링 결과:', files.length, '개 이미지 파일');
+    
+    if (files.length === 0) {
+      alert('이미지 파일만 업로드할 수 있습니다.');
+      return;
+    }
     
     try {
       setIsActionLoading(true); // 액션 로딩 상태 사용
-      for (const file of files) {
-        // FormData 생성
+      console.log('이미지 업로드 시작:', files.map(f => f.name));
+      
+      // 모든 파일을 업로드하고 URL을 수집
+      const uploadPromises = files.map(async (file, index) => {
+        console.log(`파일 ${index + 1} 업로드 시작:`, file.name);
         const formData = new FormData();
         formData.append('file', file);
         
-        // API 호출
         const response = await fetch('/api/upload', {
           method: 'POST',
           body: formData,
         });
         
+        console.log(`파일 ${index + 1} 응답 상태:`, response.status);
         const result = await response.json();
+        console.log(`파일 ${index + 1} 응답 결과:`, result);
         
         if (result.error) {
           throw new Error(result.error);
         }
         
-        if (result.url) {
-          const imageUrl = result.url;
-          setUploadedImages([...uploadedImages, imageUrl]);
-          
-          // 이미지 태그 삽입
-          const imageTag = `\n<img src="${imageUrl}" alt="업로드된 이미지" />\n`;
-          
-          if (isEditMode && contentRef.current) {
-            const cursorPos = contentRef.current.selectionStart;
-            const textBefore = selectedPost.content.substring(0, cursorPos);
-            const textAfter = selectedPost.content.substring(cursorPos);
-            
-            setSelectedPost({
-              ...selectedPost,
-              content: textBefore + imageTag + textAfter
-            });
-          } else if (isCreateDialogOpen && contentRef.current) {
-            const cursorPos = contentRef.current.selectionStart;
-            const textBefore = newPost.content.substring(0, cursorPos);
-            const textAfter = newPost.content.substring(cursorPos);
-            
-            setNewPost({
-              ...newPost,
-              content: textBefore + imageTag + textAfter
-            });
-          }
-        }
+        return result.url;
+      });
+      
+      const uploadedUrls = await Promise.all(uploadPromises);
+      
+      // 업로드된 이미지 목록 업데이트
+      setUploadedImages(prev => [...prev, ...uploadedUrls]);
+      
+      // 성공 메시지 표시
+      console.log(`✅ ${uploadedUrls.length}개의 이미지가 성공적으로 업로드되었습니다.`);
+      
+      // 모든 이미지를 한 번에 텍스트에 삽입
+      const imageTags = uploadedUrls.map(imageUrl => 
+        editorMode === 'markdown' 
+          ? `![업로드된 이미지](${imageUrl})`
+          : `<img src="${imageUrl}" alt="업로드된 이미지" />`
+      ).join('\n');
+      
+      const imageTagsWithNewlines = `\n${imageTags}\n`;
+      
+      if (isEditMode && selectedPost) {
+        const cursorPos = contentRef.current?.selectionStart || selectedPost.content.length;
+        const textBefore = selectedPost.content.substring(0, cursorPos);
+        const textAfter = selectedPost.content.substring(cursorPos);
+        
+        setSelectedPost({
+          ...selectedPost,
+          content: textBefore + imageTagsWithNewlines + textAfter
+        });
+      } else if (activeTab === 'write' || isCreateDialogOpen) {
+        // 글쓰기 모드일 때 처리
+        const cursorPos = contentRef.current?.selectionStart || newPost.content.length;
+        const textBefore = newPost.content.substring(0, cursorPos);
+        const textAfter = newPost.content.substring(cursorPos);
+        
+        setNewPost({
+          ...newPost,
+          content: textBefore + imageTagsWithNewlines + textAfter,
+          format: editorMode === 'markdown' ? 'markdown' : 'text'
+        });
       }
     } catch (error) {
       console.error('이미지 업로드 오류:', error);
-      alert(error instanceof Error ? error.message : '이미지 업로드에 실패했습니다.');
+      const errorMessage = error instanceof Error ? error.message : '이미지 업로드에 실패했습니다.';
+      alert(`❌ ${errorMessage}`);
     } finally {
       setIsActionLoading(false); // 액션 로딩 상태 종료
+    }
+  };
+
+  // 마크다운 에디터용 이미지 업로드 핸들러
+  const handleMarkdownImageUpload = async (file: File): Promise<string> => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      const result = await response.json();
+      
+      if (result.error) {
+        throw new Error(result.error);
+      }
+      
+      return result.url;
+    } catch (error) {
+      console.error('마크다운 이미지 업로드 오류:', error);
+      throw error;
     }
   };
 
@@ -752,6 +860,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                   <Button onClick={() => {
                     setActiveTab('write');
                     setIsSourceMode(true);
+                    setEditorMode('html'); // 기본값은 HTML 에디터
                   }}>
                     <Plus className="mr-2 h-4 w-4" />
                     글쓰기
@@ -871,59 +980,147 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                       <div className="min-h-[300px] mb-4">
                         {isEditMode ? (
                           <div>
-                            <div className="flex justify-end mb-2">
-                              <Button 
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setIsSourceMode(!isSourceMode)}
-                                className="flex items-center gap-1"
-                              >
-                                {isSourceMode ? (
-                                  <>
-                                    <Eye className="h-4 w-4" />
-                                    <span>미리보기</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <Code className="h-4 w-4" />
-                                    <span>HTML</span>
-                                  </>
-                                )}
-                              </Button>
+                            <div className="flex justify-between items-center mb-2">
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium">에디터:</span>
+                                <Tabs value={selectedPost.format === 'markdown' ? 'markdown' : 'html'} onValueChange={(value) => {
+                                  const newFormat = value as 'html' | 'markdown';
+                                  setEditorMode(newFormat);
+                                  setSelectedPost({ ...selectedPost, format: newFormat === 'markdown' ? 'markdown' : 'text' });
+                                }}>
+                                  <TabsList className="grid w-full grid-cols-2">
+                                    <TabsTrigger value="html" className="flex items-center gap-1">
+                                      <Code className="h-4 w-4" />
+                                      HTML
+                                    </TabsTrigger>
+                                    <TabsTrigger value="markdown" className="flex items-center gap-1">
+                                      <Hash className="h-4 w-4" />
+                                      Markdown
+                                    </TabsTrigger>
+                                  </TabsList>
+                                </Tabs>
+                              </div>
                             </div>
-                            {isSourceMode ? (
-                              <div 
-                                className={`relative ${isDragging ? 'border-2 border-dashed border-primary bg-primary/10' : ''}`}
-                                onDragOver={handleDragOver}
-                                onDragLeave={handleDragLeave}
-                                onDrop={handleDrop}
-                              >
-                                <Textarea
-                                  ref={contentRef}
+                            
+                            {selectedPost.format === 'markdown' ? (
+                              <div className="space-y-2">
+                                <p className="text-sm text-muted-foreground">
+                                  마크다운 문법을 사용하여 편집하세요. 이미지를 드래그하여 업로드할 수 있습니다.
+                                </p>
+                                <MDEditor
                                   value={selectedPost.content}
-                                  onChange={(e) => setSelectedPost({ ...selectedPost, content: e.target.value })}
-                                  className={`min-h-[300px] font-mono ${textareaClass}`}
+                                  onChange={(value) => setSelectedPost({ 
+                                    ...selectedPost, 
+                                    content: value || '',
+                                    format: 'markdown'
+                                  })}
+                                  data-color-mode="light"
+                                  height={400}
+                                  onDrop={async (event) => {
+                                    const files = Array.from(event.dataTransfer.files).filter(file => 
+                                      file.type.startsWith('image/')
+                                    );
+                                    
+                                    for (const file of files) {
+                                      try {
+                                        const imageUrl = await handleMarkdownImageUpload(file);
+                                        const imageMarkdown = `![${file.name}](${imageUrl})`;
+                                        setSelectedPost({
+                                          ...selectedPost,
+                                          content: (selectedPost.content || '') + '\n' + imageMarkdown + '\n',
+                                          format: 'markdown'
+                                        });
+                                      } catch (error) {
+                                        console.error('이미지 업로드 실패:', error);
+                                      }
+                                    }
+                                  }}
                                 />
-                                {isDragging && (
-                                  <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
-                                    <p className="text-lg font-medium">이미지를 여기에 놓으세요</p>
-                                  </div>
-                                )}
                               </div>
                             ) : (
-                              <div className="border rounded-md p-3 min-h-[300px]">
-                                <div dangerouslySetInnerHTML={{ __html: selectedPost.content }} />
-                              </div>
+                              <>
+                                <div className="flex justify-end mb-2">
+                                  <Button 
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setIsSourceMode(!isSourceMode)}
+                                    className="flex items-center gap-1"
+                                  >
+                                    {isSourceMode ? (
+                                      <>
+                                        <Eye className="h-4 w-4" />
+                                        <span>미리보기</span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Code className="h-4 w-4" />
+                                        <span>HTML</span>
+                                      </>
+                                    )}
+                                  </Button>
+                                </div>
+                                {isSourceMode ? (
+                                  <div 
+                                    className={`relative transition-all duration-200 ${isDragging ? 'border-2 border-dashed border-primary bg-primary/10 rounded-md' : 'border border-transparent'}`}
+                                    onDragEnter={handleDragEnter}
+                                    onDragOver={handleDragOver}
+                                    onDragLeave={handleDragLeave}
+                                    onDrop={handleDrop}
+                                  >
+                                    <Textarea
+                                      ref={contentRef}
+                                      value={selectedPost.content}
+                                      onChange={(e) => setSelectedPost({ ...selectedPost, content: e.target.value })}
+                                      className={`min-h-[300px] font-mono ${textareaClass}`}
+                                      placeholder="HTML 내용을 입력하세요. 이미지를 드래그하여 업로드할 수 있습니다."
+                                    />
+                                    {isDragging && (
+                                      <div className="absolute inset-0 flex items-center justify-center bg-primary/20 z-10 rounded-md">
+                                        <div className="text-center">
+                                          <p className="text-lg font-medium text-primary">📁 이미지를 여기에 놓으세요</p>
+                                          <p className="text-sm text-muted-foreground">여러 이미지를 동시에 업로드할 수 있습니다</p>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <div className="border rounded-md p-3 min-h-[300px]">
+                                    <div dangerouslySetInnerHTML={{ 
+                                      __html: selectedPost.content?.replace(/<img([^>]*)\ssrc=["']?\s*["']?([^>]*)>/gi, (match, attrs, rest) => {
+                                        // Remove img tags with empty src attributes
+                                        if (!attrs.includes('src=') || attrs.includes('src=""') || attrs.includes("src=''") || attrs.includes('src= ')) {
+                                          return '';
+                                        }
+                                        return match;
+                                      }) || ''
+                                    }} />
+                                  </div>
+                                )}
+                              </>
                             )}
                           </div>
                         ) : (
                           <div className="whitespace-pre-wrap">
-                            <div dangerouslySetInnerHTML={{ __html: selectedPost.content }} />
+                            {selectedPost.format === 'markdown' ? (
+                              <div className="prose max-w-none">
+                                <ReactMarkdown>{selectedPost.content || ''}</ReactMarkdown>
+                              </div>
+                            ) : (
+                              <div dangerouslySetInnerHTML={{ 
+                                __html: selectedPost.content?.replace(/<img([^>]*)\ssrc=["']?\s*["']?([^>]*)>/gi, (match, attrs, rest) => {
+                                  // Remove img tags with empty src attributes
+                                  if (!attrs.includes('src=') || attrs.includes('src=""') || attrs.includes("src=''") || attrs.includes('src= ')) {
+                                    return '';
+                                  }
+                                  return match;
+                                }) || ''
+                              }} />
+                            )}
                           </div>
                         )}
                       </div>
 
-                      {isEditMode && isSourceMode && (
+                      {isEditMode && (
                         <div className="flex justify-end space-x-2">
                           <Button variant="outline" onClick={() => {
                             setIsEditMode(false);
@@ -951,6 +1148,22 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <h2 className="text-2xl font-bold">새 게시글 작성</h2>
+                    {/* 에디터 모드 선택 */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">에디터:</span>
+                      <Tabs value={editorMode} onValueChange={(value) => setEditorMode(value as 'html' | 'markdown')}>
+                        <TabsList className="grid w-full grid-cols-2">
+                          <TabsTrigger value="html" className="flex items-center gap-1">
+                            <Code className="h-4 w-4" />
+                            HTML
+                          </TabsTrigger>
+                          <TabsTrigger value="markdown" className="flex items-center gap-1">
+                            <Hash className="h-4 w-4" />
+                            Markdown
+                          </TabsTrigger>
+                        </TabsList>
+                      </Tabs>
+                    </div>
                   </div>
 
                   <div className="border rounded-lg p-4">
@@ -997,70 +1210,119 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                     </div>
 
                     <div className="min-h-[300px] mb-4">
-                      <div className="flex justify-end mb-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setIsSourceMode(!isSourceMode)}
-                          className="flex items-center gap-1"
-                        >
-                          {isSourceMode ? (
-                            <>
-                              <Eye className="h-4 w-4" />
-                              <span>미리보기</span>
-                            </>
-                          ) : (
-                            <>
-                              <Code className="h-4 w-4" />
-                              <span>HTML</span>
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                      {isSourceMode ? (
-                        <div 
-                          className={`relative ${isDragging ? 'border-2 border-dashed border-primary bg-primary/10' : ''}`}
-                          onDragOver={handleDragOver}
-                          onDragLeave={handleDragLeave}
-                          onDrop={handleDrop}
-                        >
-                          <Textarea
-                            ref={contentRef}
+                      {editorMode === 'markdown' ? (
+                        <div className="space-y-2">
+                          <p className="text-sm text-muted-foreground">
+                            마크다운 문법을 사용하여 작성하세요. 이미지를 드래그하여 업로드할 수 있습니다.
+                          </p>
+                          <MDEditor
                             value={newPost.content}
-                            onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
-                            className={`min-h-[300px] font-mono ${textareaClass}`}
-                            placeholder="내용을 입력하세요"
+                            onChange={(value) => setNewPost({ 
+                              ...newPost, 
+                              content: value || '',
+                              format: 'markdown'
+                            })}
+                            data-color-mode="light"
+                            height={400}
+                            onDrop={async (event) => {
+                              const files = Array.from(event.dataTransfer.files).filter(file => 
+                                file.type.startsWith('image/')
+                              );
+                              
+                              for (const file of files) {
+                                try {
+                                  const imageUrl = await handleMarkdownImageUpload(file);
+                                  const imageMarkdown = `![${file.name}](${imageUrl})`;
+                                  setNewPost({
+                                    ...newPost,
+                                    content: (newPost.content || '') + '\n' + imageMarkdown + '\n',
+                                    format: 'markdown'
+                                  });
+                                } catch (error) {
+                                  console.error('이미지 업로드 실패:', error);
+                                }
+                              }
+                            }}
                           />
-                          {isDragging && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
-                              <p className="text-lg font-medium">이미지를 여기에 놓으세요</p>
-                            </div>
-                          )}
                         </div>
                       ) : (
-                        <div className="border rounded-md p-4 min-h-[300px]">
-                          {newPost.content ? (
-                            <div dangerouslySetInnerHTML={{ __html: newPost.content }} />
+                        <>
+                          <div className="flex justify-end mb-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setIsSourceMode(!isSourceMode)}
+                              className="flex items-center gap-1"
+                            >
+                              {isSourceMode ? (
+                                <>
+                                  <Eye className="h-4 w-4" />
+                                  <span>미리보기</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Code className="h-4 w-4" />
+                                  <span>HTML</span>
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                          {isSourceMode ? (
+                            <div 
+                              className={`relative transition-all duration-200 ${isDragging ? 'border-2 border-dashed border-primary bg-primary/10 rounded-md' : 'border border-transparent'}`}
+                              onDragEnter={handleDragEnter}
+                              onDragOver={handleDragOver}
+                              onDragLeave={handleDragLeave}
+                              onDrop={handleDrop}
+                            >
+                              <Textarea
+                                ref={contentRef}
+                                value={newPost.content}
+                                onChange={(e) => setNewPost({ ...newPost, content: e.target.value, format: 'text' })}
+                                className={`min-h-[300px] font-mono ${textareaClass}`}
+                                placeholder="HTML 내용을 입력하세요. 이미지를 드래그하여 업로드할 수 있습니다."
+                              />
+                              {isDragging && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-primary/20 z-10 rounded-md">
+                                  <div className="text-center">
+                                    <p className="text-lg font-medium text-primary">📁 이미지를 여기에 놓으세요</p>
+                                    <p className="text-sm text-muted-foreground">여러 이미지를 동시에 업로드할 수 있습니다</p>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
                           ) : (
-                            <p className="text-muted-foreground">내용을 입력하세요</p>
+                            <div className="border rounded-md p-4 min-h-[300px]">
+                              {newPost.content ? (
+                                <div dangerouslySetInnerHTML={{ 
+                                  __html: newPost.content.replace(/<img([^>]*)\ssrc=["']?\s*["']?([^>]*)>/gi, (match, attrs, rest) => {
+                                    // Remove img tags with empty src attributes
+                                    if (!attrs.includes('src=') || attrs.includes('src=""') || attrs.includes("src=''") || attrs.includes('src= ')) {
+                                      return '';
+                                    }
+                                    return match;
+                                  })
+                                }} />
+                              ) : (
+                                <p className="text-muted-foreground">내용을 입력하세요</p>
+                              )}
+                            </div>
                           )}
-                        </div>
+                        </>
                       )}
                     </div>
 
-                    {isSourceMode && (
-                      <div className="flex justify-end space-x-2">
-                        <Button
-                          variant="outline"
-                          onClick={() => setActiveTab('list')}
-                        >
-                          취소
-                        </Button>
-                        <Button onClick={handleCreatePost}>
-                          저장
-                        </Button>
-                      </div>
-                    )}
+                    <div className="flex justify-end space-x-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => setActiveTab('list')}
+                      >
+                        취소
+                      </Button>
+                      <Button onClick={handleCreatePost}>
+                        저장
+                      </Button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -1188,7 +1450,8 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                   
                   {isSourceMode ? (
                     <div 
-                      className={`relative ${isDragging ? 'border-2 border-dashed border-primary bg-primary/10' : ''}`}
+                      className={`relative transition-all duration-200 ${isDragging ? 'border-2 border-dashed border-primary bg-primary/10 rounded-md' : 'border border-transparent'}`}
+                      onDragEnter={handleDragEnter}
                       onDragOver={handleDragOver}
                       onDragLeave={handleDragLeave}
                       onDrop={handleDrop}
@@ -1201,15 +1464,26 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                         placeholder="내용을 입력하세요"
                       />
                       {isDragging && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
-                          <p className="text-lg font-medium">이미지를 여기에 놓으세요</p>
+                        <div className="absolute inset-0 flex items-center justify-center bg-primary/20 z-10 rounded-md">
+                          <div className="text-center">
+                            <p className="text-lg font-medium text-primary">📁 이미지를 여기에 놓으세요</p>
+                            <p className="text-sm text-muted-foreground">여러 이미지를 동시에 업로드할 수 있습니다</p>
+                          </div>
                         </div>
                       )}
                     </div>
                   ) : (
                     <div className="border rounded-md p-4 min-h-[300px]">
                       {newPost.content ? (
-                        <div dangerouslySetInnerHTML={{ __html: newPost.content }} />
+                        <div dangerouslySetInnerHTML={{ 
+                          __html: newPost.content.replace(/<img([^>]*)\ssrc=["']?\s*["']?([^>]*)>/gi, (match, attrs, rest) => {
+                            // Remove img tags with empty src attributes
+                            if (!attrs.includes('src=') || attrs.includes('src=""') || attrs.includes("src=''") || attrs.includes('src= ')) {
+                              return '';
+                            }
+                            return match;
+                          })
+                        }} />
                       ) : (
                         <p className="text-muted-foreground">내용을 입력하세요</p>
                       )}

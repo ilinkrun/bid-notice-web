@@ -1,9 +1,10 @@
 import re
 import urllib
 from utils_data import valid_str, fix_encoding, decode_html_text
-from mysql_basic import Mysql, _where_like_unit, _where_eq_unit
-from mysql_bid import SEPERATOR, SETTINGS_DETAIL_FIELDS, SETTINGS_DETAIL_CONFIG_FIELDS, find_settings_list, _find_settings_detail_by_name, find_settings_detail_by_name, unpack_settings_elements
-from spider_lxml import _get_outerhtml, get_val, get_dict, download_by_url, download_by_url_with_headers
+from utils_mysql import Mysql, _where_like_unit, _where_eq_unit
+from mysql_bid import SEPERATOR, SETTINGS_DETAIL_FIELDS, SETTINGS_DETAIL_CONFIG_FIELDS, find_settings_list, _find_settings_detail_by_name, find_settings_detail_by_name, unpack_settings_elements, upsert_notices
+from utils_lxml import _get_outerhtml, get_val, get_dict, download_by_url, download_by_url_with_headers
+from utils_nas import get_notice_nas_folder
 
 import requests
 from playwright.sync_api import Playwright, sync_playwright
@@ -16,7 +17,7 @@ import time
 import os
 
 
-DATAFOLER = "../../../data/"
+# DATAFOLER = "../../../data/"
 
 # * populate
 # -----------------------------------------------------------
@@ -445,13 +446,36 @@ def _fetch_detail_by_name(url, name, required_keys=["제목"]):
 def _fetch_detail_by_nid(nid, required_keys=["제목"]):
     # 417236
     mysql = Mysql()  # 로컬 MySQL 객체 생성
-    find1 = mysql.find("notices", ["상세페이지주소", "기관명"], addStr=f"WHERE `nid` = '{nid}'")
+    fields = ["상세페이지주소", "기관명", "created_at", "작성일", "작성자", "category", "status"]
+    # fields = ["상세페이지주소", "기관명", "created_at", "작성일", "작성자", "category", "status"]
+    # fields = ["상세페이지주소", "기관명"]
+    find1 = mysql.find("notices", fields, addStr=f"WHERE `nid` = '{nid}'")
     mysql.close()
     if find1:
         url = find1[0][0]
         name = find1[0][1]
+        
+        # find1[0]의 값을 dict로 생성
+        db_data = {
+            "created_at": find1[0][2] if len(find1[0]) > 2 else None,
+            "작성일": find1[0][3] if len(find1[0]) > 3 else None,
+            "작성자": find1[0][4] if len(find1[0]) > 4 else None,
+            "category": find1[0][5] if len(find1[0]) > 5 else None,
+            "status": find1[0][6] if len(find1[0]) > 6 else None
+        }
+        
+        # _fetch_detail_by_name의 결과를 가져와서 db_data와 합침
+        detail_result = _fetch_detail_by_name(url, name, required_keys)
+        
+        # dict인 경우 merge, 아닌 경우 새로운 키로 추가
+        if isinstance(detail_result, dict):
+            result = {**detail_result, **db_data}
+        else:
+            result = {"detail": detail_result, **db_data}
+        
+        return result
     # return url
-    return _fetch_detail_by_name(url, name, required_keys)
+    return None
 
 
 def upsert_detail_by_nid(nid):
@@ -467,8 +491,21 @@ def upsert_detail_by_nid(nid):
         dict: 저장된 상세 정보
     """
     data = _fetch_detail_by_nid(nid)
+    print(f"{data=}")
     if data:
         data["nid"] = nid
+        
+        # datetime 객체를 문자열로 변환
+        if data.get("created_at") and hasattr(data["created_at"], "strftime"):
+            data["created_at"] = data["created_at"].strftime("%Y-%m-%d %H:%M:%S")
+        if data.get("작성일") and hasattr(data["작성일"], "strftime"):
+            data["작성일"] = data["작성일"].strftime("%Y-%m-%d")
+            
+        # None 값들을 빈 문자열로 변환 (필요한 경우)
+        for key in ["category", "status", "작성자"]:
+            if data.get(key) is None:
+                data[key] = ""
+        
         mysql = Mysql()  # 로컬 MySQL 객체 생성
         mysql.upsert("details", [data], inType="dicts")
         mysql.close()
@@ -476,15 +513,23 @@ def upsert_detail_by_nid(nid):
     return data
 
 
-def download_by_nid(nid, folder="/nas/24_공사점검/새 폴더/"):
+def download_by_nid(nid, folder=""):
+    if not folder:
+        folder = get_notice_nas_folder(nid)
+    
+    # print(folder)
+
     mysql = Mysql()  # 로컬 MySQL 객체 생성
     # !! details에 "상세페이지주소" 추가, Referer로 사용
     find1 = mysql.find("details", ["파일주소", "파일이름"], addStr=f"WHERE `nid` = '{nid}'")
     find2 = mysql.find("notices", ["상세페이지주소"], addStr=f"WHERE `nid` = '{nid}'")
     mysql.close()
 
+    print(f"{find1=} {find2=}")
+
     if not find1:
         return
+
     (urlStr, nameStr) = find1[0]
     referer = find2[0][0]
     urls = urlStr.split(SEPERATOR)
@@ -493,21 +538,56 @@ def download_by_nid(nid, folder="/nas/24_공사점검/새 폴더/"):
 
     for (index, url) in enumerate(urls):
         print(f"index, url name: {index}, {url}, {names[index]}")
+        print(f"{folder=}")
         # download_by_url(url, folder, names[index])
         download_by_url_with_headers(url, folder, names[index], headers={"Referer": referer})
 
+
+# !!업데이트 공고 (제외 -> 진행)
+def notice_status_to_progress(nid):
+    # update_notice_bid(nid)  # notices status 변경
+    upsert_detail_by_nid(nid)
+    # create_notice_bid(nid)
+    download_by_nid(nid)
+
+# !!업데이트 공고 상태 (제외 -> 진행)
+def update_notice_status(data):
+    # notices status 변경
+    upsert_notices([{'nid': data['nid'], 'status': data['to']}])
+    if data['to'] == "진행" or data['to'] == "포함" or data['to'] == "준비":
+        # insert info to details 
+        upsert_detail_by_nid(data['nid'])
+        # insert info to notices_progress
+        # insert_progress_notice()
+        download_by_nid(data['nid'])
+    elif data['to'] == "낙찰":
+        pass
+
 # TEST
-def test_download_file(file_name="test5.txt", folder_name=DATAFOLER):
-    folder_name = "/nas/24_공사점검/새 폴더/"
-    with open(folder_name + file_name, "w") as file:
+def test_save_file(nid=536548, file_name="test.txt"):
+    dir_name = get_notice_nas_folder(nid)
+    os.makedirs(dir_name, exist_ok=True)
+    with open(f"{dir_name}/{file_name}", "w") as file:
         file.write("testing....")
 
 if __name__ == "__main__":
     pass
-    nid = 363442
-    upsert_detail_by_nid(nid)
-    # data = _fetch_detail_by_nid(nid)
-    # print(data)
+    # test_save_file()
+    # nid = 537939 # 537950
+    # data = {'nid': nid, 'from': '제외', 'to': '진행'}
+    # update_notice_status(data)
+    data = {
+        "nid": 537943, 
+        "from": "제외", 
+        "to": "진행"
+    }
+    update_notice_status(data)
+
+    # upsert_detail_by_nid(nid)
+
+    # upsert_detail_by_nid(nid)
+    # print(_fetch_detail_by_nid(nid, required_keys=["제목"]))
+    # download_by_nid(nid, folder="")
     # test_download_file()
     # 테스트 코드
     # url = "https://seobu.ice.go.kr/bseobu/read.aspx?board_idx=150901&board_code=4644&g1="

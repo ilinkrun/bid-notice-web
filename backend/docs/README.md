@@ -24,5 +24,5 @@ apt-get update && apt-get install -y libxml2-dev libxslt-dev
 cd /_exp/apps/backends/bid-notice-scraper/app && uv sync
 
 # 데이터베이스 연결 테스트
-uv run python mysql_basic.py
+uv run python utils_mysql.py
 ```

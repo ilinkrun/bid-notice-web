@@ -222,7 +222,7 @@ chmod +x /_exp/apps/backends/bid-notice-scraper/scripts/start_servers.sh
 
 ```sh
 cd /_exp/apps/backends/bid-notice-scraper
-uv run spider_bid.py
+uv run spider_list.py
 ```
 
 cd /_exp/apps/backends/bid-notice-scraper && uv run python -m playwright install
@@ -395,3 +395,32 @@ docker run --mount type=bind,source=/host/path,target=/container/path my-image
 ● 이제 컨테이너 시작 시 entrypoint.sh가 자동으로
   실행되지만, 스크립트 파일은 볼륨 마운트를 통해
   호스트에서 관리되므로 이미지에는 포함되지 않습니다.
+
+
+===
+
+## ilmac-bid backend
+
+- python
+- mysql
+- uvicorn
+- fastapi
+
+- docker
+- uv
+ 
+
+```sh
+# 사전 설치!!
+apt-get update && apt-get install -y libxml2-dev libxslt-dev
+
+# pyproject.toml 패키지 설치
+cd "/_exp/apps/backends/ilmac-bid/bid-notice-scraper/app" && uv sync
+```
+
+## test
+
+```sh
+cd /_exp/apps/backends/bid-notice-scraper/app
+uv run python utils_mysql.py
+```

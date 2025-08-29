@@ -4,7 +4,7 @@ from typing import Optional, List
 
 from fastapi import FastAPI
 import uvicorn
-from mysql_basic import Mysql
+from utils_mysql import Mysql
 
 #    ** Global Variables
 # MYSQL_CONFIG = dict(host='172.17.0.3', port=3306, user='root', passwd='mysqlIlmac1!', db='Bid', charset='utf8')
