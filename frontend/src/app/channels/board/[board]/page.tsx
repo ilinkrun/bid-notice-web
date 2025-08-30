@@ -57,6 +57,8 @@ import {
   Hash
 } from 'lucide-react';
 
+import Comments from '@/components/board/Comments';
+
 import dynamic from 'next/dynamic';
 
 // MDEditor 동적 임포트 (SSR 방지)
@@ -907,7 +909,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                       <TableRow 
                         key={post.id}
                         className="cursor-pointer hover:bg-muted/50"
-                        onClick={() => handlePostSelect(post)}
+                        onClick={() => navigate(`/channels/board/${board}/${post.id}`)}
                       >
                         <TableCell>{post.id}</TableCell>
                         <TableCell className="max-w-[400px] truncate">{post.title}</TableCell>
@@ -1124,6 +1126,20 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                           </Button>
                         </div>
                       )}
+                    </div>
+                  )}
+
+                  {/* 댓글 섹션 - 수정 모드가 아닐 때만 표시 */}
+                  {!isEditMode && (
+                    <div className="border-t pt-6 mt-6">
+                      <Comments 
+                        board={channelBoard}
+                        postId={selectedPost.id}
+                        onCommentCountChange={(count) => {
+                          // 댓글 수가 변경되면 필요에 따라 상태 업데이트
+                          console.log('댓글 수 변경:', count);
+                        }}
+                      />
                     </div>
                   )}
                 </div>

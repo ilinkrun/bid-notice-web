@@ -29,6 +29,24 @@ CREATE TABLE channel_dev (
     INDEX idx_is_visible (is_visible)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='개발 채널 게시판';
 
+CREATE TABLE board_comments (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    board VARCHAR(50) NOT NULL COMMENT '게시판 이름',
+    post_id BIGINT UNSIGNED NOT NULL COMMENT '게시글 ID',
+    content TEXT NOT NULL COMMENT '댓글 내용',
+    writer VARCHAR(50) NOT NULL COMMENT '댓글 작성자 이름',
+    password CHAR(4) NOT NULL COMMENT '숫자 4자리 비밀번호',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 날짜/시간',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 날짜/시간',
+    is_visible BOOLEAN NOT NULL DEFAULT TRUE COMMENT '댓글 노출 여부',
+    
+    -- 인덱스 추가
+    INDEX idx_board_post (board, post_id),
+    INDEX idx_created_at (created_at),
+    INDEX idx_writer (writer),
+    INDEX idx_is_visible (is_visible)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='게시판 댓글';
+
 """
 
 
@@ -287,6 +305,253 @@ def check_table_exists(table_name: str) -> bool:
     finally:
         mysql.close()
 
+# 댓글 관련 CRUD 함수들
+def create_comment(data: dict):
+    """
+    새로운 댓글을 생성합니다.
+    
+    Args:
+        data (dict): 댓글 데이터
+            {
+                'board': str,       # 필수: 게시판 이름
+                'post_id': int,     # 필수: 게시글 ID
+                'content': str,     # 필수: 댓글 내용
+                'writer': str,      # 필수: 댓글 작성자 이름
+                'password': str,    # 필수: 숫자 4자리 비밀번호
+                'is_visible': bool  # 선택: 댓글 노출 여부. 기본값 True
+            }
+        
+    Returns:
+        int: 생성된 댓글의 ID
+        
+    Raises:
+        ValueError: 필수 필드가 없거나 유효하지 않은 데이터인 경우
+    """
+    mysql = Mysql()
+    try:
+        # 필수 필드 검사
+        required_fields = ['board', 'post_id', 'content', 'writer', 'password']
+        for field in required_fields:
+            if field not in data:
+                raise ValueError(f"필수 필드가 누락되었습니다: {field}")
+        
+        # 비밀번호 유효성 검사
+        if not (data['password'].isdigit() and len(data['password']) == 4):
+            raise ValueError("비밀번호는 4자리 숫자여야 합니다.")
+        
+        # 기본값 설정 및 데이터 정제
+        insert_data = {
+            'board': data['board'],
+            'post_id': int(data['post_id']),
+            'content': data['content'],
+            'writer': data['writer'],
+            'password': data['password'],
+            'is_visible': 1 if data.get('is_visible', True) else 0
+        }
+        
+        try:
+            # insert 함수 직접 호출 대신 exec 사용
+            fields = ', '.join(insert_data.keys())
+            values = ', '.join([f"'{str(v)}'" if isinstance(v, str) else str(v) for v in insert_data.values()])
+            sql = f"INSERT INTO board_comments ({fields}) VALUES ({values})"
+            
+            print(f"Executing SQL: {sql}")  # 디버깅용
+            
+            mysql.exec(sql)
+            
+            # 마지막 삽입된 ID 가져오기
+            result = mysql.fetch("SELECT LAST_INSERT_ID()")
+            comment_id = result[0][0]
+            
+            return comment_id
+            
+        except Exception as e:
+            print(f"Database error: {str(e)}")
+            raise Exception(f"데이터베이스 오류: {str(e)}")
+            
+    except Exception as e:
+        raise e
+    finally:
+        mysql.close()
+
+def get_comments(board: str, post_id: int, page: int = 1, per_page: int = 50, only_visible: bool = True):
+    """
+    특정 게시글의 댓글 목록을 조회합니다.
+    
+    Args:
+        board (str): 게시판 이름
+        post_id (int): 게시글 ID
+        page (int, optional): 페이지 번호. 기본값 1
+        per_page (int, optional): 페이지당 댓글 수. 기본값 50
+        only_visible (bool, optional): 노출된 댓글만 조회할지 여부. 기본값 True
+        
+    Returns:
+        tuple: (전체 댓글 수, 현재 페이지 댓글 목록)
+    """
+    mysql = Mysql()
+    try:
+        # 조건 구성
+        where_clause = f"WHERE board = '{board}' AND post_id = {post_id}"
+        if only_visible:
+            where_clause += " AND is_visible = 1"
+        
+        # 전체 댓글 수 조회
+        count_sql = f"SELECT COUNT(*) FROM board_comments {where_clause}"
+        total_count = mysql.fetch(count_sql)[0][0]
+        
+        # 페이지네이션 적용하여 댓글 조회
+        offset = (page - 1) * per_page
+        fields = ["id", "board", "post_id", "content", "writer", "created_at", "updated_at", "is_visible"]
+        fields_str = ", ".join(fields)
+
+        list_sql = f"SELECT {fields_str} FROM board_comments {where_clause} ORDER BY created_at ASC LIMIT {per_page} OFFSET {offset}"
+        result = mysql.fetch(list_sql)
+
+        # 결과를 딕셔너리 리스트로 변환
+        comments = []
+        for row in result:
+            comment = {}
+            for i, field in enumerate(fields):
+                # datetime 객체를 문자열로 변환
+                if isinstance(row[i], datetime):
+                    comment[field] = row[i].strftime('%Y-%m-%d %H:%M:%S')
+                else:
+                    comment[field] = row[i]
+            comments.append(comment)
+            
+        return total_count, comments
+    finally:
+        mysql.close()
+
+def get_comment(comment_id: int):
+    """
+    특정 ID의 댓글을 조회합니다.
+    
+    Args:
+        comment_id (int): 댓글 ID
+        
+    Returns:
+        dict: 댓글 정보 또는 None
+    """
+    mysql = Mysql()
+    try:
+        fields = ["id", "board", "post_id", "content", "writer", "password", "created_at", "updated_at", "is_visible"]
+        fields_str = ", ".join(fields)
+        
+        sql = f"SELECT {fields_str} FROM board_comments WHERE id = {comment_id}"
+        result = mysql.fetch(sql)
+        
+        if not result:
+            return None
+
+        # 결과를 딕셔너리로 변환하고 datetime을 문자열로 변환
+        comment = {}
+        row = result[0]
+        for i, field in enumerate(fields):
+            if isinstance(row[i], datetime):
+                # datetime 객체를 문자열로 변환
+                comment[field] = row[i].strftime('%Y-%m-%d %H:%M:%S')
+            else:
+                comment[field] = row[i]
+                
+        return comment
+    finally:
+        mysql.close()
+
+def update_comment(comment_id: int, data: dict, password: str):
+    """
+    댓글을 수정합니다. 비밀번호가 일치하는 경우에만 수정이 가능합니다.
+    
+    Args:
+        comment_id (int): 댓글 ID
+        data (dict): 수정할 댓글 데이터
+            {
+                'content': str,      # 선택: 댓글 내용
+                'is_visible': bool   # 선택: 댓글 노출 여부
+            }
+        password (str): 댓글 비밀번호
+        
+    Returns:
+        bool: 수정 성공 여부
+        
+    Raises:
+        ValueError: 유효하지 않은 데이터인 경우
+    """
+    mysql = Mysql()
+    try:
+        # 비밀번호 확인
+        if not password:
+            raise ValueError("비밀번호를 입력해주세요.")
+            
+        stored_password = mysql.find("board_comments", fields=["password"], addStr=f"WHERE id = {comment_id}")
+        print(f"댓글 수정 비밀번호 검증 - ID: {comment_id}, 입력: '{password}', 저장된: '{stored_password[0][0] if stored_password else None}'")
+        
+        if not stored_password:
+            print(f"댓글 ID {comment_id}를 찾을 수 없습니다.")
+            return False
+            
+        stored_pwd = str(stored_password[0][0]).strip()
+        input_pwd = str(password).strip()
+        
+        if stored_pwd != input_pwd:
+            print(f"비밀번호 불일치: 저장된='{stored_pwd}' (길이:{len(stored_pwd)}), 입력='{input_pwd}' (길이:{len(input_pwd)})")
+            return False
+        
+        print(f"비밀번호 일치 확인됨")
+            
+        # 수정할 데이터 구성
+        update_data = {}
+        
+        # 내용 업데이트
+        if 'content' in data:
+            update_data['content'] = data['content']
+            
+        # 노출 여부 업데이트
+        if 'is_visible' in data:
+            update_data['is_visible'] = 1 if data['is_visible'] else 0
+            
+        if update_data:
+            mysql.update("board_comments", update_data, f"id = {comment_id}")
+            return True
+        return False
+    finally:
+        mysql.close()
+
+def delete_comment(comment_id: int, password: str):
+    """
+    댓글을 삭제합니다. 비밀번호가 일치하는 경우에만 삭제가 가능합니다.
+    
+    Args:
+        comment_id (int): 댓글 ID
+        password (str): 댓글 비밀번호
+        
+    Returns:
+        bool: 삭제 성공 여부
+    """
+    mysql = Mysql()
+    try:
+        # 비밀번호 확인  
+        stored_password = mysql.find("board_comments", fields=["password"], addStr=f"WHERE id = {comment_id}")
+        print(f"댓글 삭제 비밀번호 검증 - ID: {comment_id}, 입력: '{password}', 저장된: '{stored_password[0][0] if stored_password else None}'")
+        
+        if not stored_password:
+            print(f"댓글 ID {comment_id}를 찾을 수 없습니다.")
+            return False
+            
+        stored_pwd = str(stored_password[0][0]).strip()
+        input_pwd = str(password).strip()
+        
+        if stored_pwd != input_pwd:
+            print(f"비밀번호 불일치: 저장된='{stored_pwd}' (길이:{len(stored_pwd)}), 입력='{input_pwd}' (길이:{len(input_pwd)})")
+            return False
+        
+        print(f"비밀번호 일치 확인됨")
+            
+        mysql.delete("board_comments", f"id = {comment_id}")
+        return True
+    finally:
+        mysql.close()
+
 # FastAPI 앱 생성
 app = FastAPI()
 
@@ -395,6 +660,90 @@ def list_posts_endpoint(
             "per_page": per_page,
             "posts": posts
         }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# 댓글 관련 API 엔드포인트들
+@app.post("/comments")
+def create_comment_endpoint(comment_data: Dict[str, Any]):
+    """댓글을 생성합니다."""
+    try:
+        comment_id = create_comment(comment_data)
+        return {"id": comment_id}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        import traceback
+        error_detail = f"Error creating comment: {str(e)}\n{traceback.format_exc()}"
+        print(error_detail)
+        raise HTTPException(status_code=500, detail=error_detail)
+
+@app.get("/comments/{board}/{post_id}")
+def get_comments_endpoint(
+    board: str,
+    post_id: int,
+    page: int = Query(1, description="페이지 번호"),
+    per_page: int = Query(50, description="페이지당 댓글 수"),
+    only_visible: bool = Query(True, description="노출된 댓글만 표시")
+):
+    """특정 게시글의 댓글 목록을 조회합니다."""
+    try:
+        total_count, comments = get_comments(board, post_id, page, per_page, only_visible)
+        return {
+            "total_count": total_count,
+            "page": page,
+            "per_page": per_page,
+            "comments": comments
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/comments/{comment_id}")
+def get_comment_endpoint(comment_id: int):
+    """특정 댓글을 조회합니다."""
+    try:
+        comment = get_comment(comment_id)
+        if not comment:
+            raise HTTPException(status_code=404, detail="댓글을 찾을 수 없습니다.")
+        return comment
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/comments/{comment_id}")
+def update_comment_endpoint(
+    comment_id: int,
+    update_data: Dict[str, Any]
+):
+    """댓글을 수정합니다."""
+    try:
+        password = update_data.pop("password", None)
+        if not password:
+            raise HTTPException(status_code=400, detail="비밀번호가 필요합니다.")
+            
+        success = update_comment(comment_id, update_data, password)
+        if not success:
+            raise HTTPException(status_code=401, detail="비밀번호가 일치하지 않습니다.")
+        return {"success": True}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/comments/{comment_id}")
+def delete_comment_endpoint(
+    comment_id: int,
+    delete_data: Dict[str, str]
+):
+    """댓글을 삭제합니다."""
+    try:
+        password = delete_data.get("password")
+        if not password:
+            raise HTTPException(status_code=400, detail="비밀번호가 필요합니다.")
+            
+        success = delete_comment(comment_id, password)
+        if not success:
+            raise HTTPException(status_code=401, detail="비밀번호가 일치하지 않습니다.")
+        return {"success": True}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
