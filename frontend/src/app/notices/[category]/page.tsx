@@ -6,6 +6,7 @@ import { Notice } from '@/types/notice';
 import '../../themes.css';
 import { redirect } from 'next/navigation';
 import CategoryPageClient from './CategoryPageClient';
+import DataLoadingWrapper from './DataLoadingWrapper';
 
 interface PageProps {
   params: Promise<{ category: string }>;
@@ -58,11 +59,13 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
     return (
       <div>
         <Suspense fallback={<NoticeTableSkeleton />}>
-          <CategoryPageClient 
-            notices={notices}
-            category={category}
-            gap={gap}
-          />
+          <DataLoadingWrapper>
+            <CategoryPageClient 
+              notices={notices}
+              category={category}
+              gap={gap}
+            />
+          </DataLoadingWrapper>
         </Suspense>
       </div>
     );

@@ -16,7 +16,7 @@ import { useSettingsStore } from '@/store/settingsStore';
 import { NoticeDetailModal } from './NoticeDetailModal';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { useNavigation } from '@/hooks/useNavigation';
+import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
 
 type SortField = '제목' | '기관명' | '작성일' | '지역' | '등록';
 type SortOrder = 'asc' | 'desc';
@@ -46,7 +46,7 @@ const DEFAULT_GAP = process.env.NEXT_PUBLIC_DAY_GAP || '1';
 
 export default function NoticeTable({ notices, currentCategory, gap: initialGap }: NoticeTableProps) {
   const router = useRouter();
-  const { navigate } = useNavigation();
+  const { navigate } = useUnifiedNavigation();
   const searchParams = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
@@ -495,14 +495,16 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
           >
             <Edit3 className="h-4 w-4" />
           </Button>
-          <Button 
-            onClick={handleBidProcess} 
-            variant="outline" 
-            className="bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200 h-10 w-10 flex items-center justify-center"
-            title="입찰 진행"
-          >
-            <Star className="h-4 w-4" />
-          </Button>
+          {currentCategory !== '무관' && (
+            <Button 
+              onClick={handleBidProcess} 
+              variant="outline" 
+              className="bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200 h-10 w-10 flex items-center justify-center"
+              title="입찰 진행"
+            >
+              <Star className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </div>
 

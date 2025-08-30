@@ -4,10 +4,11 @@ _drafts/
 .env
 .env.*
 
+
 # backend
 __pycache__
 .venv/
-
+nohup.out
 
 # frontend
 node_modules/

@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { useBidFilterStore } from '@/store/bidFilterStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { filterBids } from '@/lib/utils/filterBids';
-import { useNavigation } from '@/hooks/useNavigation';
+import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
 
 const BID_STAGES = [
   { value: 'progress', label: '진행' },
@@ -67,7 +67,7 @@ const getStatusChangeOptions = (currentStatus) => {
 };
 
 export default function BidTable({ bids, currentStatus }) {
-  const { navigate } = useNavigation();
+  const { navigate } = useUnifiedNavigation();
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);

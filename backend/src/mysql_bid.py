@@ -454,25 +454,36 @@ def _find_settings_detail_by_name(name, fields=SETTINGS_DETAIL_CONFIG_FIELDS, ta
     result = mysql.find(table_name, fields=fields, addStr=f"WHERE `기관명`='{name}'")
     mysql.close()
     if out_type == "dict":
-        dicts = dict_from_tuple(fields, result[0])
-        return dicts
+        if result:
+            dicts = dict_from_tuple(fields, result[0])
+            return dicts
+        return {}
     elif out_type == "tuple":
-        return result[0]
+        return result  # 전체 결과 반환 (빈 리스트일 수 있음)
   except Exception as e:
     print(f"기관명 '{name}' 설정 검색 중 오류 발생: {str(e)}")
     return []
 
 
 # def find_settings_detail_by_name(name, fields=SETTINGS_DETAIL_FIELDS, out_type="tuple"):
-def find_settings_detail_by_name(name, fields=SETTINGS_DETAIL_CONFIG_FIELDS, table_name="settings_detail"):
-  site_config = _find_settings_detail_by_name(name, fields=["기관명"], table_name=table_name)
-  if not site_config:
-    return None
-  config = dict_from_tuple(["기관명"], site_config)
-
-  elements_config = {SETTINGS_DETAIL_ELEMENT_FIELDS[i]:v for (i, v) in enumerate(_find_settings_detail_by_name(name, fields=fields, table_name=table_name)[0])}
-  config["elements"] = unpack_settings_elements(elements_config)
-  return config
+def find_settings_detail_by_name(name, fields=SETTINGS_DETAIL_FIELDS, table_name="settings_detail", out_type="dicts"):
+  """
+  기관명으로 설정 상세를 조회하는 함수 - find_settings_detail 패턴 따름
+  """
+  mysql = Mysql()  # 로컬 MySQL 객체 생성
+  result = mysql.find(table_name, fields=fields, addStr=f"WHERE `기관명`='{name}' AND `use`=1")
+  mysql.close()
+  
+  if out_type == "dicts":
+    if result:
+      dicts = dicts_from_tuples(fields, result)
+      return dicts
+    else:
+      return []  # 데이터가 없으면 빈 리스트 반환
+  elif out_type == "tuples":
+    return result
+  else:
+    return result
 
 def detail_config_by_name(name, fields=SETTINGS_DETAIL_CONFIG_FIELDS, table_name="settings_detail"):
     """
@@ -1063,7 +1074,9 @@ def get_notices_gap(gap=3):
 
 if __name__ == "__main__":
     pass
+    # print(find_settings_detail(addStr="", out_type="dicts"))
+    print(find_settings_detail_by_name(name="강화군청"))
     # print(find_details_by_status("진행"))
-    print(find_details_by_status("제외"))
+    # print(find_details_by_status("제외"))
     # name = "강화군청"
     # print(find_settings_detail_by_name(name))

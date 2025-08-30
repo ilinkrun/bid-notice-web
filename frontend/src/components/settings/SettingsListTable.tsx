@@ -8,8 +8,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useState, useMemo } from 'react';
-import { SettingsEditModal } from './SettingsEditModal';
+import { useState, useMemo, useEffect } from 'react';
+import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
+import { useUnifiedLoading } from '@/components/providers/UnifiedLoadingProvider';
 
 interface SettingsListTableProps {
   initialData: {
@@ -38,14 +39,21 @@ const detailUrlA = (detailUrl: string) => {
 };
 
 export function SettingsListTable({ initialData }: SettingsListTableProps) {
-  const [selectedOrgName, setSelectedOrgName] = useState<string | null>(null);
+  const { navigate } = useUnifiedNavigation();
+  const { finishLoading } = useUnifiedLoading();
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     key: null,
     direction: 'asc',
   });
 
+  // 컴포넌트 마운트시 로딩 완료 처리
+  useEffect(() => {
+    finishLoading();
+  }, [finishLoading]);
+
   const handleRowClick = (orgName: string) => {
-    setSelectedOrgName(orgName);
+    const encodedOrgName = encodeURIComponent(orgName);
+    navigate(`/settings/list/${encodedOrgName}`);
   };
 
   const handleSort = (key: keyof SettingsListTableProps['initialData'][0]) => {
@@ -132,6 +140,7 @@ export function SettingsListTable({ initialData }: SettingsListTableProps) {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 hover:underline"
+                  onClick={(e) => e.stopPropagation()}
                 >
                   {detailUrlA(item.detailUrl)}
                 </a>
@@ -144,13 +153,6 @@ export function SettingsListTable({ initialData }: SettingsListTableProps) {
           </TableBody>
         </Table>
       </div>
-
-      {selectedOrgName && (
-        <SettingsEditModal
-          orgName={selectedOrgName}
-          onClose={() => setSelectedOrgName(null)}
-        />
-      )}
     </>
   );
 }

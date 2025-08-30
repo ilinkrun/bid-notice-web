@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
+import { useUnifiedLoading } from '@/components/providers/UnifiedLoadingProvider';
 import { gql, useQuery } from '@apollo/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,7 +44,8 @@ export function LogScrapingStatisticsTable({
   initialData,
   defaultGap,
 }: LogScrapingStatisticsTableProps) {
-  const router = useRouter();
+  const { navigate } = useUnifiedNavigation();
+  const { finishLoading } = useUnifiedLoading();
   const searchParams = useSearchParams();
   const [gap, setGap] = useState(defaultGap);
 
@@ -52,6 +55,13 @@ export function LogScrapingStatisticsTable({
   });
 
   const logScrapings = data?.logScrapings || initialData;
+
+  // 쿼리 완료시 로딩 스피너 해제
+  useEffect(() => {
+    if (!loading && (data || error)) {
+      finishLoading();
+    }
+  }, [loading, data, error, finishLoading]);
 
   useEffect(() => {
     const currentGap = searchParams.get('gap');
@@ -68,7 +78,7 @@ export function LogScrapingStatisticsTable({
     e.preventDefault();
     const validGap = parseInt(gap, 10);
     if (!isNaN(validGap) && validGap > 0) {
-      router.push(`/statistics/logs_scraping?gap=${gap}`);
+      navigate(`/statistics/logs_scraping?gap=${gap}`);
     }
   };
 

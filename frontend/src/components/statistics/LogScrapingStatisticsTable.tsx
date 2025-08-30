@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
+import { useUnifiedLoading } from '@/components/providers/UnifiedLoadingProvider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -43,7 +45,8 @@ export function LogScrapingStatisticsTable({
   initialData,
   defaultGap,
 }: LogScrapingStatisticsTableProps) {
-  const router = useRouter();
+  const { navigate } = useUnifiedNavigation();
+  const { finishLoading } = useUnifiedLoading();
   const searchParams = useSearchParams();
 
   // URL 파라미터에서 초기값 가져오기
@@ -80,6 +83,11 @@ export function LogScrapingStatisticsTable({
     if (query !== null) setSearchQuery(query);
   }, [searchParams]);
 
+  // 컴포넌트 마운트시 로딩 완료 처리
+  useEffect(() => {
+    finishLoading();
+  }, [finishLoading]);
+
   // URL 업데이트 함수
   const updateURL = (params: Record<string, string | null>) => {
     const newParams = new URLSearchParams(searchParams.toString());
@@ -93,7 +101,7 @@ export function LogScrapingStatisticsTable({
       }
     });
     
-    router.push(`/statistics/logs_scraping?${newParams.toString()}`);
+    navigate(`/statistics/logs_scraping?${newParams.toString()}`);
   };
 
   // 폼 제출 핸들러

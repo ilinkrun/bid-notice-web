@@ -1,20 +1,21 @@
 'use client';
 
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
 
 interface GapSelectorProps {
   defaultValue: string;
 }
 
 export function GapSelector({ defaultValue }: GapSelectorProps) {
-  const router = useRouter();
+  const { navigate } = useUnifiedNavigation();
   const searchParams = useSearchParams();
 
   const handleGapChange = (value: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('gap', value);
-    router.push(`?${params.toString()}`);
+    navigate(`?${params.toString()}`);
   };
 
   return (

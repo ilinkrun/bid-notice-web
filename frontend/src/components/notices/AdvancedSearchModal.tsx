@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
+import { useUnifiedLoading } from '@/components/providers/UnifiedLoadingProvider';
 import { Calendar } from '@/components/ui/calendar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -11,14 +12,16 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
 import { useNoticeFilterStore, NoticeFilter } from '@/store/noticeFilterStore';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { CalendarIcon } from 'lucide-react';
 
 export function AdvancedSearchModal() {
   const [open, setOpen] = useState(false);
-  const router = useRouter();
+  const { navigate } = useUnifiedNavigation();
+  const { finishLoading } = useUnifiedLoading();
   const searchParams = useSearchParams();
   const { filter, setFilter, resetFilter } = useNoticeFilterStore();
 
@@ -67,7 +70,7 @@ export function AdvancedSearchModal() {
     if (data.includedRegions) params.set('includedRegions', data.includedRegions);
 
     const queryString = params.toString();
-    router.push(queryString ? `?${queryString}` : '');
+    navigate(queryString ? `?${queryString}` : '');
   };
 
   const onSubmit = (data: NoticeFilter) => {
@@ -79,7 +82,7 @@ export function AdvancedSearchModal() {
   const handleReset = () => {
     resetFilter();
     form.reset(filter);
-    router.push('');
+    navigate('');
   };
 
   return (

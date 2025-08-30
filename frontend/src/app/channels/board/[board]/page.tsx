@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { use } from 'react';
-import { useRouter } from 'next/navigation';
+import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
+import { useUnifiedLoading } from '@/components/providers/UnifiedLoadingProvider';
 import { Card, CardContent } from "@/components/ui/card";
 import { 
   Table, 
@@ -154,15 +155,13 @@ const textareaClass = "text-gray-800 focus:placeholder:text-transparent focus:bo
 
 export default function BoardPage({ params }: { params: Promise<any> }) {
   const { board } = use(params);
-  const router = useRouter();
+  const { navigate } = useUnifiedNavigation();
+  const { startLoading, finishLoading, setCustomMessage } = useUnifiedLoading();
   const [activeTab, setActiveTab] = useState('list');
   const [posts, setPosts] = useState<any[]>([]);
   const [selectedPost, setSelectedPost] = useState<any>(null);
   
-  // 로딩 상태를 세분화하여 관리
-  const [isLoading, setIsLoading] = useState(true);
-  const [isDetailLoading, setIsDetailLoading] = useState(false);
-  const [isActionLoading, setIsActionLoading] = useState(false);
+  // 통합 로딩 관리
   const [error, setError] = useState<string | null>(null);
   
   const [searchTerm, setSearchTerm] = useState('');
@@ -190,11 +189,13 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
   // board 값을 channel_${board} 형식으로 변환
   const channelBoard = `channel_${board}`;
 
+  // 페이지 마운트시 초기화 - 로딩은 데이터 로딩 완료시 해제
+
   // 게시글 목록 조회
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        setIsLoading(true);
+        setCustomMessage('게시글 목록을 불러오는 중입니다...');
         setError(null);
         
         const response = await fetch('/api/graphql', {
@@ -217,21 +218,24 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
         }
         
         setPosts(result.data.posts);
+        
+        // 게시글 목록 로딩 완료
+        finishLoading();
       } catch (err) {
         console.error('게시글 목록 조회 오류:', err);
         setError('게시글 목록을 불러오는데 실패했습니다.');
-      } finally {
-        setIsLoading(false);
+        finishLoading();
       }
     };
     
     fetchPosts();
-  }, [channelBoard]);
+  }, [channelBoard, finishLoading, setCustomMessage]);
 
   // 게시글 선택
   const handlePostSelect = async (post: any) => {
     try {
-      setIsDetailLoading(true); // 상세 로딩 상태 사용
+      setCustomMessage('게시글을 불러오는 중입니다...');
+      startLoading();
       setError(null);
       
       console.log('게시글 선택:', post.id);
@@ -277,14 +281,14 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
         
         setSelectedPost(postData);
         setActiveTab('detail');
+        finishLoading();
       } else {
         throw new Error('게시글 정보를 가져올 수 없습니다.');
       }
     } catch (err) {
       console.error('게시글 상세 조회 오류:', err);
       setError('게시글을 불러오는데 실패했습니다.');
-    } finally {
-      setIsDetailLoading(false);
+      finishLoading();
     }
   };
 
@@ -354,7 +358,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
 
   // Enter 키로 비밀번호 확인을 처리하는 함수
   const handlePasswordKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !isActionLoading) {
+    if (e.key === 'Enter') {
       e.preventDefault();
       console.log('Enter 키 감지: 비밀번호 확인 실행');
       handlePasswordCheck();
@@ -383,7 +387,8 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
     if (!selectedPost) return;
     
     try {
-      setIsActionLoading(true); // 액션 로딩 상태 사용
+      setCustomMessage('게시글을 삭제하는 중입니다...');
+      startLoading();
       setError(null);
       
       // 삭제를 위한 요청 데이터 로깅
@@ -444,12 +449,12 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
       
       // 목록 페이지로 이동
       setActiveTab('list');
+      finishLoading();
       
     } catch (err) {
       console.error('게시글 삭제 오류:', err);
       setError('게시글 삭제에 실패했습니다.');
-    } finally {
-      setIsActionLoading(false); // 액션 로딩 상태 종료
+      finishLoading();
     }
   };
 
@@ -458,7 +463,8 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
     if (!selectedPost) return;
     
     try {
-      setIsActionLoading(true); // 액션 로딩 상태 사용
+      setCustomMessage('게시글을 수정하는 중입니다...');
+      startLoading();
       setError(null);
       
       // 서버로 전송할 데이터 구성
@@ -541,12 +547,13 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
       if (!refreshResult.errors && refreshResult.data?.posts) {
         setPosts(refreshResult.data.posts);
       }
+      
+      finishLoading();
     } catch (err) {
       console.error('게시글 수정 오류:', err);
       setError(err instanceof Error ? err.message : '게시글 수정에 실패했습니다.');
+      finishLoading();
       return;
-    } finally {
-      setIsActionLoading(false); // 액션 로딩 상태 종료
     }
   };
 
@@ -558,7 +565,8 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
     }
 
     try {
-      setIsActionLoading(true); // 액션 로딩 상태 사용
+      setCustomMessage('게시글을 작성하는 중입니다...');
+      startLoading();
       const response = await fetch('/api/graphql', {
         method: 'POST',
         headers: {
@@ -619,19 +627,19 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
       
       // 목록 페이지로 이동
       setActiveTab('list');
+      finishLoading();
       
     } catch (error) {
       console.error('게시글 작성 오류:', error);
       alert(error instanceof Error ? error.message : '게시글 작성에 실패했습니다.');
-    } finally {
-      setIsActionLoading(false); // 액션 로딩 상태 종료
+      finishLoading();
     }
   };
 
   // 채널 변경
   const handleChannelChange = (channelId: string) => {
     if (channelId !== board) {
-      router.push(`/channels/board/${channelId}`);
+      navigate(`/channels/board/${channelId}`);
     }
   };
 
@@ -721,7 +729,8 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
     }
     
     try {
-      setIsActionLoading(true); // 액션 로딩 상태 사용
+      setCustomMessage('이미지를 업로드하는 중입니다...');
+      startLoading();
       console.log('이미지 업로드 시작:', files.map(f => f.name));
       
       // 모든 파일을 업로드하고 URL을 수집
@@ -788,8 +797,9 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
       console.error('이미지 업로드 오류:', error);
       const errorMessage = error instanceof Error ? error.message : '이미지 업로드에 실패했습니다.';
       alert(`❌ ${errorMessage}`);
+      finishLoading();
     } finally {
-      setIsActionLoading(false); // 액션 로딩 상태 종료
+      finishLoading();
     }
   };
 
@@ -819,7 +829,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
 
   // 비밀번호 다이얼로그 상태 관리 함수
   const handlePasswordDialogChange = (open: boolean) => {
-    if (!open && !isActionLoading) {
+    if (!open) {
       console.log('비밀번호 다이얼로그 닫기');
       setIsPasswordDialogOpen(false);
       // 다이얼로그가 닫힐 때 상태 초기화
@@ -880,13 +890,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {isLoading ? (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center py-4">
-                        로딩 중...
-                      </TableCell>
-                    </TableRow>
-                  ) : error ? (
+                  {error ? (
                     <TableRow>
                       <TableCell colSpan={4} className="text-center py-4 text-red-500">
                         {error}
@@ -914,19 +918,10 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                   )}
                 </TableBody>
               </Table>
-              {isActionLoading && (
-                <div className="flex justify-center items-center my-4">
-                  <div className="text-center py-4">
-                    처리 중...
-                  </div>
-                </div>
-              )}
             </TabsContent>
 
             <TabsContent value="detail">
-              {isDetailLoading ? (
-                <div className="text-center py-10">로딩 중...</div>
-              ) : selectedPost && (
+              {selectedPost && (
                 <div>
                   <div className="flex justify-between items-center mb-4">
                     <Button variant="outline" onClick={() => {
@@ -948,11 +943,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                     )}
                   </div>
 
-                  {isActionLoading ? (
-                    <div className="text-center py-10 border rounded-lg">
-                      <div className="py-20">처리 중...</div>
-                    </div>
-                  ) : (
+                  {(
                     <div className="border rounded-lg p-4">
                       <div className="border-b pb-4 mb-4">
                         <h2 className="text-2xl font-bold mb-2">
@@ -1140,11 +1131,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
             </TabsContent>
 
             <TabsContent value="write">
-              {isActionLoading ? (
-                <div className="text-center py-10">
-                  <div className="py-20">처리 중...</div>
-                </div>
-              ) : (
+              {(
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <h2 className="text-2xl font-bold">새 게시글 작성</h2>
@@ -1361,14 +1348,12 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                 <Button 
                   type="button"
                   variant="outline" 
-                  onClick={() => handlePasswordDialogChange(false)} 
-                  disabled={isActionLoading}>
+                  onClick={() => handlePasswordDialogChange(false)}>
                   취소
                 </Button>
                 <Button 
-                  type="submit"
-                  disabled={isActionLoading}>
-                  {isActionLoading ? '처리 중...' : '확인'}
+                  type="submit">
+                  확인
                 </Button>
               </div>
             </form>
@@ -1386,9 +1371,9 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isActionLoading}>취소</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm} disabled={isActionLoading}>
-              {isActionLoading ? '처리 중...' : '삭제'}
+            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm}>
+              삭제
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -1400,9 +1385,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
           <DialogHeader>
             <DialogTitle>새 게시글 작성</DialogTitle>
           </DialogHeader>
-          {isActionLoading ? (
-            <div className="text-center py-10">처리 중...</div>
-          ) : (
+          {(
             <>
               <div className="space-y-4 py-4">
                 <div>
@@ -1492,10 +1475,10 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)} disabled={isActionLoading}>
+                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
                   취소
                 </Button>
-                <Button onClick={handleCreatePost} disabled={isActionLoading}>
+                <Button onClick={handleCreatePost}>
                   작성
                 </Button>
               </DialogFooter>

@@ -6,6 +6,7 @@ import { NoticeStatisticsTable } from '@/components/statistics/NoticeStatisticsT
 import { AlertCircle } from 'lucide-react';
 import { getClient } from '@/lib/api/graphqlClient';
 import ApolloWrapper from '@/components/providers/ApolloWrapper';
+import UnifiedDataLoadingWrapper from '@/components/shared/UnifiedDataLoadingWrapper';
 
 const GET_DASHBOARD_DATA = gql`
   query GetDashboardData($gap: Int!) {
@@ -88,6 +89,7 @@ export default async function Home() {
   return (
     <div className="container mx-auto p-4 space-y-6 theme-default">
       <ApolloWrapper>
+        <UnifiedDataLoadingWrapper data={data}>
         {/* 최근 스크랩 에러 */}
         <Card className="m-1 rounded-none">
           <CardHeader>
@@ -143,6 +145,7 @@ export default async function Home() {
           </Card>
         </div>
 
+        </UnifiedDataLoadingWrapper>
       </ApolloWrapper>
     </div>
   );

@@ -4,7 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { useNavigation } from '@/hooks/useNavigation';
+import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
 import {
   Settings,
   ListTodo,
@@ -181,7 +181,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ label, icon: Icon, items, a
   const [isOpen, setIsOpen] = React.useState(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
   const pathname = usePathname();
-  const { navigate } = useNavigation();
+  const { navigate } = useUnifiedNavigation();
 
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

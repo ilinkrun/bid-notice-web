@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import NoticeTable from '@/components/notices/NoticeTable';
 import { Notice } from '@/types/notice';
-import { useLoading } from '@/components/providers/LoadingProvider';
+import { useUnifiedLoading } from '@/components/providers/UnifiedLoadingProvider';
 
 interface CategoryPageClientProps {
   notices: Notice[];
@@ -28,7 +28,7 @@ function getCategoryTheme(category: string): string {
 export default function CategoryPageClient({ notices, category, gap }: CategoryPageClientProps) {
   const [currentCategory, setCurrentCategory] = useState(category);
   const themeClass = getCategoryTheme(currentCategory);
-  const { setIsLoading } = useLoading();
+  const { finishLoading } = useUnifiedLoading();
 
   // 테마 색상 적용
   useEffect(() => {
@@ -36,10 +36,13 @@ export default function CategoryPageClient({ notices, category, gap }: CategoryP
     root.setAttribute('data-primary-color', getThemeColor(currentCategory));
   }, [currentCategory]);
 
-  // 페이지 로딩 완료시 로딩 상태 해제
+  // 데이터 렌더링 완료 후 로딩 해제
   useEffect(() => {
-    setIsLoading(false);
-  }, [setIsLoading]);
+    if (notices && notices.length >= 0) {
+      // 통합 로딩 완료
+      finishLoading();
+    }
+  }, [notices, finishLoading]);
 
   // 카테고리에 따른 테마 색상 설정
   const getThemeColor = (category: string) => {

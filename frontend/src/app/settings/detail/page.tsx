@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { useQuery } from '@apollo/client';
 import { getClient } from '@/lib/api/graphqlClient';
 import { gql } from '@apollo/client';
@@ -8,9 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useUnifiedLoading } from '@/components/providers/UnifiedLoadingProvider';
+import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
+import { useEffect } from 'react';
 
 // GraphQL 쿼리 정의
 const GET_SETTINGS_DETAILS = gql`
@@ -22,40 +21,35 @@ const GET_SETTINGS_DETAILS = gql`
   }
 `;
 
-const GET_SETTING_DETAIL = gql`
-  query GetSettingDetail($orgName: String!) {
-    settingDetail(orgName: $orgName) {
-      orgName
-      elements {
-        key
-        xpath
-        target
-        callback
-      }
-    }
-  }
-`;
-
 export default function SettingsDetailPage() {
-  const [selectedOrgName, setSelectedOrgName] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<string>('list');
+  const { navigate } = useUnifiedNavigation();
+  const { finishLoading } = useUnifiedLoading();
 
   // 설정 상세 목록 쿼리
   const { loading: loadingDetails, error: errorDetails, data: dataDetails } = useQuery(GET_SETTINGS_DETAILS, {
     client: getClient(),
+    onCompleted: (data) => {
+      console.log('GET_SETTINGS_DETAILS 완료:', data);
+      // GraphQL 쿼리 완료 시 LoadingProvider 로딩 해제
+      finishLoading();
+    },
+    onError: (error) => {
+      console.error('GET_SETTINGS_DETAILS 에러:', error);
+      // 에러 발생 시에도 LoadingProvider 로딩 해제
+      finishLoading();
+    }
   });
 
-  // 선택된 기관의 상세 설정 쿼리
-  const { loading: loadingDetail, error: errorDetail, data: dataDetail } = useQuery(GET_SETTING_DETAIL, {
-    client: getClient(),
-    variables: { orgName: selectedOrgName },
-    skip: !selectedOrgName, // orgName이 없으면 쿼리 실행하지 않음
-  });
+  // 페이지 마운트 시 즉시 로딩 해제 (useNavigation에서 이미 처리됨)
+  useEffect(() => {
+    finishLoading(false);
+  }, [finishLoading]);
 
-  // 기관 선택 핸들러
+  // 기관 선택 핸들러 - 페이지 이동
   const handleOrgSelect = (orgName: string) => {
-    setSelectedOrgName(orgName);
-    setActiveTab('detail');
+    console.log('기관 선택:', orgName);
+    const encodedOrgName = encodeURIComponent(orgName);
+    navigate(`/settings/detail/${encodedOrgName}`);
   };
 
   // 로딩 상태 처리
@@ -100,91 +94,50 @@ export default function SettingsDetailPage() {
     <div className="container mx-auto py-10">
       <Card>
         <CardHeader>
-          <CardTitle>상세페이지 스크랩 설정</CardTitle>
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle>상세페이지 스크랩 설정</CardTitle>
+              <CardDescription>기관별 설정 상세 정보를 관리합니다.</CardDescription>
+            </div>
+            <a 
+              href="/settings/detail/new" 
+              className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 gap-1.5 px-3 has-[>svg]:px-2.5"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                <path d="M5 12h14"/>
+                <path d="M12 5v14"/>
+              </svg>
+              추가
+            </a>
+          </div>
         </CardHeader>
         <CardContent>
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="list">기관 목록</TabsTrigger>
-              <TabsTrigger value="detail" disabled={!selectedOrgName}>상세 설정</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="list">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>기관명</TableHead>
-                    <TableHead>제목</TableHead>
-                    <TableHead>작업</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {dataDetails?.settingsDetails?.map((detail: any) => (
-                    <TableRow key={detail.orgName}>
-                      <TableCell>{detail.orgName}</TableCell>
-                      <TableCell>{detail.title}</TableCell>
-                      <TableCell>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleOrgSelect(detail.orgName)}
-                        >
-                          상세 보기
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TabsContent>
-            
-            <TabsContent value="detail">
-              {loadingDetail ? (
-                <div className="space-y-4">
-                  <Skeleton className="h-10 w-full" />
-                  <Skeleton className="h-10 w-full" />
-                  <Skeleton className="h-10 w-full" />
-                </div>
-              ) : errorDetail ? (
-                <p className="text-red-500">{errorDetail.message}</p>
-              ) : dataDetail?.settingDetail ? (
-                <div className="space-y-6">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>기관명</Label>
-                      <Input value={dataDetail.settingDetail.orgName} readOnly />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <Label className="mb-2 block">요소 목록</Label>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>키</TableHead>
-                          <TableHead>XPath</TableHead>
-                          <TableHead>Target</TableHead>
-                          <TableHead>Callback</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {dataDetail.settingDetail.elements?.map((element: any, index: number) => (
-                          <TableRow key={index}>
-                            <TableCell>{element.key}</TableCell>
-                            <TableCell>{element.xpath}</TableCell>
-                            <TableCell>{element.target}</TableCell>
-                            <TableCell>{element.callback}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </div>
-              ) : (
-                <p>데이터가 없습니다.</p>
-              )}
-            </TabsContent>
-          </Tabs>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>기관명</TableHead>
+                <TableHead>제목</TableHead>
+                <TableHead>작업</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {dataDetails?.settingsDetails?.map((detail: any) => (
+                <TableRow key={detail.orgName}>
+                  <TableCell>{detail.orgName}</TableCell>
+                  <TableCell>{detail.title}</TableCell>
+                  <TableCell>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleOrgSelect(detail.orgName)}
+                    >
+                      상세 보기
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
     </div>

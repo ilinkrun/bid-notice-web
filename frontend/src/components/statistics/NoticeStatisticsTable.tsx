@@ -9,7 +9,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useState, useMemo, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
 import { StatisticsTypeSelector } from './StatisticsTypeSelector';
 import { GapSelector } from './GapSelector';
 import { NoticeStatisticsChart } from './NoticeStatisticsChart';
@@ -90,7 +91,7 @@ export function NoticeStatisticsTable({
   hideControls = false,
   hideTypeSelector = false
 }: NoticeStatisticsTableProps) {
-  const router = useRouter();
+  const { navigate } = useUnifiedNavigation();
   const searchParams = useSearchParams();
   const [statisticsType, setStatisticsType] = useState<string>(() => {
     const typeParam = searchParams.get('type');
@@ -105,7 +106,7 @@ export function NoticeStatisticsTable({
   const handleTypeChange = (value: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('type', typeToUrlParam[value]);
-    router.push(`?${params.toString()}`);
+    navigate(`?${params.toString()}`);
     setStatisticsType(value);
   };
 

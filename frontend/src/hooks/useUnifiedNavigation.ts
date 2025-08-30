@@ -1,13 +1,13 @@
 'use client';
 
 import { useRouter, usePathname } from 'next/navigation';
-import { useLoading } from '@/components/providers/LoadingProvider';
+import { useUnifiedLoading } from '@/components/providers/UnifiedLoadingProvider';
 import { useEffect, useRef } from 'react';
 
-export function useNavigation() {
+export function useUnifiedNavigation() {
   const router = useRouter();
   const pathname = usePathname();
-  const { setIsLoading } = useLoading();
+  const { startLoading, finishLoading } = useUnifiedLoading();
   const timeoutRef = useRef<NodeJS.Timeout>();
 
   const navigate = (url: string) => {
@@ -21,8 +21,8 @@ export function useNavigation() {
       clearTimeout(timeoutRef.current);
     }
 
-    // 로딩 상태 활성화
-    setIsLoading(true);
+    // 로딩 시작
+    startLoading();
     
     // 즉시 URL 변경
     window.history.pushState(null, '', url);
@@ -30,26 +30,17 @@ export function useNavigation() {
     // Next.js 라우터로 페이지 전환
     router.push(url);
     
-    // 안전장치: 5초 후 강제 로딩 해제 (기존 10초에서 단축)
+    // 안전장치: 10초 후 강제 로딩 해제
     timeoutRef.current = setTimeout(() => {
-      setIsLoading(false);
-    }, 5000);
+      finishLoading();
+    }, 10000);
   };
 
-  // pathname 변경 감지하여 지연 후 로딩 해제
+  // pathname 변경 감지 - 로딩은 각 페이지에서 명시적으로 해제
   useEffect(() => {
-    // pathname이 변경되면 기존 타이머 클리어
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    
-    // 페이지가 로드되기 시작했을 때만 네비게이션 로딩 해제
-    // 데이터 로딩은 별도 관리되므로 즉시 해제하지 않음
-    timeoutRef.current = setTimeout(() => {
-      setIsLoading(false);
-    }, 50); // 50ms로 단축, 네비게이션 완료만 처리
-    
-  }, [pathname, setIsLoading]);
+    // pathname이 변경되면 안전장치 타이머는 그대로 유지
+    // 각 페이지 컴포넌트에서 데이터 로딩 완료시 finishLoading() 호출해야 함
+  }, [pathname]);
 
   // 컴포넌트 언마운트시 타이머 정리
   useEffect(() => {
@@ -61,4 +52,4 @@ export function useNavigation() {
   }, []);
 
   return { navigate };
-} 
+}

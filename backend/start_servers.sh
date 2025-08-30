@@ -1,8 +1,8 @@
 # start backend servers in parallel
-cd /_exp/projects/bid-notice-web/backend/src && uv run server_spider.py &
-cd /_exp/projects/bid-notice-web/backend/src && uv run server_bid.py &
-cd /_exp/projects/bid-notice-web/backend/src && uv run server_mysql.py &
-cd /_exp/projects/bid-notice-web/backend/src && uv run server_board.py &
+cd /_exp/projects/bid-notice-web/backend/src && nohup uv run server_spider.py &
+cd /_exp/projects/bid-notice-web/backend/src && nohup uv run server_bid.py &
+cd /_exp/projects/bid-notice-web/backend/src && nohup uv run server_mysql.py &
+cd /_exp/projects/bid-notice-web/backend/src && nohup uv run server_board.py &
 
 # set -e
 

@@ -2,10 +2,10 @@
 
 import { LogIn } from 'lucide-react';
 import { useState, FormEvent } from 'react';
-import { useNavigation } from '@/hooks/useNavigation';
+import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
 
 export default function LoginPage() {
-  const { navigate } = useNavigation();
+  const { navigate } = useUnifiedNavigation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);

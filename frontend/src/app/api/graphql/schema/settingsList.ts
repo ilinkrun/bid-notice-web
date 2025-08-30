@@ -7,18 +7,18 @@ export const settingsListTypeDefs = `#graphql
   }
 
   type SettingsList {
-    orgName: String!
-    detailUrl: String!
+    orgName: String
+    detailUrl: String
     iframe: String
-    rowXpath: String!
-    paging: String!
-    startPage: Int!
-    endPage: Int!
+    rowXpath: String
+    paging: String
+    startPage: Int
+    endPage: Int
     login: String
-    elements: [Element!]!
+    elements: [Element]
     region: String
     registration: Int
-    use: Int!
+    use: Int
   }
 
   type SettingsListBrief {
@@ -52,9 +52,9 @@ export const settingsListTypeDefs = `#graphql
   }
 
   extend type Query {
-    settingsLists: [SettingsListBrief!]!
-    settingList(orgName: String!): SettingsList
-    orgNameList: [String!]!
+    settingsLists: [SettingsListBrief]
+    settingList(orgName: String): SettingsList
+    orgNameList: [String]
   }
 
   extend type Mutation {

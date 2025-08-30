@@ -8,7 +8,7 @@ import Footer from '@/components/layouts/Footer';
 import ApolloWrapper from '@/components/providers/ApolloWrapper';
 import { Suspense } from 'react';
 import Loading from '@/app/loading';
-import { LoadingProvider } from '@/components/providers/LoadingProvider';
+import { UnifiedLoadingProvider } from '@/components/providers/UnifiedLoadingProvider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -22,7 +22,7 @@ export function RootLayoutClient({ children }: RootLayoutClientProps) {
   return (
     <body className={cn(inter.className, 'min-h-screen flex flex-col bg-blue-100')}>
       <ApolloWrapper>
-        <LoadingProvider>
+        <UnifiedLoadingProvider>
           <Header 
             isMobileMenuOpen={isMobileMenuOpen}
             setIsMobileMenuOpen={setIsMobileMenuOpen}
@@ -36,7 +36,7 @@ export function RootLayoutClient({ children }: RootLayoutClientProps) {
             </Suspense>
           </main>
           <div className="h-4"></div>
-        </LoadingProvider>
+        </UnifiedLoadingProvider>
       </ApolloWrapper>
       <Footer />
     </body>
