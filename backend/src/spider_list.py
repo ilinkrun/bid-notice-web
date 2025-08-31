@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# 1~3페이지 목록 스크랩 후, '상세페이지주소'가 일치하는 항목 제외로 수정
+# 1~3페이지 목록 스크랩 후, 'detail_url'가 일치하는 항목 제외로 수정
 
 import time
 import json
@@ -20,7 +20,7 @@ from playwright.sync_api import Playwright, sync_playwright
 
 from utils_lxml import get_rows, get_dict, get_val, remove_scripts_from_html, remove_els_from_html
 from utils_mysql import Mysql
-from mysql_bid import find_settings_list, find_settings_list_by_name, find_last_notice, update_all_category, insert_all_logs, insert_all_errors
+from mysql_bid import find_settings_notice_list, find_settings_notice_list_by_name, find_last_notice, update_all_category, insert_all_logs, insert_all_errors
 from utils_data import save_html, load_html, valid_str, arr_from_csv, dict_from_tuple, dicts_from_tuples, csv_from_dict, csv_from_dicts, csv_added_defaults, fix_encoding_response, _now
 
 from utils_search import find_nids_for_fetch_details
@@ -39,14 +39,14 @@ from urllib3.exceptions import InsecureRequestWarning
 HEADLESS = True
 
 DATAFOLER = "../../../data/"
-SEPERATOR = "|-"  # 스크랩 요소(key,target,callback), 파일이름, 파일주소 분리자
+SEPERATOR = "|-"  # 스크랩 요소(key,target,callback), file_name, file_url 분리자
 KST = pytz.timezone('Asia/Seoul')
-TABLE_NOTICES = "notices"
-TABLE_DETAILS = "details"
-TABLE_FILES = "files"
+TABLE_NOTICES = "notice_list"
+TABLE_DETAILS = "notice_details"
+TABLE_FILES = "notice_files"
 MAX_RETRY = 20
 
-STOP_KEY = "제목"
+STOP_KEY = "title"
 
 mysql = Mysql()
 
@@ -61,9 +61,9 @@ ERROR_CODES = {
   "ROW_PARSING_ERROR": 300,   # 행 파싱 오류
   "NEXT_PAGE_ERROR": 400,     # 다음 페이지 이동 오류
   "DATA_PROCESSING_ERROR": 500, # 데이터 처리 오류
-  "TITLE_ERROR": 301,       # 제목 파싱 오류
+  "TITLE_ERROR": 301,       # title 파싱 오류
   "URL_ERROR": 302,       # 상세페이지 주소 파싱 오류
-  "DATE_ERROR": 303,      # 작성일 파싱 오류
+  "DATE_ERROR": 303,      # posted_date 파싱 오류
   "UNKNOWN_ERROR": 900,     # 알 수 없는 오류
   "SELENIUM_ERROR": 999     # Selenium 오류
 }
@@ -78,7 +78,7 @@ def get_start_end_page(name):
   Args:
     name (str): 기관명
   """
-  settings = find_settings_list_by_name(name, out_type="dict")
+  settings = find_settings_notice_list_by_name(name, out_type="dict")
   if settings:
     return (settings['startPage'], settings['endPage'])
   else:
@@ -89,10 +89,10 @@ def insertListData(csv):
   스크래핑된 데이터를 데이터베이스에 저장하는 함수
   
   Args:
-    csv (list): [['제목', 'scraped_at', '상세페이지주소', '작성일', '작성자', '기관명'], [...데이터...]]
+    csv (list): [['title', 'scraped_at', 'detail_url', 'posted_date', 'posted_by', 'org_name'], [...데이터...]]
     
   Returns:
-    list: [{'org_name': '기관명', 'inserted_count': 삽입된 데이터 수}, ...]
+    list: [{'org_name': 'org_name', 'inserted_count': 삽입된 데이터 수}, ...]
   """
   # print(f"##CSV: {csv}")  # !! 디버그시 사용
   if (len(csv) < 2):
@@ -104,8 +104,8 @@ def insertListData(csv):
   data = [csv[0]]
   
   # 필요한 인덱스 찾기
-  org_name_idx = csv[0].index('기관명')
-  detail_url_idx = csv[0].index('상세페이지주소')
+  org_name_idx = csv[0].index('org_name')
+  detail_url_idx = csv[0].index('detail_url')
   
   # 기관별 데이터 그룹화
   org_data = {}
@@ -126,14 +126,14 @@ def insertListData(csv):
     org_insert_counts[org_name] = 0
     
     # 해당 기관의 마지막 sn과 기존 URL 목록 가져오기
-    last_sn, _ = find_last_notice(org_name, field="제목")
+    last_sn, _ = find_last_notice(org_name, field="title")
     last_sn = last_sn if last_sn is not None else 0
     
     limit = max(100, len(csv))  # 이전 게시물 find 최소 개수: 100
     detail_urls = mysql.find(
       TABLE_NOTICES, 
-      fields=['상세페이지주소'], 
-      addStr=f"WHERE `기관명`='{org_name}' order by sn DESC limit {limit}"
+      fields=['detail_url'], 
+      addStr=f"WHERE `org_name`='{org_name}' order by sn DESC limit {limit}"
     )
     detail_urls = [url[0] for url in detail_urls]
     # print(f"##URLS: {detail_urls}")
@@ -166,7 +166,7 @@ def insertListData(csv):
         data0.pop(field_index)
         for row in data[1:]:
           row.pop(field_index)
-    mysql.upsert(TABLE_NOTICES, data, ['상세페이지주소'], inType="csv")
+    mysql.upsert(TABLE_NOTICES, data, ['detail_url'], inType="csv")
   else:
     pass
     # print("****추가된 게시글이 없습니다.")
@@ -180,11 +180,11 @@ def insertListData(csv):
 # ** 스크래핑 설정 관련 함수들
 def find_org_names():
   """사용 가능한 기관명 목록을 반환"""
-  return arr_from_csv(find_settings_list(fields=["기관명"], addStr="WHERE `use`=1", out_type="csv"), index=0, has_header=False)
+  return arr_from_csv(find_settings_notice_list(fields=["org_name"], addStr="WHERE `use`=1", out_type="csv"), index=0, has_header=False)
 
 def get_scrapping_settings(org_name):
   """기관명을 입력받아 해당 기관의 스크래핑 설정을 반환"""
-  return find_settings_list_by_name(org_name)
+  return find_settings_notice_list_by_name(org_name)
 
 def set_list_page(url, paging, pageNum):
   """페이징 URL 설정"""
@@ -255,7 +255,7 @@ def get_format_date(date_str):
 def _get_rows_after_row(row, key, rst):
   """행 데이터 처리 후 콜백"""
   try:
-    if key == "작성일":
+    if key == "posted_date":
       row[key] = get_format_date(rst)
   except Exception as e:
     # 에러 발생 시 오늘 날짜를 넣어줌
@@ -265,24 +265,24 @@ def _get_rows_after_row(row, key, rst):
 
 def _get_rows_after_rows(rows, row, key, rst):
   """전체 행 처리 후 콜백"""
-  if "제목" not in row or not row["제목"]:
+  if "title" not in row or not row["title"]:
     row["error_code"] = ERROR_CODES["TITLE_ERROR"]
     row["error_message"] = "제목이 없습니다."
   
-  if "상세페이지주소" not in row or not row["상세페이지주소"]:
+  if "detail_url" not in row or not row["detail_url"]:
     row["error_code"] = ERROR_CODES["URL_ERROR"] 
     row["error_message"] = "상세페이지 주소가 없습니다."
 
-  is_exclusion = row.get("제외항목", None)
+  is_exclusion = row.get("exception_path", None)
 
   if is_exclusion is None:
     rows.append(row)
   elif not is_exclusion:
-    row.pop("제외항목", None)
+    row.pop("exception_path", None)
     rows.append(row)
   else:
     pass
-    # print(f"!!! 제외항목: {is_exclusion}")
+    # print(f"!!! exception_path: {is_exclusion}")
 
 # ** 메인 스크래핑 함수
 def scrape_list(org_name, start_page=1, end_page=1, debug=False):
@@ -320,7 +320,7 @@ def scrape_list(org_name, start_page=1, end_page=1, debug=False):
   # print(f"### settings: {settings}")
   
   (url, _, rowXpath, paging, config_start_page, config_end_page, login, _, _, _, elements) = settings
-  # (url, iframe, rowXpath, paging, config_start_page, config_end_page, login, 지역, 등록, use, elements) = settings
+  # (url, iframe, rowXpath, paging, config_start_page, config_end_page, login, org_region, registration, use, elements) = settings
 
   # 사용자 지정 페이지 범위가 있으면 우선 적용
   if start_page > 0:
@@ -444,9 +444,9 @@ def scrape_list(org_name, start_page=1, end_page=1, debug=False):
         # 일반 처리
         page_data = get_rows(html, rowXpath, elements, _get_rows_after_row, _get_rows_after_rows)
         # print(f"### page_data: {page_data} len: {len(page_data)}")
-        # 기관명 추가
+        # org_name 추가
         for item in page_data:
-          item["기관명"] = org_name
+          item["org_name"] = org_name
         
         return page_data
       except Exception as e:
@@ -477,8 +477,8 @@ def scrape_list(org_name, start_page=1, end_page=1, debug=False):
     if all_data:
       try:
         all_data.reverse()  # 최신 데이터가 먼저 오도록 역순 정렬
-        # 빈 제목 제거
-        filtered_data = [item for item in all_data if item.get("제목", "")]
+        # 빈 title 제거
+        filtered_data = [item for item in all_data if item.get("title", "")]
         
         result['data'] = filtered_data
       except Exception as e:
@@ -559,9 +559,9 @@ def scrape_list_with_playwright(org_name, start_page, end_page, url, rowXpath, p
           try:
             page_data = get_rows(html_content, rowXpath, elements, _get_rows_after_row, _get_rows_after_rows)
             
-            # 기관명 추가
+            # org_name 추가
             for item in page_data:
-              item["기관명"] = org_name
+              item["org_name"] = org_name
             
             all_data.extend(page_data)
             
@@ -607,7 +607,7 @@ def scrape_list_with_playwright(org_name, start_page, end_page, url, rowXpath, p
 def _fetch_list_pages(names, debug=False):
   """
   여러 기관의 게시판 목록 페이지 스크래핑
-  
+
   Args:
     names (list): 스크래핑할 기관명 리스트
     start_page (int): 시작 페이지 번호
@@ -713,11 +713,11 @@ def _save_results(results):
 
   # 필수 키 추가
   required_keys = {
-    "제목": "",
-    "작성일": "",
-    "작성자": "",
-    "상세페이지주소": "",
-    "기관명": "",
+    "title": "",
+    "posted_date": "",
+    "posted_by": "",
+    "detail_url": "",
+    "org_name": "",
     "scraped_at": _now(),
     "error_code": None,
     "error_message": None
@@ -814,7 +814,7 @@ def fetch_list_pages(names, save=True):
   return all_results
 
 if __name__ == "__main__":
-    # print(find_settings_list(fields=["기관명"], addStr="WHERE `use`=1"))
+    # print(find_settings_notice_list(fields=["org_name"], addStr="WHERE `use`=1"))
     # ** fetch list
     print("[SCARPING] 공고 고시 게시판(spider_list)")
     names = find_org_names()
@@ -844,4 +844,4 @@ if __name__ == "__main__":
     # print(get_start_end_page("양주시청"))
 
 # * 부여군청
-# ##CSV: [['제목', 'scraped_at', '상세페이지주소', '작성일', '작성자', '기관명', 'error_code', 'error_message'], ['êµ\xadë\x82´ê²°í\x98¼ì¤\x91ê°\x9cì\x97\x85 ë\x93±ë¡\x9dí\x98\x84í\x99©', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=r7F-f-rYc0UIwCgfForfWA&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2025-03-28', 'ê°\x80ì¡±í\x96\x89ë³µê³¼', '부여군청', None, None], ['ã\x80\x8c2024ë\x85\x84 ì\xa0\x9c22í\x9a\x8c ë¶\x80ì\x97¬ì\x84\x9cë\x8f\x99ì\x97°ê½\x83ì¶\x95ì\xa0\x9cã\x80\x8d ì¶\x95ì\xa0\x9cì\x9e¥ ë\x82´ ì\x9e\x84ì\x8b\x9c í\x8e¸ì\x9d\x98ì\xa0\x90 ì\x98\x81ì\x97\x85ì\x9e\x90 ê³µëª¨ ì\x84\xa0ì\xa0\x95 ê²°ê³¼ ì\x95\x88ë\x82´', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=sKSXJGgHe_rH8GcBPMS4CQ&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-05-31', 'ë¬¸í\x99\x94ì²´ì\x9c¡ê´\x80ê´\x91ê³¼', '부여군청', None, None], ['ì\xa0\x9c22í\x9a\x8c ë¶\x80ì\x97¬ì\x84\x9cë\x8f\x99ì\x97°ê½\x83ì¶\x95ì\xa0\x9c ì²´í\x97\x98í\x94\x84ë¡\x9cê·¸ë\x9e¨ ê³µëª¨ ì\x84\xa0ì\xa0\x95 ê²°ê³¼(ì\x88\x98ì\xa0\x95)', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=vndq5UqoQLoxv-92oITtfg&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-05-31', 'ë¬¸í\x99\x94ì²´ì\x9c¡ê´\x80ê´\x91ê³¼', '부여군청', None, None], ['ã\x80\x8c2024ë\x85\x84 ì\xa0\x9c22í\x9a\x8c ë¶\x80ì\x97¬ì\x84\x9cë\x8f\x99ì\x97°ê½\x83ì¶\x95ì\xa0\x9cã\x80\x8d ì¶\x95ì\xa0\x9cì\x9e¥ ì\x9d\x8cì\x8b\x9dí\x8c\x90ë§¤ì\x9e\x90ë\x8f\x99ì°¨(í\x91¸ë\x93\x9cí\x8a¸ë\x9f\xad) ê³µëª¨ ì\x84\xa0ì\xa0\x95 ê²°ê³¼ ì\x95\x88ë\x82´', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=ULmkDwOGrMSl7TfbHAbQjA&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-05-31', 'ë¬¸í\x99\x94ì²´ì\x9c¡ê´\x80ê´\x91ê³¼', '부여군청', None, None], ['ì\x9e¥ì\x95\xa0ì\x9d¸ì\xa0\x84ì\x9a©ì£¼ì°¨êµ¬ì\x97\xad ì£¼ì°¨ì\x9c\x84ë°\x98 ê³¼í\x83\x9cë£\x8c ë¶\x80ê³¼í\x86µì§\x80 ë°\x98ì\x86¡ë¶\x84ì\x97\x90 ë\x8c\x80í\x95\x9c ê³µì\x8b\x9cì\x86¡ë\x8b¬ ê³µê³', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=q7xUctS4IFTO9ETbIaRzWA&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-05-31', 'ì\x82¬í\x9a\x8cë³µì§\x80ê³¼', '부여군청', None, None], ['2024ë\x85\x84 ì\xa0\x9c22í\x9a\x8c ë¶\x80ì\x97¬ì\x84\x9cë\x8f\x99ì\x97°ê½\x83ì¶\x95ì\xa0\x9c ì²´í\x97\x98 í\x94\x84ë¡\x9cê·¸ë\x9e¨ ê³µëª¨', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=9nF473eKInw4xAG7noTK1g&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-05-20', 'ë¬¸í\x99\x94ì²´ì\x9c¡ê´\x80ê´\x91ê³¼', '부여군청', None, None], ['ã\x80\x8c2024ë\x85\x84 ì\xa0\x9c22í\x9a\x8c ë¶\x80ì\x97¬ì\x84\x9cë\x8f\x99ì\x97°ê½\x83ì¶\x95ì\xa0\x9cã\x80\x8d ì¶\x95ì\xa0\x9cì\x9e¥ ë\x82´ ì\x9e\x84ì\x8b\x9c í\x8e¸ì\x9d\x98ì\xa0\x90 ì\x98\x81ì\x97\x85ì\x9e\x90 ëª¨ì§\x91 ì\x95\x88ë\x82´', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=oiw5z4Hs52MEpCSVPrhn_g&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-05-20', 'ë¬¸í\x99\x94ì²´ì\x9c¡ê´\x80ê´\x91ê³¼', '부여군청', None, None], ['ã\x80\x8c2024ë\x85\x84 ì\xa0\x9c22í\x9a\x8c ë¶\x80ì\x97¬ì\x84\x9cë\x8f\x99ì\x97°ê½\x83ì¶\x95ì\xa0\x9cã\x80\x8d ì¶\x95ì\xa0\x9cì\x9e¥ ì\x9d\x8cì\x8b\x9dí\x8c\x90ë§¤ì\x9e\x90ë\x8f\x99ì°¨(í\x91¸ë\x93\x9cí\x8a¸ë\x9f\xad) ì\x98\x81ì\x97\x85ì\x9e\x90 ëª¨ì§\x91 ì\x95\x88ë\x82´', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=r5yTNYIaFCbEogGFHlMF2Q&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-05-20', 'ë¬¸í\x99\x94ì²´ì\x9c¡ê´\x80ê´\x91ê³¼', '부여군청', None, None], ['2024ë\x85\x84 ì\x9e¬ë\x82\x9cë\x8c\x80ì\x9d\x91 ì\x95\x88ì\xa0\x84í\x95\x9cêµ\xadí\x9b\x88ë\xa0¨ êµ\xadë¯¼ì²´í\x97\x98ë\x8b¨ ëª¨ì§\x91', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=CRt4vJDvryraZxFaTt7XWw&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-05-17', 'ì\x95\x88ì\xa0\x84ì´\x9dê´\x84ê³¼', '부여군청', None, None], ['ë¶\x80ì\x97¬êµ° ê³µë¦½ì§\x80ì\x97\xadì\x95\x84ë\x8f\x99ì\x84¼í\x84° ì\x9c\x84í\x83\x81ì\x9a´ì\x98\x81ì\x9e\x90 ëª¨ì§\x91ê³µê³', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=naR8YfyLGBlsBPDDqh8Pww&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-05-16', 'ê°\x80ì¡±í\x96\x89ë³µê³¼', '부여군청', None, None], ['ã\x80\x8cë¶\x80ì\x97¬êµ° ë§¤ì\x9e¥ë¬¸í\x99\x94ì\x9e¬ ì\x9c\xa0ì¡´ì§\x80ì\x97\xad ì\xa0\x95ë³´ê³\xa0ë\x8f\x84í\x99\x94 ì\x82¬ì\x97\x85 ì§\x80ë\x8f\x84 ì\xa0\x9cì\x9e\x91 ë°\x8f DB êµ¬ì¶\x95 ì\x9a©ì\x97\xadã\x80\x8d ì\xa0\x9cì\x95\x88ì\x84\x9c í\x8f\x89ê°\x80ì\x9c\x84ì\x9b\x90(í\x9b\x84ë³´ì\x9e\x90) ëª¨ì§\x91 ê³µê³', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=UyPzWyiUgedjSx5hHmxZaA&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-04-17', 'ë¬¸í\x99\x94ì\x9e¬ê³¼', '부여군청', None, None], ['2024ë\x85\x84 ì\x83\x9dì\x82°ë\x8b¨ê³\x84 ì¶\x95ì\x82°ë¬¼ HACCP(ë\x86\x8dì\x97\x85ì\x9d¸ê³¼ì\xa0\x95) êµ\x90ì\x9c¡ê³\x84í\x9a\x8d ë³\x80ê²½ ì\x95\x8cë¦¼', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=7M0b3EBg1hb8ZVv65raQOA&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-04-12', 'ì¶\x95ì\x88\x98ì\x82°ê³¼', '부여군청', None, None], ['(ì\x9e¬)ë¶\x80ì\x97¬êµ°ì§\x80ì\x97\xadê³µë\x8f\x99ì²´í\x99\x9cì\x84±í\x99\x94ì\x9e¬ë\x8b¨ ë¹\x84ì\x83\x81ì\x9e\x84ì\x9d´ì\x82¬ ê³µê°\x9cëª¨ì§\x91 ê³µê³', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=ERy8TXNoDDn2W4QinAhnkA&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-04-03', 'ê²½ì\xa0\x9cêµ\x90í\x86µê³¼', '부여군청', None, None], ['2024 í\x95\x98ë°\x98ê¸° ë\x82´êµ\xadì\x9d¸ êµ¬ì\x9d¸ê³µê³', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=4q9vOPZRg7m-eoAPaLvFqQ&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-04-02', 'ë\x86\x8dì\x97\x85ì\xa0\x95ì±\x85ê³¼', '부여군청', None, None], ['ì\x9e¥ì\x95\xa0ì\x9d¸ì\xa0\x84ì\x9a©ì£¼ì°¨êµ¬ì\x97\xad ì£¼ì°¨ì\x9c\x84ë°\x98 ê³¼í\x83\x9cë£\x8c ë¶\x80ê³¼í\x86µì§\x80 ë°\x98ì\x86¡ë¶\x84ì\x97\x90 ë\x8c\x80í\x95\x9c ê³µì\x8b\x9cì\x86¡ë\x8b¬ ê³µê³', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=9TK626GWmfiBtM8jngtCtQ&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-03-28', 'ì\x82¬í\x9a\x8cë³µì§\x80ê³¼', '부여군청', None, None], ['ë\x8f\x84ë¡\x9cëª\x85ì£¼ì\x86\x8c ê°\x9cë³\x84ê³\xa0ì\x8b\x9c', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=TpleXePD8L6lrmS-ETczyg&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-03-28', 'ì¢\x85í\x95©ë¯¼ì\x9b\x90ì§\x80ì\xa0\x81ê³¼', '부여군청', None, None], ['2024ë\x85\x84 ë¶\x80ì\x97¬êµ° ì\x9d¼ì\x9e\x90ë¦¬ë\x8c\x80ì±\x85 ì\x84¸ë¶\x80ê³\x84í\x9a\x8d ê³µì\x8b\x9c', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=OJ8SUhxD4gKzIlOhap46_Q&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-03-26', 'ê²½ì\xa0\x9cêµ\x90í\x86µê³¼', '부여군청', None, None], ['ë\x8f\x84ë¡\x9cëª\x85ì£¼ì\x86\x8c ê°\x9cë³\x84ê³\xa0ì\x8b\x9c', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=eFhorApxHnG3n36HMRoS3g&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-03-22', 'ì¢\x85í\x95©ë¯¼ì\x9b\x90ì§\x80ì\xa0\x81ê³¼', '부여군청', None, None], ['ë³´ì\xa0\x84ì\x82°ì§\x80 ì§\x80ì\xa0\x95í\x95´ì\xa0\x9c ê³\xa0ì\x8b\x9c', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=-aWVnpBNOgOtrYeA7ifW0w&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-03-21', 'ì\x82°ë¦¼ë\x85¹ì§\x80ê³¼', '부여군청', None, None], ['(ì\x9e¬)ë¶\x80ì\x97¬êµ°ì§\x80ì\x97\xadê³µë\x8f\x99ì²´í\x99\x9cì\x84±í\x99\x94ì\x9e¬ë\x8b¨ ì\x83\x81ì\x9e\x84ì\x9d´ì\x82¬ ê³µê°\x9cëª¨ì§\x91 ì\x9e¬ê³µê³', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=qCUNV0k_a-TjssqfCFOnlA&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-03-20', 'ê²½ì\xa0\x9cêµ\x90í\x86µê³¼', '부여군청', None, None], ['2024ë\x85\x84 ë\x86\x8dì\x9e\x91ì\x97\x85 í\x98\x84ì\x9e¥ ì¹\x9cí\x99\x98ê²½ í\x99\x94ì\x9e¥ì\x8b¤ ì\x84¤ì¹\x98 ì\x8b\xa0ì²\xad ì\x95\x8cë¦¼', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=HZ1IKDXzn_pAW4dHqoiutw&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-03-15', 'ë\x86\x8dì\x97\x85ì\xa0\x95ì±\x85ê³¼', '부여군청', None, None], ['ë\x8f\x84ë¡\x9cëª\x85ì£¼ì\x86\x8c ê°\x9cë³\x84ê³\xa0ì\x8b\x9c', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=wnx9DwKz_jayRJOI3r682Q&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-03-15', 'ì¢\x85í\x95©ë¯¼ì\x9b\x90ì§\x80ì\xa0\x81ê³¼', '부여군청', None, None], ['2024ë\x85\x84 ì²\xadë\x85\x84ë\x86\x8dì°½ì\x97\x85í\x88¬ì\x9e\x90ì\x8b¬ì¸µì»¨ì\x84¤í\x8c\x85 ì\x88\x98ì\x9a\x94ì\x9e\x90 ëª¨ì§\x91 í\x99\x8dë³´', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=vI8ey_a_lj4YsHNAsiVhpQ&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-03-14', 'ë\x86\x8dì\x97\x85ì\xa0\x95ì±\x85ê³¼', '부여군청', None, None], ['2024ë\x85\x84 ë¶\x80ì\x97¬êµ° ì·¨ì\x97\x85ì\x9e\x90ê²©ì¦\x9d ì·¨ë\x93\x9dì§\x80ì\x9b\x90 ì\x82¬ì\x97\x85 ì°¸ê°\x80ì\x9e\x90 ëª¨ì§\x91 ê³µê³', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=fleqfSC1P-NlesuzwpVurg&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-03-11', 'ê²½ì\xa0\x9cêµ\x90í\x86µê³¼', '부여군청', None, None], ['ë\x8f\x84ë¡\x9cëª\x85ì£¼ì\x86\x8c ê°\x9cë³\x84ê³\xa0ì\x8b\x9c', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=pIQ1owSqu1fBZRfzKW83OQ&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-03-08', 'ì¢\x85í\x95©ë¯¼ì\x9b\x90ì§\x80ì\xa0\x81ê³¼', '부여군청', None, None], ['2024 ì\x83\x81ë°\x98ê¸° ì\x8b\xa0ê·\x9cë\x86\x8dì\x97\x85ì\x9d¸(ê·\x80ë\x86\x8dê·\x80ì´\x8c) ê¸°ì´\x88ì\x98\x81ë\x86\x8dê¸°ì\x88\xa0êµ\x90ì\x9c¡ì\x83\x9d ëª¨ì§\x91ê³µê³', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=ZWOQnf5gZOLdhii_CHlubg&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-03-07', 'ë\x86\x8dì\x97\x85ê¸°ì\x88\xa0ì\x84¼í\x84°', '부여군청', None, None], ['ë¶\x80ì\x97¬ êµ°ê³\x84í\x9a\x8dì\x8b\x9cì\x84¤(ë°\x95ë¬¼ê´\x80) ì\x82¬ì\x97\x85ì\x8b\x9cí\x96\x89ì\x9e\x90 ì§\x80ì\xa0\x95 ë°\x8f ì\x8b¤ì\x8b\x9cê³\x84í\x9a\x8d(ë³\x80ê²½) ì\x9d¸ê°\x80 ê³\xa0ì\x8b\x9c', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=5OsRZ2ukQGVNLKPQwo4CSQ&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-03-06', 'ë\x8f\x84ì\x8b\x9cê±´ì¶\x95ê³¼', '부여군청', None, None], ['ë\x8f\x84ë¡\x9cëª\x85ì£¼ì\x86\x8c ê°\x9cë³\x84ê³\xa0ì\x8b\x9c', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=kFHbdYXwyezkryJLhE8-Hw&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-02-29', 'ì¢\x85í\x95©ë¯¼ì\x9b\x90ì§\x80ì\xa0\x81ê³¼', '부여군청', None, None], ['ë¶\x80ì\x97¬ êµ°ê´\x80ë¦¬ê³\x84í\x9a\x8d(í\x95\x99êµ\x90 ì¡°ì\x84±ê³\x84í\x9a\x8d) ê²°ì\xa0\x95(ë³\x80ê²½) ë°\x8f êµ°ê³\x84í\x9a\x8dì\x8b\x9cì\x84¤(í\x95\x99êµ\x90)ì\x82¬ì\x97\x85 ì\x8b¤ì\x8b\x9cê³\x84í\x9a\x8d(ë³\x80ê²½) ì\x9d¸ê°\x80 ê³\xa0ì\x8b\x9c', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=xvUhQsqoPu6_xeAsenkWbQ&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-02-29', 'ë\x8f\x84ì\x8b\x9cê±´ì¶\x95ê³¼', '부여군청', None, None], ['ë¶\x80ì\x97¬ êµ°ê´\x80ë¦¬ê³\x84í\x9a\x8d(ì\x8c\x8dë¶\x81ì§\x80êµ¬ ì§\x80êµ¬ë\x8b¨ì\x9c\x84ê³\x84í\x9a\x8d) ê²°ì\xa0\x95(ë³\x80ê²½) ë°\x8f ì§\x80í\x98\x95ë\x8f\x84ë©´ ê³\xa0ì\x8b\x9c', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=85PynxOPvksqlYdEvp2jGQ&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-02-29', 'ë\x8f\x84ì\x8b\x9cê±´ì¶\x95ê³¼', '부여군청', None, None], ['2024ë\x85\x84 ì\x83\x81ë°\x98ê¸° ì\x83\x81ì\x88\x98ë\x8f\x84 ê¸\x89ì\x88\x98ê³µì\x82¬ ì\x82°ì\xa0\x95ê¸°ì¤\x80 ë°\x8f ë§\x88ì\x9d\x84ë\x8b¨ì\x9c\x84 ê¸\x89ì\x88\x98ê³µì\x82¬ ë\x8b¨ê°\x80 ê³\xa0ì\x8b\x9c', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=6whcFZfRC7oKq_BX8M2_Kw&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-02-28', 'ì\x83\x81í\x95\x98ì\x88\x98ë\x8f\x84ì\x82¬ì\x97\x85ì\x86\x8c', '부여군청', None, None], ['(ì\x9e¬)ë¶\x80ì\x97¬êµ° ì§\x80ì\x97\xadê³µë\x8f\x99ì²´í\x99\x9cì\x84±í\x99\x94ì\x9e¬ë\x8b¨ ì\x83\x81ì\x9e\x84ì\x9d´ì\x82¬ ê³µê°\x9cëª¨ì§\x91 ìµ\x9cì¢\x85 í\x95©ê²©ì\x9e\x90 ë°\x9cí\x91\x9c', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=3A1cNdhcOGWZbOBIgcnVeg&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-02-27', 'ê²½ì\xa0\x9cêµ\x90í\x86µê³¼', '부여군청', None, None], ['(ì\x9e¬)ë¶\x80ì\x97¬êµ° ì§\x80ì\x97\xadê³µë\x8f\x99ì²´í\x99\x9cì\x84±í\x99\x94 ì\x9e¬ë\x8b¨ ì\x83\x81ì\x9e\x84ì\x9d´ì\x82¬ ê³µê°\x9cëª¨ì§\x91 ë©´ì\xa0\x91ì\x8b¬ì\x82¬ í\x95©ê²©ì\x9e\x90 ë°\x9cí\x91\x9c', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=QLEbZvpIxjgP6a1A23QFNQ&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-02-23', 'ê²½ì\xa0\x9cêµ\x90í\x86µê³¼', '부여군청', None, None], ['ë\x8f\x84ë¡\x9cëª\x85ì£¼ì\x86\x8c ê°\x9cë³\x84ê³\xa0ì\x8b\x9c', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=jGCp8iaP8VfXzQwq-Y1-5g&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-02-23', 'ì¢\x85í\x95©ë¯¼ì\x9b\x90ì§\x80ì\xa0\x81ê³¼', '부여군청', None, None], ['(ì\x9e¬)ë¶\x80ì\x97¬êµ° ì§\x80ì\x97\xadê³µë\x8f\x99ì²´í\x99\x9cì\x84±í\x99\x94 ì\x9e¬ë\x8b¨ ì\x83\x81ì\x9e\x84ì\x9d´ì\x82¬ ê³µê°\x9cëª¨ì§\x91 ì\x84\x9cë¥\x98ì\x8b¬ì\x82¬ í\x95©ê²©ì\x9e\x90 ë°\x9cí\x91\x9c', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=ScDUzdiNL-bJKirmDnezqg&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-02-20', 'ê²½ì\xa0\x9cêµ\x90í\x86µê³¼', '부여군청', None, None], ['2024ë\x85\x84 ë°±ì\xa0\x9cê¸°ì\x99\x80ë¬¸í\x99\x94ê´\x80 ê¸°ê°\x84ì\xa0\x9cê·¼ë¡\x9cì\x9e\x90(ì\x8b\x9cì\x84¤ê´\x80ë¦¬ì\x9b\x90, ë¬¸í\x99\x94ì\x9c\xa0ì\x82°í\x99\x9cì\x9a©ì\xa0\x84ë¬¸ì\x9d¸ë\xa0¥) ìµ\x9cì¢\x85í\x95©ê²©ì\x9e\x90 ê³µê³', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=mqDd8fKbfxJaX0vzcRrh2A&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-02-19', 'ì\x82¬ì\xa0\x81ê´\x80ë¦¬ì\x86\x8c', '부여군청', None, None]]
+# ##CSV: [['title', 'scraped_at', 'detail_url', 'posted_date', 'posted_by', 'org_name', 'error_code', 'error_message'], ['êµ\xadë\x82´ê²°í\x98¼ì¤\x91ê°\x9cì\x97\x85 ë\x93±ë¡\x9dí\x98\x84í\x99©', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=r7F-f-rYc0UIwCgfForfWA&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2025-03-28', 'ê°\x80ì¡±í\x96\x89ë³µê³¼', '부여군청', None, None], ['ã\x80\x8c2024ë\x85\x84 ì\xa0\x9c22í\x9a\x8c ë¶\x80ì\x97¬ì\x84\x9cë\x8f\x99ì\x97°ê½\x83ì¶\x95ì\xa0\x9cã\x80\x8d ì¶\x95ì\xa0\x9cì\x9e¥ ë\x82´ ì\x9e\x84ì\x8b\x9c í\x8e¸ì\x9d\x98ì\xa0\x90 ì\x98\x81ì\x97\x85ì\x9e\x90 ê³µëª¨ ì\x84\xa0ì\xa0\x95 ê²°ê³¼ ì\x95\x88ë\x82´', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=sKSXJGgHe_rH8GcBPMS4CQ&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-05-31', 'ë¬¸í\x99\x94ì²´ì\x9c¡ê´\x80ê´\x91ê³¼', '부여군청', None, None], ['ì\xa0\x9c22í\x9a\x8c ë¶\x80ì\x97¬ì\x84\x9cë\x8f\x99ì\x97°ê½\x83ì¶\x95ì\xa0\x9c ì²´í\x97\x98í\x94\x84ë¡\x9cê·¸ë\x9e¨ ê³µëª¨ ì\x84\xa0ì\xa0\x95 ê²°ê³¼(ì\x88\x98ì\xa0\x95)', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=vndq5UqoQLoxv-92oITtfg&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-05-31', 'ë¬¸í\x99\x94ì²´ì\x9c¡ê´\x80ê´\x91ê³¼', '부여군청', None, None], ['ã\x80\x8c2024ë\x85\x84 ì\xa0\x9c22í\x9a\x8c ë¶\x80ì\x97¬ì\x84\x9cë\x8f\x99ì\x97°ê½\x83ì¶\x95ì\xa0\x9cã\x80\x8d ì¶\x95ì\xa0\x9cì\x9e¥ ì\x9d\x8cì\x8b\x9dí\x8c\x90ë§¤ì\x9e\x90ë\x8f\x99ì°¨(í\x91¸ë\x93\x9cí\x8a¸ë\x9f\xad) ê³µëª¨ ì\x84\xa0ì\xa0\x95 ê²°ê³¼ ì\x95\x88ë\x82´', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=ULmkDwOGrMSl7TfbHAbQjA&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-05-31', 'ë¬¸í\x99\x94ì²´ì\x9c¡ê´\x80ê´\x91ê³¼', '부여군청', None, None], ['ì\x9e¥ì\x95\xa0ì\x9d¸ì\xa0\x84ì\x9a©ì£¼ì°¨êµ¬ì\x97\xad ì£¼ì°¨ì\x9c\x84ë°\x98 ê³¼í\x83\x9cë£\x8c ë¶\x80ê³¼í\x86µì§\x80 ë°\x98ì\x86¡ë¶\x84ì\x97\x90 ë\x8c\x80í\x95\x9c ê³µì\x8b\x9cì\x86¡ë\x8b¬ ê³µê³', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=q7xUctS4IFTO9ETbIaRzWA&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-05-31', 'ì\x82¬í\x9a\x8cë³µì§\x80ê³¼', '부여군청', None, None], ['2024ë\x85\x84 ì\xa0\x9c22í\x9a\x8c ë¶\x80ì\x97¬ì\x84\x9cë\x8f\x99ì\x97°ê½\x83ì¶\x95ì\xa0\x9c ì²´í\x97\x98 í\x94\x84ë¡\x9cê·¸ë\x9e¨ ê³µëª¨', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=9nF473eKInw4xAG7noTK1g&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-05-20', 'ë¬¸í\x99\x94ì²´ì\x9c¡ê´\x80ê´\x91ê³¼', '부여군청', None, None], ['ã\x80\x8c2024ë\x85\x84 ì\xa0\x9c22í\x9a\x8c ë¶\x80ì\x97¬ì\x84\x9cë\x8f\x99ì\x97°ê½\x83ì¶\x95ì\xa0\x9cã\x80\x8d ì¶\x95ì\xa0\x9cì\x9e¥ ë\x82´ ì\x9e\x84ì\x8b\x9c í\x8e¸ì\x9d\x98ì\xa0\x90 ì\x98\x81ì\x97\x85ì\x9e\x90 ëª¨ì§\x91 ì\x95\x88ë\x82´', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=oiw5z4Hs52MEpCSVPrhn_g&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-05-20', 'ë¬¸í\x99\x94ì²´ì\x9c¡ê´\x80ê´\x91ê³¼', '부여군청', None, None], ['ã\x80\x8c2024ë\x85\x84 ì\xa0\x9c22í\x9a\x8c ë¶\x80ì\x97¬ì\x84\x9cë\x8f\x99ì\x97°ê½\x83ì¶\x95ì\xa0\x9cã\x80\x8d ì¶\x95ì\xa0\x9cì\x9e¥ ì\x9d\x8cì\x8b\x9dí\x8c\x90ë§¤ì\x9e\x90ë\x8f\x99ì°¨(í\x91¸ë\x93\x9cí\x8a¸ë\x9f\xad) ì\x98\x81ì\x97\x85ì\x9e\x90 ëª¨ì§\x91 ì\x95\x88ë\x82´', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=r5yTNYIaFCbEogGFHlMF2Q&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-05-20', 'ë¬¸í\x99\x94ì²´ì\x9c¡ê´\x80ê´\x91ê³¼', '부여군청', None, None], ['2024ë\x85\x84 ì\x9e¬ë\x82\x9cë\x8c\x80ì\x9d\x91 ì\x95\x88ì\xa0\x84í\x95\x9cêµ\xadí\x9b\x88ë\xa0¨ êµ\xadë¯¼ì²´í\x97\x98ë\x8b¨ ëª¨ì§\x91', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=CRt4vJDvryraZxFaTt7XWw&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-05-17', 'ì\x95\x88ì\xa0\x84ì´\x9dê´\x84ê³¼', '부여군청', None, None], ['ë¶\x80ì\x97¬êµ° ê³µë¦½ì§\x80ì\x97\xadì\x95\x84ë\x8f\x99ì\x84¼í\x84° ì\x9c\x84í\x83\x81ì\x9a´ì\x98\x81ì\x9e\x90 ëª¨ì§\x91ê³µê³', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=naR8YfyLGBlsBPDDqh8Pww&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-05-16', 'ê°\x80ì¡±í\x96\x89ë³µê³¼', '부여군청', None, None], ['ã\x80\x8cë¶\x80ì\x97¬êµ° ë§¤ì\x9e¥ë¬¸í\x99\x94ì\x9e¬ ì\x9c\xa0ì¡´ì§\x80ì\x97\xad ì\xa0\x95ë³´ê³\xa0ë\x8f\x84í\x99\x94 ì\x82¬ì\x97\x85 ì§\x80ë\x8f\x84 ì\xa0\x9cì\x9e\x91 ë°\x8f DB êµ¬ì¶\x95 ì\x9a©ì\x97\xadã\x80\x8d ì\xa0\x9cì\x95\x88ì\x84\x9c í\x8f\x89ê°\x80ì\x9c\x84ì\x9b\x90(í\x9b\x84ë³´ì\x9e\x90) ëª¨ì§\x91 ê³µê³', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=UyPzWyiUgedjSx5hHmxZaA&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-04-17', 'ë¬¸í\x99\x94ì\x9e¬ê³¼', '부여군청', None, None], ['2024ë\x85\x84 ì\x83\x9dì\x82°ë\x8b¨ê³\x84 ì¶\x95ì\x82°ë¬¼ HACCP(ë\x86\x8dì\x97\x85ì\x9d¸ê³¼ì\xa0\x95) êµ\x90ì\x9c¡ê³\x84í\x9a\x8d ë³\x80ê²½ ì\x95\x8cë¦¼', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=7M0b3EBg1hb8ZVv65raQOA&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-04-12', 'ì¶\x95ì\x88\x98ì\x82°ê³¼', '부여군청', None, None], ['(ì\x9e¬)ë¶\x80ì\x97¬êµ°ì§\x80ì\x97\xadê³µë\x8f\x99ì²´í\x99\x9cì\x84±í\x99\x94ì\x9e¬ë\x8b¨ ë¹\x84ì\x83\x81ì\x9e\x84ì\x9d´ì\x82¬ ê³µê°\x9cëª¨ì§\x91 ê³µê³', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=ERy8TXNoDDn2W4QinAhnkA&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-04-03', 'ê²½ì\xa0\x9cêµ\x90í\x86µê³¼', '부여군청', None, None], ['2024 í\x95\x98ë°\x98ê¸° ë\x82´êµ\xadì\x9d¸ êµ¬ì\x9d¸ê³µê³', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=4q9vOPZRg7m-eoAPaLvFqQ&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-04-02', 'ë\x86\x8dì\x97\x85ì\xa0\x95ì±\x85ê³¼', '부여군청', None, None], ['ì\x9e¥ì\x95\xa0ì\x9d¸ì\xa0\x84ì\x9a©ì£¼ì°¨êµ¬ì\x97\xad ì£¼ì°¨ì\x9c\x84ë°\x98 ê³¼í\x83\x9cë£\x8c ë¶\x80ê³¼í\x86µì§\x80 ë°\x98ì\x86¡ë¶\x84ì\x97\x90 ë\x8c\x80í\x95\x9c ê³µì\x8b\x9cì\x86¡ë\x8b¬ ê³µê³', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=9TK626GWmfiBtM8jngtCtQ&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-03-28', 'ì\x82¬í\x9a\x8cë³µì§\x80ê³¼', '부여군청', None, None], ['ë\x8f\x84ë¡\x9cëª\x85ì£¼ì\x86\x8c ê°\x9cë³\x84ê³\xa0ì\x8b\x9c', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=TpleXePD8L6lrmS-ETczyg&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-03-28', 'ì¢\x85í\x95©ë¯¼ì\x9b\x90ì§\x80ì\xa0\x81ê³¼', '부여군청', None, None], ['2024ë\x85\x84 ë¶\x80ì\x97¬êµ° ì\x9d¼ì\x9e\x90ë¦¬ë\x8c\x80ì±\x85 ì\x84¸ë¶\x80ê³\x84í\x9a\x8d ê³µì\x8b\x9c', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=OJ8SUhxD4gKzIlOhap46_Q&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-03-26', 'ê²½ì\xa0\x9cêµ\x90í\x86µê³¼', '부여군청', None, None], ['ë\x8f\x84ë¡\x9cëª\x85ì£¼ì\x86\x8c ê°\x9cë³\x84ê³\xa0ì\x8b\x9c', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=eFhorApxHnG3n36HMRoS3g&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-03-22', 'ì¢\x85í\x95©ë¯¼ì\x9b\x90ì§\x80ì\xa0\x81ê³¼', '부여군청', None, None], ['ë³´ì\xa0\x84ì\x82°ì§\x80 ì§\x80ì\xa0\x95í\x95´ì\xa0\x9c ê³\xa0ì\x8b\x9c', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=-aWVnpBNOgOtrYeA7ifW0w&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-03-21', 'ì\x82°ë¦¼ë\x85¹ì§\x80ê³¼', '부여군청', None, None], ['(ì\x9e¬)ë¶\x80ì\x97¬êµ°ì§\x80ì\x97\xadê³µë\x8f\x99ì²´í\x99\x9cì\x84±í\x99\x94ì\x9e¬ë\x8b¨ ì\x83\x81ì\x9e\x84ì\x9d´ì\x82¬ ê³µê°\x9cëª¨ì§\x91 ì\x9e¬ê³µê³', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=qCUNV0k_a-TjssqfCFOnlA&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-03-20', 'ê²½ì\xa0\x9cêµ\x90í\x86µê³¼', '부여군청', None, None], ['2024ë\x85\x84 ë\x86\x8dì\x9e\x91ì\x97\x85 í\x98\x84ì\x9e¥ ì¹\x9cí\x99\x98ê²½ í\x99\x94ì\x9e¥ì\x8b¤ ì\x84¤ì¹\x98 ì\x8b\xa0ì²\xad ì\x95\x8cë¦¼', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=HZ1IKDXzn_pAW4dHqoiutw&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-03-15', 'ë\x86\x8dì\x97\x85ì\xa0\x95ì±\x85ê³¼', '부여군청', None, None], ['ë\x8f\x84ë¡\x9cëª\x85ì£¼ì\x86\x8c ê°\x9cë³\x84ê³\xa0ì\x8b\x9c', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=wnx9DwKz_jayRJOI3r682Q&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-03-15', 'ì¢\x85í\x95©ë¯¼ì\x9b\x90ì§\x80ì\xa0\x81ê³¼', '부여군청', None, None], ['2024ë\x85\x84 ì²\xadë\x85\x84ë\x86\x8dì°½ì\x97\x85í\x88¬ì\x9e\x90ì\x8b¬ì¸µì»¨ì\x84¤í\x8c\x85 ì\x88\x98ì\x9a\x94ì\x9e\x90 ëª¨ì§\x91 í\x99\x8dë³´', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=vI8ey_a_lj4YsHNAsiVhpQ&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-03-14', 'ë\x86\x8dì\x97\x85ì\xa0\x95ì±\x85ê³¼', '부여군청', None, None], ['2024ë\x85\x84 ë¶\x80ì\x97¬êµ° ì·¨ì\x97\x85ì\x9e\x90ê²©ì¦\x9d ì·¨ë\x93\x9dì§\x80ì\x9b\x90 ì\x82¬ì\x97\x85 ì°¸ê°\x80ì\x9e\x90 ëª¨ì§\x91 ê³µê³', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=fleqfSC1P-NlesuzwpVurg&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-03-11', 'ê²½ì\xa0\x9cêµ\x90í\x86µê³¼', '부여군청', None, None], ['ë\x8f\x84ë¡\x9cëª\x85ì£¼ì\x86\x8c ê°\x9cë³\x84ê³\xa0ì\x8b\x9c', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=pIQ1owSqu1fBZRfzKW83OQ&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-03-08', 'ì¢\x85í\x95©ë¯¼ì\x9b\x90ì§\x80ì\xa0\x81ê³¼', '부여군청', None, None], ['2024 ì\x83\x81ë°\x98ê¸° ì\x8b\xa0ê·\x9cë\x86\x8dì\x97\x85ì\x9d¸(ê·\x80ë\x86\x8dê·\x80ì´\x8c) ê¸°ì´\x88ì\x98\x81ë\x86\x8dê¸°ì\x88\xa0êµ\x90ì\x9c¡ì\x83\x9d ëª¨ì§\x91ê³µê³', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=ZWOQnf5gZOLdhii_CHlubg&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-03-07', 'ë\x86\x8dì\x97\x85ê¸°ì\x88\xa0ì\x84¼í\x84°', '부여군청', None, None], ['ë¶\x80ì\x97¬ êµ°ê³\x84í\x9a\x8dì\x8b\x9cì\x84¤(ë°\x95ë¬¼ê´\x80) ì\x82¬ì\x97\x85ì\x8b\x9cí\x96\x89ì\x9e\x90 ì§\x80ì\xa0\x95 ë°\x8f ì\x8b¤ì\x8b\x9cê³\x84í\x9a\x8d(ë³\x80ê²½) ì\x9d¸ê°\x80 ê³\xa0ì\x8b\x9c', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=5OsRZ2ukQGVNLKPQwo4CSQ&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-03-06', 'ë\x8f\x84ì\x8b\x9cê±´ì¶\x95ê³¼', '부여군청', None, None], ['ë\x8f\x84ë¡\x9cëª\x85ì£¼ì\x86\x8c ê°\x9cë³\x84ê³\xa0ì\x8b\x9c', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=kFHbdYXwyezkryJLhE8-Hw&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-02-29', 'ì¢\x85í\x95©ë¯¼ì\x9b\x90ì§\x80ì\xa0\x81ê³¼', '부여군청', None, None], ['ë¶\x80ì\x97¬ êµ°ê´\x80ë¦¬ê³\x84í\x9a\x8d(í\x95\x99êµ\x90 ì¡°ì\x84±ê³\x84í\x9a\x8d) ê²°ì\xa0\x95(ë³\x80ê²½) ë°\x8f êµ°ê³\x84í\x9a\x8dì\x8b\x9cì\x84¤(í\x95\x99êµ\x90)ì\x82¬ì\x97\x85 ì\x8b¤ì\x8b\x9cê³\x84í\x9a\x8d(ë³\x80ê²½) ì\x9d¸ê°\x80 ê³\xa0ì\x8b\x9c', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=xvUhQsqoPu6_xeAsenkWbQ&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-02-29', 'ë\x8f\x84ì\x8b\x9cê±´ì¶\x95ê³¼', '부여군청', None, None], ['ë¶\x80ì\x97¬ êµ°ê´\x80ë¦¬ê³\x84í\x9a\x8d(ì\x8c\x8dë¶\x81ì§\x80êµ¬ ì§\x80êµ¬ë\x8b¨ì\x9c\x84ê³\x84í\x9a\x8d) ê²°ì\xa0\x95(ë³\x80ê²½) ë°\x8f ì§\x80í\x98\x95ë\x8f\x84ë©´ ê³\xa0ì\x8b\x9c', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=85PynxOPvksqlYdEvp2jGQ&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-02-29', 'ë\x8f\x84ì\x8b\x9cê±´ì¶\x95ê³¼', '부여군청', None, None], ['2024ë\x85\x84 ì\x83\x81ë°\x98ê¸° ì\x83\x81ì\x88\x98ë\x8f\x84 ê¸\x89ì\x88\x98ê³µì\x82¬ ì\x82°ì\xa0\x95ê¸°ì¤\x80 ë°\x8f ë§\x88ì\x9d\x84ë\x8b¨ì\x9c\x84 ê¸\x89ì\x88\x98ê³µì\x82¬ ë\x8b¨ê°\x80 ê³\xa0ì\x8b\x9c', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=6whcFZfRC7oKq_BX8M2_Kw&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-02-28', 'ì\x83\x81í\x95\x98ì\x88\x98ë\x8f\x84ì\x82¬ì\x97\x85ì\x86\x8c', '부여군청', None, None], ['(ì\x9e¬)ë¶\x80ì\x97¬êµ° ì§\x80ì\x97\xadê³µë\x8f\x99ì²´í\x99\x9cì\x84±í\x99\x94ì\x9e¬ë\x8b¨ ì\x83\x81ì\x9e\x84ì\x9d´ì\x82¬ ê³µê°\x9cëª¨ì§\x91 ìµ\x9cì¢\x85 í\x95©ê²©ì\x9e\x90 ë°\x9cí\x91\x9c', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=3A1cNdhcOGWZbOBIgcnVeg&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-02-27', 'ê²½ì\xa0\x9cêµ\x90í\x86µê³¼', '부여군청', None, None], ['(ì\x9e¬)ë¶\x80ì\x97¬êµ° ì§\x80ì\x97\xadê³µë\x8f\x99ì²´í\x99\x9cì\x84±í\x99\x94 ì\x9e¬ë\x8b¨ ì\x83\x81ì\x9e\x84ì\x9d´ì\x82¬ ê³µê°\x9cëª¨ì§\x91 ë©´ì\xa0\x91ì\x8b¬ì\x82¬ í\x95©ê²©ì\x9e\x90 ë°\x9cí\x91\x9c', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=QLEbZvpIxjgP6a1A23QFNQ&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-02-23', 'ê²½ì\xa0\x9cêµ\x90í\x86µê³¼', '부여군청', None, None], ['ë\x8f\x84ë¡\x9cëª\x85ì£¼ì\x86\x8c ê°\x9cë³\x84ê³\xa0ì\x8b\x9c', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=jGCp8iaP8VfXzQwq-Y1-5g&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-02-23', 'ì¢\x85í\x95©ë¯¼ì\x9b\x90ì§\x80ì\xa0\x81ê³¼', '부여군청', None, None], ['(ì\x9e¬)ë¶\x80ì\x97¬êµ° ì§\x80ì\x97\xadê³µë\x8f\x99ì²´í\x99\x9cì\x84±í\x99\x94 ì\x9e¬ë\x8b¨ ì\x83\x81ì\x9e\x84ì\x9d´ì\x82¬ ê³µê°\x9cëª¨ì§\x91 ì\x84\x9cë¥\x98ì\x8b¬ì\x82¬ í\x95©ê²©ì\x9e\x90 ë°\x9cí\x91\x9c', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=ScDUzdiNL-bJKirmDnezqg&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-02-20', 'ê²½ì\xa0\x9cêµ\x90í\x86µê³¼', '부여군청', None, None], ['2024ë\x85\x84 ë°±ì\xa0\x9cê¸°ì\x99\x80ë¬¸í\x99\x94ê´\x80 ê¸°ê°\x84ì\xa0\x9cê·¼ë¡\x9cì\x9e\x90(ì\x8b\x9cì\x84¤ê´\x80ë¦¬ì\x9b\x90, ë¬¸í\x99\x94ì\x9c\xa0ì\x82°í\x99\x9cì\x9a©ì\xa0\x84ë¬¸ì\x9d¸ë\xa0¥) ìµ\x9cì¢\x85í\x95©ê²©ì\x9e\x90 ê³µê³', '2025-04-18 07:03:24', 'https://www.buyeo.go.kr/_prog/_board/?mode=V&no=mqDd8fKbfxJaX0vzcRrh2A&code=news_02&site_dvs_cd=kr&menu_dvs_cd=040205', '2024-02-19', 'ì\x82¬ì\xa0\x81ê´\x80ë¦¬ì\x86\x8c', '부여군청', None, None]]

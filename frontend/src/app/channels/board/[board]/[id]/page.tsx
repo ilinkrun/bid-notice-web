@@ -128,8 +128,8 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
   const [editorMode, setEditorMode] = useState<'html' | 'markdown'>('html');
   const [error, setError] = useState<string | null>(null);
 
-  // board 값을 channel_${board} 형식으로 변환
-  const channelBoard = `channel_${board}`;
+  // board 값을 board_${board} 형식으로 변환
+  const channelBoard = `board_${board}`;
 
   // 게시글 조회
   useEffect(() => {

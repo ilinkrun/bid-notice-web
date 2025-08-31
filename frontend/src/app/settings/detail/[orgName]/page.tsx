@@ -71,22 +71,18 @@ export default function SettingDetailOrgPage({ params }: PageProps) {
     errorPolicy: 'all', // 에러가 있어도 부분 데이터 표시
     onCompleted: (data) => {
       console.log('GET_SETTING_DETAIL 완료:', data);
-      // GraphQL 쿼리 완료 시 LoadingProvider 로딩 해제
-      finishLoading();
     },
     onError: (error) => {
       console.error('GET_SETTING_DETAIL 에러:', error);
-      // 에러 발생 시에도 LoadingProvider 로딩 해제
-      finishLoading();
     }
   });
 
-  // 페이지 마운트 시 또는 데이터 로딩이 완료되지 않은 경우 LoadingProvider 상태 해제
+  // GraphQL 쿼리 완료 또는 데이터 없음 시에만 로딩 해제 (Create Mode가 아닐 때만)
   useEffect(() => {
-    if (!loadingDetail && (dataDetail || errorDetail)) {
+    if (!isCreateMode && !loadingDetail && (dataDetail !== undefined || errorDetail)) {
       finishLoading();
     }
-  }, [loadingDetail, dataDetail, errorDetail, finishLoading]);
+  }, [isCreateMode, loadingDetail, dataDetail, errorDetail, finishLoading]);
 
   // 데이터가 로드되면 편집 가능한 데이터로 복사 (또는 create mode일 때 빈 데이터 설정)
   useEffect(() => {
@@ -168,7 +164,7 @@ export default function SettingDetailOrgPage({ params }: PageProps) {
         mergedData['기관명'] = newOrgName;
         
         // 새로운 설정 생성
-        const response = await apiClient.post(`/settings_detail`, mergedData);
+        const response = await apiClient.post(`/settings_notice_detail`, mergedData);
         
         if (response.status === 200 || response.status === 201) {
           alert('새로운 설정이 생성되었습니다.');
@@ -179,7 +175,7 @@ export default function SettingDetailOrgPage({ params }: PageProps) {
         mergedData['기관명'] = orgName;
         
         const encodedOrgName = encodeURIComponent(orgName);
-        const response = await apiClient.put(`/settings_detail/${encodedOrgName}`, mergedData);
+        const response = await apiClient.put(`/settings_notice_detail/${encodedOrgName}`, mergedData);
         
         if (response.status === 200) {
           alert('저장이 완료되었습니다.');

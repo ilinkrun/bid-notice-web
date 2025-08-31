@@ -172,7 +172,7 @@ files -> notice_files
 
 settings_category -> settings_notice_category
 settings_detail -> settings_notice_detail
-settings_keyword -> settings_notice_keyword
+settings_category -> settings_notice_keyword
 settings_list -> settings_notice_list
 
 

@@ -10,25 +10,25 @@ from utils_data import arr_from_csv, dict_from_tuple, dicts_from_tuples, csv_fro
 
 ## ** Global Variables
 CATEGORIES = ["공사점검", "성능평가", "기타"]
-SEPERATOR = "|-"  # 스크랩 요소(key,target,callback), 파일이름, 파일주소 분리자
+SEPERATOR = "|-"  # 스크랩 요소(key,target,callback), file_name, file_url 분리자
 
-SETTINGS_LIST_FIELDS = [
-    "기관명", "url", "iframe", "rowXpath", "paging", "startPage", "endPage", 
-    "login", "use", "지역", "등록", "제목", "상세페이지주소", "작성일", "작성자"
+SETTINGS_NOTICE_LIST_FIELDS = [
+    "org_name", "url", "iframe", "rowXpath", "paging", "startPage", "endPage", 
+    "login", "use", "org_region", "registration", "title", "detail_url", "posted_date", "posted_by"
 ]
-# SETTINGS_LIST_CONFIG_FIELDS = ["url", "iframe", "rowXpath", "paging", "startPage", "endPage", "login"]
-SETTINGS_LIST_CONFIG_FIELDS = ["url", "iframe", "rowXpath", "paging", "startPage", "endPage", "login", "지역", "등록", "use"]
-SETTINGS_LIST_BRIEF_FIELDS = ["기관명", "url", "지역", "등록", "use"]
-SETTINGS_LIST_ELEMENT_FIELDS = ["제목", "상세페이지주소", "작성일", "작성자", "제외항목"]
-SETTINGS_DETAIL_FIELDS = ["기관명", "제목", "본문", "파일이름", "파일주소", "공고구분", "공고번호", "담당부서", "담당자", "연락처"]
-SETTINGS_DETAIL_ELEMENT_FIELDS = ["제목", "본문", "파일이름", "파일주소", "공고구분", "공고번호", "담당부서", "담당자", "연락처"]
-SETTINGS_DETAIL_CONFIG_FIELDS = ["제목", "본문", "파일이름", "파일주소", "공고구분", "공고번호", "담당부서", "담당자", "연락처"]
-SETTINGS_CATEGORY_FIELDS = ["sn", "keywords", "nots", "min_point", "category", "creator", "memo"]
+
+SETTINGS_NOTICE_LIST_CONFIG_FIELDS = ["url", "iframe", "rowXpath", "paging", "startPage", "endPage", "login", "org_region", "registration", "use"]
+SETTINGS_NOTICE_LIST_BRIEF_FIELDS = ["org_name", "url", "org_region", "registration", "use"]
+SETTINGS_NOTICE_LIST_ELEMENT_FIELDS = ["title", "detail_url", "posted_date", "posted_by", "exception_path"]
+SETTINGS_NOTICE_DETAIL_FIELDS = ["org_name", "title", "body_html", "file_name", "file_url", "notice_div", "notice_num", "org_dept", "org_man", "org_tel"]
+SETTINGS_NOTICE_DETAIL_ELEMENT_FIELDS = ["title", "body_html", "file_name", "file_url", "notice_div", "notice_num", "org_dept", "org_man", "org_tel"]
+SETTINGS_NOTICE_DETAIL_CONFIG_FIELDS = ["title", "body_html", "file_name", "file_url", "notice_div", "notice_num", "org_dept", "org_man", "org_tel"]
+SETTINGS_NOTICE_CATEGORY_FIELDS = ["sn", "keywords", "nots", "min_point", "category", "creator", "memo"]
 
 ELEMENT_KEYS = ["key", "xpath", "callback"]
 
-# settings_list 데이터를 저장할 JSON 파일 경로
-SETTINGS_LIST_JSON_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'settings_list.json')
+# settings_notice_list 데이터를 저장할 JSON 파일 경로
+SETTINGS_NOTICE_LIST_JSON_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'settings_notice_list.json')
 
 
 ## SUB FUNCTIONS
@@ -39,7 +39,7 @@ def get_gap_date(day_gap=10, format='%Y-%m-%d'):
 
 ## ** SETTINGS(category)
 #--------------------------------------------------------------------
-def find_all_settings_category(fields=SETTINGS_CATEGORY_FIELDS, addStr="WHERE `use` = 1"):
+def find_all_settings_notice_category(fields=SETTINGS_NOTICE_CATEGORY_FIELDS, addStr="WHERE `use` = 1"):
     """
     모든 키워드 설정을 가져오는 함수
     
@@ -47,13 +47,13 @@ def find_all_settings_category(fields=SETTINGS_CATEGORY_FIELDS, addStr="WHERE `u
         list: [{"sn": "", "keywords": "", "nots": "", "min_point": 0, "category": ""}, ...]
     """
     mysql = Mysql()  # 로컬 MySQL 객체 생성
-    result = mysql.find("settings_category", fields=fields, addStr=addStr)
+    result = mysql.find("settings_notice_category", fields=fields, addStr=addStr)
     mysql.close()
     return dicts_from_tuples(fields, result)
     # return [{"sn": r[0], "keywords": r[1], "nots": r[2], "min_point": r[3], "category": r[4]} for r in result]
 
 
-def find_settings_category(category, fields=["keywords", "nots", "min_point"]):
+def find_settings_notice_category(category, fields=["keywords", "nots", "min_point"]):
     """
     특정 카테고리의 키워드 설정을 가져오는 함수
     
@@ -64,7 +64,7 @@ def find_settings_category(category, fields=["keywords", "nots", "min_point"]):
         dict: {"keywords": "", "nots": "", "min_point": 0} 또는 None
     """
     mysql = Mysql()  # 로컬 MySQL 객체 생성
-    result = mysql.find("settings_category", fields=fields, addStr=f"WHERE `category`='{category}'")
+    result = mysql.find("settings_notice_category", fields=fields, addStr=f"WHERE `category`='{category}'")
     mysql.close()
     if len(result) == 0:
         return None
@@ -94,7 +94,7 @@ def get_keyword_weight_list(keyword_weight_str):
     return keyword_weights
 
 
-def get_search_weight(keywords, min_point=4, field="제목", table_name="notices", add_fields=[], add_where=""):
+def get_search_weight(keywords, min_point=4, field="title", table_name="notice_list", add_fields=[], add_where=""):
     """
     키워드 가중치를 기반으로 notices를 검색하는 함수
     
@@ -119,7 +119,7 @@ def get_search_weight(keywords, min_point=4, field="제목", table_name="notices
         addStr = f"where `{field}` like '%{keyword}%'"
         if add_where != "":
             addStr += f" and {add_where}"
-        fields = ["nid", "제목"] + add_fields
+        fields = ["nid", "title"] + add_fields
         rs = []
         for r in mysql.find(table_name, fields, addStr):
             rs.append([keyword, weight] + list(r))
@@ -195,7 +195,7 @@ def unpack_settings_elements(settings={}):
   Args:
     settings (dict): 설정 요소 
       syntax) {[key]: "[xpath][SEPERATOR][target][SEPERATOR][callback]"}
-      ex) {"제목": "td[4]/a", "상세페이지주소": "td[4]/a|-href|-"https://www.gp.go.kr/portal/" + rst.split("/")[1]", ...}
+      ex) {"title": "td[4]/a", "detail_url": "td[4]/a|-href|-"https://www.gp.go.kr/portal/" + rst.split("/")[1]", ...}
     
   Returns:
   """
@@ -252,9 +252,9 @@ def pack_settings_elements(elements):
 
 ## ** SETTINGS(list)
 #--------------------------------------------------------------------
-def find_settings_list(fields=SETTINGS_LIST_BRIEF_FIELDS, addStr="WHERE `use`=1", out_type="dicts"):
+def find_settings_notice_list(fields=SETTINGS_NOTICE_LIST_BRIEF_FIELDS, addStr="WHERE `use`=1", out_type="dicts"):
   mysql = Mysql()  # 로컬 MySQL 객체 생성
-  result = mysql.find("settings_list", fields=fields, addStr=addStr)
+  result = mysql.find("settings_notice_list", fields=fields, addStr=addStr)
   mysql.close()
   if out_type == "dicts":
     dicts = dicts_from_tuples(fields, result)
@@ -264,8 +264,8 @@ def find_settings_list(fields=SETTINGS_LIST_BRIEF_FIELDS, addStr="WHERE `use`=1"
   else:
     return result
 
-def _find_settings_list_by_name(name, fields=SETTINGS_LIST_CONFIG_FIELDS):
-# def _find_settings_list_by_name(name, fields=SETTINGS_LIST_FIELDS):
+def _find_settings_notice_list_by_name(name, fields=SETTINGS_NOTICE_LIST_CONFIG_FIELDS):
+# def _find_settings_notice_list_by_name(name, fields=SETTINGS_NOTICE_LIST_FIELDS):
   """
   기관명으로 설정 목록을 검색하는 함수
   
@@ -278,69 +278,69 @@ def _find_settings_list_by_name(name, fields=SETTINGS_LIST_CONFIG_FIELDS):
   """
   try:
     mysql = Mysql()  # 로컬 MySQL 객체 생성
-    result = mysql.find("settings_list", fields=fields, addStr=f"WHERE `기관명`='{name}'")
+    result = mysql.find("settings_notice_list", fields=fields, addStr=f"WHERE `org_name`='{name}'")
     return result
   except Exception as e:
     print(f"기관명 '{name}' 설정 검색 중 오류 발생: {str(e)}")
     return []
 
 
-def find_settings_list_by_name(name, fields=SETTINGS_LIST_CONFIG_FIELDS, out_type="tuple"):
-# def find_settings_list_by_name(name, fields=SETTINGS_LIST_FIELDS, out_type="tuple"):
-  # print("@@@mysql_bid: find_settings_list_by_name", name, fields)
-  site_config = _find_settings_list_by_name(name, fields)[0]
+def find_settings_notice_list_by_name(name, fields=SETTINGS_NOTICE_LIST_CONFIG_FIELDS, out_type="tuple"):
+# def find_settings_notice_list_by_name(name, fields=SETTINGS_NOTICE_LIST_FIELDS, out_type="tuple"):
+  # print("@@@mysql_bid: find_settings_notice_list_by_name", name, fields)
+  site_config = _find_settings_notice_list_by_name(name, fields)[0]
   config = dict_from_tuple(fields, site_config)
-  elements_config = {SETTINGS_LIST_ELEMENT_FIELDS[i]:v for (i, v) in enumerate(_find_settings_list_by_name(name, fields=SETTINGS_LIST_ELEMENT_FIELDS)[0])}
+  elements_config = {SETTINGS_NOTICE_LIST_ELEMENT_FIELDS[i]:v for (i, v) in enumerate(_find_settings_notice_list_by_name(name, fields=SETTINGS_NOTICE_LIST_ELEMENT_FIELDS)[0])}
   config["elements"] = unpack_settings_elements(elements_config)
   
-  # use, 지역, 등록 필드 추가
+  # use, org_region, registration 필드 추가
   config["use"] = site_config[fields.index("use")] if "use" in fields else None
-  config["지역"] = site_config[fields.index("지역")] if "지역" in fields else None
-  config["등록"] = site_config[fields.index("등록")] if "등록" in fields else None
+  config["org_region"] = site_config[fields.index("org_region")] if "org_region" in fields else None
+  config["registration"] = site_config[fields.index("registration")] if "registration" in fields else None
   
   if out_type == "dict":
     return config
   elif out_type == "tuple":
     return tuple([config.get(field, None) for field in fields + ["elements"]])
 
-def add_settings_to_notice(notice, keys=['지역', '등록']):
+def add_settings_to_notice(notice, keys=['org_region', 'registration']):
     """
     공고에 해당 기관의 설정값을 추가합니다.
     
     Args:
         notice (dict): 공고 정보
-        keys (list): 추가할 설정 키 리스트 (기본값: ['지역', '등록'])
+        keys (list): 추가할 설정 키 리스트 (기본값: ['org_region', 'registration'])
     
     Returns:
         dict: 설정값이 추가된 공고 정보
     """
-    org_name = notice.get("기관명")
+    org_name = notice.get("org_name")
     
     if org_name:
-        # settings 리스트에서 기관명과 일치하는 항목 찾기
-        fields=["기관명"]
+        # settings 리스트에서 org_name과 일치하는 항목 찾기
+        fields=["org_name"]
         fields.extend(keys)
-        # keys.append("기관명")
-        settings = find_settings_list(fields=fields, out_type="dicts")
-        # settings = find_settings_list(fields=["기관명", "지역", "등록"], out_type="dicts")
+        # keys.append("org_name")
+        settings = find_settings_notice_list(fields=fields, out_type="dicts")
+        # settings = find_settings_notice_list(fields=["org_name", "org_region", "registration"], out_type="dicts")
         for setting in settings:
-            if setting.get("기관명") == org_name:  # 기관명이 일치하면
+            if setting.get("org_name") == org_name:  # org_name이 일치하면
                 # 결과에 설정 키 추가
                 for key in keys:
                     notice[key] = setting.get(key, "")
                 break
-        else:  # 일치하는 기관명이 없으면 빈 문자열로 설정
+        else:  # 일치하는 org_name이 없으면 빈 문자열로 설정
             for key in keys:
                 notice[key] = ""
     else:
-        # 기관명이 없으면 빈 문자열로 설정
+        # org_name이 없으면 빈 문자열로 설정
         for key in keys:
             notice[key] = ""
     
     return notice
 
 
-def _upsert_settings_list(name, data):
+def _upsert_settings_notice_list(name, data):
     """
     기관명으로 설정 목록을 업데이트하는 함수
   
@@ -353,9 +353,9 @@ def _upsert_settings_list(name, data):
     """
     mysql = None
     try:
-        # data에 '기관명' 키가 없으면 추가
-        if '기관명' not in data:
-            data['기관명'] = name
+        # data에 'org_name' 키가 없으면 추가
+        if 'org_name' not in data:
+            data['org_name'] = name
           
         # None 값을 빈 문자열로 변환
         for key, value in data.items():
@@ -368,20 +368,20 @@ def _upsert_settings_list(name, data):
         mysql = Mysql()
         
         # 기존 데이터가 있는지 확인
-        existing_data = mysql.find("settings_list", ["기관명"], f"WHERE 기관명 = '{name}'")
+        existing_data = mysql.find("settings_notice_list", ["org_name"], f"WHERE org_name = '{name}'")
         
         if existing_data:
             # 기존 데이터가 있으면 UPDATE 실행
             update_data = {}
             for key, value in data.items():
-                if key != '기관명':  # 기관명은 WHERE 조건으로 사용하므로 제외
+                if key != 'org_name':  # org_name은 WHERE 조건으로 사용하므로 제외
                     update_data[key] = value
           
             # UPDATE 쿼리 실행
-            mysql.update("settings_list", update_data, f"기관명 = '{name}'")
+            mysql.update("settings_notice_list", update_data, f"org_name = '{name}'")
         else:
             # 기존 데이터가 없으면 INSERT 실행
-            mysql.insert("settings_list", csv_data)
+            mysql.insert("settings_notice_list", csv_data)
         
         return True
     except Exception as e:
@@ -392,7 +392,7 @@ def _upsert_settings_list(name, data):
             mysql.close()
 
 
-def upsert_settings_list(name, data):
+def upsert_settings_notice_list(name, data):
   """
   기관명으로 설정 목록을 업데이트하는 함수 (elements 요소 포함)
 
@@ -417,17 +417,17 @@ def upsert_settings_list(name, data):
       # 변환된 elements 딕셔너리를 data_copy에 병합
       data_copy.update(elements_dict)
     
-    # _upsert_settings_list 함수 호출
-    return _upsert_settings_list(name, data_copy)
+    # _upsert_settings_notice_list 함수 호출
+    return _upsert_settings_notice_list(name, data_copy)
   except Exception as e:
     print(f"설정 업데이트 중 오류 발생: {str(e)}")
     return False
 
 ## ** SETTINGS(detail)
 #--------------------------------------------------------------------
-def find_settings_detail(fields=SETTINGS_DETAIL_FIELDS, addStr="WHERE `use`=1", out_type="dicts"):
+def find_settings_notice_detail(fields=SETTINGS_NOTICE_DETAIL_FIELDS, addStr="WHERE `use`=1", out_type="dicts"):
   mysql = Mysql()  # 로컬 MySQL 객체 생성
-  result = mysql.find("settings_detail", fields=fields, addStr=addStr)
+  result = mysql.find("settings_notice_detail", fields=fields, addStr=addStr)
   mysql.close()
   if out_type == "dicts":
     dicts = dicts_from_tuples(fields, result)
@@ -437,8 +437,8 @@ def find_settings_detail(fields=SETTINGS_DETAIL_FIELDS, addStr="WHERE `use`=1", 
   else:
     return result
 
-def _find_settings_detail_by_name(name, fields=SETTINGS_DETAIL_CONFIG_FIELDS, table_name="settings_detail", out_type="tuple"):
-# def _find_settings_detail_by_name(name, fields=SETTINGS_DETAIL_FIELDS):
+def _find_settings_notice_detail_by_name(name, fields=SETTINGS_NOTICE_DETAIL_CONFIG_FIELDS, table_name="settings_notice_detail", out_type="tuple"):
+# def _find_settings_notice_detail_by_name(name, fields=SETTINGS_NOTICE_DETAIL_FIELDS):
   """
   기관명으로 설정 목록을 검색하는 함수
   
@@ -451,7 +451,7 @@ def _find_settings_detail_by_name(name, fields=SETTINGS_DETAIL_CONFIG_FIELDS, ta
   """
   try:
     mysql = Mysql()  # 로컬 MySQL 객체 생성
-    result = mysql.find(table_name, fields=fields, addStr=f"WHERE `기관명`='{name}'")
+    result = mysql.find(table_name, fields=fields, addStr=f"WHERE `org_name`='{name}'")
     mysql.close()
     if out_type == "dict":
         if result:
@@ -465,13 +465,13 @@ def _find_settings_detail_by_name(name, fields=SETTINGS_DETAIL_CONFIG_FIELDS, ta
     return []
 
 
-# def find_settings_detail_by_name(name, fields=SETTINGS_DETAIL_FIELDS, out_type="tuple"):
-def find_settings_detail_by_name(name, fields=SETTINGS_DETAIL_FIELDS, table_name="settings_detail", out_type="dicts"):
+# def find_settings_notice_detail_by_name(name, fields=SETTINGS_NOTICE_DETAIL_FIELDS, out_type="tuple"):
+def find_settings_notice_detail_by_name(name, fields=SETTINGS_NOTICE_DETAIL_FIELDS, table_name="settings_notice_detail", out_type="dicts"):
   """
-  기관명으로 설정 상세를 조회하는 함수 - find_settings_detail 패턴 따름
+  기관명으로 설정 상세를 조회하는 함수 - find_settings_notice_detail 패턴 따름
   """
   mysql = Mysql()  # 로컬 MySQL 객체 생성
-  result = mysql.find(table_name, fields=fields, addStr=f"WHERE `기관명`='{name}' AND `use`=1")
+  result = mysql.find(table_name, fields=fields, addStr=f"WHERE `org_name`='{name}' AND `use`=1")
   mysql.close()
   
   if out_type == "dicts":
@@ -485,7 +485,7 @@ def find_settings_detail_by_name(name, fields=SETTINGS_DETAIL_FIELDS, table_name
   else:
     return result
 
-def detail_config_by_name(name, fields=SETTINGS_DETAIL_CONFIG_FIELDS, table_name="settings_detail"):
+def detail_config_by_name(name, fields=SETTINGS_NOTICE_DETAIL_CONFIG_FIELDS, table_name="settings_notice_detail"):
     """
     기관명으로 상세 페이지 설정을 가져오는 함수
     
@@ -497,7 +497,7 @@ def detail_config_by_name(name, fields=SETTINGS_DETAIL_CONFIG_FIELDS, table_name
     Returns:
         dict: 설정 정보
     """
-    return find_settings_detail_by_name(name, fields, table_name)
+    return find_settings_notice_detail_by_name(name, fields, table_name)
 
 def get_detail_elements(settings):
     """
@@ -513,10 +513,10 @@ def get_detail_elements(settings):
 
 ## ** NOTICES
 #--------------------------------------------------------------------
-def find_last_notice(name, field="제목"):
-  # fields = ["sn", field] if field != None else ["sn", "제목"]
+def find_last_notice(name, field="title"):
+  # fields = ["sn", field] if field != None else ["sn", "title"]
   mysql = Mysql()  # 로컬 MySQL 객체 생성
-  rs = mysql.find("notices", fields=["sn", field], addStr=f"WHERE `기관명`='{name}' ORDER BY `sn` desc", limit=1)
+  rs = mysql.find("notice_list", fields=["sn", field], addStr=f"WHERE `org_name`='{name}' ORDER BY `sn` desc", limit=1)
   mysql.close()
   return rs if rs != None else (0, "제목없음")
 
@@ -533,8 +533,8 @@ def find_notices(names, keywords):
         list: 검색된 notices 리스트
     """
     mysql = Mysql()  # 로컬 MySQL 객체 생성
-    nameStr = _where_like_unit(names, field="기관명", joiner="or")
-    searchStr = _where_like_unit(keywords, field="제목", joiner="and")
+    nameStr = _where_like_unit(names, field="org_name", joiner="or")
+    searchStr = _where_like_unit(keywords, field="title", joiner="and")
 
     addStr = "where "
     if nameStr == "" and searchStr == "":
@@ -546,12 +546,12 @@ def find_notices(names, keywords):
     else:
         addStr += f"({nameStr}) and ({searchStr})"
 
-    result = mysql.find("notices", ["지역", "기관명", "제목", "작성일"], addStr)
+    result = mysql.find("notice_list", ["org_region", "org_name", "title", "posted_date"], addStr)
     mysql.close()
     return result
 
 
-def find_notices_for_statistics(fields=["기관명", "작성일", "category", "created_at", "status"], renames=["orgName", "postedAt", "category", "createdAt", "status"], day_gap=5):
+def find_notices_for_statistics(fields=["org_name", "posted_date", "category", "created_at", "status"], renames=["orgName", "postedAt", "category", "createdAt", "status"], day_gap=5):
     """
     통계를 위한 공고 목록을 조회하고 지역 정보를 추가하는 함수
     
@@ -561,24 +561,24 @@ def find_notices_for_statistics(fields=["기관명", "작성일", "category", "c
         day_gap (int): 현재 시간으로부터 몇 일 전까지의 데이터를 조회할지
         
     Returns:
-        list: [{"orgName": "기관명", "region": "지역", "postedAt": "YYYY-MM-DD", "createdAt": "YYYY-MM-DD", "category": "", "status": ""}, ...]
+        list: [{"orgName": "org_name", "region": "org_region", "postedAt": "YYYY-MM-DD", "createdAt": "YYYY-MM-DD", "category": "", "status": ""}, ...]
     """
     mysql = Mysql()
     try:
         # 기준 날짜 계산 (day_gap일 전)
-        result = mysql.find("notices", fields=fields, 
-            addStr=f"WHERE STR_TO_DATE(`작성일`, '%Y-%m-%d') >= '{get_gap_date(day_gap)}' ORDER BY `작성일` DESC")
+        result = mysql.find("notice_list", fields=fields, 
+            addStr=f"WHERE STR_TO_DATE(`posted_date`, '%Y-%m-%d') >= '{get_gap_date(day_gap)}' ORDER BY `posted_date` DESC")
         
-        # settings_list에서 기관별 지역 정보 조회
+        # settings_notice_list에서 기관별 org_region 정보 조회
         settings = dicts_from_tuples(
             ["orgName", "region"], 
-            find_settings_list(fields=["기관명", "지역"], out_type="tuples")
+            find_settings_notice_list(fields=["org_name", "org_region"], out_type="tuples")
         )
         
         # settings를 딕셔너리로 변환하여 검색 효율성 향상
         region_map = {s["orgName"]: s["region"] for s in settings}
         
-        # notices 결과를 딕셔너리로 변환하고 지역 정보 추가
+        # notices 결과를 딕셔너리로 변환하고 org_region 정보 추가
         notices = []
         for row in result:
             notice = dict(zip(renames, row))
@@ -606,7 +606,7 @@ def find_notices_for_statistics(fields=["기관명", "작성일", "category", "c
     finally:
         mysql.close()
 
-def search_notices(keywords, nots, min_point, field="제목", add_fields=[], add_where=""):
+def search_notices(keywords, nots, min_point, field="title", add_fields=[], add_where=""):
     """
     키워드 가중치와 제외어를 사용하여 notices를 검색하는 함수
     
@@ -625,7 +625,7 @@ def search_notices(keywords, nots, min_point, field="제목", add_fields=[], add
     return filter_by_not(nots, dicts, field)
 
 
-def find_notices_with_category(fields=["nid", "제목", "상세페이지주소", "작성일", "작성자", "기관명", "category"], add_where=""):
+def find_notices_with_category(fields=["nid", "title", "detail_url", "posted_date", "posted_by", "org_name", "category"], add_where=""):
     """
     notices를 검색하는 함수
     
@@ -634,7 +634,7 @@ def find_notices_with_category(fields=["nid", "제목", "상세페이지주소",
         add_where (str): 추가 WHERE 조건
         
     Returns:
-        list: [{"nid": "", "제목": "", "상세페이지주소": "", "작성일": "YYYY-mm-dd", "작성자": "", "기관명": "", "category": ""}, ...]
+        list: [{"nid": "", "title": "", "detail_url": "", "posted_date": "YYYY-mm-dd", "posted_by": "", "org_name": "", "category": ""}, ...]
     """
     mysql = Mysql()
     try:
@@ -644,17 +644,17 @@ def find_notices_with_category(fields=["nid", "제목", "상세페이지주소",
         if add_where:
             search_str += f" AND {add_where}"
             
-        notices = mysql.find("notices", fields=fields, addStr=search_str)
+        notices = mysql.find("notice_list", fields=fields, addStr=search_str)
         
         # 튜플 리스트를 딕셔너리 리스트로 변환
         result = []
         for notice in notices:
             notice_dict = dict(zip(fields, notice))
             
-            # 작성일 형식 변환
-            if notice_dict.get("작성일"):
+            # posted_date 형식 변환
+            if notice_dict.get("posted_date"):
                 try:
-                    notice_dict["작성일"] = notice_dict["작성일"].strftime('%Y-%m-%d')
+                    notice_dict["posted_date"] = notice_dict["posted_date"].strftime('%Y-%m-%d')
                 except (AttributeError, ValueError):
                     pass
                 
@@ -667,44 +667,45 @@ def find_notices_with_category(fields=["nid", "제목", "상세페이지주소",
         return []
 
 
-def find_notices_by_category(category, day_gap=15):
+def find_notices_by_category(category, day_gap=2):
     """
     카테고리별로 notices를 검색하는 함수
     
     Args:
         category (str): 카테고리명('무관' 또는 카테고리명)
-        day_gap (int): 현재 시간으로부터 몇 일 전까지의 notices를 검색할지 (기본값: 15일)
+        day_gap (int): 현재 시간으로부터 몇 일 전까지의 notices를 검색할지 (기본값: 2일)
         
     Returns:
-        list: [{"nid": "", "제목": "", "상세페이지주소": "", "작성일": "YYYY-mm-dd", "작성자": "", "기관명": "", "지역": "", "등록": ""}, ...]
+        list: [{"nid": "", "title": "", "detail_url": "", "posted_date": "YYYY-mm-dd", "posted_by": "", "org_name": "", "org_region": "", "registration": ""}, ...]
     """   
     mysql = Mysql()
     try:
         # 카테고리별 notices 검색
-        if category == "무관":
-            search_str = "WHERE category IS NULL "
-        else:
-            search_str = f"WHERE category = '{category}'"
+        # if category == "무관":
+        #     search_str = "WHERE category IS NULL "
+        # else:
+        #     search_str = f"WHERE category = '{category}'"
+        search_str = f"WHERE category = '{category}'"
         if day_gap > 0:
             # search_str += f" AND scraped_at >= '{datetime.now(timezone.utc) - timedelta(days=day_gap)}'"
-            search_str += f" AND STR_TO_DATE(`작성일`, '%Y-%m-%d') >= '{get_gap_date(day_gap)}' ORDER BY `작성일` DESC"
+            search_str += f" AND STR_TO_DATE(`posted_date`, '%Y-%m-%d') >= '{get_gap_date(day_gap)}' ORDER BY `posted_date` DESC"
             
-        fields = ["nid", "제목", "상세페이지주소", "작성일", "작성자", "기관명", "category"]
-        notices = mysql.find("notices", fields=fields, addStr=search_str)
+        fields = ["nid", "title", "detail_url", "posted_date", "posted_by", "org_name", "category"]
+        notices = mysql.find("notice_list", fields=fields, addStr=search_str)
         
-        # 튜플 리스트를 딕셔너리 리스트로 변환하고 작성일 형식 변환
+        # 튜플 리스트를 딕셔너리 리스트로 변환하고 posted_date 형식 변환
         result = []
         for notice in notices:
             notice_dict = dict(zip(fields, notice))
-            if notice_dict["작성일"]:
+            if notice_dict["posted_date"]:
                 try:
                     # datetime.date 객체를 'YYYY-mm-dd' 형식으로 변환
-                    notice_dict["작성일"] = notice_dict["작성일"].strftime('%Y-%m-%d')
+                    notice_dict["posted_date"] = notice_dict["posted_date"].strftime('%Y-%m-%d')
                 except (AttributeError, ValueError):
                     # 날짜 형식이 다른 경우 원본 유지
                     pass
             
-            # '지역'과 '등록' 값 추가
+            # 'org_region'과 'registration' 값 추가
             add_settings_to_notice(notice_dict)
             
             result.append(notice_dict)
@@ -730,7 +731,7 @@ def update_category_batch(category, delta_hours=23, start_time=None):
         start_time = (datetime.now(kst) - timedelta(hours=delta_hours)).strftime('%Y-%m-%d %H:%M:%S')
     
     # 카테고리별 키워드 설정 가져오기
-    keywords = find_settings_category(category)
+    keywords = find_settings_notice_category(category)
     if keywords is None:
         print(f"카테고리 '{category}'에 대한 키워드 설정이 없습니다.")
         return
@@ -740,7 +741,7 @@ def update_category_batch(category, delta_hours=23, start_time=None):
     try:
         # scraped_at이 start_time 이후인 notices 검색
         search_str = f"WHERE scraped_at >= '{start_time}' AND category IS NULL"
-        notices = mysql.find("notices", fields=["nid", "제목"], addStr=search_str)
+        notices = mysql.find("notice_list", fields=["nid", "title"], addStr=search_str)
         print(f"해당 {category} notices: {len(notices)}")
         
         if not notices:
@@ -763,7 +764,7 @@ def update_category_batch(category, delta_hours=23, start_time=None):
         # 검색된 notices에 대해 category 업데이트
         for notice in matched_notices:
             for nid, data in notice.items():
-                mysql.update("notices", {"category": category, "status": "준비"}, f"nid = {nid}")
+                mysql.update("notice_list", {"category": category, "status": "준비"}, f"nid = {nid}")
 
         print(f"카테고리 '{category}'에 대한 category 업데이트 완료: {len(matched_notices)}개")
 
@@ -803,7 +804,7 @@ def upsert_notices(data):
     try:
         print(f'upsert_notices data: {data}')
         # 전체 데이터를 한 번에 업데이트
-        mysql.upsert("notices", data, inType="dicts")
+        mysql.upsert("notice_list", data, inType="dicts")
         print(f"{len(data)}개의 공고가 업데이트되었습니다.")
     except Exception as e:
         print(f"공고 업데이트 중 오류 발생: {str(e)}")
@@ -815,17 +816,17 @@ def update_notices_status(data):
     mysql = Mysql()
     for item in data:
         # status가 변경되었는지 확인( 변경되지 않았다면 continue)
-        # if mysql.find("notices", {"status": item["status"]}, f"WHERE nid = {item['nid']}"):
+        # if mysql.find("notice_list", {"status": item["status"]}, f"WHERE nid = {item['nid']}"):
         #     continue
-        # rs = mysql.find("notices", ["status"], f"WHERE nid = {item['nid']}")[0][0]
+        # rs = mysql.find("notice_list", ["status"], f"WHERE nid = {item['nid']}")[0][0]
         # print(f"rs: {rs}")
         # if rs == item["status"]:
         #     continue
 
-        mysql.update("notices", {"status": item["status"]}, f"nid = {item['nid']}")
+        mysql.update("notice_list", {"status": item["status"]}, f"nid = {item['nid']}")
         if item["status"] == "관심":
             pass
-            # mysql.update("notices", {"status": item["status"]}, f"nid = {item['nid']}")
+            # mysql.update("notice_list", {"status": item["status"]}, f"nid = {item['nid']}")
         else:
             data = {}
             data["nid"] = item["nid"]
@@ -839,17 +840,17 @@ def update_notices_status(data):
     mysql.close()
 
 # details
-def find_details_by_status(status, fields=["nid", "status", "제목", "scraped_at"], addStr=""):
+def find_details_by_status(status, fields=["nid", "status", "title", "scraped_at"], addStr=""):
     mysql = Mysql()
-    details = mysql.find("details", fields=fields, addStr=f"WHERE status = '{status}' {addStr}")
+    details = mysql.find("notice_details", fields=fields, addStr=f"WHERE status = '{status}' {addStr}")
     mysql.close()
     return dicts_from_tuples(fields, details)
 
 ## ** bids
 #--------------------------------------------------------------------
-def find_notice_by_nid(nid, fields=["기관명", "category", "status", "작성일"], out_type="dict"):
+def find_notice_by_nid(nid, fields=["org_name", "category", "status", "posted_date"], out_type="dict"):
     mysql = Mysql()
-    rs = mysql.find("notices", fields, f"WHERE nid = {nid}")
+    rs = mysql.find("notice_list", fields, f"WHERE nid = {nid}")
     mysql.close()
     if not rs:
         return None
@@ -863,15 +864,15 @@ def find_bids(fields=["bid", "nid", "status", "title", "started_at", "ended_at",
     bids = mysql.find("bids", fields=fields, addStr=addStr)
     mysql.close()
     dicts = [dict(zip(fields, bid)) for bid in bids]
-    settings = find_settings_list(fields=["기관명", "지역"], out_type="dicts")
+    settings = find_settings_notice_list(fields=["org_name", "org_region"], out_type="dicts")
     for bid in dicts:
         notice = find_notice_by_nid(bid["nid"])
         if notice:
             bid.update(notice)
-            bid["지역"] = ""
+            bid["org_region"] = ""
             for setting in settings:
-                if setting.get("기관명") == bid["기관명"]:  # 기관명이 일치하면
-                    bid["지역"] = setting.get("지역", "")
+                if setting.get("org_name") == bid["org_name"]:  # org_name이 일치하면
+                    bid["org_region"] = setting.get("org_region", "")
                     break
     return dicts
 
@@ -913,7 +914,7 @@ def insert_all_logs(logs):
       
       # SQL 쿼리 문자열 직접 구성
       sql = f"""
-      INSERT INTO logs_scraping (org_name, error_code, error_message, scraped_count, inserted_count, time)
+      INSERT INTO logs_notice_scraping (org_name, error_code, error_message, scraped_count, inserted_count, time)
       VALUES ('{log["org_name"]}', {error_code if error_code is not None else 'NULL'}, 
       '{error_message.replace("'", "''") if error_message else ''}', 
       {log["scraped_count"]}, {log["inserted_count"]}, '{log["time"]}')
@@ -943,7 +944,7 @@ def insert_all_errors(errors):
   try:
     # SQL 쿼리 문자열 직접 구성
     sql = f"""
-    INSERT INTO errors_scraping (orgs, time)
+    INSERT INTO errors_notice_scraping (orgs, time)
     VALUES ('{errors["orgs"]}', '{errors["time"]}')
     """
     
@@ -955,28 +956,28 @@ def insert_all_errors(errors):
     mysql.close()
 
 
-def find_logs_scraping(day_gap=15, out_type="dicts"):
+def find_logs_notice_scraping(day_gap=15, out_type="dicts"):
   """
   day_gap일 전부터 현재까지의 로그를 조회하는 함수
   """
   mysql = Mysql()
   fields=["org_name", "error_code", "error_message", "scraped_count", "inserted_count", "time"]
   kst = timezone(timedelta(hours=9))
-  logs = mysql.find("logs_scraping", fields=fields, addStr=f"WHERE time >= '{datetime.now(kst) - timedelta(days=day_gap)}' ORDER BY time DESC")
+  logs = mysql.find("logs_notice_scraping", fields=fields, addStr=f"WHERE time >= '{datetime.now(kst) - timedelta(days=day_gap)}' ORDER BY time DESC")
   mysql.close()
   if out_type == "dicts":
     return [dict(zip(fields, log)) for log in logs]
   else:
     return logs
 
-def find_errors_scraping(day_gap=15, out_type="dicts"):
+def find_errors_notice_scraping(day_gap=15, out_type="dicts"):
   """
   day_gap일 전부터 현재까지의 에러를 조회하는 함수
   """
   mysql = Mysql()
   fields=["orgs", "time"]
   kst = timezone(timedelta(hours=9))
-  errors = mysql.find("errors_scraping", fields=fields, addStr=f"WHERE time >= '{datetime.now(kst) - timedelta(days=day_gap)}' ORDER BY time DESC")
+  errors = mysql.find("errors_notice_scraping", fields=fields, addStr=f"WHERE time >= '{datetime.now(kst) - timedelta(days=day_gap)}' ORDER BY time DESC")
   mysql.close()
   if out_type == "dicts":
     return [dict(zip(fields, error)) for error in errors]
@@ -998,7 +999,7 @@ def delete_old_notices(day_gap=15, condition="category IS NULL"):
     """
     mysql = Mysql()
     kst = timezone(timedelta(hours=9))
-    mysql.delete("notices", f"{condition} AND scraped_at < '{datetime.now(kst) - timedelta(days=day_gap)}'")
+    mysql.delete("notice_list", f"{condition} AND scraped_at < '{datetime.now(kst) - timedelta(days=day_gap)}'")
     mysql.close()
 
 
@@ -1016,7 +1017,7 @@ def backup_db():
     mysql = Mysql()
     try:
         # 백업할 테이블 목록
-        tables = ["notices", "settings_list", "settings_detail", "settings_category", "logs_scraping", "errors_scraping"]
+        tables = ["notice_list", "settings_notice_list", "settings_notice_detail", "settings_notice_category", "logs_notice_scraping", "errors_notice_scraping"]
         
         with open(backup_file, 'w', encoding='utf-8') as f:
             # 헤더 추가
@@ -1064,9 +1065,9 @@ def get_notices_gap(gap=3):
     """
     특정 카테고리의 공고 목록을 반환합니다.
     """
-    result = find_notices_with_category(add_where=f"`작성일` >= DATE_SUB(NOW(), INTERVAL {gap} DAY)")
+    result = find_notices_with_category(add_where=f"`posted_date` >= DATE_SUB(NOW(), INTERVAL {gap} DAY)")
 
-    # 각 row의 기관명에 해당하는 '지역', '등록' 필드값을 가져오기
+    # 각 row의 org_name에 해당하는 'org_region', 'registration' 필드값을 가져오기
     for item in result:
         add_settings_to_notice(item)
     
@@ -1074,9 +1075,11 @@ def get_notices_gap(gap=3):
 
 if __name__ == "__main__":
     pass
-    # print(find_settings_detail(addStr="", out_type="dicts"))
-    print(find_settings_detail_by_name(name="강화군청"))
+    # print(find_settings_notice_detail(addStr="", out_type="dicts"))
+    # print(find_settings_notice_detail_by_name(name="강화군청"))
+    category = "무관"
+    print(find_notices_by_category(category, day_gap=15))
     # print(find_details_by_status("진행"))
     # print(find_details_by_status("제외"))
     # name = "강화군청"
-    # print(find_settings_detail_by_name(name))
+    # print(find_settings_notice_detail_by_name(name))

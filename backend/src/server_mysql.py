@@ -7,21 +7,21 @@ import uvicorn
 from utils_mysql import Mysql
 
 #    ** Global Variables
-# MYSQL_CONFIG = dict(host='172.17.0.3', port=3306, user='root', passwd='mysqlIlmac1!', db='Bid', charset='utf8')
+# MYSQL_CONFIG = dict(host='172.17.0.3', port=3306, user='root', passwd='mysqlIlmac1!', db='ilmac_bid_db', charset='utf8')
 
-TABLE_NOTICES = "notices"
-TABLE_DETAILS = "details"
-TABLE_FILES = "files"
+TABLE_NOTICES = "notice_list"
+TABLE_DETAILS = "notice_details"
+TABLE_FILES = "notice_files"
 KEY_FIELD_NOTICES = "nid"
-KEY_FIELD_FOR_SEARCH = "제목"
+KEY_FIELD_FOR_SEARCH = "title"
 SEARCH_DOMAINS = ["공사점검", "성능평가", "기타"]
 
 # ** BASE_SQL
 # notices, details
-BASE_SQL_NOTICE_LIST_1 = "SELECT notices.nid, notices.작성일, notices.기관명, notices.제목, notices.상세페이지주소, details.공고번호, details.파일이름, details.created_at FROM notices LEFT JOIN details ON notices.nid = details.nid"
+BASE_SQL_NOTICE_LIST_1 = "SELECT notices.nid, notices.posted_date, notices.org_name, notices.title, notices.detail_url, details.notice_num, details.file_name, details.created_at FROM notices LEFT JOIN details ON notices.nid = details.nid"
 
 # notices, details, files
-BASE_SQL_NOTICE_LIST_2 = "SELECT notices.nid, notices.작성일, notices.기관명, details.공고번호, notices.제목, notices.상세페이지주소, files.파일이름, details.created_at FROM notices LEFT JOIN details ON notices.nid = details.nid LEFT JOIN files ON notices.nid = files.nid"
+BASE_SQL_NOTICE_LIST_2 = "SELECT notices.nid, notices.posted_date, notices.org_name, details.notice_num, notices.title, notices.detail_url, files.file_name, details.created_at FROM notices LEFT JOIN details ON notices.nid = details.nid LEFT JOIN files ON notices.nid = files.nid"
 
 # ** ADD_SQL
 ADD_SQL_NOTICE_LIST_1 = "ORDER BY notices.nid DESC"

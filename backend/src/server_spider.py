@@ -19,35 +19,35 @@ class CSVRequest(BaseModel):
 
 class ListPageSettings(BaseModel):
   use: str
-  기관명: str
+  org_name: str
   url: str
   iframe: str
   rowXpath: str
-  제목: str
-  상세페이지주소: str
-  작성일: str
-  작성자: str
-  제외항목: str
+  title: str
+  detail_url: str
+  posted_date: str
+  posted_by: str
+  exception_path: str
   paging: str
   startPage: str
   endPage: str
   login: str
-  지역: str
+  org_region: str
   _비고: str
 
 class DetailPageSettings(BaseModel):
   use: str
-  기관명: str
-  제목: str
-  본문: str
-  파일이름: str
-  파일주소: str
-  미리보기: str
-  공고구분: str
-  공고번호: str
-  담당부서: str
-  담당자: str
-  연락처: str
+  org_name: str
+  title: str
+  body_html: str
+  file_name: str
+  file_url: str
+  preview: str
+  notice_div: str
+  notice_num: str
+  org_dept: str
+  org_man: str
+  org_tel: str
 
 class Nids(BaseModel):
   nids_str: str
@@ -73,7 +73,7 @@ def check_fetch_list(org_name: str):
     
   Returns:
     dict: {
-      'org_name': 기관명,
+      'org_name': org_name,
       'error_code': 에러 코드 (0은 성공),
       'error_message': 에러 메시지,
       'data': 스크래핑된 결과 dictionary 리스트

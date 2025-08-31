@@ -379,7 +379,7 @@ CSV 데이터 처리를 테스트합니다.
 **파라미터**:
 - `gap` (query, optional): 며칠간의 로그를 조회할지 지정
 
-#### `GET /errors_scraping`
+#### `GET /errors_notice_scraping`
 
 스크래핑 오류 로그를 조회합니다.
 

@@ -13,19 +13,19 @@ from utils_data import arr_from_csv, dict_from_tuple, dicts_from_tuples, csv_fro
 
 ## TODO: 설정 상수는 globals.py 또는 config.json 등에 일괄 저장
 
-TABLE_NOTICES = "notices"
-TABLE_DETAILS = "details"
-TABLE_FILES = "files"
+TABLE_NOTICES = "notice_list"
+TABLE_DETAILS = "notice_details"
+TABLE_FILES = "notice_files"
 KEY_FIELD_NOTICES = "nid"
-KEY_FIELD_FOR_SEARCH = "제목"
+KEY_FIELD_FOR_SEARCH = "title"
 SEARCH_DOMAINS = ["공사점검", "성능평가", "기타"]
 
 # ** BASE_SQL
 # notices, details
-BASE_SQL_NOTICE_LIST_1 = "SELECT notices.nid, notices.작성일, notices.기관명, notices.제목, notices.상세페이지주소, details.공고번호, details.파일이름, details.파일주소, details.created_at FROM notices LEFT JOIN details ON notices.nid = details.nid"
+BASE_SQL_NOTICE_LIST_1 = "SELECT notices.nid, notices.posted_date, notices.org_name, notices.title, notices.detail_url, details.notice_num, details.file_name, details.file_url, details.created_at FROM notices LEFT JOIN details ON notices.nid = details.nid"
 
 # notices, details, files
-BASE_SQL_NOTICE_LIST_2 = "SELECT notices.nid, notices.작성일, notices.기관명, details.공고번호, notices.제목, notices.상세페이지주소, files.파일이름, details.created_at FROM notices LEFT JOIN details ON notices.nid = details.nid LEFT JOIN files ON notices.nid = files.nid"
+BASE_SQL_NOTICE_LIST_2 = "SELECT notices.nid, notices.posted_date, notices.org_name, details.notice_num, notices.title, notices.detail_url, files.file_name, details.created_at FROM notices LEFT JOIN details ON notices.nid = details.nid LEFT JOIN files ON notices.nid = files.nid"
 
 # ** ADD_SQL
 ADD_SQL_NOTICE_LIST_1 = "ORDER BY notices.nid DESC"
@@ -34,13 +34,13 @@ ADD_SQL_NOTICE_LIST_2 = "ORDER BY notices.nid DESC, files.sn ASC"
 # 테스트후 'hasUrl=False' 삭제
 
 # ## ** Global Variables
-# SEPERATOR = "|-"  # 스크랩 요소(key,target,callback), 파일이름, 파일주소 분리자
+# SEPERATOR = "|-"  # 스크랩 요소(key,target,callback), file_name, file_url 분리자
 
-# SETTINGS_LIST_FIELDS = ["기관명", "url", "iframe", "rowXpath", "paging", "startPage", "endPage", "login", "제목", "상세페이지주소", "작성일"]
-# SETTINGS_LIST_CONFIG_FIELDS = ["url", "iframe", "rowXpath", "paging", "startPage", "endPage", "login"]
-# SETTINGS_LIST_ELEMENT_FIELDS = ["제목", "상세페이지주소", "작성일", "작성자", "제외항목"]
-# SETTINGS_DETAIL_FIELDS = ["기관명", "제목", "본문", "파일이름", "파일주소", "공고구분", "공고번호", "담당부서", "담당자", "연락처"]
-# settings_category_FIELDS = []
+# SETTINGS_NOTICE_LIST_FIELDS = ["org_name", "url", "iframe", "rowXpath", "paging", "startPage", "endPage", "login", "title", "detail_url", "posted_date"]
+# SETTINGS_NOTICE_LIST_CONFIG_FIELDS = ["url", "iframe", "rowXpath", "paging", "startPage", "endPage", "login"]
+# SETTINGS_NOTICE_LIST_ELEMENT_FIELDS = ["title", "detail_url", "posted_date", "posted_by", "exception_path"]
+# SETTINGS_NOTICE_DETAIL_FIELDS = ["org_name", "title", "body_html", "file_name", "file_url", "notice_div", "notice_num", "org_dept", "org_man", "org_tel"]
+# settings_notice_category_FIELDS = []
 
 # ELEMENT_KEYS = ["key", "xpath", "callback"]
 
@@ -56,7 +56,7 @@ def find_default_keyword(domain="공사점검"):
     Returns:
         tuple: (검색어, 배제어, 최소점수) 형태의 튜플
     """
-    sql = f"SELECT `검색어`, `배제어`, `최소점수` FROM settings_category WHERE `use`=true AND `적용분야`='{domain}' ORDER BY `updated_at` DESC LIMIT 1"
+    sql = f"SELECT `검색어`, `배제어`, `최소점수` FROM settings_notice_category WHERE `use`=true AND `적용분야`='{domain}' ORDER BY `updated_at` DESC LIMIT 1"
     return mysql.fetch(sql, 1)
 
 def find_default_keywords(domains=SEARCH_DOMAINS):
@@ -96,7 +96,7 @@ def get_keyword_weight_list(keyword_weight_str):
 
 # * 가중치 검색어 배열 -> 가중치 검색 조건에 맞는 dict 반환 {"<nid>": {<rst>}, ...}
 # TODO: 직접 SQL(LEFT JOIN 등 가능) parameter 버전 추가, 'field' -> 'key'
-def get_search_weight(keyword_weight_str, min_point=4, add_where="`작성일` > '2023-03-31'"):
+def get_search_weight(keyword_weight_str, min_point=4, add_where="`posted_date` > '2023-03-31'"):
     """
     가중치 검색어를 사용하여 데이터를 검색합니다.
     
@@ -106,7 +106,7 @@ def get_search_weight(keyword_weight_str, min_point=4, add_where="`작성일` > 
         add_where (str): 추가 WHERE 조건
         
     Returns:
-        list: [{nid: {제목: str, matched: str, point: int}}, ...] 형태의 리스트
+        list: [{nid: {title: str, matched: str, point: int}}, ...] 형태의 리스트
     """
     keyword_weights = get_keyword_weight_list(keyword_weight_str)
     rsts = {}
@@ -142,7 +142,7 @@ def is_not_ins(not_str="", data=""):
             return True
     return False
 
-def filter_by_not(not_str="", dicts=[], field="제목"):
+def filter_by_not(not_str="", dicts=[], field="title"):
     if (not_str.strip() == ""):
         return dicts
 
@@ -179,11 +179,11 @@ def get_search_results(keyword_weight_str, nots_str, min_point, add_where=""):
     
     return response
 
-# TABLE_NOTICES = "notices"
-# TABLE_DETAILS = "details"
-# TABLE_FILES = "files"
+# TABLE_NOTICES = "notice_list"
+# TABLE_DETAILS = "notice_details"
+# TABLE_FILES = "notice_files"
 # KEY_FIELD_NOTICES = "nid"
-# KEY_FIELD_FOR_SEARCH = "제목"
+# KEY_FIELD_FOR_SEARCH = "title"
 # search by weight keywords and not filters
 
 ## * nids 중 특정 테이블에 있는 nid, 없는 nid 반환
@@ -211,17 +211,17 @@ def find_nids_for_fetch_details(last_date=None):
     for domain in SEARCH_DOMAINS:
         (keyword_weight_str, nots_str, min_point) = find_default_keyword(domain)
         # print(keywords, nots, min_point)
-        # 스크래핑한 최종 작성일 날짜: details에서 최종 nid => nid에 해당하는 notices의 `작성일`
+        # 스크래핑한 최종 posted_date 날짜: details에서 최종 nid => nid에 해당하는 notices의 `posted_date`
         if last_date is None:
-            last_date = mysql.fetch("SELECT `작성일`  FROM notices  WHERE nid=(SELECT MAX(`nid`) FROM details)", 1)[0]
+            last_date = mysql.fetch("SELECT `posted_date`  FROM notices  WHERE nid=(SELECT MAX(`nid`) FROM details)", 1)[0]
 
-        add_where = f"`작성일` > '{last_date}'"
+        add_where = f"`posted_date` > '{last_date}'"
         nids.extend(find_nids_by_search_setting(keyword_weight_str, nots_str, min_point, add_where))
 
     nids = list(set(nids))
     nids.sort()
 
-    return find_nids_in_table(nids, "details", exist=False)  # ? details에 이미 있는 nid 제외
+    return find_nids_in_table(nids, "notice_details", exist=False)  # ? details에 이미 있는 nid 제외
 
     # return [list(dct.keys())[0] for dct in dicts]
 
@@ -270,8 +270,8 @@ if __name__ == "__main__":
 
     # # *
     # keywords = "내진*3,성능,평가,설계,보강,검증"
-    # # add_where = "`작성일` > '2023-03-31'"
+    # # add_where = "`posted_date` > '2023-03-31'"
     # add_where = ""
     # add_fields = []
-    # get_search_weight(keywords, min_point=4, field="제목", table_name="notices", add_fields=add_fields, add_where=add_where)
+    # get_search_weight(keywords, min_point=4, field="title", table_name="notice_list", add_fields=add_fields, add_where=add_where)
     # # print(rs)

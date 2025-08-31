@@ -5,7 +5,7 @@ export const settingsDetailResolvers = {
     settingsDetails: async () => {
       try {
         console.log('settingsDetails API 호출 시작');
-        const response = await apiClient.get('/settings_detail');
+        const response = await apiClient.get('/settings_notice_detail');
         console.log('settingsDetails API 응답:', response.data);
         
         if (!response) {
@@ -19,16 +19,16 @@ export const settingsDetailResolvers = {
         }
 
         return response.data.map((item: any) => ({
-          orgName: item?.기관명 || '',
-          title: item?.제목 || '',
-          content: item?.본문 || '',
-          // fileName: item?.파일이름 || '',
-          // fileUrl: item?.파일주소 || '',
-          // noticeType: item?.공고구분 || '',
-          // noticeNumber: item?.공고번호 || '',
-          // department: item?.담당부서 || '',
-          // manager: item?.담당자 || '',
-          // contact: item?.연락처 || '',
+          orgName: item?.org_name || '',
+          title: item?.title || '',
+          content: item?.body_html || '',
+          // fileName: item?.file_name || '',
+          // fileUrl: item?.file_url || '',
+          // noticeType: item?.notice_div || '',
+          // noticeNumber: item?.notice_num || '',
+          // department: item?.org_dept || '',
+          // manager: item?.org_man || '',
+          // contact: item?.org_tel || '',
         }));
       } catch (error) {
         console.error('settingsDetail API 에러 상세:', error);
@@ -45,8 +45,8 @@ export const settingsDetailResolvers = {
         const encodedOrgName = encodeURIComponent(orgName);
         console.log('인코딩된 기관명:', encodedOrgName);
         
-        // 백엔드 BID 서버의 /settings_detail/{기관명} 엔드포인트 호출
-        const response = await apiClient.get(`/settings_detail/${encodedOrgName}`);
+        // 백엔드 BID 서버의 /settings_notice_detail/{기관명} 엔드포인트 호출
+        const response = await apiClient.get(`/settings_notice_detail/${encodedOrgName}`);
         console.log('settingDetail API 응답:', response.data);
         
         const setting = response.data;
@@ -78,15 +78,15 @@ export const settingsDetailResolvers = {
 
             // 각 필드를 element로 변환
             const fieldMappings = [
-              { key: '제목', xpathString: orgSetting['제목'] || '' },
-              { key: '본문', xpathString: orgSetting['본문'] || '' },
-              { key: '파일이름', xpathString: orgSetting['파일이름'] || '' },
-              { key: '파일주소', xpathString: orgSetting['파일주소'] || '' },
-              { key: '공고구분', xpathString: orgSetting['공고구분'] || '' },
-              { key: '공고번호', xpathString: orgSetting['공고번호'] || '' },
-              { key: '담당부서', xpathString: orgSetting['담당부서'] || '' },
-              { key: '담당자', xpathString: orgSetting['담당자'] || '' },
-              { key: '연락처', xpathString: orgSetting['연락처'] || '' },
+              { key: '제목', xpathString: orgSetting['title'] || '' },
+              { key: '본문', xpathString: orgSetting['body_html'] || '' },
+              { key: '파일이름', xpathString: orgSetting['file_name'] || '' },
+              { key: '파일주소', xpathString: orgSetting['file_url'] || '' },
+              { key: '공고구분', xpathString: orgSetting['notice_div'] || '' },
+              { key: '공고번호', xpathString: orgSetting['notice_num'] || '' },
+              { key: '담당부서', xpathString: orgSetting['org_dept'] || '' },
+              { key: '담당자', xpathString: orgSetting['org_man'] || '' },
+              { key: '연락처', xpathString: orgSetting['org_tel'] || '' },
             ];
             
             elements = fieldMappings
@@ -117,7 +117,7 @@ export const settingsDetailResolvers = {
           };
 
           const elementKeys = Object.keys(setting).filter(key => 
-            key !== '기관명' && setting[key]
+            key !== 'org_name' && setting[key]
           );
           
           elements = elementKeys.map(key => {

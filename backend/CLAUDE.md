@@ -26,7 +26,7 @@ Key tables:
 - `details` - Detailed content and attachments
 - `files` - File attachment tracking  
 - `settings_list` - Scraping configuration per organization
-- `settings_keyword` - Keyword search and scoring rules
+- `settings_category` - Keyword search and scoring rules
 - `settings_category` - Category classification settings
 
 ## Development Commands
@@ -87,7 +87,7 @@ python mysql_bid.py
 ### Configuration Management
 - Organization scraping settings stored in `settings_list` table
 - XPath selectors, pagination, login credentials per site
-- Keyword rules in `settings_keyword` with scoring weights
+- Keyword rules in `settings_category` with scoring weights
 - Category classification in `settings_category`
 
 ## API Endpoints

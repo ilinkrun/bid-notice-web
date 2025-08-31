@@ -13,11 +13,11 @@ export const bidResolvers = {
           started_at: bd.started_at,
           ended_at: bd.ended_at,
           memo: bd.memo,
-          orgName: bd.기관명,
-          postedAt: bd.작성일,
+          orgName: bd.org_name,
+          postedAt: bd.posted_date,
           detail: bd.detail,
           category: bd.category || "",
-          region: bd.지역 || "",
+          region: bd.org_region || "",
         }));
       } catch (error) {
         console.error('Error fetching bid by category:', error);

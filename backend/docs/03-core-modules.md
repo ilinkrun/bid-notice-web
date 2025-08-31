@@ -282,8 +282,8 @@
 
 #### Global Constants
 - `CATEGORIES = ["공사점검", "성능평가", "기타"]`: System categories
-- `SETTINGS_LIST_FIELDS`: Configuration fields for list scraping
-- `SETTINGS_DETAIL_FIELDS`: Configuration fields for detail scraping
+- `SETTINGS_NOTICE_LIST_FIELDS`: Configuration fields for list scraping
+- `SETTINGS_NOTICE_DETAIL_FIELDS`: Configuration fields for detail scraping
 
 #### Settings Management Functions
 
@@ -698,7 +698,7 @@ CREATE TABLE channel_dev (
 - `DELETE /delete_old_notices?day_gap={days}`: Clean old notices
 - `POST /backup_db`: Backup database
 - `GET /logs_scraping?gap={days}`: Get scraping logs
-- `GET /errors_scraping?gap={days}`: Get error logs
+- `GET /errors_notice_scraping?gap={days}`: Get error logs
 
 #### Request/Response Models
 

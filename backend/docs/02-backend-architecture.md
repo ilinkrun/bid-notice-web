@@ -173,7 +173,7 @@ settings_list 테이블 → 기관별 설정 → 동적 스크래핑 규칙
 
 ### 키워드 설정
 ```
-settings_keyword 테이블 → 키워드 규칙 → 자동 분류 로직
+settings_category 테이블 → 키워드 규칙 → 자동 분류 로직
 ```
 
 ## 확장성 고려사항

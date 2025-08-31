@@ -188,8 +188,8 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
   const contentRef = useRef<HTMLTextAreaElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
 
-  // board 값을 channel_${board} 형식으로 변환
-  const channelBoard = `channel_${board}`;
+  // board 값을 board_${board} 형식으로 변환
+  const channelBoard = `board_${board}`;
 
   // 페이지 마운트시 초기화 - 로딩은 데이터 로딩 완료시 해제
 

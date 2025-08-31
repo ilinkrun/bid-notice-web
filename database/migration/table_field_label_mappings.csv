@@ -1,0 +1,162 @@
+id,table_name,field_key,field_label,remark
+1,bids,bid,입찰아이디,입찰아이디
+2,bids,nid,공고아이디,공고아이디
+3,bids,title,제목,입찰 공고 제목
+4,bids,started_at,입찰시작,입찰 시작 시간
+5,bids,ended_at,입찰종료,입찰 종료 시간
+6,bids,detail,상세정보,상세정보
+7,bids,memo,메모,메모
+8,bids,created_at,생성일시,생성일시
+9,bids,updated_at,수정일시,수정일시
+10,bids,status,상태,입찰 진행 상태
+11,board_comments,id,순번,순번
+12,board_comments,board,게시판명,"channel_dev, channel_op, channel_manual"
+13,board_comments,post_id,게시글 ID,게시글 ID
+14,board_comments,content,내용,댓글 내용
+15,board_comments,writer,작성자,댓글 작성자 이름
+16,board_comments,password,비밀번호,숫자 4자리
+17,board_comments,created_at,생성시간,생성시간
+18,board_comments,updated_at,수정시간,수정시간
+19,board_comments,is_visible,노출,댓글 노출 여부
+20,channel_dev,id,순번,글 순번 아이디
+21,channel_dev,title,제목,글제목
+22,channel_dev,content,내용,글내용
+23,channel_dev,format,형식,"글형식(text, markdown, html)"
+24,channel_dev,writer,글쓴이,글쓴이 이름
+25,channel_dev,password,비밀번호,숫자 4자리
+26,channel_dev,created_at,생성시간,생성시간
+27,channel_dev,updated_at,수정시간,수정시간
+28,channel_dev,is_visible,노출,글 노출 여부
+29,channel_manual,id,순번,글 순번 아이디
+30,channel_manual,title,제목,글제목
+31,channel_manual,content,내용,글내용
+32,channel_manual,format,형식,"글형식(text, markdown, html)"
+33,channel_manual,writer,글쓴이,글쓴이 이름
+34,channel_manual,password,비밀번호,숫자 4자리
+35,channel_manual,created_at,생성시간,생성시간
+36,channel_manual,updated_at,수정시간,수정시간
+37,channel_manual,is_visible,노출,글 노출 여부
+38,channel_op,id,순번,글 순번 아이디
+39,channel_op,title,제목,글제목
+40,channel_op,content,내용,글내용
+41,channel_op,format,형식,"글형식(text, markdown, html)"
+42,channel_op,writer,글쓴이,글쓴이 이름
+43,channel_op,password,비밀번호,숫자 4자리
+44,channel_op,created_at,생성시간,생성시간
+45,channel_op,updated_at,수정시간,수정시간
+46,channel_op,is_visible,노출,글 노출 여부
+47,details,nid,순번,순번
+48,details,title,제목,title
+49,details,file_name,파일이름,file_names
+50,details,file_url,파일주소,file_urls
+51,details,notice_div,공고구분,notice_div
+52,details,notice_num,공고번호,notice_num
+53,details,org_dept,담당부서,org_dept
+54,details,org_man,담당자,org_man
+55,details,org_tel,연락처,org_tel
+56,details,scraped_at,스크랩 시간,스크랩 시간
+57,details,updated_at,수정 시간,수정 시간
+58,details,org_name,기관명,org_name
+59,details,body_html,본문,body_html
+60,details,detail_url,상세페이지주소,detail_url
+61,details,created_at,생성 시간,생성 시간
+62,details,posted_date,작성일,posted_date
+63,details,posted_by,작성자,posted_by
+64,details,category,업무 분류,업무 분류
+65,details,status,진행 상태,진행 상태
+66,errors_notice_scraping,id,id,
+67,errors_notice_scraping,orgs,orgs,
+68,errors_notice_scraping,time,time,
+69,errors_notice_scraping,created_at,created_at,
+70,files,nid,순번,공고 아이디
+71,files,sn,일련번호,일련번호
+72,files,file_name,파일이름,file_name
+73,files,file_url,파일주소,file_url
+74,files,down_folder,다운폴더,down_folder
+75,files,down_start,다운로드 시작시간,다운로드 시작시간
+76,files,scraped_at,스크랩 시간,스크랩 시간
+77,files,created_at,생성 시간,생성 시간
+78,files,updated_at,수정 시간,수정 시간
+79,logs_scraping,id,id,
+80,logs_scraping,org_name,org_name,
+81,logs_scraping,error_code,error_code,
+82,logs_scraping,error_message,error_message,
+83,logs_scraping,scraped_count,scraped_count,
+84,logs_scraping,inserted_count,inserted_count,
+85,logs_scraping,time,time,
+86,logs_scraping,created_at,created_at,
+87,notices,nid,순번,공고 아이디
+88,notices,sn,일련번호,일련번호
+89,notices,org_name,기관명,org_name
+90,notices,title,제목,title
+91,notices,detail_url,상세페이지주소,detail_url
+92,notices,posted_date,작성일,posted_date
+93,notices,posted_by,작성자,posted_by
+94,notices,scraped_at,스크랩 시간,스크랩 시간
+95,notices,created_at,생성시간,생성시간
+96,notices,updated_at,수정시간,수정시간
+97,notices,category,구분,업무 분류
+98,notices,status,상태,상태
+99,notices,is_selected,진행,입찰 진행 여부
+100,settings_category,sn,순번,순번
+101,settings_category,category,구분,업무 분류
+102,settings_category,keywords,키워드,키워드
+103,settings_category,nots,배제어,배제어
+104,settings_category,min_point,최소점수,최소점수
+105,settings_category,creator,생성자,생성자
+106,settings_category,memo,메모,메모
+107,settings_category,created_at,생성시간,생성시간
+108,settings_category,updated_at,수정시간,수정시간
+109,settings_category,use,사용,사용 여부
+110,settings_detail,org_name,기관명,org_name
+111,settings_detail,title,제목,xpath_title
+112,settings_detail,body_html,본문,xpath_body
+113,settings_detail,file_name,파일이름,xpath_file_name
+114,settings_detail,file_url,파일주소,xpath_file_url
+115,settings_detail,preview,미리보기,xpath_preview
+116,settings_detail,notice_div,공고구분,xpath_notice_div
+117,settings_detail,notice_num,공고번호,xpath_notice_num
+118,settings_detail,org_dept,담당부서,xpath_org_div
+119,settings_detail,org_man,담당자,xpath_org_man
+120,settings_detail,org_tel,연락처,xpath_org_tel
+121,settings_detail,use,사용,사용
+122,settings_detail,sample_url,샘플 url,샘플 url
+123,settings_detail,down,다운로드,다운로드
+124,settings_detail,oid,순번,순번
+125,settings_keyword,use,use,
+126,settings_keyword,search_name,검색명,
+127,settings_keyword,search_keyword,검색어,
+128,settings_keyword,exclude_keyword,배제어,
+129,settings_keyword,min_score,최소점수,
+130,settings_keyword,apply_field,적용분야,
+131,settings_keyword,apply_org,적용기관,
+132,settings_keyword,apply_region,적용지역,
+133,settings_keyword,posted_by,작성자,
+134,settings_keyword,memo,메모,
+135,settings_keyword,created_at,created_at,
+136,settings_keyword,updated_at,updated_at,
+137,settings_list,org_name,기관명,org_name
+138,settings_list,url,게시판 url,게시판 url
+139,settings_list,iframe,게시판 iframe,게시판 iframe
+140,settings_list,rowXpath,게시판 행,게시판 행
+141,settings_list,paging,페이지 클릭요소,페이지 클릭요소
+142,settings_list,startPage,시작 페이지,시작 페이지
+143,settings_list,endPage,끝 페이지,끝 페이지
+144,settings_list,login,로그인,로그인
+145,settings_list,title,제목,path_title
+146,settings_list,detail_url,상세페이지주소,path_detail_url
+147,settings_list,posted_date,작성일,path_posted_date
+148,settings_list,posted_by,작성자,path_posted_by
+149,settings_list,exception_path,제외항목,path_exception
+150,settings_list,use,사용,사용 여부
+151,settings_list,org_region,지역,지역
+152,settings_list,registration,등록,
+153,settings_list,company_in_charge,담당업체,
+154,settings_list,org_man,담당자,
+155,settings_list,oid,oid,
+156,settings_nas_folder,id,순번,아이디
+157,settings_nas_folder,name,이름,이름
+158,settings_nas_folder,area,영역,영역
+159,settings_nas_folder,level,깊이,깊이
+160,settings_nas_folder,folder,폴더,폴더
+161,settings_nas_folder,remark,비고,비고

@@ -8,7 +8,7 @@ from utils_mysql import Mysql, _where_like_unit, _where_eq_unit
 from utils_data import arr_from_csv, dict_from_tuple, dicts_from_tuples, csv_from_dicts, csv_added_defaults
 
 """
-CREATE TABLE channel_dev (
+CREATE TABLE board_dev (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL COMMENT '글 제목',
     content TEXT NOT NULL COMMENT '글 내용',
@@ -28,21 +28,21 @@ CREATE TABLE channel_dev (
 """
 
 # 게시판 CRUD 함수들을 추가합니다
-def create_post(data: dict, table_name: str = 'channel_dev'):
+def create_post(data: dict, table_name: str = 'board_dev'):
     """
     새로운 게시글을 생성합니다.
     
     Args:
         data (dict): 게시글 데이터
             {
-                'title': str,        # 필수: 글 제목
+                'title': str,        # 필수: 글 title
                 'content': str,      # 필수: 글 내용
                 'writer': str,       # 필수: 글쓴이 이름
                 'password': str,     # 필수: 숫자 4자리 비밀번호
                 'format': str,       # 선택: 내용 형식 ('text', 'markdown', 'html'). 기본값 'text'
                 'is_visible': bool   # 선택: 글 노출 여부. 기본값 True
             }
-        table_name (str, optional): 테이블명. 기본값 'channel_dev'
+        table_name (str, optional): 테이블명. 기본값 'board_dev'
         
     Returns:
         int: 생성된 게시글의 ID
@@ -81,13 +81,13 @@ def create_post(data: dict, table_name: str = 'channel_dev'):
     finally:
         mysql.close()
 
-def get_post(post_id: int, table_name: str = 'channel_dev'):
+def get_post(post_id: int, table_name: str = 'board_dev'):
     """
     특정 ID의 게시글을 조회합니다.
     
     Args:
         post_id (int): 게시글 ID
-        table_name (str, optional): 테이블명. 기본값 'channel_dev'
+        table_name (str, optional): 테이블명. 기본값 'board_dev'
         
     Returns:
         dict: 게시글 정보 또는 None
@@ -105,7 +105,7 @@ def get_post(post_id: int, table_name: str = 'channel_dev'):
     finally:
         mysql.close()
 
-def update_post(post_id: int, data: dict, password: str, table_name: str = 'channel_dev'):
+def update_post(post_id: int, data: dict, password: str, table_name: str = 'board_dev'):
     """
     게시글을 수정합니다. 비밀번호가 일치하는 경우에만 수정이 가능합니다.
     
@@ -113,13 +113,13 @@ def update_post(post_id: int, data: dict, password: str, table_name: str = 'chan
         post_id (int): 게시글 ID
         data (dict): 수정할 게시글 데이터
             {
-                'title': str,        # 선택: 글 제목
+                'title': str,        # 선택: 글 title
                 'content': str,      # 선택: 글 내용
                 'format': str,       # 선택: 내용 형식 ('text', 'markdown', 'html')
                 'is_visible': bool   # 선택: 글 노출 여부
             }
         password (str): 게시글 비밀번호
-        table_name (str, optional): 테이블명. 기본값 'channel_dev'
+        table_name (str, optional): 테이블명. 기본값 'board_dev'
         
     Returns:
         bool: 수정 성공 여부
@@ -140,7 +140,7 @@ def update_post(post_id: int, data: dict, password: str, table_name: str = 'chan
         # 수정할 데이터 구성
         update_data = {}
         
-        # 제목 업데이트
+        # title 업데이트
         if 'title' in data:
             update_data['title'] = data['title']
             
@@ -165,14 +165,14 @@ def update_post(post_id: int, data: dict, password: str, table_name: str = 'chan
     finally:
         mysql.close()
 
-def delete_post(post_id: int, password: str, table_name: str = 'channel_dev'):
+def delete_post(post_id: int, password: str, table_name: str = 'board_dev'):
     """
     게시글을 삭제합니다. 비밀번호가 일치하는 경우에만 삭제가 가능합니다.
     
     Args:
         post_id (int): 게시글 ID
         password (str): 게시글 비밀번호
-        table_name (str, optional): 테이블명. 기본값 'channel_dev'
+        table_name (str, optional): 테이블명. 기본값 'board_dev'
         
     Returns:
         bool: 삭제 성공 여부
@@ -189,7 +189,7 @@ def delete_post(post_id: int, password: str, table_name: str = 'channel_dev'):
     finally:
         mysql.close()
 
-def list_posts(page: int = 1, per_page: int = 20, only_visible: bool = True, table_name: str = 'channel_dev'):
+def list_posts(page: int = 1, per_page: int = 20, only_visible: bool = True, table_name: str = 'board_dev'):
     """
     게시글 목록을 조회합니다.
     
@@ -197,7 +197,7 @@ def list_posts(page: int = 1, per_page: int = 20, only_visible: bool = True, tab
         page (int, optional): 페이지 번호. 기본값 1
         per_page (int, optional): 페이지당 게시글 수. 기본값 20
         only_visible (bool, optional): 노출된 게시글만 조회할지 여부. 기본값 True
-        table_name (str, optional): 테이블명. 기본값 'channel_dev'
+        table_name (str, optional): 테이블명. 기본값 'board_dev'
         
     Returns:
         tuple: (전체 게시글 수, 현재 페이지 게시글 목록)

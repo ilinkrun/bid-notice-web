@@ -4,13 +4,13 @@ export const settingsListResolvers = {
   Query: {
     settingsLists: async () => {
       try {
-        const response = await apiClient.get('/settings_list');
+        const response = await apiClient.get('/settings_notice_list');
         return response.data.map((setting: any) => {
           return {
-            orgName: setting.기관명,
+            orgName: setting.org_name,
             detailUrl: setting.url || '',
-            region: setting.지역,
-            registration: setting.등록,
+            region: setting.org_region,
+            registration: setting.registration,
             use: setting.use
           };
         });
@@ -22,7 +22,7 @@ export const settingsListResolvers = {
 
     settingList: async (_: unknown, { orgName }: { orgName: string }) => {
       try {
-        const response = await apiClient.get(`/settings_list/${orgName}`);
+        const response = await apiClient.get(`/settings_notice_list/${orgName}`);
         const setting = response.data;
 
         return {
@@ -35,8 +35,8 @@ export const settingsListResolvers = {
           endPage: setting.endPage,
           login: setting.login || "",
           elements: setting.elements || [],
-          region: setting.지역,
-          registration: setting.등록,
+          region: setting.org_region,
+          registration: setting.registration,
           use: setting.use
         };
       } catch (error) {
@@ -47,8 +47,8 @@ export const settingsListResolvers = {
 
     orgNameList: async () => {
       try {
-        const response = await apiClient.get('/settings_list');
-        return response.data.filter((setting: any) => setting.use == 1).map((setting: any) => setting.기관명);
+        const response = await apiClient.get('/settings_notice_list');
+        return response.data.filter((setting: any) => setting.use == 1).map((setting: any) => setting.org_name);
       } catch (error) {
         console.error('Error fetching org name list:', error);
         return [];
@@ -59,15 +59,15 @@ export const settingsListResolvers = {
   Mutation: {
     createSettingsList: async (_: unknown, { input }: { input: any }) => {
       try {
-        const response = await apiClient.post('/settings_list', {
+        const response = await apiClient.post('/settings_notice_list', {
           ...input,
-          지역: input.region,
-          등록: input.registration
+          org_region: input.region,
+          registration: input.registration
         });
         return {
           ...response.data,
-          region: response.data.지역,
-          registration: response.data.등록
+          region: response.data.org_region,
+          registration: response.data.registration
         };
       } catch (error) {
         console.error('Error creating setting:', error);
@@ -77,15 +77,15 @@ export const settingsListResolvers = {
 
     updateSettingsList: async (_: unknown, { orgName, input }: { orgName: string, input: any }) => {
       try {
-        const response = await apiClient.put(`/settings_list/${orgName}`, {
+        const response = await apiClient.put(`/settings_notice_list/${orgName}`, {
           ...input,
-          지역: input.region,
-          등록: input.registration
+          org_region: input.region,
+          registration: input.registration
         });
         return {
           ...response.data,
-          region: response.data.지역,
-          registration: response.data.등록
+          region: response.data.org_region,
+          registration: response.data.registration
         };
       } catch (error) {
         console.error('Error updating setting:', error);

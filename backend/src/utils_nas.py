@@ -43,15 +43,15 @@ from utils_data import (find_folders)
 # * NAS 폴더, 파일
 def get_notice_category_org_com(nid):
     mysql = Mysql()
-    result1 = mysql.find("notices", fields=['기관명', 'category', '제목'], addStr=f"WHERE nid = {nid}")
-    [기관명, category, 제목] = list(result1[0])
-    result2 = mysql.find("settings_list", fields=['oid', '담당업체'], addStr=f"WHERE `기관명` = '{기관명}'")
-    [oid, 담당업체] = list(result2[0])
+    result1 = mysql.find("notice_list", fields=['org_name', 'category', 'title'], addStr=f"WHERE nid = {nid}")
+    [org_name, category, title] = list(result1[0])
+    result2 = mysql.find("settings_notice_list", fields=['oid', 'company_in_charge'], addStr=f"WHERE `org_name` = '{org_name}'")
+    [oid, company_in_charge] = list(result2[0])
     mysql.close()
     if not category: 
         category = '공사점검' #!!! 디폴트값
 
-    return [기관명, category, 제목, oid, 담당업체]
+    return [org_name, category, title, oid, company_in_charge]
 
 
 def get_nas_folder(name='root', level=1):
@@ -73,9 +73,9 @@ def get_notice_folder_num(title, parent_dir = '/nas/_ilmac'):
 
 
 def get_notice_nas_folder(nid):
-    [기관명, category, 제목, oid, 담당업체] = get_notice_category_org_com(nid)
+    [org_name, category, title, oid, company_in_charge] = get_notice_category_org_com(nid)
 
-    levels = [['root', 1], [category, 2], ['공고', 3], ['기관명', 4], ['공고명', 5], ['공고파일', 6]]
+    levels = [['root', 1], [category, 2], ['공고', 3], ['org_name', 4], ['공고명', 5], ['공고파일', 6]]
     # print(levels)
     mysql = Mysql()
     paths = [(mysql.find("settings_nas_folder", fields=['folder'], addStr=f"WHERE name = '{level[0]}' AND level={level[1]}"))[0][0] for level in levels]
@@ -84,14 +84,14 @@ def get_notice_nas_folder(nid):
 
     # 실제 값으로 치환
     for i, path in enumerate(paths):
-        path = path.replace('{담당업체}', str(담당업체))
+        path = path.replace('{company_in_charge}', str(company_in_charge))
         path = path.replace('{oid}', str(oid))
-        path = path.replace('{기관명}', str(기관명))
-        path = path.replace('{제목}', str(제목))
+        path = path.replace('{org_name}', str(org_name))
+        path = path.replace('{title}', str(title))
         paths[i] = path
 
     parent_path = "/".join(paths[:-2])
-    num = get_notice_folder_num(제목, parent_path) # !!!제목이 일치하는 폴더 있는지 확인
+    num = get_notice_folder_num(title, parent_path) # !!!title이 일치하는 폴더 있는지 확인
     
     # print(f"Parent path: {parent_path}")
     return parent_path + "/" + paths[-2].replace('{num}', str(num)) + "/" + paths[-1]

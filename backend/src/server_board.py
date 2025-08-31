@@ -12,7 +12,7 @@ from utils_mysql import Mysql, _where_like_unit, _where_eq_unit
 from utils_data import arr_from_csv, dict_from_tuple, dicts_from_tuples, csv_from_dicts, csv_added_defaults
 
 """
-CREATE TABLE channel_dev (
+CREATE TABLE board_dev (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL COMMENT '글 제목',
     content TEXT NOT NULL COMMENT '글 내용',
@@ -29,7 +29,7 @@ CREATE TABLE channel_dev (
     INDEX idx_is_visible (is_visible)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='개발 채널 게시판';
 
-CREATE TABLE board_comments (
+CREATE TABLE comments_board (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     board VARCHAR(50) NOT NULL COMMENT '게시판 이름',
     post_id BIGINT UNSIGNED NOT NULL COMMENT '게시글 ID',
@@ -57,21 +57,21 @@ is_valid_password 함수 추가 필요
 """
 
 # 게시판 CRUD 함수들을 추가합니다
-def create_post(data: dict, table_name: str = 'channel_dev'):
+def create_post(data: dict, table_name: str = 'board_dev'):
     """
     새로운 게시글을 생성합니다.
     
     Args:
         data (dict): 게시글 데이터
             {
-                'title': str,        # 필수: 글 제목
+                'title': str,        # 필수: 글 title
                 'content': str,      # 필수: 글 내용
                 'writer': str,       # 필수: 글쓴이 이름
                 'password': str,     # 필수: 숫자 4자리 비밀번호
                 'format': str,       # 선택: 내용 형식 ('text', 'markdown', 'html'). 기본값 'text'
                 'is_visible': bool   # 선택: 글 노출 여부. 기본값 True
             }
-        table_name (str, optional): 테이블명. 기본값 'channel_dev'
+        table_name (str, optional): 테이블명. 기본값 'board_dev'
         
     Returns:
         int: 생성된 게시글의 ID
@@ -130,13 +130,13 @@ def create_post(data: dict, table_name: str = 'channel_dev'):
     finally:
         mysql.close()
 
-def get_post(post_id: int, table_name: str = 'channel_dev'):
+def get_post(post_id: int, table_name: str = 'board_dev'):
     """
     특정 ID의 게시글을 조회합니다.
     
     Args:
         post_id (int): 게시글 ID
-        table_name (str, optional): 테이블명. 기본값 'channel_dev'
+        table_name (str, optional): 테이블명. 기본값 'board_dev'
         
     Returns:
         dict: 게시글 정보 또는 None
@@ -167,7 +167,7 @@ def get_post(post_id: int, table_name: str = 'channel_dev'):
     finally:
         mysql.close()
 
-def update_post(post_id: int, data: dict, password: str, table_name: str = 'channel_dev'):
+def update_post(post_id: int, data: dict, password: str, table_name: str = 'board_dev'):
     """
     게시글을 수정합니다. 비밀번호가 일치하는 경우에만 수정이 가능합니다.
     
@@ -175,13 +175,13 @@ def update_post(post_id: int, data: dict, password: str, table_name: str = 'chan
         post_id (int): 게시글 ID
         data (dict): 수정할 게시글 데이터
             {
-                'title': str,        # 선택: 글 제목
+                'title': str,        # 선택: 글 title
                 'content': str,      # 선택: 글 내용
                 'format': str,       # 선택: 내용 형식 ('text', 'markdown', 'html')
                 'is_visible': bool   # 선택: 글 노출 여부
             }
         password (str): 게시글 비밀번호
-        table_name (str, optional): 테이블명. 기본값 'channel_dev'
+        table_name (str, optional): 테이블명. 기본값 'board_dev'
         
     Returns:
         bool: 수정 성공 여부
@@ -202,7 +202,7 @@ def update_post(post_id: int, data: dict, password: str, table_name: str = 'chan
         # 수정할 데이터 구성
         update_data = {}
         
-        # 제목 업데이트
+        # title 업데이트
         if 'title' in data:
             update_data['title'] = data['title']
             
@@ -227,14 +227,14 @@ def update_post(post_id: int, data: dict, password: str, table_name: str = 'chan
     finally:
         mysql.close()
 
-def delete_post(post_id: int, password: str, table_name: str = 'channel_dev'):
+def delete_post(post_id: int, password: str, table_name: str = 'board_dev'):
     """
     게시글을 삭제합니다. 비밀번호가 일치하는 경우에만 삭제가 가능합니다.
     
     Args:
         post_id (int): 게시글 ID
         password (str): 게시글 비밀번호
-        table_name (str, optional): 테이블명. 기본값 'channel_dev'
+        table_name (str, optional): 테이블명. 기본값 'board_dev'
         
     Returns:
         bool: 삭제 성공 여부
@@ -251,7 +251,7 @@ def delete_post(post_id: int, password: str, table_name: str = 'channel_dev'):
     finally:
         mysql.close()
 
-def list_posts(page: int = 1, per_page: int = 20, only_visible: bool = True, table_name: str = 'channel_dev'):
+def list_posts(page: int = 1, per_page: int = 20, only_visible: bool = True, table_name: str = 'board_dev'):
     """
     게시글 목록을 조회합니다.
     
@@ -259,7 +259,7 @@ def list_posts(page: int = 1, per_page: int = 20, only_visible: bool = True, tab
         page (int, optional): 페이지 번호. 기본값 1
         per_page (int, optional): 페이지당 게시글 수. 기본값 20
         only_visible (bool, optional): 노출된 게시글만 조회할지 여부. 기본값 True
-        table_name (str, optional): 테이블명. 기본값 'channel_dev'
+        table_name (str, optional): 테이블명. 기본값 'board_dev'
         
     Returns:
         tuple: (전체 게시글 수, 현재 페이지 게시글 목록)
@@ -316,7 +316,7 @@ def create_comment(data: dict):
                 'board': str,       # 필수: 게시판 이름
                 'post_id': int,     # 필수: 게시글 ID
                 'content': str,     # 필수: 댓글 내용
-                'writer': str,      # 필수: 댓글 작성자 이름
+                'writer': str,      # 필수: 댓글 posted_by 이름
                 'password': str,    # 필수: 숫자 4자리 비밀번호
                 'is_visible': bool  # 선택: 댓글 노출 여부. 기본값 True
             }
@@ -353,7 +353,7 @@ def create_comment(data: dict):
             # insert 함수 직접 호출 대신 exec 사용
             fields = ', '.join(insert_data.keys())
             values = ', '.join([f"'{str(v)}'" if isinstance(v, str) else str(v) for v in insert_data.values()])
-            sql = f"INSERT INTO board_comments ({fields}) VALUES ({values})"
+            sql = f"INSERT INTO comments_board ({fields}) VALUES ({values})"
             
             print(f"Executing SQL: {sql}")  # 디버깅용
             
@@ -396,7 +396,7 @@ def get_comments(board: str, post_id: int, page: int = 1, per_page: int = 50, on
             where_clause += " AND is_visible = 1"
         
         # 전체 댓글 수 조회
-        count_sql = f"SELECT COUNT(*) FROM board_comments {where_clause}"
+        count_sql = f"SELECT COUNT(*) FROM comments_board {where_clause}"
         total_count = mysql.fetch(count_sql)[0][0]
         
         # 페이지네이션 적용하여 댓글 조회
@@ -404,7 +404,7 @@ def get_comments(board: str, post_id: int, page: int = 1, per_page: int = 50, on
         fields = ["id", "board", "post_id", "content", "writer", "created_at", "updated_at", "is_visible"]
         fields_str = ", ".join(fields)
 
-        list_sql = f"SELECT {fields_str} FROM board_comments {where_clause} ORDER BY created_at ASC LIMIT {per_page} OFFSET {offset}"
+        list_sql = f"SELECT {fields_str} FROM comments_board {where_clause} ORDER BY created_at ASC LIMIT {per_page} OFFSET {offset}"
         result = mysql.fetch(list_sql)
 
         # 결과를 딕셔너리 리스트로 변환
@@ -438,7 +438,7 @@ def get_comment(comment_id: int):
         fields = ["id", "board", "post_id", "content", "writer", "password", "created_at", "updated_at", "is_visible"]
         fields_str = ", ".join(fields)
         
-        sql = f"SELECT {fields_str} FROM board_comments WHERE id = {comment_id}"
+        sql = f"SELECT {fields_str} FROM comments_board WHERE id = {comment_id}"
         result = mysql.fetch(sql)
         
         if not result:
@@ -483,7 +483,7 @@ def update_comment(comment_id: int, data: dict, password: str):
         if not password:
             raise ValueError("비밀번호를 입력해주세요.")
             
-        stored_password = mysql.find("board_comments", fields=["password"], addStr=f"WHERE id = {comment_id}")
+        stored_password = mysql.find("comments_board", fields=["password"], addStr=f"WHERE id = {comment_id}")
         print(f"댓글 수정 비밀번호 검증 - ID: {comment_id}, 입력: '{password}', 저장된: '{stored_password[0][0] if stored_password else None}'")
         
         if not stored_password:
@@ -511,7 +511,7 @@ def update_comment(comment_id: int, data: dict, password: str):
             update_data['is_visible'] = 1 if data['is_visible'] else 0
             
         if update_data:
-            mysql.update("board_comments", update_data, f"id = {comment_id}")
+            mysql.update("comments_board", update_data, f"id = {comment_id}")
             return True
         return False
     finally:
@@ -531,7 +531,7 @@ def delete_comment(comment_id: int, password: str):
     mysql = Mysql()
     try:
         # 비밀번호 확인  
-        stored_password = mysql.find("board_comments", fields=["password"], addStr=f"WHERE id = {comment_id}")
+        stored_password = mysql.find("comments_board", fields=["password"], addStr=f"WHERE id = {comment_id}")
         print(f"댓글 삭제 비밀번호 검증 - ID: {comment_id}, 입력: '{password}', 저장된: '{stored_password[0][0] if stored_password else None}'")
         
         if not stored_password:
@@ -547,7 +547,7 @@ def delete_comment(comment_id: int, password: str):
         
         print(f"비밀번호 일치 확인됨")
             
-        mysql.delete("board_comments", f"id = {comment_id}")
+        mysql.delete("comments_board", f"id = {comment_id}")
         return True
     finally:
         mysql.close()

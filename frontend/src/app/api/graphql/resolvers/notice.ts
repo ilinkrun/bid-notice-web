@@ -7,13 +7,13 @@ export const noticeResolvers = {
         const response = await apiClient.get(`/notices/${category}`, { params: { gap } });
         return response.data.map((notice: any) => ({
           nid: notice.nid.toString(),
-          title: notice.제목,
-          orgName: notice.기관명,
-          postedAt: notice.작성일,
-          detailUrl: notice.상세페이지주소,
+          title: notice.title,
+          orgName: notice.org_name,
+          postedAt: notice.posted_date,
+          detailUrl: notice.detail_url,
           category: notice.카테고리 || "",
-          region: notice.지역 || "미지정",
-          registration: notice.등록
+          region: notice.org_region || "미지정",
+          registration: notice.registration
         }));
       } catch (error) {
         console.error('Error fetching notices by category:', error);
@@ -26,12 +26,12 @@ export const noticeResolvers = {
         const response = await apiClient.get('/notices', { params: { gap } });
         return response.data.map((notice: any) => ({
           id: notice.nid.toString(),
-          title: notice.제목,
-          orgName: notice.기관명,
-          postedAt: notice.작성일,
-          url: notice.상세페이지주소,
-          region: notice.지역 || "미지정",
-          registration: notice.등록
+          title: notice.title,
+          orgName: notice.org_name,
+          postedAt: notice.posted_date,
+          url: notice.detail_url,
+          region: notice.org_region || "미지정",
+          registration: notice.registration
         }));
       } catch (error) {
         console.error('Error fetching all notices:', error);

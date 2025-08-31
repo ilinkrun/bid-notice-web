@@ -8,7 +8,7 @@ export default class MySQL {
       host: process.env.MYSQL_HOST || '1.23.45.67',
       user: process.env.MYSQL_USER || 'root',
       password: process.env.MYSQL_PASSWORD || 'mysqlpassword',
-      database: process.env.MYSQL_DATABASE || 'Bid',
+      database: process.env.MYSQL_DATABASE || 'ilmac_bid_db',
       port: parseInt(process.env.MYSQL_PORT || '1234', 10),
       waitForConnections: true,
       connectionLimit: 10,
@@ -103,7 +103,7 @@ export default class MySQL {
   async noticeConfigByName(name: string): Promise<any | null> {
     try {
       const addStr = `WHERE 기관명='${name}'`;
-      const result = await this.find('settings_list', null, addStr);
+      const result = await this.find('settings_notice_list', null, addStr);
 
       if (!result || Array.isArray(result)) {
         console.error(`설정을 찾을 수 없습니다: ${name}`);
@@ -167,7 +167,7 @@ export default class MySQL {
   async findNoticesByCategory(category: string, dayGap: number = 15): Promise<any[]> {
     try {
       // 카테고리별 notices 검색 조건 생성
-      let searchStr = category === '무관' 
+      let searchStr = category === '무관'
         ? 'WHERE category IS NULL'
         : `WHERE category = '${category}'`;
 
@@ -180,24 +180,24 @@ export default class MySQL {
 
       // 필요한 필드 정의
       const fields = ['nid', '제목', '상세페이지주소', '작성일', '작성자', '기관명', 'category'];
-      
+
       // notices 테이블 조회
       const notices = await this.find('notices', fields, searchStr);
-      
+
       if (!notices || !Array.isArray(notices)) {
         return [];
       }
 
-      // settings_list 전체 데이터를 한 번에 조회
-      const allSettings = await this.find('settings_list', ['기관명', '지역', '등록']);
-      const settingsMap = Array.isArray(allSettings) 
+      // settings_notice_list 전체 데이터를 한 번에 조회
+      const allSettings = await this.find('settings_notice_list', ['기관명', '지역', '등록']);
+      const settingsMap = Array.isArray(allSettings)
         ? allSettings.reduce((acc: { [key: string]: { 지역: string; 등록: string } }, setting: any) => {
-            acc[setting.기관명] = {
-              지역: setting.지역,
-              등록: setting.등록
-            };
-            return acc;
-          }, {})
+          acc[setting.기관명] = {
+            지역: setting.지역,
+            등록: setting.등록
+          };
+          return acc;
+        }, {})
         : {};
 
       // 결과 처리
@@ -206,12 +206,12 @@ export default class MySQL {
           nid: notice.nid,
           title: notice.제목,
           detailUrl: notice.상세페이지주소,
-          postedAt: notice.작성일 
+          postedAt: notice.작성일
             ? new Date(notice.작성일).toLocaleDateString('ko-KR', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit'
-              }).replace(/\. /g, '-').replace('.', '')
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit'
+            }).replace(/\. /g, '-').replace('.', '')
             : null,
           orgName: notice.기관명,
           category: notice.category

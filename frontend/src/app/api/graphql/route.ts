@@ -32,8 +32,8 @@ export async function GET(request: NextRequest) {
     return await handler(request);
   } catch (error) {
     console.error('GraphQL GET Error:', error);
-    return new Response(JSON.stringify({ 
-      errors: [{ message: 'Internal server error', extensions: { code: 'INTERNAL_SERVER_ERROR' } }] 
+    return new Response(JSON.stringify({
+      errors: [{ message: 'Internal server error', extensions: { code: 'INTERNAL_SERVER_ERROR' } }]
     }), {
       status: 500,
       headers: {
@@ -62,8 +62,8 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('GraphQL POST Error:', error);
-    return new Response(JSON.stringify({ 
-      errors: [{ message: 'Internal server error', extensions: { code: 'INTERNAL_SERVER_ERROR' } }] 
+    return new Response(JSON.stringify({
+      errors: [{ message: 'Internal server error', extensions: { code: 'INTERNAL_SERVER_ERROR' } }]
     }), {
       status: 500,
       headers: {

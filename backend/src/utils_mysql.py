@@ -28,7 +28,7 @@ def get_mysql_config():
         port=int(os.environ.get('MYSQL_PORT', 2306)),
         user=os.environ.get('MYSQL_USER', 'root'),
         passwd=os.environ.get('MYSQL_PASSWORD', 'mysqlIlmac1!'),
-        db=os.environ.get('MYSQL_DATABASE', 'Bid'),
+        db=os.environ.get('MYSQL_DATABASE', 'ilmac_bid_db'),
         charset='utf8'
     )
 
@@ -362,12 +362,15 @@ class Mysql(object):
 if __name__ == "__main__":
     # * fetch
     mysql = Mysql()
-    sql = "select `기관명`, `제목`, `상세페이지주소`, `작성일` from notices where `작성일` > '2023-03-28'"
+    print(get_mysql_config())
+    sql = "select `org_name`, `title`, `detail_url`, `posted_date` from notice_list where `posted_date` > '2023-03-28'"
     print(mysql.fetch(sql))
+    # sql = "select `org_name`, `title`, `detail_url`, `posted_date` from notices where `posted_date` > '2023-03-28'"
+    # print(mysql.fetch(sql))
 
-    # table_name = "settings_list"
+    # table_name = "settings_notice_list"
     # # data = [
-    # #     ["기관명", "지역", "등록", "use", "담당업체", "담당자"],
+    # #     ["org_name", "org_region", "registration", "use", "company_in_charge", "org_man"],
     # #     ["가평군청", "경기", 1, 1, "일맥", "전영서"],
     # #     ["강남구", "서울", 1, 1, "일맥", "전영서"],
     # #     ["강동구", "서울", 1, 1, "일맥", "전영서"],
@@ -375,7 +378,7 @@ if __name__ == "__main__":
     # # ]
 
     # data = [
-    #     ["기관명", "url", "rowXpath", "제목", "상세페이지주소", "작성자", "작성일", "startPage", "endPage"],
+    #     ["org_name", "url", "rowXpath", "title", "detail_url", "posted_by", "posted_date", "startPage", "endPage"],
     #     ["수원시청", "https://www.suwon.go.kr/web/saeallOfr/BD_ofrList.do", '//*[@id="contents"]/div[1]/div/table/tbody/tr', "td[3]/a", "td[3]/a|-href|-", "td[4]", "td[5]", 1, 3],
     #     ["울릉군청", "https://www.ulleung.go.kr/ko/page.do?mnu_uid=571&boardType=notice", '//*[@id="content"]/div[1]/div/div[3]/table/tbody/tr', "td[2]/a", "td[2]/a|-href|-", "td[3]", "td[4]", 1, 3],
     #     ["제주지방항공청", "https://www.molit.go.kr/USR/I0204/m_45/lst.jsp?gubun=4", '//*[@id="cont-body"]/table/tbody/tr', "td[2]/a", "td[2]/a|-href|-", "td[3]", "td[4]", 1, 3],

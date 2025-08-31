@@ -50,9 +50,9 @@ export default function SettingsListOrgPage({ params }: PageProps) {
   const { finishLoading, startLoading } = useUnifiedLoading();
   const [orgName, setOrgName] = useState<string>('');
   const [editableData, setEditableData] = useState<any>({});
-  
+
   const [isNewMode, setIsNewMode] = useState(false);
-  
+
   // 모드 확인
   const mode = searchParams.get('mode') || 'view';
   const isEditMode = mode === 'edit';
@@ -81,18 +81,18 @@ export default function SettingsListOrgPage({ params }: PageProps) {
     errorPolicy: 'all',
     onCompleted: (data) => {
       console.log('GET_SETTING_LIST 완료:', data);
-      finishLoading();
     },
     onError: (error) => {
       console.error('GET_SETTING_LIST 에러:', error);
-      finishLoading();
     }
   });
 
-  // 페이지 마운트 시 즉시 로딩 해제 (useNavigation에서 이미 처리됨)
+  // GraphQL 쿼리 완료 또는 데이터 없음 시에만 로딩 해제 (Create Mode가 아닐 때만)
   useEffect(() => {
-    finishLoading();
-  }, [finishLoading]);
+    if (!isCreateMode && !loadingList && (dataList !== undefined || errorList)) {
+      finishLoading();
+    }
+  }, [isCreateMode, loadingList, dataList, errorList, finishLoading]);
 
   // 데이터가 로드되면 편집 가능한 데이터로 복사 (또는 create mode일 때 빈 데이터 설정)
   useEffect(() => {
@@ -154,18 +154,18 @@ export default function SettingsListOrgPage({ params }: PageProps) {
   const handleSave = async () => {
     try {
       startLoading();
-      
+
       console.log('저장할 데이터:', editableData);
-      
+
       if (isCreateMode) {
         // 새로운 설정 생성
-        const response = await apiClient.post(`/settings_list`, {
+        const response = await apiClient.post(`/settings_notice_list`, {
           ...editableData,
           기관명: editableData.orgName,
           지역: editableData.region,
           등록: editableData.registration
         });
-        
+
         if (response.status === 200 || response.status === 201) {
           alert('새로운 설정이 생성되었습니다.');
           navigate('/settings/list');
@@ -173,13 +173,13 @@ export default function SettingsListOrgPage({ params }: PageProps) {
       } else {
         // 기존 설정 업데이트
         const encodedOrgName = encodeURIComponent(orgName);
-        const response = await apiClient.put(`/settings_list/${encodedOrgName}`, {
+        const response = await apiClient.put(`/settings_notice_list/${encodedOrgName}`, {
           ...editableData,
           기관명: orgName,
           지역: editableData.region,
           등록: editableData.registration
         });
-        
+
         if (response.status === 200) {
           alert('저장이 완료되었습니다.');
           handleViewMode();
@@ -261,8 +261,8 @@ export default function SettingsListOrgPage({ params }: PageProps) {
               <div>
                 <CardTitle>{isCreateMode ? '새 설정 추가' : '목록페이지 스크랩 설정'}</CardTitle>
                 <CardDescription>
-                  {isCreateMode 
-                    ? '새로운 목록 스크랩 설정을 추가합니다' 
+                  {isCreateMode
+                    ? '새로운 목록 스크랩 설정을 추가합니다'
                     : `${orgName} 목록 스크랩 설정 정보`
                   }
                 </CardDescription>
@@ -302,8 +302,8 @@ export default function SettingsListOrgPage({ params }: PageProps) {
                 <div>
                   <Label className="text-base font-medium mb-2 block">기관명</Label>
                   {isEditMode || isCreateMode ? (
-                    <Input 
-                      value={isCreateMode ? editableData.orgName || '' : orgName} 
+                    <Input
+                      value={isCreateMode ? editableData.orgName || '' : orgName}
                       onChange={(e) => {
                         if (isCreateMode) {
                           updateEditableData('orgName', e.target.value);
@@ -320,8 +320,8 @@ export default function SettingsListOrgPage({ params }: PageProps) {
                 <div>
                   <Label className="text-base font-medium mb-2 block">상세 URL</Label>
                   {isEditMode || isCreateMode ? (
-                    <Input 
-                      value={editableData.detailUrl || ''} 
+                    <Input
+                      value={editableData.detailUrl || ''}
                       onChange={(e) => updateEditableData('detailUrl', e.target.value)}
                       className="text-black font-mono text-sm"
                     />
@@ -336,8 +336,8 @@ export default function SettingsListOrgPage({ params }: PageProps) {
                 <div>
                   <Label className="text-base font-medium mb-2 block">행 XPath</Label>
                   {isEditMode || isCreateMode ? (
-                    <Input 
-                      value={editableData.rowXpath || ''} 
+                    <Input
+                      value={editableData.rowXpath || ''}
                       onChange={(e) => updateEditableData('rowXpath', e.target.value)}
                       className="text-black font-mono text-sm"
                     />
@@ -348,8 +348,8 @@ export default function SettingsListOrgPage({ params }: PageProps) {
                 <div>
                   <Label className="text-base font-medium mb-2 block">페이징</Label>
                   {isEditMode || isCreateMode ? (
-                    <Input 
-                      value={editableData.paging || ''} 
+                    <Input
+                      value={editableData.paging || ''}
                       onChange={(e) => updateEditableData('paging', e.target.value)}
                       className="text-black font-mono text-sm"
                     />
@@ -363,9 +363,9 @@ export default function SettingsListOrgPage({ params }: PageProps) {
                 <div>
                   <Label className="text-base font-medium mb-2 block">시작 페이지</Label>
                   {isEditMode || isCreateMode ? (
-                    <Input 
+                    <Input
                       type="number"
-                      value={editableData.startPage || ''} 
+                      value={editableData.startPage || ''}
                       onChange={(e) => updateEditableData('startPage', parseInt(e.target.value) || 0)}
                       className="text-black"
                     />
@@ -376,9 +376,9 @@ export default function SettingsListOrgPage({ params }: PageProps) {
                 <div>
                   <Label className="text-base font-medium mb-2 block">종료 페이지</Label>
                   {isEditMode || isCreateMode ? (
-                    <Input 
+                    <Input
                       type="number"
-                      value={editableData.endPage || ''} 
+                      value={editableData.endPage || ''}
                       onChange={(e) => updateEditableData('endPage', parseInt(e.target.value) || 0)}
                       className="text-black"
                     />
@@ -407,8 +407,8 @@ export default function SettingsListOrgPage({ params }: PageProps) {
                 <div>
                   <Label className="text-base font-medium mb-2 block">지역</Label>
                   {isEditMode || isCreateMode ? (
-                    <Input 
-                      value={editableData.region || ''} 
+                    <Input
+                      value={editableData.region || ''}
                       onChange={(e) => updateEditableData('region', e.target.value)}
                       className="text-black"
                     />
@@ -419,8 +419,8 @@ export default function SettingsListOrgPage({ params }: PageProps) {
                 <div>
                   <Label className="text-base font-medium mb-2 block">등록</Label>
                   {isEditMode || isCreateMode ? (
-                    <Input 
-                      value={editableData.registration || ''} 
+                    <Input
+                      value={editableData.registration || ''}
                       onChange={(e) => updateEditableData('registration', e.target.value)}
                       className="text-black"
                     />
@@ -436,8 +436,8 @@ export default function SettingsListOrgPage({ params }: PageProps) {
                   <div>
                     <Label className="text-base font-medium mb-2 block">IFrame</Label>
                     {isEditMode || isCreateMode ? (
-                      <Input 
-                        value={editableData.iframe || ''} 
+                      <Input
+                        value={editableData.iframe || ''}
                         onChange={(e) => updateEditableData('iframe', e.target.value)}
                         className="text-black font-mono text-sm"
                       />
@@ -448,8 +448,8 @@ export default function SettingsListOrgPage({ params }: PageProps) {
                   <div>
                     <Label className="text-base font-medium mb-2 block">로그인</Label>
                     {isEditMode || isCreateMode ? (
-                      <Input 
-                        value={editableData.login || ''} 
+                      <Input
+                        value={editableData.login || ''}
                         onChange={(e) => updateEditableData('login', e.target.value)}
                         className="text-black font-mono text-sm"
                       />
@@ -481,8 +481,8 @@ export default function SettingsListOrgPage({ params }: PageProps) {
                           </TableCell>
                           <TableCell className="flex-1">
                             {isEditMode || isCreateMode ? (
-                              <Input 
-                                value={element.xpath || ''} 
+                              <Input
+                                value={element.xpath || ''}
                                 onChange={(e) => {
                                   const newElements = [...(editableData.elements || dataList?.settingList?.elements || [])];
                                   newElements[index] = { ...newElements[index], xpath: e.target.value };
@@ -496,8 +496,8 @@ export default function SettingsListOrgPage({ params }: PageProps) {
                           </TableCell>
                           <TableCell className="w-20">
                             {isEditMode || isCreateMode ? (
-                              <Input 
-                                value={element.target || ''} 
+                              <Input
+                                value={element.target || ''}
                                 onChange={(e) => {
                                   const newElements = [...(editableData.elements || dataList?.settingList?.elements || [])];
                                   newElements[index] = { ...newElements[index], target: e.target.value };
@@ -512,8 +512,8 @@ export default function SettingsListOrgPage({ params }: PageProps) {
                           </TableCell>
                           <TableCell className="w-32">
                             {isEditMode || isCreateMode ? (
-                              <Input 
-                                value={element.callback || ''} 
+                              <Input
+                                value={element.callback || ''}
                                 onChange={(e) => {
                                   const newElements = [...(editableData.elements || dataList?.settingList?.elements || [])];
                                   newElements[index] = { ...newElements[index], callback: e.target.value };

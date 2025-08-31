@@ -6,7 +6,7 @@
 - 핵심 스크래핑 테이블: `notices`, `details`, `files`
 - 설정 관리 테이블: `settings_list`, `settings_detail`, `settings_category`
 - 워크플로우 테이블: `bids`
-- 로그 관리 테이블: `logs_scraping`, `errors_scraping`
+- 로그 관리 테이블: `logs_scraping`, `errors_notice_scraping`
 - 게시판 테이블: `channel_dev`
 
 ## 데이터베이스 연결 설정
@@ -228,12 +228,12 @@ CREATE TABLE logs_scraping (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 
-### 9. `errors_scraping` 테이블  
+### 9. `errors_notice_scraping` 테이블  
 **목적**: 일반적인 스크래핑 오류 정보 저장
 
 **스키마**:
 ```sql
-CREATE TABLE errors_scraping (
+CREATE TABLE errors_notice_scraping (
     eid INT AUTO_INCREMENT PRIMARY KEY,
     orgs TEXT NOT NULL COMMENT '에러 발생 기관 목록',
     time TIMESTAMP NOT NULL COMMENT '에러 발생 시간',
@@ -307,7 +307,7 @@ CREATE TABLE channel_dev (
 └─────────────────┘       └──────────────────┘
 
 ┌─────────────────┐       ┌──────────────────┐
-│  logs_scraping  │       │ errors_scraping  │
+│  logs_scraping  │       │ errors_notice_scraping  │
 ├─────────────────┤       ├──────────────────┤
 │ lid (PK)        │       │ eid (PK)         │
 │ org_name        │       │ orgs             │
@@ -431,11 +431,11 @@ WHERE category IS NULL
 ### 2. 백업 작업
 시스템에는 모든 핵심 테이블의 SQL 덤프를 생성하는 백업 기능이 포함되어 있습니다:
 - `notices`, `settings_list`, `settings_detail`, `settings_category`
-- `logs_scraping`, `errors_scraping`
+- `logs_scraping`, `errors_notice_scraping`
 
 ### 3. 성능 모니터링
 - `logs_scraping` 테이블에서 스크래핑 성능 지표 추적
-- `errors_scraping` 테이블에서 시스템 레벨 오류 추적
+- `errors_notice_scraping` 테이블에서 시스템 레벨 오류 추적
 
 ## 데이터 무결성
 

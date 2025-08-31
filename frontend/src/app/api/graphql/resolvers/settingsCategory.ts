@@ -4,7 +4,7 @@ export const settingsCategoryResolvers = {
   Query: {
     settingsCategorys: async (_: any) => {
       try {
-        const response = await apiClient.get('/settings_categorys');
+        const response = await apiClient.get('/settings_notice_categorys');
         console.log(`response.data: ${JSON.stringify(response.data)}`);
         return response.data
           .map((category: any) => ({
@@ -26,7 +26,7 @@ export const settingsCategoryResolvers = {
   Mutation: {
     createSettingsCategory: async (_: any, { input }: any) => {
       try {
-        const response = await apiClient.post('/settings_categorys', {
+        const response = await apiClient.post('/settings_notice_categorys', {
           sn: input.sn,
           keywords: input.keywords,
           nots: input.nots,
@@ -51,7 +51,7 @@ export const settingsCategoryResolvers = {
     },
     updateSettingsCategory: async (_: any, { input }: any) => {
       try {
-        const response = await apiClient.put(`/settings_categorys/${input.category}`, {
+        const response = await apiClient.put(`/settings_notice_categorys/${input.category}`, {
           sn: input.sn,
           keywords: input.keywords,
           nots: input.nots,
