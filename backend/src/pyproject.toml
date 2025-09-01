@@ -25,6 +25,7 @@ dependencies = [
     "urllib3>=2.0.0",
     "uvicorn>=0.24.0",
     "pytz>=2023.3",
+    "httpx>=0.28.1",
 ]
 
 [project.optional-dependencies]
@@ -57,3 +58,8 @@ disallow_incomplete_defs = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = "test_*.py"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+]

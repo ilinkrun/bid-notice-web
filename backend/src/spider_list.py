@@ -42,7 +42,7 @@ DATAFOLER = "../../../data/"
 SEPERATOR = "|-"  # 스크랩 요소(key,target,callback), file_name, file_url 분리자
 KST = pytz.timezone('Asia/Seoul')
 TABLE_NOTICES = "notice_list"
-TABLE_DETAILS = "notice_notice_details"
+TABLE_DETAILS = "notice_details"
 TABLE_FILES = "notice_files"
 MAX_RETRY = 20
 

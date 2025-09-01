@@ -835,18 +835,18 @@ def update_notice_list_status(data):
             data["created_at"] = _now()
             data["started_at"] = _now()
             data["memo"] = "테스트 중입니다."
-            print(f"upsert_bids: {data}")
-            upsert_bids([data])
+            print(f"upsert_my_bids: {data}")
+            upsert_my_bids([data])
     mysql.close()
 
 # details
 def find_notice_details_by_status(status, fields=["nid", "status", "title", "scraped_at"], addStr=""):
     mysql = Mysql()
-    details = mysql.find("notice_notice_details", fields=fields, addStr=f"WHERE status = '{status}' {addStr}")
+    details = mysql.find("notice_details", fields=fields, addStr=f"WHERE status = '{status}' {addStr}")
     mysql.close()
     return dicts_from_tuples(fields, details)
 
-## ** bids
+## ** my_bids
 #--------------------------------------------------------------------
 def find_notice_by_nid(nid, fields=["org_name", "category", "status", "posted_date"], out_type="dict"):
     mysql = Mysql()
@@ -859,11 +859,11 @@ def find_notice_by_nid(nid, fields=["org_name", "category", "status", "posted_da
     else:
         return rs[0]
 
-def find_bids(fields=["bid", "nid", "status", "title", "started_at", "ended_at", "detail", "memo"], addStr=""):
+def find_my_bids(fields=["bid", "nid", "status", "title", "started_at", "ended_at", "detail", "memo"], addStr=""):
     mysql = Mysql()
-    bids = mysql.find("bids", fields=fields, addStr=addStr)
+    my_bids = mysql.find("my_bids", fields=fields, addStr=addStr)
     mysql.close()
-    dicts = [dict(zip(fields, bid)) for bid in bids]
+    dicts = [dict(zip(fields, bid)) for bid in my_bids]
     settings = find_settings_notice_list(fields=["org_name", "org_region"], out_type="dicts")
     for bid in dicts:
         notice = find_notice_by_nid(bid["nid"])
@@ -877,14 +877,14 @@ def find_bids(fields=["bid", "nid", "status", "title", "started_at", "ended_at",
     return dicts
 
 
-def find_bids_by_status(status, fields=["bid", "nid", "status", "title", "started_at", "ended_at", "detail", "memo"], addStr=""):
-    dicts = find_bids(fields=fields, addStr=f"WHERE status = '{status}' {addStr}")
+def find_my_bids_by_status(status, fields=["bid", "nid", "status", "title", "started_at", "ended_at", "detail", "memo"], addStr=""):
+    dicts = find_my_bids(fields=fields, addStr=f"WHERE status = '{status}' {addStr}")
     return dicts
 
 
-def upsert_bids(data):
+def upsert_my_bids(data):
     mysql = Mysql()
-    mysql.upsert("bids", data, inType="dicts")
+    mysql.upsert("my_bids", data, inType="dicts")
     mysql.close()
 
 

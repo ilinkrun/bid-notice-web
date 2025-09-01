@@ -10,7 +10,7 @@ from utils_mysql import Mysql
 # MYSQL_CONFIG = dict(host='172.17.0.3', port=3306, user='root', passwd='mysqlIlmac1!', db='ilmac_bid_db', charset='utf8')
 
 TABLE_NOTICES = "notice_list"
-TABLE_DETAILS = "notice_notice_details"
+TABLE_DETAILS = "notice_details"
 TABLE_FILES = "notice_files"
 KEY_FIELD_NOTICES = "nid"
 KEY_FIELD_FOR_SEARCH = "title"

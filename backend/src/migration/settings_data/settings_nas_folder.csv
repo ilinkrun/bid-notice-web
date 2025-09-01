@@ -1,9 +1,0 @@
-id,name,area,level,folder,remark
-1,root,1,1,/nas/_ilmac,root
-2,공사점검,notice,2,24_공사점검,
-3,성능평가,notice,2,13_성능평가,
-4,기타,notice,2,31_기타용역,
-5,공고,notice,3,3. 용역 입찰공고,입찰공고
-6,기관명,notice,4,[{담당업체}] {oid}. {기관명},
-7,공고명,notice,5,{num}. {제목},
-8,공고파일,notice,6,공고첨부파일,상세페이지 첨부파일

@@ -104,7 +104,7 @@ def update_all_orgs_url():
         if find1:
             data = {"nid": nid, "detail_url": find1[0][0], "org_name": find1[0][1]}
             print(data)
-            mysql.upsert("notice_notice_details", [data], inType="dicts")
+            mysql.upsert("notice_details", [data], inType="dicts")
     mysql.close()
     print(nids)
 
@@ -507,7 +507,7 @@ def upsert_detail_by_nid(nid):
                 data[key] = ""
         
         mysql = Mysql()  # 로컬 MySQL 객체 생성
-        mysql.upsert("notice_notice_details", [data], inType="dicts")
+        mysql.upsert("notice_details", [data], inType="dicts")
         mysql.close()
         
     return data
@@ -521,7 +521,7 @@ def download_by_nid(nid, folder=""):
 
     mysql = Mysql()  # 로컬 MySQL 객체 생성
     # !! details에 "detail_url" 추가, Referer로 사용
-    find1 = mysql.find("notice_notice_details", ["file_url", "file_name"], addStr=f"WHERE `nid` = '{nid}'")
+    find1 = mysql.find("notice_details", ["file_url", "file_name"], addStr=f"WHERE `nid` = '{nid}'")
     find2 = mysql.find("notice_list", ["detail_url"], addStr=f"WHERE `nid` = '{nid}'")
     mysql.close()
 

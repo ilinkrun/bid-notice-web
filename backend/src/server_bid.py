@@ -28,8 +28,8 @@ from mysql_bid import (
     upsert_notice_list,
 
     # 입찰 관련 함수들
-    find_bids,
-    find_bids_by_status,
+    find_my_bids,
+    find_my_bids_by_status,
     # category 업데이트 함수들
     update_all_category,
     
@@ -113,7 +113,7 @@ class CheckResult(BaseModel):
 # ** Global Variables(mysql)
 #------------------------------------------------------------
 TABLE_NOTICES = "notice_list"
-TABLE_DETAILS = "notice_notice_details"
+TABLE_DETAILS = "notice_details"
 TABLE_FILES = "notice_files"
 KEY_FIELD_NOTICES = "nid"
 KEY_FIELD_FOR_SEARCH = "title"
@@ -422,7 +422,7 @@ def get_bids():
     모든 공고 목록을 반환합니다.
     """
     try:
-        result = find_bids()
+        result = find_my_bids()
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -433,7 +433,7 @@ def get_bids_by_status(status: str):
     특정 상태의 공고 목록을 반환합니다.
     """
     try:
-        result = find_bids_by_status(status)
+        result = find_my_bids_by_status(status)
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
