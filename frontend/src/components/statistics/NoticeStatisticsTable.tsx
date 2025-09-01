@@ -141,20 +141,17 @@ export function NoticeStatisticsTable({
     loadOrgStatistics();
   }, [statisticsType, initialData]);
 
-  // 렌더링 완료 감지
-  const { startDetection } = useRenderingComplete({
-    selectors: ['.statistics-cell', 'table', '.container'], // 통계 요소들이 렌더링되면 완료
-    minWaitTime: 100,
-    maxWaitTime: 2000,
-    onComplete: finishLoading
-  });
-
-  // 데이터가 준비되면 렌더링 완료 감지 시작
+  // 컴포넌트가 완전히 렌더링되고 데이터가 준비되면 로딩 완료
   useEffect(() => {
     if (initialData !== undefined) {
-      startDetection();
+      // 컴포넌트가 완전히 렌더링된 후 로딩 완료
+      const timer = setTimeout(() => {
+        finishLoading();
+      }, 200);
+      
+      return () => clearTimeout(timer);
     }
-  }, [initialData, startDetection]);
+  }, [initialData, finishLoading]);
 
   // 선택된 통계 유형에 따른 데이터와 합계
   const { statistics, totals } = useMemo(() => {
