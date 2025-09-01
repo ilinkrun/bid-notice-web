@@ -7,6 +7,8 @@ import { logScrapingResolvers } from './logScraping';
 import { errorScrapingResolvers } from './errorScraping';
 import { boardResolvers } from './board';
 import { bidResolvers } from './bid';
+import { spiderResolvers } from './spider';
+import { mysqlResolvers } from './mysql';
 
 export const resolvers = [
   baseResolvers,
@@ -18,4 +20,6 @@ export const resolvers = [
   errorScrapingResolvers,
   boardResolvers,
   bidResolvers,
+  spiderResolvers,
+  mysqlResolvers,
 ];

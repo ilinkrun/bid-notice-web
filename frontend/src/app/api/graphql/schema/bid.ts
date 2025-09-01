@@ -1,46 +1,45 @@
 export const bidTypeDefs = `#graphql
   type Bid {
-    bid: Int
-    nid: Int!
-    status: String
-    title: String
-    started_at: String
-    ended_at: String
-    detail: JSON
+    bid_id: String!
+    title: String!
+    org_name: String!
+    posted_date: String!
+    detail_url: String!
+    status: String!
+    bid_amount: Float
+    deposit_amount: Float
+    start_date: String
+    end_date: String
     memo: String
-    orgName: String
     category: String
-    postedAt: String
     region: String
   }
 
-  type Query {
-    bidByStatus(status: String!): [Bid!]!
+  extend type Query {
+    myBids: [Bid!]!
+    bidsByStatus(status: String!): [Bid!]!
   }
 
-  type Mutation {
+  extend type Mutation {
     createBid(input: CreateBidInput!): Bid!
-    updateBid(bid: Int!, input: UpdateBidInput!): Bid!
-    deleteBid(bid: Int!): Boolean!
+    updateBidStatus(bidId: String!, status: String!): UpdateResult!
+    deleteBid(bidId: String!): UpdateResult!
   }
 
   input CreateBidInput {
-    nid: Int!
-    status: String!
     title: String!
-    started_at: String!
-    ended_at: String!
-    detail: JSON!
+    org_name: String!
+    detail_url: String!
+    bid_amount: Float
+    deposit_amount: Float
+    start_date: String
+    end_date: String
     memo: String
   }
 
-  input UpdateBidInput {
-    status: String
-    title: String
-    started_at: String
-    ended_at: String
-    detail: JSON
-    memo: String
+  type UpdateResult {
+    success: Boolean!
+    message: String
   }
 
   scalar JSON

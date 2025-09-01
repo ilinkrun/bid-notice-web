@@ -7,6 +7,8 @@ import { logScrapingTypeDefs } from './logScraping';
 import { errorScrapingTypeDefs } from './errorScraping';
 import { boardTypeDefs } from './board';
 import { bidTypeDefs } from './bid';
+import { spiderTypeDefs } from './spider';
+import { mysqlTypeDefs } from './mysql';
 
 const baseTypeDefs = gql`
   type Query {
@@ -28,4 +30,6 @@ export const typeDefs = [
   errorScrapingTypeDefs,
   boardTypeDefs,
   bidTypeDefs,
+  spiderTypeDefs,
+  mysqlTypeDefs,
 ];

@@ -1,13 +1,17 @@
 import axios from 'axios';
 
-// API 타입 정의
-export type ApiType = 'bid' | 'board';
+// API 타입 정의 - 모든 백엔드 서버 포함
+export type ApiType = 'bid' | 'board' | 'mysql' | 'spider';
 
 // API baseURL 설정
 const getBaseUrl = (type: ApiType = 'bid'): string => {
   switch (type) {
     case 'board':
       return process.env.NEXT_PUBLIC_BACKEND_BOARD_URL || 'http://14.34.23.70:11307';
+    case 'mysql':
+      return process.env.NEXT_PUBLIC_BACKEND_MYSQL_URL || 'http://14.34.23.70:11302';
+    case 'spider':
+      return process.env.NEXT_PUBLIC_BACKEND_SPIDER_URL || 'http://14.34.23.70:11301';
     case 'bid':
     default:
       return process.env.NEXT_PUBLIC_BACKEND_BID_URL || 'http://14.34.23.70:11303';
@@ -77,4 +81,10 @@ export const createApiClient = (type: ApiType = 'bid') => {
 export const apiClient = createApiClient('bid');
 
 // 게시판 API 클라이언트
-export const boardApiClient = createApiClient('board'); 
+export const boardApiClient = createApiClient('board');
+
+// MySQL API 클라이언트
+export const mysqlApiClient = createApiClient('mysql');
+
+// Spider API 클라이언트
+export const spiderApiClient = createApiClient('spider'); 

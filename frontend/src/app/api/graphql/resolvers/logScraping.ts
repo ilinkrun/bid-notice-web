@@ -4,7 +4,7 @@ export const logScrapingResolvers = {
   Query: {
     logScrapings: async (_: any, { gap }: any) => {
       try {
-        const response = await apiClient.get('/logs_scraping', { params: { gap } });
+        const response = await apiClient.get('/logs_notice_scraping', { params: { gap } });
         return response.data.map((log: any) => ({
           orgName: log.org_name,
           errorCode: log.error_code,
@@ -14,7 +14,7 @@ export const logScrapingResolvers = {
           time: log.time
         }));
       } catch (error) {
-        console.error('Error fetching logs scraping:', error);
+        console.error('Error fetching logs notice scraping:', error);
         return [];
       }
     },

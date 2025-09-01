@@ -57,9 +57,9 @@ export const settingsListResolvers = {
   },
 
   Mutation: {
-    createSettingsList: async (_: unknown, { input }: { input: any }) => {
+    upsertSettingsList: async (_: unknown, { orgName, input }: { orgName: string, input: any }) => {
       try {
-        const response = await apiClient.post('/settings_notice_list', {
+        const response = await apiClient.post(`/settings_notice_list/${orgName}`, {
           ...input,
           org_region: input.region,
           registration: input.registration
@@ -70,26 +70,8 @@ export const settingsListResolvers = {
           registration: response.data.registration
         };
       } catch (error) {
-        console.error('Error creating setting:', error);
-        throw new Error('Failed to create setting');
-      }
-    },
-
-    updateSettingsList: async (_: unknown, { orgName, input }: { orgName: string, input: any }) => {
-      try {
-        const response = await apiClient.put(`/settings_notice_list/${orgName}`, {
-          ...input,
-          org_region: input.region,
-          registration: input.registration
-        });
-        return {
-          ...response.data,
-          region: response.data.org_region,
-          registration: response.data.registration
-        };
-      } catch (error) {
-        console.error('Error updating setting:', error);
-        throw new Error('Failed to update setting');
+        console.error('Error upserting setting:', error);
+        throw new Error('Failed to upsert setting');
       }
     },
   }
