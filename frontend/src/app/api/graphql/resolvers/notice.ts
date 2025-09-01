@@ -25,11 +25,12 @@ export const noticeResolvers = {
       try {
         const response = await apiClient.get('/notice_list', { params: { gap } });
         return response.data.map((notice: any) => ({
-          id: notice.nid.toString(),
+          nid: notice.nid.toString(),
           title: notice.title,
           orgName: notice.org_name,
           postedAt: notice.posted_date,
-          url: notice.detail_url,
+          detailUrl: notice.detail_url,
+          category: notice.category || notice.카테고리 || "",
           region: notice.org_region || "미지정",
           registration: notice.registration
         }));
@@ -42,7 +43,12 @@ export const noticeResolvers = {
     noticesStatistics: async (_: unknown, { gap }: { gap: number }) => {
       try {
         const response = await apiClient.get('/notice_list_statistics', { params: { gap } });
-        return response.data;
+        return response.data.map((item: any) => ({
+          orgName: item.org_name || item.orgName || '',
+          postedAt: item.posted_date || item.postedAt || '',
+          category: item.category || item.카테고리 || '',
+          region: item.org_region || item.region || item.지역 || '미지정'
+        }));
       } catch (error) {
         console.error('Error fetching notice statistics:', error);
         return [];

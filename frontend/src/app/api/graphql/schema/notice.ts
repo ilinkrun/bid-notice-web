@@ -12,7 +12,9 @@ export const noticeTypeDefs = `#graphql
 
   type NoticeStatistics {
     orgName: String!
-    noticeCount: Int!
+    postedAt: String!
+    category: String
+    region: String
   }
 
   type NoticeRegionStatistics {
@@ -25,19 +27,33 @@ export const noticeTypeDefs = `#graphql
     notices(category: String, gap: Int): [Notice!]!
     noticesStatistics(gap: Int): [NoticeStatistics]!
     noticeRegionStatistics(gap: Int): [NoticeRegionStatistics]!
-  }
-
-  extend type Mutation {
     searchNotices(
       keywords: String!
       nots: String!
       minPoint: Float!
       addWhere: String
     ): [Notice]
+    lastNotice(orgName: String!, field: String): String
+  }
+
+  extend type Mutation {
+    upsertNotice(data: [NoticeInput!]!): Boolean
     updateNoticeStatus(
-      nid: String!
-      status: String!
-    ): UpdateResult
+      nid: Int!
+      from: String!
+      to: String!
+    ): Boolean
+  }
+
+  input NoticeInput {
+    nid: ID
+    title: String
+    orgName: String
+    region: String
+    detailUrl: String
+    category: String
+    registration: String
+    postedAt: String
   }
 
   type UpdateResult {

@@ -1,7 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import BidTable from '@/components/bids/BidTable';
+import { useUnifiedLoading } from '@/components/providers/UnifiedLoadingProvider';
 
 // Mock 데이터
 const mockBids = [
@@ -26,6 +27,17 @@ const mockBids = [
 ];
 
 export default function AwardedPage() {
+  const { finishLoading } = useUnifiedLoading();
+
+  useEffect(() => {
+    // 페이지가 완전히 렌더링된 후 로딩 완료
+    const timer = setTimeout(() => {
+      finishLoading();
+    }, 200);
+    
+    return () => clearTimeout(timer);
+  }, [finishLoading]);
+
   return (
     <div className="p-6">
       <div className="mb-6">

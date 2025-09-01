@@ -21,13 +21,16 @@ export function useUnifiedNavigation() {
       clearTimeout(timeoutRef.current);
     }
 
-    // 로딩 시작
+    // 1. 즉시 URL 변경 (브라우저 주소창 업데이트)
+    window.history.pushState({}, '', url);
+    
+    // 2. 로딩 시작
     startLoading();
     
-    // Next.js 라우터로 페이지 전환 (즉시 URL 변경 제거)
+    // 3. Next.js 라우터로 페이지 전환
     router.push(url);
     
-    // 안전장치: 3초 후 강제 로딩 해제 (더 짧은 시간으로 설정)
+    // 안전장치: 3초 후 강제 로딩 해제
     timeoutRef.current = setTimeout(() => {
       finishLoading();
     }, 3000);

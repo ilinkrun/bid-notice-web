@@ -1,23 +1,22 @@
 export const bidTypeDefs = `#graphql
   type Bid {
-    bid_id: String!
+    bid: String!
+    nid: String!
     title: String!
-    org_name: String!
-    posted_date: String!
-    detail_url: String!
     status: String!
-    bid_amount: Float
-    deposit_amount: Float
-    start_date: String
-    end_date: String
+    started_at: String
+    ended_at: String
     memo: String
+    orgName: String!
+    postedAt: String!
+    detail: String
     category: String
     region: String
   }
 
   extend type Query {
     myBids: [Bid!]!
-    bidsByStatus(status: String!): [Bid!]!
+    bidByStatus(status: String!): [Bid!]!
   }
 
   extend type Mutation {

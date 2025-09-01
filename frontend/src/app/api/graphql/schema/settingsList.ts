@@ -60,6 +60,7 @@ export const settingsListTypeDefs = `#graphql
   extend type Mutation {
     createSettingsList(input: SettingsListInput!): SettingsList!
     updateSettingsList(orgName: String!, input: SettingsListInput!): SettingsList!
+    upsertSettingsList(orgName: String!, input: SettingsListInput!): SettingsList!
     # deleteSettingsList(orgName: String!): Boolean!
   }
 `; 

@@ -149,7 +149,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
       
       // 2. URL 업데이트 준비
       const newSearchParams = new URLSearchParams(window.location.search);
-      const newUrl = `/notice_list/${encodeURIComponent(value)}?${newSearchParams.toString()}`;
+      const newUrl = `/notices/${encodeURIComponent(value)}?${newSearchParams.toString()}`;
       
       // 3. URL 히스토리 업데이트 (페이지 새로고침 없이)
       navigate(newUrl);

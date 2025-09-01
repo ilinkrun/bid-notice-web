@@ -11,6 +11,7 @@ import {
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
+import { useUnifiedLoading } from '@/components/providers/UnifiedLoadingProvider';
 import { StatisticsTypeSelector } from './StatisticsTypeSelector';
 import { GapSelector } from './GapSelector';
 import { NoticeStatisticsChart } from './NoticeStatisticsChart';
@@ -92,6 +93,7 @@ export function NoticeStatisticsTable({
   hideTypeSelector = false
 }: NoticeStatisticsTableProps) {
   const { navigate } = useUnifiedNavigation();
+  const { finishLoading } = useUnifiedLoading();
   const searchParams = useSearchParams();
   const [statisticsType, setStatisticsType] = useState<string>(() => {
     const typeParam = searchParams.get('type');
@@ -138,6 +140,21 @@ export function NoticeStatisticsTable({
     
     loadOrgStatistics();
   }, [statisticsType, initialData]);
+
+  // 렌더링 완료 감지
+  const { startDetection } = useRenderingComplete({
+    selectors: ['.statistics-cell', 'table', '.container'], // 통계 요소들이 렌더링되면 완료
+    minWaitTime: 100,
+    maxWaitTime: 2000,
+    onComplete: finishLoading
+  });
+
+  // 데이터가 준비되면 렌더링 완료 감지 시작
+  useEffect(() => {
+    if (initialData !== undefined) {
+      startDetection();
+    }
+  }, [initialData, startDetection]);
 
   // 선택된 통계 유형에 따른 데이터와 합계
   const { statistics, totals } = useMemo(() => {
