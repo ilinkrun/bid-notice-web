@@ -23,7 +23,7 @@ from utils_mysql import Mysql
 from mysql_bid import find_settings_notice_list, find_settings_notice_list_by_name, find_last_notice, update_all_category, insert_all_logs, insert_all_errors
 from utils_data import save_html, load_html, valid_str, arr_from_csv, dict_from_tuple, dicts_from_tuples, csv_from_dict, csv_from_dicts, csv_added_defaults, fix_encoding_response, _now
 
-from utils_search import find_nids_for_fetch_details
+from utils_search import find_nids_for_fetch_notice_details
 
 # import ssl
 
@@ -42,7 +42,7 @@ DATAFOLER = "../../../data/"
 SEPERATOR = "|-"  # 스크랩 요소(key,target,callback), file_name, file_url 분리자
 KST = pytz.timezone('Asia/Seoul')
 TABLE_NOTICES = "notice_list"
-TABLE_DETAILS = "notice_details"
+TABLE_DETAILS = "notice_notice_details"
 TABLE_FILES = "notice_files"
 MAX_RETRY = 20
 

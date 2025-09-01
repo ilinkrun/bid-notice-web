@@ -37,7 +37,7 @@ class SettingsDataMigrator:
             'settings_notice_list': 'settings_notice_list',
             'settings_notice_detail': 'settings_notice_detail', 
             'settings_notice_category': 'settings_notice_category',
-            'settings_nas_folder': 'settings_nas_path'
+            'settings_nas_path': 'settings_nas_path'
         }
         
         # 필드 매핑 정보 (각 테이블별)
@@ -249,14 +249,14 @@ class SettingsDataMigrator:
         # 데이터 삽입
         return self.insert_data_to_table('settings_notice_category', data)
     
-    def migrate_settings_nas_folder(self):
+    def migrate_settings_nas_path(self):
         """settings_nas_path 테이블 마이그레이션"""
         print("\n" + "="*60)
         print("settings_nas_path 테이블 마이그레이션")
         print("="*60)
         
         # CSV 데이터 로드
-        data = self.load_csv_data('settings_nas_folder.csv')
+        data = self.load_csv_data('settings_nas_path.csv')
         if not data:
             return False
         
@@ -327,7 +327,7 @@ class SettingsDataMigrator:
             if self.migrate_settings_notice_category():
                 success_count += 1
                 
-            if self.migrate_settings_nas_folder():
+            if self.migrate_settings_nas_path():
                 success_count += 1
             
             # 결과 검증

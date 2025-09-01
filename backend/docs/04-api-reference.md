@@ -105,7 +105,7 @@ CSV 데이터 처리를 테스트합니다.
 ]
 ```
 
-#### `POST /notices_by_search/`
+#### `POST /notice_list_by_search/`
 
 고급 검색 기능으로 키워드 가중치를 적용한 공고 검색을 수행합니다.
 
@@ -204,7 +204,7 @@ CSV 데이터 처리를 테스트합니다.
 
 ### 공고 조회
 
-#### `GET /notices`
+#### `GET /notice_list`
 
 최근 공고를 조회합니다.
 
@@ -227,7 +227,7 @@ CSV 데이터 처리를 테스트합니다.
 ]
 ```
 
-#### `GET /notices/{category}`
+#### `GET /notice_list/{category}`
 
 특정 카테고리의 공고를 조회합니다.
 
@@ -235,9 +235,9 @@ CSV 데이터 처리를 테스트합니다.
 - `category` (path, required): 카테고리명 (공사점검, 성능평가, 기타, 무관)
 - `gap` (query, optional): 일수 제한
 
-**응답**: `/notices`와 동일한 형식
+**응답**: `/notice_list`와 동일한 형식
 
-#### `GET /notices_statistics`
+#### `GET /notice_list_statistics`
 
 공고 통계 데이터를 조회합니다.
 
@@ -262,7 +262,7 @@ CSV 데이터 처리를 테스트합니다.
 
 ### 검색 기능
 
-#### `POST /search_notices`
+#### `POST /search_notice_list`
 
 고급 키워드 검색을 수행합니다.
 
@@ -334,7 +334,7 @@ CSV 데이터 처리를 테스트합니다.
 }
 ```
 
-#### `POST /filter_notices`
+#### `POST /filter_notice_list`
 
 제외 키워드로 공고를 필터링합니다.
 
@@ -352,7 +352,7 @@ CSV 데이터 처리를 테스트합니다.
 
 ### 시스템 관리
 
-#### `DELETE /delete_old_notices`
+#### `DELETE /delete_old_notice_list`
 
 오래된 공고를 삭제합니다.
 
@@ -538,7 +538,7 @@ curl "http://localhost:11301/check_fetch_list?org_name=새기관"
 
 ### 2. 키워드 검색
 ```bash
-curl -X POST "http://localhost:11303/search_notices" \
+curl -X POST "http://localhost:11303/search_notice_list" \
   -H "Content-Type: application/json" \
   -d '{
     "keywords": "도로*5,보수*3",

@@ -15,7 +15,7 @@ interface PageProps {
 
 async function getNoticesByCategory(category: string, gap: number): Promise<Notice[]> {
   try {
-    const response = await getClient().get<Notice[]>(`/notices/${encodeURIComponent(category)}?gap=${gap}`);
+    const response = await getClient().get<Notice[]>(`/notice_list/${encodeURIComponent(category)}?gap=${gap}`);
     return response.data;
   } catch (error) {
     console.error('Failed to fetch notices:', error);
@@ -49,7 +49,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
   
   // gap 파라미터가 없으면 리디렉션
   if (!resolvedSearchParams.gap) {
-    redirect(`/notices/${category}?gap=${process.env.NEXT_PUBLIC_DAY_GAP || '1'}`);
+    redirect(`/notice_list/${category}?gap=${process.env.NEXT_PUBLIC_DAY_GAP || '1'}`);
   }
 
   try {

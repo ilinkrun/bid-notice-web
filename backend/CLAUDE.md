@@ -93,12 +93,12 @@ python mysql_bid.py
 ## API Endpoints
 
 ### Spider Server (11301)
-- `POST /spider/notices/{org_name}` - Scrape specific organization
+- `POST /spider/notice_list/{org_name}` - Scrape specific organization
 - `GET /spider/test/{org_name}` - Test scraping configuration
 
 ### MySQL Server (11302) 
-- `GET /mysql/notices` - Query notices with filters
-- `POST /mysql/notices/{nid}` - Update notice details
+- `GET /mysql/notice_list` - Query notices with filters
+- `POST /mysql/notice_list/{nid}` - Update notice details
 - `GET /mysql/files/{nid}` - Get file attachments
 
 ### Bid Server (11303)

@@ -1,4 +1,4 @@
-settings_nas_folder
+settings_nas_path
 
 name	area	level	folder	remark
 root	1	notice	/nas	root

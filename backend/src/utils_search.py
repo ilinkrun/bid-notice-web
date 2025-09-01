@@ -14,7 +14,7 @@ from utils_data import arr_from_csv, dict_from_tuple, dicts_from_tuples, csv_fro
 ## TODO: 설정 상수는 globals.py 또는 config.json 등에 일괄 저장
 
 TABLE_NOTICES = "notice_list"
-TABLE_DETAILS = "notice_details"
+TABLE_DETAILS = "notice_notice_details"
 TABLE_FILES = "notice_files"
 KEY_FIELD_NOTICES = "nid"
 KEY_FIELD_FOR_SEARCH = "title"
@@ -180,7 +180,7 @@ def get_search_results(keyword_weight_str, nots_str, min_point, add_where=""):
     return response
 
 # TABLE_NOTICES = "notice_list"
-# TABLE_DETAILS = "notice_details"
+# TABLE_DETAILS = "notice_notice_details"
 # TABLE_FILES = "notice_files"
 # KEY_FIELD_NOTICES = "nid"
 # KEY_FIELD_FOR_SEARCH = "title"
@@ -205,7 +205,7 @@ def find_nids_in_table(nids, table_name, exist=True):
 
 
 ## ** 스크래핑 관련
-def find_nids_for_fetch_details(last_date=None):
+def find_nids_for_fetch_notice_details(last_date=None):
     # 디폴트 검색어
     nids = []
     for domain in SEARCH_DOMAINS:
@@ -221,7 +221,7 @@ def find_nids_for_fetch_details(last_date=None):
     nids = list(set(nids))
     nids.sort()
 
-    return find_nids_in_table(nids, "notice_details", exist=False)  # ? details에 이미 있는 nid 제외
+    return find_nids_in_table(nids, "notice_notice_details", exist=False)  # ? details에 이미 있는 nid 제외
 
     # return [list(dct.keys())[0] for dct in dicts]
 
@@ -252,7 +252,7 @@ if __name__ == "__main__":
 
     (keyword_weight_str, nots_str, min_point) = rs["공사점검"]
     # # rs = find_nids_by_search_setting(keyword_weight_str, nots_str, min_point, add_where="")
-    # rs = search_notices(keyword_weight_str, nots_str, min_point, add_where="")
+    # rs = search_notice_list(keyword_weight_str, nots_str, min_point, add_where="")
 
     # print(rs)
 
@@ -261,12 +261,12 @@ if __name__ == "__main__":
     # add_sql = "ORDER BY notices.nid DESC, files.sn ASC"
     # find_notice_list_by_nids(nids, add_sql=add_sql)
 
-    rs = find_notices_by_search(keyword_weight_str, nots_str, min_point, add_where="", base_sql="", add_sql="")
+    rs = find_notice_list_by_search(keyword_weight_str, nots_str, min_point, add_where="", base_sql="", add_sql="")
     print(rs)
 
 
     # # ** 스크래핑 관련
-    # print(find_nids_for_fetch_details("2023-03-01"))
+    # print(find_nids_for_fetch_notice_details("2023-03-01"))
 
     # # *
     # keywords = "내진*3,성능,평가,설계,보강,검증"

@@ -2,7 +2,7 @@ import re
 import urllib
 from utils_data import valid_str, fix_encoding, decode_html_text
 from utils_mysql import Mysql, _where_like_unit, _where_eq_unit
-from mysql_bid import SEPERATOR, SETTINGS_NOTICE_DETAIL_FIELDS, SETTINGS_NOTICE_DETAIL_CONFIG_FIELDS, find_settings_notice_list, _find_settings_notice_detail_by_name, find_settings_notice_detail_by_name, unpack_settings_elements, upsert_notices
+from mysql_bid import SEPERATOR, SETTINGS_NOTICE_DETAIL_FIELDS, SETTINGS_NOTICE_DETAIL_CONFIG_FIELDS, find_settings_notice_list, _find_settings_notice_detail_by_name, find_settings_notice_detail_by_name, unpack_settings_elements, upsert_notice_list
 from utils_lxml import _get_outerhtml, get_val, get_dict, download_by_url, download_by_url_with_headers
 from utils_nas import get_notice_nas_folder
 
@@ -85,7 +85,7 @@ def get_all_nids():
     mysql.close()
     return {"nids": nids, "error_orgs": error_orgs}
 
-def populate_details_by_sample_url(nids=[]):
+def populate_notice_details_by_sample_url(nids=[]):
     if not nids:
         data = get_all_nids()
         nids = data["nids"]
@@ -104,7 +104,7 @@ def update_all_orgs_url():
         if find1:
             data = {"nid": nid, "detail_url": find1[0][0], "org_name": find1[0][1]}
             print(data)
-            mysql.upsert("notice_details", [data], inType="dicts")
+            mysql.upsert("notice_notice_details", [data], inType="dicts")
     mysql.close()
     print(nids)
 
@@ -507,7 +507,7 @@ def upsert_detail_by_nid(nid):
                 data[key] = ""
         
         mysql = Mysql()  # 로컬 MySQL 객체 생성
-        mysql.upsert("notice_details", [data], inType="dicts")
+        mysql.upsert("notice_notice_details", [data], inType="dicts")
         mysql.close()
         
     return data
@@ -521,7 +521,7 @@ def download_by_nid(nid, folder=""):
 
     mysql = Mysql()  # 로컬 MySQL 객체 생성
     # !! details에 "detail_url" 추가, Referer로 사용
-    find1 = mysql.find("notice_details", ["file_url", "file_name"], addStr=f"WHERE `nid` = '{nid}'")
+    find1 = mysql.find("notice_notice_details", ["file_url", "file_name"], addStr=f"WHERE `nid` = '{nid}'")
     find2 = mysql.find("notice_list", ["detail_url"], addStr=f"WHERE `nid` = '{nid}'")
     mysql.close()
 
@@ -553,11 +553,11 @@ def notice_status_to_progress(nid):
 # !!업데이트 공고 상태 (제외 -> 진행)
 def update_notice_status(data):
     # notices status 변경
-    upsert_notices([{'nid': data['nid'], 'status': data['to']}])
+    upsert_notice_list([{'nid': data['nid'], 'status': data['to']}])
     if data['to'] == "진행" or data['to'] == "포함" or data['to'] == "준비":
         # insert info to details 
         upsert_detail_by_nid(data['nid'])
-        # insert info to notices_progress
+        # insert info to notice_list_progress
         # insert_progress_notice()
         download_by_nid(data['nid'])
     elif data['to'] == "낙찰":
@@ -632,7 +632,7 @@ if __name__ == "__main__":
     # ** details 샘플 채우기
     # nids = []
     # nids = [417973, 417989, 417522, 413711, 415404, 409677, 416263]
-    # populate_details_by_sample_url(nids)
+    # populate_notice_details_by_sample_url(nids)
 
     # [417236, 417973, 417980, 417977, 417988, 417981, 417989, 417267, 412579, 417999, 418008, 418000, 419901, 415985, 417291, 417290, 418058, 418054, 366205, 418060, 418065, 418064, 418076, 418071, 418091, 418082, 417351, 417343, 418101, 417362, 418103, 418102, 418104, 414840, 413690, 365679, 416136, 365639, 410342, 412802, 417417, 418114, 418120, 418119, 418544, 418126, 417440, 418129, 418133, 417449, 418142, 418139, 417475, 418143, 417508, 418162, 418514, 418164, 418166, 364717, 409333, 417522, 417524, 416260, 416264, 416263, 418171, 416267, 417565, 417562, 416320, 417576, 417595, 418175, 418178, 418930, 418478, 413711, 417905, 417903, 409597, 418480, 418485, 418483, 418486, 411684, 417931, 413700, 418498, 418488, 418501, 411701, 409677, 412382, 417962, 418504, 417968]
 

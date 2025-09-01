@@ -4,7 +4,7 @@ export const noticeResolvers = {
   Query: {
     noticesByCategory: async (_: unknown, { category, gap }: { category: string; gap: number }) => {
       try {
-        const response = await apiClient.get(`/notices/${category}`, { params: { gap } });
+        const response = await apiClient.get(`/notice_list/${category}`, { params: { gap } });
         return response.data.map((notice: any) => ({
           nid: notice.nid.toString(),
           title: notice.title,

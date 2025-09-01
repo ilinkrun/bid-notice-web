@@ -319,7 +319,7 @@
 **Purpose**: Get all keyword search settings
 **Returns**: List of category configurations
 
-##### `search_notices(keywords, nots, min_point, field="제목", add_fields=[], add_where="")`
+##### `search_notice_list(keywords, nots, min_point, field="제목", add_fields=[], add_where="")`
 **Purpose**: Advanced keyword search with weighting and exclusions
 **Parameters**:
 - `keywords (str)`: "keyword*weight,keyword*weight,..." format
@@ -346,7 +346,7 @@
 
 #### Notice Management Functions
 
-##### `find_notices_by_category(category, day_gap=15)`
+##### `find_notice_list_by_category(category, day_gap=15)`
 **Purpose**: Get notices by category within timeframe
 **Parameters**:
 - `category (str)`: Category name or "무관" for uncategorized
@@ -644,7 +644,7 @@ CREATE TABLE channel_dev (
 
 **Returns**: Database query results
 
-##### `find_nids_for_fetch_details(last_date=None)`
+##### `find_nids_for_fetch_notice_details(last_date=None)`
 **Purpose**: Find notice IDs needing detail scraping
 **Parameters**: `last_date (str)`: Last processed date
 **Returns**: `list`: Notice IDs for detail processing
@@ -673,16 +673,16 @@ CREATE TABLE channel_dev (
 - `GET /settings_detail/{org_name}`: Get organization detail settings
 
 ##### Notice Operations
-- `GET /notices?gap={days}`: Get recent notices within timeframe
-- `GET /notices/{category}?gap={days}`: Get notices by category
-- `GET /notices_statistics?gap={days}`: Get statistical data
+- `GET /notice_list?gap={days}`: Get recent notices within timeframe
+- `GET /notice_list/{category}?gap={days}`: Get notices by category
+- `GET /notice_list_statistics?gap={days}`: Get statistical data
 - `GET /last_notice/{org_name}?field={field}`: Get organization's latest notice
-- `POST /search_notices`: Advanced keyword search
-- `POST /notices`: Batch update notice data
+- `POST /search_notice_list`: Advanced keyword search
+- `POST /notice_list`: Batch update notice data
 
 ##### Bid Management
-- `GET /bids`: Get all bids
-- `GET /bids/{status}`: Get bids by status
+- `GET /my_bids`: Get all bids
+- `GET /my_bids/{status}`: Get bids by status
 
 ##### Scraping Operations
 - `GET /check_fetch_list?org_name={name}`: Test organization scraping
@@ -691,11 +691,11 @@ CREATE TABLE channel_dev (
 - `GET /settings_categorys`: Get all category configurations
 - `GET /settings_categorys/{category}`: Get specific category settings
 - `POST /category_weight_search`: Weighted keyword search
-- `POST /filter_notices`: Filter notices by exclusion terms
+- `POST /filter_notice_list`: Filter notices by exclusion terms
 - `GET /parse_keyword_weights?keyword_weight_str={str}`: Parse keyword weights
 
 ##### System Management
-- `DELETE /delete_old_notices?day_gap={days}`: Clean old notices
+- `DELETE /delete_old_notice_list?day_gap={days}`: Clean old notices
 - `POST /backup_db`: Backup database
 - `GET /logs_scraping?gap={days}`: Get scraping logs
 - `GET /errors_notice_scraping?gap={days}`: Get error logs
@@ -771,7 +771,7 @@ CREATE TABLE channel_dev (
 ```
 **Returns**: Query results
 
-##### `POST /notices_by_search/`
+##### `POST /notice_list_by_search/`
 **Purpose**: Advanced notice search with keyword weighting
 **Request Body**:
 ```python

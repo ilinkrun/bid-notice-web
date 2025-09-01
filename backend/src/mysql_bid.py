@@ -521,7 +521,7 @@ def find_last_notice(name, field="title"):
   return rs if rs != None else (0, "제목없음")
 
 # ** main functions
-def find_notices(names, keywords):
+def find_notice_list(names, keywords):
     """
     기관명과 키워드로 notices를 검색하는 함수
     
@@ -551,7 +551,7 @@ def find_notices(names, keywords):
     return result
 
 
-def find_notices_for_statistics(fields=["org_name", "posted_date", "category", "created_at", "status"], renames=["orgName", "postedAt", "category", "createdAt", "status"], day_gap=5):
+def find_notice_list_for_statistics(fields=["org_name", "posted_date", "category", "created_at", "status"], renames=["orgName", "postedAt", "category", "createdAt", "status"], day_gap=5):
     """
     통계를 위한 공고 목록을 조회하고 지역 정보를 추가하는 함수
     
@@ -606,7 +606,7 @@ def find_notices_for_statistics(fields=["org_name", "posted_date", "category", "
     finally:
         mysql.close()
 
-def search_notices(keywords, nots, min_point, field="title", add_fields=[], add_where=""):
+def search_notice_list(keywords, nots, min_point, field="title", add_fields=[], add_where=""):
     """
     키워드 가중치와 제외어를 사용하여 notices를 검색하는 함수
     
@@ -620,12 +620,12 @@ def search_notices(keywords, nots, min_point, field="title", add_fields=[], add_
         list: 검색된 notices 리스트
     """
     dicts = get_search_weight(keywords, min_point=min_point, add_fields=add_fields, add_where=add_where)
-    # print(f"search_notices keywords: {keywords} / nots: {nots} / min_point: {min_point} / field: {field} / add_fields: {add_fields} / add_where: {add_where}")
-    # print(f"search_notices dicts: {dicts}")
+    # print(f"search_notice_list keywords: {keywords} / nots: {nots} / min_point: {min_point} / field: {field} / add_fields: {add_fields} / add_where: {add_where}")
+    # print(f"search_notice_list dicts: {dicts}")
     return filter_by_not(nots, dicts, field)
 
 
-def find_notices_with_category(fields=["nid", "title", "detail_url", "posted_date", "posted_by", "org_name", "category"], add_where=""):
+def find_notice_list_with_category(fields=["nid", "title", "detail_url", "posted_date", "posted_by", "org_name", "category"], add_where=""):
     """
     notices를 검색하는 함수
     
@@ -667,7 +667,7 @@ def find_notices_with_category(fields=["nid", "title", "detail_url", "posted_dat
         return []
 
 
-def find_notices_by_category(category, day_gap=2):
+def find_notice_list_by_category(category, day_gap=2):
     """
     카테고리별로 notices를 검색하는 함수
     
@@ -749,7 +749,7 @@ def update_category_batch(category, delta_hours=23, start_time=None):
             return
             
         # 카테고리에 해당하는 notices 검색
-        matched_notices = search_notices(
+        matched_notice_list = search_notice_list(
             keywords["keywords"],
             keywords["nots"],
             keywords["min_point"],
@@ -757,16 +757,16 @@ def update_category_batch(category, delta_hours=23, start_time=None):
             add_where=f"scraped_at >= '{start_time}' AND category IS NULL"
         )
         
-        if not matched_notices:
+        if not matched_notice_list:
             print(f"카테고리 '{category}'에 해당하는 notices가 없습니다.")
             return
             
         # 검색된 notices에 대해 category 업데이트
-        for notice in matched_notices:
+        for notice in matched_notice_list:
             for nid, data in notice.items():
                 mysql.update("notice_list", {"category": category, "status": "준비"}, f"nid = {nid}")
 
-        print(f"카테고리 '{category}'에 대한 category 업데이트 완료: {len(matched_notices)}개")
+        print(f"카테고리 '{category}'에 대한 category 업데이트 완료: {len(matched_notice_list)}개")
 
     except Exception as e:
         print(f"category 업데이트 중 오류 발생: {str(e)}")
@@ -793,7 +793,7 @@ def update_all_category(delta_hours=23, start_time=None):
         print(f"전체 category 업데이트 중 오류 발생: {str(e)}")
 
 
-def upsert_notices(data):
+def upsert_notice_list(data):
     """
     여러 공고를 업데이트하는 함수
     
@@ -802,7 +802,7 @@ def upsert_notices(data):
     """
     mysql = Mysql()
     try:
-        print(f'upsert_notices data: {data}')
+        print(f'upsert_notice_list data: {data}')
         # 전체 데이터를 한 번에 업데이트
         mysql.upsert("notice_list", data, inType="dicts")
         print(f"{len(data)}개의 공고가 업데이트되었습니다.")
@@ -811,7 +811,7 @@ def upsert_notices(data):
     finally:
         mysql.close()
 
-def update_notices_status(data):
+def update_notice_list_status(data):
     # data = [{"nid": 406810, "status": "준비", "title": "테스트 공고"}, ...]
     mysql = Mysql()
     for item in data:
@@ -840,9 +840,9 @@ def update_notices_status(data):
     mysql.close()
 
 # details
-def find_details_by_status(status, fields=["nid", "status", "title", "scraped_at"], addStr=""):
+def find_notice_details_by_status(status, fields=["nid", "status", "title", "scraped_at"], addStr=""):
     mysql = Mysql()
-    details = mysql.find("notice_details", fields=fields, addStr=f"WHERE status = '{status}' {addStr}")
+    details = mysql.find("notice_notice_details", fields=fields, addStr=f"WHERE status = '{status}' {addStr}")
     mysql.close()
     return dicts_from_tuples(fields, details)
 
@@ -984,13 +984,13 @@ def find_errors_notice_scraping(day_gap=15, out_type="dicts"):
   else:
     return errors
 
-## ** settings_nas_folder
+## ** settings_nas_path
 #--------------------------------------------------------------------
 
 
 ## ** DATABASE
 #--------------------------------------------------------------------
-def delete_old_notices(day_gap=15, condition="category IS NULL"):
+def delete_old_notice_list(day_gap=15, condition="category IS NULL"):
     """
     오래된 notices를 삭제하는 함수(category가 NULL이고 scraped_at이 day_gap일 전인 notices)
     
@@ -1061,11 +1061,11 @@ def backup_db():
 
 # ** test
 #--------------------------------------------------------------------
-def get_notices_gap(gap=3):
+def get_notice_list_gap(gap=3):
     """
     특정 카테고리의 공고 목록을 반환합니다.
     """
-    result = find_notices_with_category(add_where=f"`posted_date` >= DATE_SUB(NOW(), INTERVAL {gap} DAY)")
+    result = find_notice_list_with_category(add_where=f"`posted_date` >= DATE_SUB(NOW(), INTERVAL {gap} DAY)")
 
     # 각 row의 org_name에 해당하는 'org_region', 'registration' 필드값을 가져오기
     for item in result:
@@ -1078,8 +1078,8 @@ if __name__ == "__main__":
     # print(find_settings_notice_detail(addStr="", out_type="dicts"))
     # print(find_settings_notice_detail_by_name(name="강화군청"))
     category = "무관"
-    print(find_notices_by_category(category, day_gap=15))
-    # print(find_details_by_status("진행"))
-    # print(find_details_by_status("제외"))
+    print(find_notice_list_by_category(category, day_gap=15))
+    # print(find_notice_details_by_status("진행"))
+    # print(find_notice_details_by_status("제외"))
     # name = "강화군청"
     # print(find_settings_notice_detail_by_name(name))

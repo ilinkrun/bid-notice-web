@@ -147,12 +147,12 @@ CREATE TABLE `my_bids` (
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='회사 관련 입찰(공고) 정보'
 
 -- =============================================
--- Table: notice_details
+-- Table: notice_notice_details
 -- Engine: InnoDB
 -- Rows: 0
 -- Comment: 공고 상세정보
 -- =============================================
-CREATE TABLE `notice_details` (
+CREATE TABLE `notice_notice_details` (
   `nid` int(11) NOT NULL COMMENT '순번',
   `title` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT '제목: title',
   `file_name` varchar(500) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT '파일이름: file_names',

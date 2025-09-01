@@ -10,7 +10,7 @@ from utils_mysql import Mysql
 # MYSQL_CONFIG = dict(host='172.17.0.3', port=3306, user='root', passwd='mysqlIlmac1!', db='ilmac_bid_db', charset='utf8')
 
 TABLE_NOTICES = "notice_list"
-TABLE_DETAILS = "notice_details"
+TABLE_DETAILS = "notice_notice_details"
 TABLE_FILES = "notice_files"
 KEY_FIELD_NOTICES = "nid"
 KEY_FIELD_FOR_SEARCH = "title"
@@ -54,8 +54,8 @@ def get_fetch(sql: Sql):
     return rs
 
 # search by weight keywords and not filters
-@app.post("/notices_by_search/")
-def post_notices_by_search(search: Search):
+@app.post("/notice_list_by_search/")
+def post_notice_list_by_search(search: Search):
     # ? 초기화
     keyword_str = search.keywords.strip()
     not_str = search.nots.strip()
@@ -140,7 +140,7 @@ def post_notices_by_search(search: Search):
 # @app.post("/upsert_table/{table_name}")
 # def upsert_table(upsert):
 #     upsert(self, csv, table_name, updKeys=[], close=False)
-#     return find_notices(names, keywords)
+#     return find_notice_list(names, keywords)
 
 if __name__ == "__main__":
     uvicorn.run(

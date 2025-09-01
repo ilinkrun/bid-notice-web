@@ -56,7 +56,7 @@ def get_notice_category_org_com(nid):
 
 def get_nas_folder(name='root', level=1):
     mysql = Mysql()
-    result = mysql.find("settings_nas_folder", fields=['folder'], addStr=f"WHERE name = '{name}' AND level={level}")
+    result = mysql.find("settings_nas_path", fields=['folder'], addStr=f"WHERE name = '{name}' AND level={level}")
     mysql.close()
     return result[0][0]
 
@@ -78,7 +78,7 @@ def get_notice_nas_folder(nid):
     levels = [['root', 1], [category, 2], ['공고', 3], ['org_name', 4], ['공고명', 5], ['공고파일', 6]]
     # print(levels)
     mysql = Mysql()
-    paths = [(mysql.find("settings_nas_folder", fields=['folder'], addStr=f"WHERE name = '{level[0]}' AND level={level[1]}"))[0][0] for level in levels]
+    paths = [(mysql.find("settings_nas_path", fields=['folder'], addStr=f"WHERE name = '{level[0]}' AND level={level[1]}"))[0][0] for level in levels]
     mysql.close()
     # print(paths)
 
