@@ -141,13 +141,13 @@ export function NoticeStatisticsTable({
     loadOrgStatistics();
   }, [statisticsType, initialData]);
 
-  // 컴포넌트가 완전히 렌더링되고 데이터가 준비되면 로딩 완료
+  // 데이터 로딩 완료 후 UI 안정화를 위해 300ms 대기 후 로딩 스피너 제거
   useEffect(() => {
     if (initialData !== undefined) {
-      // 컴포넌트가 완전히 렌더링된 후 로딩 완료
+      // 통계 데이터 로딩이 완료되었으므로 300ms 후 스피너 제거
       const timer = setTimeout(() => {
         finishLoading();
-      }, 200);
+      }, 300);
       
       return () => clearTimeout(timer);
     }

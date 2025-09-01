@@ -46,12 +46,12 @@ export function SettingsListTable({ initialData }: SettingsListTableProps) {
     direction: 'asc',
   });
 
-  // 컴포넌트 렌더링 완료 후 로딩 해제 (SSR 대응)
+  // 데이터 로딩 완료 후 UI 안정화를 위해 300ms 대기 후 로딩 스피너 제거
   useEffect(() => {
-    // 다음 렌더링 사이클에서 로딩 해제
+    // 설정 데이터 로딩이 완료되었으므로 300ms 후 스피너 제거
     const timer = setTimeout(() => {
       finishLoading();
-    }, 0);
+    }, 300);
     
     return () => clearTimeout(timer);
   }, [finishLoading]);

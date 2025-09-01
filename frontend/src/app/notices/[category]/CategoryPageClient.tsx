@@ -35,13 +35,13 @@ export default function CategoryPageClient({ notices, category, gap }: CategoryP
     root.setAttribute('data-primary-color', getThemeColor(category));
   }, [category]);
 
-  // 컴포넌트가 완전히 렌더링되고 데이터 준비 완료 후 로딩 해제
+  // 데이터 로딩 완료 후 UI 안정화를 위해 300ms 대기 후 로딩 스피너 제거
   useEffect(() => {
     if (notices !== undefined) {
-      // 약간의 지연을 주어 페이지가 완전히 렌더링되도록 함
+      // 데이터 로딩이 완료되었으므로 300ms 후 스피너 제거
       const timer = setTimeout(() => {
         finishLoading();
-      }, 200);
+      }, 300);
       
       return () => clearTimeout(timer);
     }

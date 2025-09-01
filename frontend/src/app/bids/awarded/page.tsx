@@ -30,10 +30,10 @@ export default function AwardedPage() {
   const { finishLoading } = useUnifiedLoading();
 
   useEffect(() => {
-    // 페이지가 완전히 렌더링된 후 로딩 완료
+    // 데이터 로딩 완료 후 UI 안정화를 위해 300ms 대기 후 로딩 스피너 제거
     const timer = setTimeout(() => {
       finishLoading();
-    }, 200);
+    }, 300);
     
     return () => clearTimeout(timer);
   }, [finishLoading]);
