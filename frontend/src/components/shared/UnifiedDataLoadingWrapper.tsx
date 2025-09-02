@@ -11,15 +11,12 @@ interface UnifiedDataLoadingWrapperProps {
 export default function UnifiedDataLoadingWrapper({ children, data }: UnifiedDataLoadingWrapperProps) {
   const { finishLoading } = useUnifiedLoading();
 
-  // 데이터 로딩 완료 후 UI 안정화를 위해 300ms 대기 후 로딩 스피너 제거
+  // GraphQL/REST 데이터 로딩 완료 감지: undefined에서 실제 데이터(빈 객체 포함)로 변경되면 로딩 완료
   useEffect(() => {
     if (data !== undefined) {
-      // 데이터 로딩이 완료되었으므로 300ms 후 스피너 제거
-      const timer = setTimeout(() => {
-        finishLoading();
-      }, 300);
-      
-      return () => clearTimeout(timer);
+      // 데이터 로딩 완료 (null이나 빈 객체도 유효한 결과)
+      console.log('[UnifiedDataLoadingWrapper] 데이터 로딩 완료:', data);
+      finishLoading();
     }
   }, [data, finishLoading]);
 

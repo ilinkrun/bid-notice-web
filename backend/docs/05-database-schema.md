@@ -405,7 +405,7 @@ ORDER BY n.작성일 DESC;
 SELECT n.nid, n.제목, n.기관명, n.작성일
 FROM notices n
 WHERE n.제목 LIKE '%검사%' OR n.제목 LIKE '%점검%'
-  AND n.category IS NULL
+  AND n.category = '무관'
   AND n.scraped_at >= '2024-01-01'
 ORDER BY n.nid DESC;
 ```
@@ -424,7 +424,7 @@ GROUP BY n.기관명, s.지역, n.category;
 ### 1. 오래된 공고 정리
 ```sql
 DELETE FROM notices 
-WHERE category IS NULL 
+WHERE category = '무관' 
   AND scraped_at < DATE_SUB(NOW(), INTERVAL 15 DAY);
 ```
 

@@ -147,7 +147,7 @@ id,table_name,field_key,field_label,remark
 146,settings_list,detail_url,상세페이지주소,path_detail_url
 147,settings_list,posted_date,작성일,path_posted_date
 148,settings_list,posted_by,작성자,path_posted_by
-149,settings_list,exception_path,제외항목,path_exception
+149,settings_list,exception_row,제외항목,path_exception
 150,settings_list,use,사용,사용 여부
 151,settings_list,org_region,지역,지역
 152,settings_list,registration,등록,

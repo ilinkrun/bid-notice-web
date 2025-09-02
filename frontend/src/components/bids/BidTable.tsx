@@ -17,49 +17,30 @@ import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
 const BID_STAGES = [
   { value: 'progress', label: '진행' },
   { value: 'bidding', label: '응찰' },
-  { value: 'awarded', label: '낙찰' },
-  { value: 'failed', label: '패찰' },
-  { value: 'abandoned', label: '포기' },
+  { value: 'ended', label: '종료' },
 ];
 
-// 각 단계별 변경 가능한 상태 옵션 (워크플로우 문서 기준)
+// 각 단계별 변경 가능한 상태 옵션
 const getStatusChangeOptions = (currentStatus) => {
   switch (currentStatus) {
-    case 'progress': // 진행: 응찰, 제외 가능
+    case 'progress': // 진행: 응찰, 낙찰, 패찰, 포기 가능
       return [
         { value: 'bidding', label: '응찰' },
-        { value: 'excluded', label: '제외' },
+        { value: '낙찰', label: '낙찰' },
+        { value: '패찰', label: '패찰' },
+        { value: '포기', label: '포기' },
       ];
     case 'bidding': // 응찰: 낙찰, 패찰, 진행, 포기 가능
       return [
-        { value: 'awarded', label: '낙찰' },
-        { value: 'failed', label: '패찰' },
+        { value: '낙찰', label: '낙찰' },
+        { value: '패찰', label: '패찰' },
         { value: 'progress', label: '진행' },
-        { value: 'abandoned', label: '포기' },
+        { value: '포기', label: '포기' },
       ];
-    case 'awarded': // 낙찰: 패찰, 진행, 응찰, 제외, 포기 가능
-      return [
-        { value: 'failed', label: '패찰' },
-        { value: 'progress', label: '진행' },
-        { value: 'bidding', label: '응찰' },
-        { value: 'excluded', label: '제외' },
-        { value: 'abandoned', label: '포기' },
-      ];
-    case 'failed': // 패찰: 낙찰, 진행, 응찰, 제외, 포기 가능
-      return [
-        { value: 'awarded', label: '낙찰' },
-        { value: 'progress', label: '진행' },
-        { value: 'bidding', label: '응찰' },
-        { value: 'excluded', label: '제외' },
-        { value: 'abandoned', label: '포기' },
-      ];
-    case 'abandoned': // 포기: 모든 상태로 변경 가능
+    case 'ended': // 종료: 진행, 응찰로만 변경 가능
       return [
         { value: 'progress', label: '진행' },
         { value: 'bidding', label: '응찰' },
-        { value: 'awarded', label: '낙찰' },
-        { value: 'failed', label: '패찰' },
-        { value: 'excluded', label: '제외' },
       ];
     default:
       return [];
@@ -75,7 +56,7 @@ export default function BidTable({ bids, currentStatus }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [sortConfig, setSortConfig] = useState({
-    field: 'started_at',
+    field: 'postedAt',
     order: 'desc',
   });
   const { filter } = useBidFilterStore();
@@ -85,6 +66,13 @@ export default function BidTable({ bids, currentStatus }) {
   const [isFavoriteModalOpen, setIsFavoriteModalOpen] = useState(false);
   const [isStatusChangeModalOpen, setIsStatusChangeModalOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState('');
+  
+  // 종료 페이지에서 사용할 상태별 필터링
+  const [endedStatusFilters, setEndedStatusFilters] = useState({
+    '낙찰': true,
+    '패찰': true,
+    '포기': true,
+  });
 
   // 검색어 입력 핸들러 수정
   const handleSearchInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -131,7 +119,7 @@ export default function BidTable({ bids, currentStatus }) {
     const aValue = String(a[field] || ''); // 문자열로 변환
     const bValue = String(b[field] || ''); // 문자열로 변환
 
-    if (field === 'started_at') {
+    if (field === 'started_at' || field === 'postedAt') {
       return sortConfig.order === 'asc'
         ? new Date(aValue).getTime() - new Date(bValue).getTime()
         : new Date(bValue).getTime() - new Date(aValue).getTime();
@@ -147,13 +135,26 @@ export default function BidTable({ bids, currentStatus }) {
   // 검색 및 정렬된 데이터
   const filteredAndSortedBids = bids
     .filter((bid) => {
-      if (!debouncedSearchTerm) return true;
-      const searchLower = debouncedSearchTerm.toLowerCase();
-      return (
-        bid.title.toLowerCase().includes(searchLower) ||
-        bid.orgName.toLowerCase().includes(searchLower) ||
-        (bid.region && bid.region.toLowerCase().includes(searchLower))
-      );
+      // 검색 필터
+      if (debouncedSearchTerm) {
+        const searchLower = debouncedSearchTerm.toLowerCase();
+        const matchesSearch = (
+          bid.title.toLowerCase().includes(searchLower) ||
+          bid.orgName.toLowerCase().includes(searchLower) ||
+          (bid.region && bid.region.toLowerCase().includes(searchLower))
+        );
+        if (!matchesSearch) return false;
+      }
+      
+      // 종료 페이지에서 상태별 필터링
+      if (currentStatus === 'ended') {
+        const bidStatus = bid.status;
+        if (!endedStatusFilters[bidStatus]) {
+          return false;
+        }
+      }
+      
+      return true;
     })
     .sort((a, b) => sortData(a, b, sortConfig.field));
 
@@ -356,6 +357,28 @@ export default function BidTable({ bids, currentStatus }) {
           </div>
         </div>
         <div className="flex items-center gap-2">
+        {/* 종료 페이지에서만 상태별 필터 표시 */}
+        {currentStatus === 'ended' && (
+          <div className="flex items-center gap-2 mr-4">
+            <span className="text-sm text-gray-600">상태:</span>
+            {Object.entries(endedStatusFilters).map(([status, checked]) => (
+              <label key={status} className="flex items-center gap-1">
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  onChange={(e) =>
+                    setEndedStatusFilters(prev => ({
+                      ...prev,
+                      [status]: e.target.checked
+                    }))
+                  }
+                  className="rounded border-gray-300"
+                />
+                <span className="text-sm">{status}</span>
+              </label>
+            ))}
+          </div>
+        )}
         <Button
           variant="outline"
           onClick={handleStatusChangeModal}
@@ -387,7 +410,7 @@ export default function BidTable({ bids, currentStatus }) {
                   checked={selectedBids.length === bids.length}
                   onCheckedChange={(checked) => {
                     if (checked) {
-                      setSelectedBids(bids.map(bid => bid.bid));
+                      setSelectedBids(bids.map(bid => parseInt(bid.mid)));
                     } else {
                       setSelectedBids([]);
                     }
@@ -428,12 +451,22 @@ export default function BidTable({ bids, currentStatus }) {
                   지역
                 </button>
               </TableHead>
+              {currentStatus === 'ended' && (
+                <TableHead className="w-[80px] !bg-gray-100 !text-gray-900 !border-gray-300">
+                  <button
+                    className="flex items-center gap-2 !font-medium !text-gray-900"
+                    onClick={() => toggleSort('status')}
+                  >
+                    상태
+                  </button>
+                </TableHead>
+              )}
               <TableHead className="w-[100px] !bg-gray-100 !text-gray-900 !border-gray-300">
                 <button
                   className="flex items-center gap-2 !font-medium !text-gray-900"
-                  onClick={() => toggleSort('started_at')}
+                  onClick={() => toggleSort('postedAt')}
                 >
-                  입찰일
+                  등록일
                 </button>
               </TableHead>
             </TableRow>
@@ -441,18 +474,18 @@ export default function BidTable({ bids, currentStatus }) {
           <TableBody>
             {paginatedBids.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-[300px]" />
+                <TableCell colSpan={currentStatus === 'ended' ? 7 : 6} className="h-[300px]" />
               </TableRow>
             ) : (
               paginatedBids.map((bid) => (
                 <TableRow 
-                  key={bid.bid}
+                  key={bid.mid}
                   className="cursor-pointer hover:bg-gray-50"
                 >
                   <TableCell className="w-[40px]">
                     <Checkbox
-                      checked={selectedBids.includes(bid.bid)}
-                      onCheckedChange={() => toggleCheckbox(bid.bid)}
+                      checked={selectedBids.includes(parseInt(bid.mid))}
+                      onCheckedChange={() => toggleCheckbox(parseInt(bid.mid))}
                       aria-label={`${bid.title} 선택`}
                     />
                   </TableCell>
@@ -484,8 +517,20 @@ export default function BidTable({ bids, currentStatus }) {
                   <TableCell className="w-[80px] whitespace-nowrap">
                     {bid.region}
                   </TableCell>
+                  {currentStatus === 'ended' && (
+                    <TableCell className="w-[80px] whitespace-nowrap">
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${
+                        bid.status === '낙찰' ? 'bg-green-100 text-green-800' :
+                        bid.status === '패찰' ? 'bg-red-100 text-red-800' :
+                        bid.status === '포기' ? 'bg-gray-100 text-gray-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {bid.status}
+                      </span>
+                    </TableCell>
+                  )}
                   <TableCell className="w-[100px] whitespace-nowrap">
-                    {bid.started_at.split('T')[0]}
+                    {bid.postedAt ? bid.postedAt.split('T')[0] : bid.postedAt}
                   </TableCell>
                 </TableRow>
               ))

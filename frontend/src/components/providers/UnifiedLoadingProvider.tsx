@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback, useRef, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 
 interface UnifiedLoadingContextType {
@@ -8,6 +8,8 @@ interface UnifiedLoadingContextType {
   startLoading: () => void;
   finishLoading: () => void;
   setCustomMessage: (message: string) => void;
+  showSkeleton: boolean;
+  setShowSkeleton: (show: boolean) => void;
 }
 
 const UnifiedLoadingContext = createContext<UnifiedLoadingContextType | undefined>(undefined);
@@ -27,6 +29,7 @@ interface UnifiedLoadingProviderProps {
 export function UnifiedLoadingProvider({ children }: UnifiedLoadingProviderProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [customMessage, setCustomMessage] = useState('');
+  const [showSkeleton, setShowSkeleton] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout>();
 
   const startLoading = useCallback(() => {
@@ -43,15 +46,18 @@ export function UnifiedLoadingProvider({ children }: UnifiedLoadingProviderProps
       clearTimeout(timeoutRef.current);
     }
     
-    // 중복 호출을 방지하기 위해 약간의 지연 후 해제
-    timeoutRef.current = setTimeout(() => {
-      setIsLoading(false);
-      setCustomMessage('');
-    }, 100);
+    // 로딩 완료
+    setIsLoading(false);
+    setCustomMessage('');
+    setShowSkeleton(false);
   }, []);
 
   const setMessage = useCallback((message: string) => {
     setCustomMessage(message);
+  }, []);
+
+  const setSkeletonShow = useCallback((show: boolean) => {
+    setShowSkeleton(show);
   }, []);
 
   return (
@@ -59,14 +65,16 @@ export function UnifiedLoadingProvider({ children }: UnifiedLoadingProviderProps
       isLoading, 
       startLoading, 
       finishLoading,
-      setCustomMessage: setMessage
+      setCustomMessage: setMessage,
+      showSkeleton,
+      setShowSkeleton: setSkeletonShow
     }}>
       {isLoading && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center gap-3">
             <Loader2 className="h-10 w-10 animate-spin text-primary" />
             <p className="text-base font-medium text-gray-700">
-              {customMessage || '페이지를 불러오는 중입니다...'}
+              {customMessage || '페이지 로딩 중...'}
             </p>
           </div>
         </div>

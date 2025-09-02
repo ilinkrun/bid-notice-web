@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "server_bid.py", line 5, in <module>
+    from pydantic import BaseModel
+ModuleNotFoundError: No module named 'pydantic'

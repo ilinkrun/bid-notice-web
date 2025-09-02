@@ -69,7 +69,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"use\": \"1\",\n  \"url\": \"https://www.example.go.kr/portal/selectGosiList.do\",\n  \"iframe\": \"\",\n  \"rowXpath\": \"//*[@id='board']/table/tbody/tr\",\n  \"title\": \"td[4]/a\",\n  \"detail_url\": \"td[4]/a\",\n  \"posted_date\": \"td[3]\",\n  \"posted_by\": \"td[5]\",\n  \"exception_path\": \"\",\n  \"paging\": \"//div[contains(@class, 'pagination')]/span/a[contains(text(),'${i}')]\",\n  \"startPage\": \"1\",\n  \"endPage\": \"3\",\n  \"login\": \"\",\n  \"org_region\": \"경기\",\n  \"_비고\": \"\"\n}"
+							"raw": "{\n  \"use\": \"1\",\n  \"url\": \"https://www.example.go.kr/portal/selectGosiList.do\",\n  \"iframe\": \"\",\n  \"rowXpath\": \"//*[@id='board']/table/tbody/tr\",\n  \"title\": \"td[4]/a\",\n  \"detail_url\": \"td[4]/a\",\n  \"posted_date\": \"td[3]\",\n  \"posted_by\": \"td[5]\",\n  \"exception_row\": \"\",\n  \"paging\": \"//div[contains(@class, 'pagination')]/span/a[contains(text(),'${i}')]\",\n  \"startPage\": \"1\",\n  \"endPage\": \"3\",\n  \"login\": \"\",\n  \"org_region\": \"경기\",\n  \"_비고\": \"\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/settings_notice_list/{{org_name}}",

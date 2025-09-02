@@ -282,7 +282,7 @@ CREATE TABLE `settings_list` (
   `detail_url` varchar(800) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT '상세페이지주소: path_detail_url',
   `posted_date` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT '작성일: path_posted_date',
   `posted_by` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT '작성자: path_posted_by',
-  `exception_path` varchar(400) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT '제외항목: path_exception',
+  `exception_row` varchar(400) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT '제외항목: path_exception',
   `use` tinyint(1) DEFAULT NULL COMMENT '사용: 사용 여부',
   `org_region` varchar(10) COLLATE utf8_unicode_ci DEFAULT 'NULL' COMMENT '지역: 지역',
   `registration` tinyint(4) DEFAULT NULL COMMENT '등록',

@@ -6,7 +6,7 @@ export const bidResolvers = {
       try {
         const response = await apiClient.get('/my_bids');
         return response.data.map((bd: any) => ({
-          bid: bd.bid.toString(),
+          mid: bd.mid.toString(),
           nid: bd.nid.toString(),
           title: bd.title,
           status: bd.status,
@@ -29,7 +29,7 @@ export const bidResolvers = {
       try {
         const response = await apiClient.get(`/my_bids/${status}`);
         return response.data.map((bd: any) => ({
-          bid: bd.bid.toString(),
+          mid: bd.mid.toString(),
           nid: bd.nid.toString(),
           title: bd.title,
           status: bd.status,

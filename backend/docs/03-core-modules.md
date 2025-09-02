@@ -101,7 +101,7 @@
 
 #### Main Functions
 
-##### `_fetch_detail_by_name(url, name, required_keys=["제목"])`
+##### `_fetch_detail_by_org_name(url, name, required_keys=["제목"])`
 **Purpose**: Scrapes detailed information from a notice URL
 **Parameters**:
 - `url (str)`: URL of the detail page
@@ -296,7 +296,7 @@
 
 **Returns**: Organization settings in specified format
 
-##### `find_settings_list_by_name(name, fields, out_type="tuple")`
+##### `find_settings_list_by_org_name(name, fields, out_type="tuple")`
 **Purpose**: Get specific organization's scraping settings
 **Parameters**:
 - `name (str)`: Organization name

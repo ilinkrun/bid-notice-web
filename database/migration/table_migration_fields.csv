@@ -36,7 +36,7 @@ id,table_name,field_src,field_dst,remark
 44,settings_list,상세페이지주소,detail_url,path_detail_url
 45,settings_list,작성일,posted_date,path_posted_date
 46,settings_list,작성자,posted_by,path_posted_by
-47,settings_list,제외항목,exception_path,path_exception
+47,settings_list,제외항목,exception_row,path_exception
 48,settings_list,지역,org_region,지역
 49,settings_list,등록,registration,
 50,settings_list,담당업체,company_in_charge,

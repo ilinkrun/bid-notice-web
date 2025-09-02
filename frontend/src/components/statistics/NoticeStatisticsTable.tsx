@@ -141,15 +141,12 @@ export function NoticeStatisticsTable({
     loadOrgStatistics();
   }, [statisticsType, initialData]);
 
-  // 데이터 로딩 완료 후 UI 안정화를 위해 300ms 대기 후 로딩 스피너 제거
+  // 통계 데이터 로딩 완료 감지: undefined에서 배열(빈 배열 포함)로 변경되면 로딩 완료
   useEffect(() => {
     if (initialData !== undefined) {
-      // 통계 데이터 로딩이 완료되었으므로 300ms 후 스피너 제거
-      const timer = setTimeout(() => {
-        finishLoading();
-      }, 300);
-      
-      return () => clearTimeout(timer);
+      // 데이터 로딩 완료 (비어있는 배열도 유효한 결과)
+      console.log(`[NoticeStatisticsTable] 통계 데이터 로딩 완료: ${initialData?.length || 0}개 항목`);
+      finishLoading();
     }
   }, [initialData, finishLoading]);
 

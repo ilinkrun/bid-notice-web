@@ -14,6 +14,7 @@ import {
   User,
   BookmarkPlus,
   BookmarkCheck,
+  Bookmark,
   Archive,
   PlayCircle,
   CheckCircle,
@@ -41,50 +42,38 @@ const notices = [
   {
     title: '성능평가',
     href: '/notices/성능평가?gap=1',
-    icon: BookmarkCheck,
+    icon: BookmarkPlus,
   },
   {
     title: '기타',
     href: '/notices/기타?gap=1',
-    icon: BookmarkCheck,
+    icon: BookmarkPlus,
   },
   {
-    title: '무관',
+    title: '관련없음',
     href: '/notices/무관?gap=1',
-    icon: BookmarkPlus,
+    icon: Bookmark,
   },
 ];
 
 const bids = [
   {
-    title: '진행',
+    title: '진행(응찰전)',
     href: '/bids/progress',
     description: '입찰 준비중인 공고 목록',
     icon: Clock,
   },
   {
-    title: '응찰',
+    title: '응찰(응찰후 종료전)',
     href: '/bids/bidding',
     description: '응찰 완료된 공고 목록',
     icon: Target,
   },
   {
-    title: '낙찰',
-    href: '/bids/awarded',
-    description: '낙찰된 공고 목록',
-    icon: Award,
-  },
-  {
-    title: '패찰',
-    href: '/bids/failed',
-    description: '패찰된 공고 목록',
-    icon: AlertCircle,
-  },
-  {
-    title: '포기',
-    href: '/bids/abandoned',
-    description: '포기한 공고 목록',
-    icon: Archive,
+    title: '종료(낙찰/패찰/포기)',
+    href: '/bids/ended',
+    description: '낙찰/패찰/포기된 공고 목록',
+    icon: CheckCircle,
   },
 ];
 
@@ -98,13 +87,13 @@ const statistics = [
   {
     title: '스크래핑 로그',
     href: '/statistics/logs_scraping',
-    description: '자동 스크래핑 로그',
+    description: '스크래핑 로그',
     icon: FileSpreadsheet,
   },
   {
-    title: '스크래핑 에러 기록',
+    title: '스크래핑 에러',
     href: '/statistics/errors_notice_scraping',
-    description: '스크래핑 에러 기록',
+    description: '스크래핑 에러',
     icon: FileSpreadsheet,
   },
   {
@@ -138,21 +127,15 @@ const channels = [
 
 const settings = [
   {
-    title: '목록 스크랩 설정',
-    href: '/settings/list',
-    description: '목록 스크랩 설정',
-    icon: ListTodo,
-  },
-  {
-    title: '상세 스크랩 설정',
-    href: '/settings/detail',
-    description: '상세 스크랩 설정',
+    title: '스크랩 설정',
+    href: '/settings/scrapping',
+    description: '입찰공고 스크랩 설정 관리',
     icon: Settings,
   },
   {
-    title: '카테고리 설정',
+    title: '업무구분 설정',
     href: '/settings/category',
-    description: '카테고리 관리',
+    description: '카테고리(업무구분) 관리',
     icon: FolderKanban,
   },
   {

@@ -14,11 +14,13 @@ import { useUnifiedLoading } from '@/components/providers/UnifiedLoadingProvider
 
 interface SettingsListTableProps {
   initialData: {
+    oid: number;
     orgName: string;
     detailUrl: string;
     region: string;
     registration: string;
     use: boolean;
+    companyInCharge?: string;
   }[];
 }
 
@@ -46,19 +48,15 @@ export function SettingsListTable({ initialData }: SettingsListTableProps) {
     direction: 'asc',
   });
 
-  // 데이터 로딩 완료 후 UI 안정화를 위해 300ms 대기 후 로딩 스피너 제거
+  // 설정 데이터 로딩 완료 감지: 서버사이드에서 이미 로드된 데이터가 있으므로 즉시 완료
   useEffect(() => {
-    // 설정 데이터 로딩이 완료되었으므로 300ms 후 스피너 제거
-    const timer = setTimeout(() => {
-      finishLoading();
-    }, 300);
-    
-    return () => clearTimeout(timer);
+    // initialData가 이미 서버에서 로드되어 전달된 상태
+    console.log(`[SettingsListTable] 설정 데이터 로딩 완료: ${initialData?.length || 0}개 항목`);
+    finishLoading();
   }, [finishLoading]);
 
-  const handleRowClick = (orgName: string) => {
-    const encodedOrgName = encodeURIComponent(orgName);
-    navigate(`/settings/list/${encodedOrgName}`);
+  const handleRowClick = (oid: number) => {
+    navigate(`/settings/scrapping/${oid}/list`);
   };
 
   const handleSort = (key: keyof SettingsListTableProps['initialData'][0]) => {
@@ -136,7 +134,7 @@ export function SettingsListTable({ initialData }: SettingsListTableProps) {
               <TableRow 
                 key={index}
                 className="cursor-pointer hover:bg-gray-50"
-                onClick={() => handleRowClick(item.orgName)}
+                onClick={() => handleRowClick(item.oid)}
               >
                 <TableCell>{item.orgName}</TableCell>
                 <TableCell>

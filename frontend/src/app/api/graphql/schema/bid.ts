@@ -1,6 +1,6 @@
 export const bidTypeDefs = `#graphql
   type Bid {
-    bid: String!
+    mid: String!
     nid: String!
     title: String!
     status: String!

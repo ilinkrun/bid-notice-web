@@ -8,14 +8,19 @@ import { getClient } from '@/lib/api/graphqlClient';
 import ApolloWrapper from '@/components/providers/ApolloWrapper';
 import UnifiedDataLoadingWrapper from '@/components/shared/UnifiedDataLoadingWrapper';
 
-const GET_DASHBOARD_DATA = gql`
-  query GetDashboardData($gap: Int!) {
+const GET_NOTICES_STATISTICS = gql`
+  query GetNoticesStatistics($gap: Int!) {
     noticesStatistics(gap: $gap) {
       orgName
       postedAt
       category
       region
     }
+  }
+`;
+
+const GET_ERROR_SCRAPINGS = gql`
+  query GetErrorScrapings($gap: Int!) {
     errorScrapings(gap: $gap) {
       orgNames
       time
@@ -56,18 +61,40 @@ const processNoticeStatistics = (notices: any[] = []): any[] => {
 
 // 서버 컴포넌트에서 데이터 가져오기
 async function getDashboardData() {
+  const client = getClient();
+  
+  // 개별적으로 데이터 가져오기
+  let noticesStatistics = [];
+  let errorScrapings = [];
+  
   try {
-    const client = getClient();
-    const result = await client.query({
-      query: GET_DASHBOARD_DATA,
+    const noticesResult = await client.query({
+      query: GET_NOTICES_STATISTICS,
       variables: { gap: 10 },
       fetchPolicy: 'no-cache',
+      errorPolicy: 'all'
     });
-    return result.data;
+    noticesStatistics = noticesResult.data?.noticesStatistics || [];
   } catch (error) {
-    console.error('Failed to fetch dashboard data:', error);
-    return null;
+    console.error('Failed to fetch notices statistics:', error);
   }
+  
+  try {
+    const errorsResult = await client.query({
+      query: GET_ERROR_SCRAPINGS,
+      variables: { gap: 10 },
+      fetchPolicy: 'no-cache',
+      errorPolicy: 'all'
+    });
+    errorScrapings = errorsResult.data?.errorScrapings || [];
+  } catch (error) {
+    console.error('Failed to fetch error scrapings:', error);
+  }
+  
+  return {
+    noticesStatistics,
+    errorScrapings
+  };
 }
 
 // 공지사항 데이터

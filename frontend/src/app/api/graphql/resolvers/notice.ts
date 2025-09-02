@@ -39,7 +39,7 @@ export const noticeResolvers = {
         return [];
       }
     },
-    
+
     noticesStatistics: async (_: unknown, { gap }: { gap: number }) => {
       try {
         const response = await apiClient.get('/notice_list_statistics', { params: { gap } });
@@ -55,8 +55,8 @@ export const noticeResolvers = {
       }
     },
 
-    searchNotices: async (_: unknown, { keywords, nots, minPoint, addWhere }: { 
-      keywords: string; nots: string; minPoint: number; addWhere?: string 
+    searchNotices: async (_: unknown, { keywords, nots, minPoint, addWhere }: {
+      keywords: string; nots: string; minPoint: number; addWhere?: string
     }) => {
       try {
         const response = await apiClient.post('/search_notice_list', {
@@ -85,8 +85,8 @@ export const noticeResolvers = {
 
     lastNotice: async (_: unknown, { orgName, field }: { orgName: string; field?: string }) => {
       try {
-        const response = await apiClient.get(`/last_notice/${orgName}`, { 
-          params: { field: field || 'title' } 
+        const response = await apiClient.get(`/last_notice/${orgName}`, {
+          params: { field: field || 'title' }
         });
         return response.data;
       } catch (error) {
@@ -107,13 +107,58 @@ export const noticeResolvers = {
       }
     },
 
-    updateNoticeStatus: async (_: unknown, { nid, from, to }: { nid: number; from: string; to: string }) => {
+    noticeToProgress: async (_: unknown, { nids }: { nids: string[] }) => {
       try {
-        const response = await apiClient.post('/notice_list/status', { nid, from, to });
-        return response.data;
+        const response = await apiClient.post('/notice_to_progress', { nids });
+        return {
+          success: response.data.success || true,
+          message: response.data.message || `${nids.length}개의 입찰 공고가 진행 상태로 변경되었습니다.`
+        };
       } catch (error) {
-        console.error('Error updating notice status:', error);
-        throw new Error('Failed to update notice status');
+        console.error('Error processing notice to progress:', error);
+        return {
+          success: false,
+          message: '입찰 공고 진행 처리 중 오류가 발생했습니다.'
+        };
+      }
+    },
+
+    updateNoticeCategory: async (_: unknown, { nids, category }: { nids: string[]; category: string }) => {
+      try {
+        // server_bid.py (포트 11303)로 요청 전송
+        const response = await apiClient.post('/update_notice_category', { 
+          nids: nids.map(id => parseInt(id)), 
+          category 
+        });
+        return {
+          success: response.data.success || true,
+          message: response.data.message || `${nids.length}개의 공고 유형이 '${category}'로 변경되었습니다.`
+        };
+      } catch (error) {
+        console.error('Error updating notice category:', error);
+        return {
+          success: false,
+          message: '공고 유형 변경 중 오류가 발생했습니다.'
+        };
+      }
+    },
+
+    excludeNotices: async (_: unknown, { nids }: { nids: string[] }) => {
+      try {
+        // server_bid.py로 is_selected=-1 업데이트 요청
+        const response = await apiClient.post('/exclude_notices', { 
+          nids: nids.map(id => parseInt(id))
+        });
+        return {
+          success: response.data.success || true,
+          message: response.data.message || `${nids.length}개의 공고가 업무에서 제외되었습니다.`
+        };
+      } catch (error) {
+        console.error('Error excluding notices:', error);
+        return {
+          success: false,
+          message: '공고 제외 처리 중 오류가 발생했습니다.'
+        };
       }
     },
   },

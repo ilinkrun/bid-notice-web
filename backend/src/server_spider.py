@@ -1,6 +1,7 @@
 # https://fastapi.tiangolo.com/tutorial/query-params-str-validations/#query-parameter-list-multiple-values
 # uvicorn server_spider:app --reload --host=0.0.0.0 --port=11301
-# curl -X POST "http://localhost:11301/check_fetch_list/" -H "Content-Type: application/json" -d '{"org_name": "가평군청"}'
+# curl -X POST "http://localhost:11301/check_fetch_list/" -H
+# "Content-Type: application/json" -d '{"org_name": "가평군청"}'
 from typing import Optional, List, Dict
 from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException
@@ -14,8 +15,10 @@ import json
 # 환경 변수 로드
 load_dotenv()
 
+
 class CSVRequest(BaseModel):
   csv: str
+
 
 class ListPageSettings(BaseModel):
   use: str
@@ -27,13 +30,14 @@ class ListPageSettings(BaseModel):
   detail_url: str
   posted_date: str
   posted_by: str
-  exception_path: str
+  exception_row: str
   paging: str
   startPage: str
   endPage: str
   login: str
   org_region: str
   _비고: str
+
 
 class DetailPageSettings(BaseModel):
   use: str
@@ -49,8 +53,10 @@ class DetailPageSettings(BaseModel):
   org_man: str
   org_tel: str
 
+
 class Nids(BaseModel):
   nids_str: str
+
 
 class CheckResult(BaseModel):
   org_name: str
@@ -60,6 +66,7 @@ class CheckResult(BaseModel):
   data_count: int
   first_page_data: Optional[List[Dict]] = None
 
+
 app = FastAPI()
 
 
@@ -67,10 +74,10 @@ app = FastAPI()
 def check_fetch_list(org_name: str):
   """
   특정 기관의 게시판 목록을 스크래핑하여 결과를 반환합니다.
-  
+
   Args:
     org_name (str): 스크래핑할 기관명
-    
+
   Returns:
     dict: {
       'org_name': org_name,
@@ -84,21 +91,26 @@ def check_fetch_list(org_name: str):
     return result
   except Exception as e:
     return {
-      'org_name': org_name,
-      'error_code': ERROR_CODES["UNKNOWN_ERROR"],
-      'error_message': f"스크래핑 중 예상치 못한 오류 발생: {str(e)}",
-      'data': []
+        'org_name': org_name,
+        'error_code': ERROR_CODES["UNKNOWN_ERROR"],
+        'error_message': f"스크래핑 중 예상치 못한 오류 발생: {str(e)}",
+        'data': []
     }
+
 
 # ** fastapi functions
 # * test post csv
+
+
 @app.post("/test_csv/")
 def check_list_page(request: CSVRequest):
   return request.csv
 
+
 @app.get("/hello")
 def hello():
   return {"message": "Hello, World!"}
+
 
 # # * check downloadable for detail page
 # @app.post("/check_detail_page/")
@@ -122,8 +134,8 @@ def hello():
 
 if __name__ == "__main__":
   uvicorn.run(
-    "server_spider:app",
-    host="0.0.0.0",
-    reload=False,
-    port=11301  # 컨테이너 내부 포트는 고정
+      "server_spider:app",
+      host="0.0.0.0",
+      reload=False,
+      port=11301  # 컨테이너 내부 포트는 고정
   )

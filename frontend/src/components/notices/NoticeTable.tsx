@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Star, Loader2, Edit3 } from 'lucide-react';
+import { Search, Star, Loader2, Edit3, Minus } from 'lucide-react';
 import { type Notice } from '@/types/notice';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -17,6 +17,36 @@ import { NoticeDetailModal } from './NoticeDetailModal';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
+import { useMutation } from '@apollo/client';
+import { gql } from '@apollo/client';
+
+// GraphQL mutation 정의
+const NOTICE_TO_PROGRESS = gql`
+  mutation NoticeToProgress($nids: [ID!]!) {
+    noticeToProgress(nids: $nids) {
+      success
+      message
+    }
+  }
+`;
+
+const UPDATE_NOTICE_CATEGORY = gql`
+  mutation UpdateNoticeCategory($nids: [ID!]!, $category: String!) {
+    updateNoticeCategory(nids: $nids, category: $category) {
+      success
+      message
+    }
+  }
+`;
+
+const EXCLUDE_NOTICES = gql`
+  mutation ExcludeNotices($nids: [ID!]!) {
+    excludeNotices(nids: $nids) {
+      success
+      message
+    }
+  }
+`;
 
 type SortField = '제목' | '기관명' | '작성일' | '지역' | '등록';
 type SortOrder = 'asc' | 'desc';
@@ -48,6 +78,9 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
   const router = useRouter();
   const { navigate } = useUnifiedNavigation();
   const searchParams = useSearchParams();
+  const [noticeToProgress] = useMutation(NOTICE_TO_PROGRESS);
+  const [updateNoticeCategory] = useMutation(UPDATE_NOTICE_CATEGORY);
+  const [excludeNotices] = useMutation(EXCLUDE_NOTICES);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -68,6 +101,10 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
   const [localCategory, setLocalCategory] = useState(currentCategory || '공사점검');
   const [selectedBidStage, setSelectedBidStage] = useState<string>(currentCategory === '무관' ? '무관' : '관심');
   const [isComposing, setIsComposing] = useState(false);
+  const [progressLoading, setProgressLoading] = useState(false);
+  const [categoryLoading, setCategoryLoading] = useState(false);
+  const [isExcludeModalOpen, setIsExcludeModalOpen] = useState(false);
+  const [excludeLoading, setExcludeLoading] = useState(false);
 
   // 페이지 로딩 공통 함수
   const loadPage = async (url: string) => {
@@ -342,17 +379,32 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
   };
 
   // 입찰 진행 확인 처리
-  const handleConfirmBidProcess = () => {
-    // TODO: API 호출하여 입찰 진행 처리
-    console.log('입찰 진행 처리:', {
-      nids: selectedNids,
-      status: '진행'
-    });
+  const handleConfirmBidProcess = async () => {
+    if (selectedNids.length === 0) return;
     
-    // 처리 후 선택 초기화
-    setSelectedNids([]);
-    setIsBidProcessModalOpen(false);
-    alert('입찰 진행이 설정되었습니다.');
+    setProgressLoading(true);
+    
+    try {
+      const { data } = await noticeToProgress({
+        variables: {
+          nids: selectedNids.map(nid => nid.toString())
+        }
+      });
+
+      if (data?.noticeToProgress?.success) {
+        alert(data.noticeToProgress.message || '입찰 진행이 설정되었습니다.');
+        // 처리 후 선택 초기화
+        setSelectedNids([]);
+        setIsBidProcessModalOpen(false);
+      } else {
+        throw new Error(data?.noticeToProgress?.message || '입찰 진행 처리에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('입찰 진행 처리 중 오류 발생:', error);
+      alert('입찰 진행 처리 중 오류가 발생했습니다.');
+    } finally {
+      setProgressLoading(false);
+    }
   };
 
   // 유형 변경 모달 열기
@@ -386,20 +438,79 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
 
   // 유형 변경 저장
   const handleSaveCategoryChange = async () => {
+    if (selectedNids.length === 0) return;
+    
+    setCategoryLoading(true);
+    
     try {
-      // TODO: API 호출하여 카테고리 변경
-      console.log('유형 변경 데이터:', {
-        nids: selectedNids,
-        category: localCategory
+      const { data } = await updateNoticeCategory({
+        variables: {
+          nids: selectedNids.map(nid => nid.toString()),
+          category: localCategory
+        }
       });
-      
-      // 저장 후 모달 닫기
-      setIsCategoryEditModalOpen(false);
-      setSelectedNids([]); // 선택 초기화
-      alert('유형이 변경되었습니다.');
+
+      if (data?.updateNoticeCategory?.success) {
+        alert(data.updateNoticeCategory.message || '유형이 변경되었습니다.');
+        // 성공 후 모달 닫기 및 선택 초기화
+        setIsCategoryEditModalOpen(false);
+        setSelectedNids([]);
+        
+        // 페이지 새로고침하여 변경된 데이터 반영
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } else {
+        throw new Error(data?.updateNoticeCategory?.message || '유형 변경에 실패했습니다.');
+      }
     } catch (error) {
       console.error('유형 변경 중 오류 발생:', error);
       alert('유형 변경 중 오류가 발생했습니다.');
+    } finally {
+      setCategoryLoading(false);
+    }
+  };
+
+  // 제외 모달 열기
+  const handleExclude = () => {
+    if (selectedNids.length === 0) {
+      alert('선택된 공고가 없습니다.');
+      return;
+    }
+    setIsExcludeModalOpen(true);
+  };
+
+  // 제외 확인 처리
+  const handleConfirmExclude = async () => {
+    if (selectedNids.length === 0) return;
+    
+    setExcludeLoading(true);
+    
+    try {
+      const { data } = await excludeNotices({
+        variables: {
+          nids: selectedNids.map(nid => nid.toString())
+        }
+      });
+
+      if (data?.excludeNotices?.success) {
+        alert(data.excludeNotices.message || '선택된 공고가 업무에서 제외되었습니다.');
+        // 성공 후 모달 닫기 및 선택 초기화
+        setIsExcludeModalOpen(false);
+        setSelectedNids([]);
+        
+        // 페이지 새로고침하여 변경된 데이터 반영
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } else {
+        throw new Error(data?.excludeNotices?.message || '제외 처리에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('제외 처리 중 오류 발생:', error);
+      alert('제외 처리 중 오류가 발생했습니다.');
+    } finally {
+      setExcludeLoading(false);
     }
   };
 
@@ -487,6 +598,14 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Button 
+            onClick={handleExclude} 
+            variant="outline" 
+            className="bg-red-50 border-red-300 text-red-700 hover:bg-red-100 h-10 w-10 flex items-center justify-center"
+            title="업무에서 제외"
+          >
+            <Minus className="h-4 w-4" />
+          </Button>
           <Button 
             onClick={handleCategoryEdit} 
             variant="outline" 
@@ -712,10 +831,26 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsCategoryEditModalOpen(false)}>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsCategoryEditModalOpen(false)}
+              disabled={categoryLoading}
+            >
               취소
             </Button>
-            <Button onClick={handleSaveCategoryChange}>저장</Button>
+            <Button 
+              onClick={handleSaveCategoryChange}
+              disabled={categoryLoading}
+            >
+              {categoryLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  처리 중...
+                </>
+              ) : (
+                '저장'
+              )}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -735,11 +870,62 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
             <Button 
               variant="outline" 
               onClick={() => setIsBidProcessModalOpen(false)}
+              disabled={progressLoading}
             >
               취소
             </Button>
-            <Button onClick={handleConfirmBidProcess}>
-              예
+            <Button 
+              onClick={handleConfirmBidProcess}
+              disabled={progressLoading}
+            >
+              {progressLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  처리 중...
+                </>
+              ) : (
+                '예'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 제외 확인 모달 */}
+      <Dialog open={isExcludeModalOpen} onOpenChange={setIsExcludeModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>업무에서 제외</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-gray-600">
+              선택된 {selectedNids.length}개 공고를 업무에서 제외할까요?
+            </p>
+            <p className="text-xs text-gray-500 mt-2">
+              제외된 공고는 더 이상 목록에 표시되지 않습니다.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsExcludeModalOpen(false)}
+              disabled={excludeLoading}
+            >
+              취소
+            </Button>
+            <Button 
+              onClick={handleConfirmExclude}
+              disabled={excludeLoading}
+              variant="destructive"
+            >
+              {excludeLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  처리 중...
+                </>
+              ) : (
+                '확인'
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

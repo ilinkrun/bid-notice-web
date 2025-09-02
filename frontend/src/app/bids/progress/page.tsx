@@ -1,64 +1,63 @@
-'use client';
-
-import React, { useEffect } from 'react';
+import { gql } from '@apollo/client';
+import { getClient } from '@/lib/api/graphqlClient';
 import BidTable from '@/components/bids/BidTable';
-import { useUnifiedLoading } from '@/components/providers/UnifiedLoadingProvider';
+import ApolloWrapper from '@/components/providers/ApolloWrapper';
+import UnifiedDataLoadingWrapper from '@/components/shared/UnifiedDataLoadingWrapper';
 
-// Mock 데이터
-const mockBids = [
-  {
-    bid: 1,
-    category: '공사점검',
-    orgName: '서울시 중구청',
-    title: '중구청 건물 안전점검 용역',
-    region: '서울',
-    started_at: '2024-03-15T09:00:00',
-    nid: 1001
-  },
-  {
-    bid: 2,
-    category: '성능평가',
-    orgName: '한국전력공사',
-    title: '발전소 성능평가 및 진단 용역',
-    region: '경기',
-    started_at: '2024-03-20T10:00:00',
-    nid: 1002
-  },
-  {
-    bid: 3,
-    category: '기타',
-    orgName: '부산광역시',
-    title: '부산항 시설물 점검 용역',
-    region: '부산',
-    started_at: '2024-03-25T11:00:00',
-    nid: 1003
+const GET_PROGRESS_BIDS = gql`
+  query GetProgressBids {
+    bidByStatus(status: "진행") {
+      mid
+      nid
+      title
+      status
+      started_at
+      ended_at
+      memo
+      orgName
+      postedAt
+      detail
+      category
+      region
+    }
   }
-];
+`;
 
-export default function BidProgressPage() {
-  const { finishLoading } = useUnifiedLoading();
+// 서버 컴포넌트에서 데이터 가져오기
+async function getProgressBids() {
+  try {
+    const client = getClient();
+    const result = await client.query({
+      query: GET_PROGRESS_BIDS,
+      fetchPolicy: 'no-cache',
+      errorPolicy: 'all'
+    });
+    return result.data?.bidByStatus || [];
+  } catch (error) {
+    console.error('Failed to fetch progress bids:', error);
+    return [];
+  }
+}
 
-  useEffect(() => {
-    // 데이터 로딩 완료 후 UI 안정화를 위해 300ms 대기 후 로딩 스피너 제거
-    const timer = setTimeout(() => {
-      finishLoading();
-    }, 300);
-    
-    return () => clearTimeout(timer);
-  }, [finishLoading]);
+export default async function BidProgressPage() {
+  const bids = await getProgressBids();
 
   return (
     <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">
-          진행
-        </h1>
-        <p className="text-gray-600 mt-2">
-          입찰 준비중인 공고 목록입니다. 응찰용 문서를 작성하고 입찰 단계를 관리하세요.
-        </p>
-      </div>
-      
-      <BidTable bids={mockBids} currentStatus="progress" />
+      <ApolloWrapper>
+        <UnifiedDataLoadingWrapper data={bids}>
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-900">
+              진행
+            </h1>
+            <p className="text-gray-600 mt-2">
+              입찰 준비중인 공고 목록입니다. 응찰용 문서를 작성하고 입찰 단계를 관리하세요.
+            </p>
+          </div>
+
+          <BidTable bids={bids} currentStatus="progress" />
+        </UnifiedDataLoadingWrapper>
+      </ApolloWrapper>
     </div>
   );
 }
