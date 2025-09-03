@@ -6,7 +6,7 @@ import { settingsDetailTypeDefs } from './settingsDetail';
 import { logScrapingTypeDefs } from './logScraping';
 import { errorScrapingTypeDefs } from './errorScraping';
 import { boardTypeDefs } from './board';
-import { bidTypeDefs } from './bid';
+import { bidTypeDefs } from './myBid';
 import { spiderTypeDefs } from './spider';
 import { mysqlTypeDefs } from './mysql';
 

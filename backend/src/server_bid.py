@@ -22,7 +22,7 @@ from mysql_settings import (
 from mysql_notice import (find_notice_list_with_category, find_last_notice,
                           find_notice_list_by_category,
                           find_notice_list_for_statistics, search_notice_list,
-                          upsert_notice_list, find_my_bids, find_my_bids_by_status, update_all_category,
+                          upsert_notice_list, find_my_bids, find_my_bids_by_status, find_my_bid_by_nid, update_all_category,
                           update_notice_category_by_nids, exclude_notices_by_nids, restore_notices_by_nids)
 
 from mysql_logs import (find_logs_notice_scraping, find_errors_notice_scraping)
@@ -646,6 +646,22 @@ def get_bids_by_status(status: str):
   try:
     result = find_my_bids_by_status(status)
     return result
+  except Exception as e:
+    raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/my_bids/detail/{nid}")
+def get_bid_by_nid(nid: str):
+  """
+  특정 nid의 입찰 정보를 반환합니다.
+  """
+  try:
+    result = find_my_bid_by_nid(nid)
+    if not result:
+      raise HTTPException(status_code=404, detail=f"입찰 정보를 찾을 수 없습니다: {nid}")
+    return result
+  except HTTPException as he:
+    raise he
   except Exception as e:
     raise HTTPException(status_code=500, detail=str(e))
 

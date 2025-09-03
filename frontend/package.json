@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev -p 11501 -H 0.0.0.0",
+    "dev": "next dev -p 11501",
     "start": "next start -p 11501",
     "build": "next build",
     "scrape:test": "tsx src/lib/scraper/test/gangnam.ts"
@@ -28,7 +28,6 @@
     "@radix-ui/react-slot": "^1.2.0",
     "@radix-ui/react-switch": "^1.1.4",
     "@radix-ui/react-tabs": "^1.1.4",
-    "@tailwindcss/typography": "^0.5.16",
     "@uiw/react-md-editor": "^4.0.8",
     "axios": "^1.6.7",
     "chart.js": "^4.4.8",
@@ -39,7 +38,6 @@
     "dayjs": "^1.11.10",
     "graphql": "^16.10.0",
     "lucide-react": "^0.477.0",
-    "marked": "^16.2.1",
     "mysql2": "^3.14.0",
     "next": "^15.2.1",
     "react": "^18.2.0",
@@ -50,7 +48,6 @@
     "shadcn": "^2.4.0-canary.12",
     "tailwind-merge": "^3.0.2",
     "tailwindcss-animate": "^1.0.7",
-    "turndown": "^7.2.1",
     "zod": "^3.24.2",
     "zustand": "^5.0.3"
   },

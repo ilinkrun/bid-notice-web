@@ -376,3 +376,4 @@ CREATE TABLE `settings_notice_list` (
 ----
 
 http://14.34.23.70:11501/settings/scrapping 페이지 접속은 정상적으로 접속 됩니다. 그런데, 특정 설정을 클릭하면 http://14.34.23.70:11501/settings/scr apping/[orgName] 페이지로 이동하고, 404 에러가 발생해요. oid 테스트로 http://14.34.23.70:11501/settings/scr apping/2/list 를 주소창에 입력하면 페이지 이동은 되는데, '기관명', '담당업체', '담당자' 필드가 비어있어요.
+

@@ -220,7 +220,9 @@ def unpack_settings_elements(settings={}):
   """
   elements = []
   for (k, v) in settings.items():
-    if (v is None or v.strip() == ""):
+    if v is None:
+      continue
+    if not isinstance(v, str) or v.strip() == "":
       continue
     vs = v.split(SEPERATOR)
     xpath = vs[0].strip()

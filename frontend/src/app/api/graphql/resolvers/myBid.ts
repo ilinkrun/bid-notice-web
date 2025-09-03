@@ -47,5 +47,29 @@ export const bidResolvers = {
         return [];
       }
     },
+
+    bidByNid: async (_: unknown, { nid }: { nid: string }) => {
+      try {
+        const response = await apiClient.get(`/my_bids/detail/${nid}`);
+        const bd = response.data;
+        return {
+          mid: bd.mid.toString(),
+          nid: bd.nid.toString(),
+          title: bd.title,
+          status: bd.status,
+          started_at: bd.started_at,
+          ended_at: bd.ended_at,
+          memo: bd.memo,
+          orgName: bd.org_name,
+          postedAt: bd.posted_date,
+          detail: bd.detail,
+          category: bd.category || "",
+          region: bd.org_region || "",
+        };
+      } catch (error) {
+        console.error('Error fetching bid by nid:', error);
+        return null;
+      }
+    },
   },
 };

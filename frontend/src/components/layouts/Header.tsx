@@ -97,7 +97,7 @@ const statistics = [
   },
   {
     title: '스크래핑 에러',
-    href: '/statistics/errors_notice_scraping',
+    href: '/statistics/errors_scraping',
     description: '스크래핑 에러',
     icon: FileSpreadsheet,
   },

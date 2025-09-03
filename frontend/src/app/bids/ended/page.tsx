@@ -3,6 +3,7 @@ import { getClient } from '@/lib/api/graphqlClient';
 import BidTable from '@/components/bids/BidTable';
 import ApolloWrapper from '@/components/providers/ApolloWrapper';
 import UnifiedDataLoadingWrapper from '@/components/shared/UnifiedDataLoadingWrapper';
+import '../../themes.css';
 
 const GET_COMPLETED_BIDS = gql`
   query GetCompletedBids {
@@ -50,18 +51,9 @@ export default async function EndedPage() {
   const bids = await getCompletedBids();
 
   return (
-    <div className="p-6">
+    <div className="theme-default">
       <ApolloWrapper>
         <UnifiedDataLoadingWrapper data={bids}>
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">
-              종료
-            </h1>
-            <p className="text-gray-600 mt-2">
-              종료된 입찰 공고 목록입니다. 낙찰, 패찰, 포기된 입찰들을 확인할 수 있습니다.
-            </p>
-          </div>
-
           <BidTable bids={bids} currentStatus="ended" />
         </UnifiedDataLoadingWrapper>
       </ApolloWrapper>

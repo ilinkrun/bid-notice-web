@@ -13,9 +13,9 @@ interface CategoryPageClientProps {
 
 // 카테고리별 테마 매핑
 const categoryThemes = {
-  '공사점검': 'theme-construction',
+  '공사점검': 'theme-performance',
   '성능평가': 'theme-performance',
-  '기타': 'theme-etc',
+  '기타': 'theme-performance',
   '무관': 'theme-default',
   '제외': 'theme-default'
 } as const;

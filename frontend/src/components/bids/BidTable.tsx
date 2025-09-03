@@ -13,6 +13,7 @@ import { useBidFilterStore } from '@/store/bidFilterStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { filterBids } from '@/lib/utils/filterBids';
 import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 const BID_STAGES = [
   { value: 'progress', label: '진행' },
@@ -49,6 +50,8 @@ const getStatusChangeOptions = (currentStatus) => {
 
 export default function BidTable({ bids, currentStatus }) {
   const { navigate } = useUnifiedNavigation();
+  const pathname = usePathname();
+  const [localStatus, setLocalStatus] = useState(currentStatus);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -62,10 +65,15 @@ export default function BidTable({ bids, currentStatus }) {
   const { filter } = useBidFilterStore();
   const { perPage } = useSettingsStore();
   const [isComposing, setIsComposing] = useState(false);
-  const [favorites, setFavorites] = useState<number[]>([]);
-  const [isFavoriteModalOpen, setIsFavoriteModalOpen] = useState(false);
   const [isStatusChangeModalOpen, setIsStatusChangeModalOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState('');
+  
+  // 동적 필드 상태들
+  const [bidAmount, setBidAmount] = useState('');
+  const [memo, setMemo] = useState('');
+  const [createProject, setCreateProject] = useState(false);
+  const [pm, setPm] = useState('');
+  const [giveupReason, setGiveupReason] = useState('');
   
   // 종료 페이지에서 사용할 상태별 필터링
   const [endedStatusFilters, setEndedStatusFilters] = useState({
@@ -73,6 +81,20 @@ export default function BidTable({ bids, currentStatus }) {
     '패찰': true,
     '포기': true,
   });
+
+  // URL 변경시 localStatus 동기화
+  useEffect(() => {
+    const pathSegments = pathname.split('/');
+    const statusFromPath = pathSegments[pathSegments.length - 1];
+    if (statusFromPath && statusFromPath !== localStatus) {
+      setLocalStatus(statusFromPath);
+    }
+  }, [pathname]);
+
+  // currentStatus prop 변경시 localStatus 동기화
+  useEffect(() => {
+    setLocalStatus(currentStatus);
+  }, [currentStatus]);
 
   // 검색어 입력 핸들러 수정
   const handleSearchInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -147,7 +169,7 @@ export default function BidTable({ bids, currentStatus }) {
       }
       
       // 종료 페이지에서 상태별 필터링
-      if (currentStatus === 'ended') {
+      if (localStatus === 'ended') {
         const bidStatus = bid.status;
         if (!endedStatusFilters[bidStatus]) {
           return false;
@@ -250,30 +272,21 @@ export default function BidTable({ bids, currentStatus }) {
     setSelectedBids((prev) => (prev.includes(bid) ? prev.filter((id) => id !== bid) : [...prev, bid]));
   };
 
-  // 즐겨찾기 추가 모달 열기
-  const handleAddToFavorites = () => {
-    if (selectedBids.length === 0) {
-      alert('선택된 항목이 없습니다.');
-      return;
-    }
-    setIsFavoriteModalOpen(true);
-  };
 
-  // 즐겨찾기 확인 처리
-  const handleConfirmAddToFavorites = () => {
-    setFavorites((prev) => [...prev, ...selectedBids]);
-    setSelectedBids([]);
-    setIsFavoriteModalOpen(false);
-    alert('즐겨찾기에 추가되었습니다.');
-  };
 
-  // 입찰 단계 변경 모달 열기
+  // 모달 열기시 필드 초기화
   const handleStatusChangeModal = () => {
     if (selectedBids.length === 0) {
       alert('선택된 항목이 없습니다.');
       return;
     }
+    // 필드들 초기화
     setSelectedStatus('');
+    setBidAmount('');
+    setMemo('');
+    setCreateProject(false);
+    setPm('');
+    setGiveupReason('');
     setIsStatusChangeModalOpen(true);
   };
 
@@ -285,15 +298,134 @@ export default function BidTable({ bids, currentStatus }) {
     }
     
     // TODO: API 호출하여 단계 변경
-    console.log('입찰 단계 변경:', {
+    const changeData = {
       bids: selectedBids,
-      newStatus: selectedStatus
-    });
+      newStatus: selectedStatus,
+      bidAmount: selectedStatus === 'bidding' ? bidAmount : undefined,
+      memo: ['bidding', '낙찰', '패찰', '포기'].includes(selectedStatus) ? memo : undefined,
+      createProject: selectedStatus === '낙찰' ? createProject : undefined,
+      pm: selectedStatus === '낙찰' ? pm : undefined,
+      giveupReason: selectedStatus === '포기' ? giveupReason : undefined,
+    };
+    
+    console.log('입찰 단계 변경:', changeData);
     
     setSelectedBids([]);
     setIsStatusChangeModalOpen(false);
-    const statusLabel = getStatusChangeOptions(currentStatus).find(option => option.value === selectedStatus)?.label || selectedStatus;
+    const statusLabel = getStatusChangeOptions(localStatus).find(option => option.value === selectedStatus)?.label || selectedStatus;
     alert(`입찰 단계가 '${statusLabel}'로 변경되었습니다.`);
+  };
+
+  // 동적 필드 렌더링
+  const renderDynamicFields = () => {
+    switch (selectedStatus) {
+      case 'bidding': // 응찰
+        return (
+          <div className="space-y-4 mt-4">
+            <div>
+              <Label htmlFor="bidAmount">응찰가</Label>
+              <Input
+                id="bidAmount"
+                type="number"
+                value={bidAmount}
+                onChange={(e) => setBidAmount(e.target.value)}
+                placeholder="응찰 금액을 입력하세요"
+              />
+            </div>
+            <div>
+              <Label htmlFor="memo">메모</Label>
+              <textarea
+                id="memo"
+                value={memo}
+                onChange={(e) => setMemo(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-md"
+                rows={3}
+                placeholder="메모를 입력하세요"
+              />
+            </div>
+          </div>
+        );
+      
+      case '낙찰':
+        return (
+          <div className="space-y-4 mt-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="createProject"
+                checked={createProject}
+                onCheckedChange={(checked) => setCreateProject(checked as boolean)}
+              />
+              <Label htmlFor="createProject">프로젝트 생성</Label>
+            </div>
+            <div>
+              <Label htmlFor="pm">PM</Label>
+              <Input
+                id="pm"
+                value={pm}
+                onChange={(e) => setPm(e.target.value)}
+                placeholder="PM을 입력하세요"
+              />
+            </div>
+            <div>
+              <Label htmlFor="memo">메모</Label>
+              <textarea
+                id="memo"
+                value={memo}
+                onChange={(e) => setMemo(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-md"
+                rows={3}
+                placeholder="메모를 입력하세요"
+              />
+            </div>
+          </div>
+        );
+      
+      case '패찰':
+        return (
+          <div className="space-y-4 mt-4">
+            <div>
+              <Label htmlFor="memo">메모</Label>
+              <textarea
+                id="memo"
+                value={memo}
+                onChange={(e) => setMemo(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-md"
+                rows={3}
+                placeholder="메모를 입력하세요"
+              />
+            </div>
+          </div>
+        );
+      
+      case '포기':
+        return (
+          <div className="space-y-4 mt-4">
+            <div>
+              <Label htmlFor="giveupReason">포기 이유</Label>
+              <Input
+                id="giveupReason"
+                value={giveupReason}
+                onChange={(e) => setGiveupReason(e.target.value)}
+                placeholder="포기 이유를 입력하세요"
+              />
+            </div>
+            <div>
+              <Label htmlFor="memo">메모</Label>
+              <textarea
+                id="memo"
+                value={memo}
+                onChange={(e) => setMemo(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-md"
+                rows={3}
+                placeholder="메모를 입력하세요"
+              />
+            </div>
+          </div>
+        );
+      
+      default:
+        return null;
+    }
   };
 
   return (
@@ -308,10 +440,10 @@ export default function BidTable({ bids, currentStatus }) {
       )}
       <div className="flex items-center justify-between gap-4 mb-0">
         <div className="flex items-center gap-4 flex-1">
-        <Select value={currentStatus} onValueChange={handleStatusSelection}>
+        <Select value={localStatus} onValueChange={handleStatusSelection}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="단계 선택">
-                {BID_STAGES.find(stage => stage.value === currentStatus)?.label || currentStatus}
+                {BID_STAGES.find(stage => stage.value === localStatus)?.label || localStatus}
               </SelectValue>
             </SelectTrigger>
             <SelectContent className="bg-white">
@@ -358,7 +490,7 @@ export default function BidTable({ bids, currentStatus }) {
         </div>
         <div className="flex items-center gap-2">
         {/* 종료 페이지에서만 상태별 필터 표시 */}
-        {currentStatus === 'ended' && (
+        {localStatus === 'ended' && (
           <div className="flex items-center gap-2 mr-4">
             <span className="text-sm text-gray-600">상태:</span>
             {Object.entries(endedStatusFilters).map(([status, checked]) => (
@@ -387,25 +519,17 @@ export default function BidTable({ bids, currentStatus }) {
         >
           <Edit3 className="h-4 w-4 text-gray-500" />
         </Button>
-        <Button
-          variant="outline"
-          onClick={handleAddToFavorites}
-          className="bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200 h-10 w-10 flex items-center justify-center"
-          title="즐겨찾기 추가"
-        >
-          <Star className="h-4 w-4 text-gray-500" />
-        </Button>
         </div>
 
       </div>
 
 
       {/* 테이블 */}
-      <div className="!border !border-gray-300 table-container !bg-white overflow-x-auto category-page [&_*]:!border-gray-300">
+      <div className="border border-gray-300 table-container bg-white overflow-x-auto category-page">
         <Table className="w-full min-w-[800px]">
-          <TableHeader className="[&_tr]:!border-gray-300">
-            <TableRow className="!border-gray-300">
-              <TableHead className="w-[40px] !bg-gray-100 !text-gray-900 !border-gray-300">
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[40px] [background:var(--table-header-bg)_!important] text-white">
                 <Checkbox
                   checked={selectedBids.length === bids.length}
                   onCheckedChange={(checked) => {
@@ -416,54 +540,54 @@ export default function BidTable({ bids, currentStatus }) {
                     }
                   }}
                   aria-label="모든 항목 선택"
-                  className="!border-gray-300"
+                  className="!w-4 !h-4 !min-w-4 !min-h-4 !max-w-4 !max-h-4 !bg-white !border-white hover:!bg-white focus:!bg-white data-[state=checked]:!bg-white data-[state=unchecked]:!bg-white data-[state=checked]:!text-[var(--table-header-bg)]"
                 />
               </TableHead>
-              <TableHead className="w-[100px] !bg-gray-100 !text-gray-900 !border-gray-300">
+              <TableHead className="w-[100px] [background:var(--table-header-bg)_!important] text-white">
                 <button
-                  className="flex items-center gap-2 !font-medium !text-gray-900"
+                  className="flex items-center gap-2 text-white"
                   onClick={() => toggleSort('category')}
                 >
                   유형
                 </button>
               </TableHead>
-              <TableHead className="w-[120px] !bg-gray-100 !text-gray-900 !border-gray-300">
+              <TableHead className="w-[120px] [background:var(--table-header-bg)_!important] text-white">
                 <button
-                  className="flex items-center gap-2 !font-medium !text-gray-900"
+                  className="flex items-center gap-2 text-white"
                   onClick={() => toggleSort('orgName')}
                 >
                   기관명
                 </button>
               </TableHead>
-              <TableHead className="w-auto !bg-gray-100 !text-gray-900 !border-gray-300">
+              <TableHead className="w-auto [background:var(--table-header-bg)_!important] text-white">
                 <button
-                  className="flex items-center gap-2 !font-medium !text-gray-900"
+                  className="flex items-center gap-2 text-white"
                   onClick={() => toggleSort('title')}
                 >
                   제목
                 </button>
               </TableHead>
-              <TableHead className="w-[80px] !bg-gray-100 !text-gray-900 !border-gray-300">
+              <TableHead className="w-[80px] [background:var(--table-header-bg)_!important] text-white">
                 <button
-                  className="flex items-center gap-2 !font-medium !text-gray-900"
+                  className="flex items-center gap-2 text-white"
                   onClick={() => toggleSort('region')}
                 >
                   지역
                 </button>
               </TableHead>
-              {currentStatus === 'ended' && (
-                <TableHead className="w-[80px] !bg-gray-100 !text-gray-900 !border-gray-300">
+              {localStatus === 'ended' && (
+                <TableHead className="w-[80px] [background:var(--table-header-bg)_!important] text-white">
                   <button
-                    className="flex items-center gap-2 !font-medium !text-gray-900"
+                    className="flex items-center gap-2 text-white"
                     onClick={() => toggleSort('status')}
                   >
                     상태
                   </button>
                 </TableHead>
               )}
-              <TableHead className="w-[100px] !bg-gray-100 !text-gray-900 !border-gray-300">
+              <TableHead className="w-[100px] [background:var(--table-header-bg)_!important] text-white">
                 <button
-                  className="flex items-center gap-2 !font-medium !text-gray-900"
+                  className="flex items-center gap-2 text-white"
                   onClick={() => toggleSort('postedAt')}
                 >
                   등록일
@@ -474,18 +598,22 @@ export default function BidTable({ bids, currentStatus }) {
           <TableBody>
             {paginatedBids.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={currentStatus === 'ended' ? 7 : 6} className="h-[300px]" />
+                <TableCell colSpan={localStatus === 'ended' ? 7 : 6} className="h-[300px]" />
               </TableRow>
             ) : (
               paginatedBids.map((bid) => (
                 <TableRow 
                   key={bid.mid}
                   className="cursor-pointer hover:bg-gray-50"
+                  onClick={() => {
+                    window.location.href = `/bids/${localStatus}/${bid.nid}`;
+                  }}
                 >
                   <TableCell className="w-[40px]">
                     <Checkbox
                       checked={selectedBids.includes(parseInt(bid.mid))}
                       onCheckedChange={() => toggleCheckbox(parseInt(bid.mid))}
+                      onClick={(e) => e.stopPropagation()}
                       aria-label={`${bid.title} 선택`}
                     />
                   </TableCell>
@@ -499,17 +627,11 @@ export default function BidTable({ bids, currentStatus }) {
                     <div className="flex items-center gap-2">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <a
-                            href={`/bids/${bid.nid}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm font-medium text-gray-900 hover:text-blue-600 truncate"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                            }}
+                          <span
+                            className="text-sm font-medium text-gray-900 hover:text-blue-600 truncate cursor-pointer"
                           >
                             {bid.title}
-                          </a>
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -517,7 +639,7 @@ export default function BidTable({ bids, currentStatus }) {
                   <TableCell className="w-[80px] whitespace-nowrap">
                     {bid.region}
                   </TableCell>
-                  {currentStatus === 'ended' && (
+                  {localStatus === 'ended' && (
                     <TableCell className="w-[80px] whitespace-nowrap">
                       <span className={`px-2 py-1 rounded text-xs font-medium ${
                         bid.status === '낙찰' ? 'bg-green-100 text-green-800' :
@@ -555,7 +677,7 @@ export default function BidTable({ bids, currentStatus }) {
             <div className="grid gap-2">
               <Label>변경할 단계</Label>
               <div className="flex flex-wrap gap-4">
-                {getStatusChangeOptions(currentStatus).map((option) => (
+                {getStatusChangeOptions(localStatus).map((option) => (
                   <div key={option.value} className="flex items-center space-x-2">
                     <Checkbox
                       id={`status-${option.value}`}
@@ -567,6 +689,7 @@ export default function BidTable({ bids, currentStatus }) {
                 ))}
               </div>
             </div>
+            {renderDynamicFields()}
             <div className="text-sm text-gray-600">
               선택된 {selectedBids.length}개 항목의 단계를 변경합니다.
             </div>
@@ -585,30 +708,6 @@ export default function BidTable({ bids, currentStatus }) {
         </DialogContent>
       </Dialog>
 
-      {/* 즐겨찾기 추가 확인 모달 */}
-      <Dialog open={isFavoriteModalOpen} onOpenChange={setIsFavoriteModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>즐겨찾기 추가</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <p className="text-sm text-gray-600">
-              선택된 {selectedBids.length}개 항목을 즐겨찾기에 추가하시겠습니까?
-            </p>
-          </div>
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => setIsFavoriteModalOpen(false)}
-            >
-              취소
-            </Button>
-            <Button onClick={handleConfirmAddToFavorites}>
-              예
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 } 

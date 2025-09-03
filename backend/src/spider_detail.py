@@ -8,7 +8,6 @@ from utils_data import valid_str, fix_encoding, decode_html_text, _now
 from utils_mysql import Mysql, _where_like_unit, _where_eq_unit
 # Import from separated mysql modules
 from mysql_settings import (SEPERATOR, SETTINGS_NOTICE_DETAIL_FIELDS,
-                            SETTINGS_NOTICE_DETAIL_CONFIG_FIELDS,
                             find_settings_notice_list,
                             _find_settings_notice_detail_by_org_name,
                             find_settings_notice_detail_by_org_name,
@@ -25,7 +24,7 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # DATAFOLER = "../../../data/"
-
+SETTINGS_NOTICE_DETAIL_CONFIG_FIELDS = ["title", "body_html", "file_name", "file_url", "notice_div", "notice_num", "org_dept", "org_man", "org_tel"]
 
 # * populate
 # -----------------------------------------------------------
@@ -450,8 +449,10 @@ def _fetch_detail_by_org_name_requests(url, name, save_html=False):
       fields=SETTINGS_NOTICE_DETAIL_CONFIG_FIELDS,
       table_name="settings_notice_detail",
       out_type="dict")
-  # print(f"======settings: {settings}")
+  print(f"======settings: {settings}")
+
   html = _fetch_html_by_requests(url)
+
 
   if len(html) < 10:
     return {}
@@ -465,6 +466,9 @@ def _fetch_detail_by_org_name_requests(url, name, save_html=False):
       "file_url": _cb_on_key_file_url,
       "file_name": _cb_on_key_file_name
   }
+
+  unpack = unpack_settings_elements(settings)
+  print(f"{unpack=}")
 
   return get_dict(html, unpack_settings_elements(settings), cb_on_key)
 
@@ -493,7 +497,9 @@ def _fetch_detail_by_org_name_playwright(url,
   # print(f"======settings: {settings}")
   wait_for_selector = None
   if len(required_keys) > 0:
-    wait_for_selector = settings[required_keys[-1]].split(SEPERATOR)[0]
+    key = required_keys[-1]
+    if key in settings and settings[key]:
+      wait_for_selector = settings[key].split(SEPERATOR)[0]
 
   # Playwright를 사용하여 HTML 가져오기
   html = _fetch_html_by_playwright(url, wait_for_selector=wait_for_selector)
@@ -559,8 +565,14 @@ def _fetch_detail_by_nid(nid, required_keys=["title"]):
         find1[0][5] if len(find1[0]) > 5 else "공사점검",
     }
 
+
+    print(f"{db_data=}")
+    print(url, name, required_keys)
+
     # _fetch_detail_by_org_name의 결과를 가져와서 db_data와 합침
     detail_result = _fetch_detail_by_org_name(url, name, required_keys)
+
+    print(f"{detail_result=}")
 
     # dict인 경우 merge, 아닌 경우 새로운 키로 추가
     if isinstance(detail_result, dict):
@@ -574,38 +586,41 @@ def _fetch_detail_by_nid(nid, required_keys=["title"]):
 
 
 def upsert_detail_by_nid(nid):
-  """
-  공지사항 ID로 상세 정보를 가져와 데이터베이스에 저장하는 함수
-
-  Args:
-      nid (int): 공지사항 ID
-      use_playwright (bool): Playwright 사용 여부 (기본값: False)
-      wait_for_selector (str, optional): Playwright에서 기다릴 셀렉터
-
-  Returns:
-      dict: 저장된 상세 정보
-  """
-  data = _fetch_detail_by_nid(nid)
-  print(f"{data=}")
-  if data:
-    data["nid"] = nid
-
-    # datetime 객체를 문자열로 변환
-    if data.get("created_at") and hasattr(data["created_at"], "strftime"):
-      data["created_at"] = data["created_at"].strftime("%Y-%m-%d %H:%M:%S")
-    if data.get("posted_date") and hasattr(data["posted_date"], "strftime"):
-      data["posted_date"] = data["posted_date"].strftime("%Y-%m-%d")
-
-    # None 값들을 빈 문자열로 변환 (필요한 경우)
-    # for key in ["category", "status", "posted_by"]:
-    #     if data.get(key) is None:
-    #         data[key] = ""
-
-    mysql = Mysql()  # 로컬 MySQL 객체 생성
-    mysql.upsert("notice_details", [data], inType="dicts")
-    mysql.close()
-
-  return data
+    """
+    공지사항 ID로 상세 정보를 가져와 데이터베이스에 저장하는 함수
+    
+    Args:
+        nid (int): 공지사항 ID
+        use_playwright (bool): Playwright 사용 여부 (기본값: False)
+        wait_for_selector (str, optional): Playwright에서 기다릴 셀렉터
+        
+    Returns:
+        dict: 저장된 상세 정보
+    """
+    data = _fetch_detail_by_nid(nid)
+    print(f"{data=}")
+    if data:
+        data["nid"] = nid
+        
+        # datetime 객체를 문자열로 변환
+        if data.get("created_at") and hasattr(data["created_at"], "strftime"):
+            data["created_at"] = data["created_at"].strftime("%Y-%m-%d %H:%M:%S")
+        if data.get("posted_date") and hasattr(data["posted_date"], "strftime"):
+            data["posted_date"] = data["posted_date"].strftime("%Y-%m-%d")
+            
+        # # None 값들을 빈 문자열로 변환 (필요한 경우)
+        # for key in ["category", "status", "posted_by"]:
+        #     if data.get(key) is None:
+        #         data[key] = ""
+        
+        # print("#"*80)
+        # print(f"{data}")
+        
+        mysql = Mysql()  # 로컬 MySQL 객체 생성
+        mysql.upsert("notice_details", [data], inType="dicts")
+        mysql.close()
+        
+    return data
 
 
 def download_files_by_nid(nid, folder=""):
@@ -687,4 +702,16 @@ def notice_to_progress(nid):
 if __name__ == "__main__":
   pass
   nid = 2392
+  nid = 3229
+  # _fetch_detail_by_nid(nid)
+  # upsert_detail_by_nid(nid)
   notice_to_progress(nid)
+
+
+  # url = 'https://www.gangnam.go.kr/notice/view.do?not_ancmt_mgt_no=60240'
+  # name = '강남구'
+  # required_keys = ['title']
+  # _fetch_detail_by_org_name(url, name, required_keys)
+
+
+  # _fetch_detail_by_org_name_requests(url, name, save_html=False)

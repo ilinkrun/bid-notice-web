@@ -241,6 +241,7 @@
 /* 성능평가 테마 */
 .theme-performance {
   --theme-primary: 142 70% 45%;
+  --theme-primary-dark: 142 70% 30%;
   --theme-secondary: 142 76% 58%;
   --theme-accent: 142 75% 36%;
   --theme-background: 142 84% 97%;
@@ -255,6 +256,7 @@
 /* 기타 테마 */
 .theme-etc {
   --theme-primary: 217 91% 60%;
+  --theme-primary-dark: 217 91% 30%;
   --theme-secondary: 217 95% 68%;
   --theme-accent: 217 91% 53%;
   --theme-background: 217 100% 97%;
@@ -269,6 +271,7 @@
 /* 무관 테마 */
 .theme-default {
   --theme-primary: 220 13% 50%;
+  --theme-primary-dark: 220 13% 30%;
   --theme-secondary: 220 13% 65%;
   --theme-accent: 220 13% 40%;
   --theme-background: 220 13% 97%;
@@ -280,6 +283,153 @@
   --theme-header: 220 13% 95%;
 }
 
+/* 선택박스 테마 스타일 */
+.theme-performance button[role="combobox"],
+.theme-construction button[role="combobox"],
+.theme-etc button[role="combobox"],
+.theme-default button[role="combobox"] {
+  background-color: hsl(var(--theme-primary-dark)) !important;
+  color: white !important;
+  border-color: hsl(var(--theme-primary-dark)) !important;
+}
+
+.theme-performance [role="listbox"],
+.theme-construction [role="listbox"],
+.theme-etc [role="listbox"],
+.theme-default [role="listbox"] {
+  background-color: white !important;
+  border-color: hsl(var(--theme-primary-dark)) !important;
+}
+
+.theme-performance [role="option"],
+.theme-construction [role="option"],
+.theme-etc [role="option"],
+.theme-default [role="option"] {
+  color: hsl(var(--theme-text)) !important;
+}
+
+.theme-performance [role="option"]:hover,
+.theme-construction [role="option"]:hover,
+.theme-etc [role="option"]:hover,
+.theme-default [role="option"]:hover {
+  background-color: hsl(var(--theme-hover)) !important;
+  color: hsl(var(--theme-text)) !important;
+}
+
+/* 체크박스 테마 스타일 (테이블 행용) */
+.theme-performance tbody input[type="checkbox"],
+.theme-construction tbody input[type="checkbox"],
+.theme-etc tbody input[type="checkbox"],
+.theme-default tbody input[type="checkbox"] {
+  accent-color: hsl(var(--theme-primary-dark)) !important;
+}
+
+.theme-performance tbody button[role="checkbox"],
+.theme-construction tbody button[role="checkbox"],
+.theme-etc tbody button[role="checkbox"],
+.theme-default tbody button[role="checkbox"] {
+  background-color: transparent !important;
+  border-color: hsl(var(--theme-primary-dark)) !important;
+}
+
+.theme-performance tbody button[role="checkbox"][data-state="checked"],
+.theme-construction tbody button[role="checkbox"][data-state="checked"],
+.theme-etc tbody button[role="checkbox"][data-state="checked"],
+.theme-default tbody button[role="checkbox"][data-state="checked"] {
+  background-color: transparent !important;
+  border-color: hsl(var(--theme-primary-dark)) !important;
+  color: hsl(var(--theme-primary-dark)) !important;
+}
+
+.theme-performance tbody button[role="checkbox"]:hover,
+.theme-construction tbody button[role="checkbox"]:hover,
+.theme-etc tbody button[role="checkbox"]:hover,
+.theme-default tbody button[role="checkbox"]:hover {
+  background-color: transparent !important;
+}
+
+/* 우상단 버튼 테마 스타일 */
+.theme-performance .flex.items-center.gap-2 button,
+.theme-construction .flex.items-center.gap-2 button,
+.theme-etc .flex.items-center.gap-2 button,
+.theme-default .flex.items-center.gap-2 button,
+.theme-performance button[title="즐겨찾기 추가"],
+.theme-construction button[title="즐겨찾기 추가"],
+.theme-etc button[title="즐겨찾기 추가"],
+.theme-default button[title="즐겨찾기 추가"],
+.theme-performance button[title="유형 변경"],
+.theme-construction button[title="유형 변경"],
+.theme-etc button[title="유형 변경"],
+.theme-default button[title="유형 변경"],
+.theme-performance button[title="입찰 진행"],
+.theme-construction button[title="입찰 진행"],
+.theme-etc button[title="입찰 진행"],
+.theme-default button[title="입찰 진행"],
+.theme-performance button[title="제외"],
+.theme-construction button[title="제외"],
+.theme-etc button[title="제외"],
+.theme-default button[title="제외"],
+.theme-performance button[title="업무에 복원"],
+.theme-construction button[title="업무에 복원"],
+.theme-etc button[title="업무에 복원"],
+.theme-default button[title="업무에 복원"] {
+  background-color: hsl(var(--theme-primary-dark)) !important;
+  border-color: hsl(var(--theme-primary-dark)) !important;
+  color: white !important;
+}
+
+.theme-performance .flex.items-center.gap-2 button:hover,
+.theme-construction .flex.items-center.gap-2 button:hover,
+.theme-etc .flex.items-center.gap-2 button:hover,
+.theme-default .flex.items-center.gap-2 button:hover,
+.theme-performance button[title="즐겨찾기 추가"]:hover,
+.theme-construction button[title="즐겨찾기 추가"]:hover,
+.theme-etc button[title="즐겨찾기 추가"]:hover,
+.theme-default button[title="즐겨찾기 추가"]:hover,
+.theme-performance button[title="유형 변경"]:hover,
+.theme-construction button[title="유형 변경"]:hover,
+.theme-etc button[title="유형 변경"]:hover,
+.theme-default button[title="유형 변경"]:hover,
+.theme-performance button[title="입찰 진행"]:hover,
+.theme-construction button[title="입찰 진행"]:hover,
+.theme-etc button[title="입찰 진행"]:hover,
+.theme-default button[title="입찰 진행"]:hover,
+.theme-performance button[title="제외"]:hover,
+.theme-construction button[title="제외"]:hover,
+.theme-etc button[title="제외"]:hover,
+.theme-default button[title="제외"]:hover,
+.theme-performance button[title="업무에 복원"]:hover,
+.theme-construction button[title="업무에 복원"]:hover,
+.theme-etc button[title="업무에 복원"]:hover,
+.theme-default button[title="업무에 복원"]:hover {
+  background-color: hsl(var(--theme-accent)) !important;
+  border-color: hsl(var(--theme-accent)) !important;
+}
+
+/* 추가 선택박스 스타일 */
+.theme-performance .w-\\[180px\\] button,
+.theme-construction .w-\\[180px\\] button,
+.theme-etc .w-\\[180px\\] button,
+.theme-default .w-\\[180px\\] button {
+  background-color: hsl(var(--theme-primary-dark)) !important;
+  border-color: hsl(var(--theme-primary-dark)) !important;
+  color: white !important;
+}
+
+/* 입찰 관리 전용 버튼 스타일 */
+.theme-etc button[title="입찰 단계 변경"],
+.theme-default button[title="입찰 단계 변경"] {
+  background-color: hsl(var(--theme-primary-dark)) !important;
+  border-color: hsl(var(--theme-primary-dark)) !important;
+  color: white !important;
+}
+
+.theme-etc button[title="입찰 단계 변경"]:hover,
+.theme-default button[title="입찰 단계 변경"]:hover {
+  background-color: hsl(var(--theme-accent)) !important;
+  border-color: hsl(var(--theme-accent)) !important;
+}
+
 /* 전역 스타일 리셋 */
 html, body {
   margin: 0;
@@ -289,8 +439,8 @@ html, body {
   overflow-x: hidden;
 }
 
-/* 최상위 컨테이너 스타일 */
-.container {
+/* 최상위 컨테이너 스타일 (테이블 페이지용) */
+.category-page .container {
   margin: 0 !important;
   padding: 0 !important;
   max-width: none !important;

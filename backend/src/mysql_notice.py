@@ -524,6 +524,44 @@ def find_my_bids_by_status(status,
   return dicts
 
 
+def find_my_bid_by_nid(nid, fields=["mid", "nid", "status", "title", "started_at", "ended_at", "detail", "memo"]):
+  """
+  특정 nid로 입찰 정보를 조회하는 함수
+  
+  Args:
+      nid (str): 조회할 nid
+      fields (list): 조회할 필드 목록
+      
+  Returns:
+      dict: 입찰 정보 딕셔너리 또는 None
+  """
+  from mysql_settings import find_settings_notice_list
+  
+  mysql = Mysql()
+  my_bid = mysql.find("my_bids", fields=fields, addStr=f"WHERE nid = {nid}")
+  mysql.close()
+  
+  if not my_bid:
+    return None
+    
+  bid_dict = dict(zip(fields, my_bid[0]))
+  
+  # 공고 정보 추가
+  notice = find_notice_by_nid(nid)
+  if notice:
+    bid_dict.update(notice)
+    
+    # 기관별 지역 정보 추가
+    settings = find_settings_notice_list(fields=["org_name", "org_region"], out_type="dicts")
+    bid_dict["org_region"] = ""
+    for setting in settings:
+      if setting.get("org_name") == bid_dict["org_name"]:
+        bid_dict["org_region"] = setting.get("org_region", "")
+        break
+  
+  return bid_dict
+
+
 def upsert_my_bids(data):
   mysql = Mysql()
   mysql.upsert("my_bids", data, inType="dicts")

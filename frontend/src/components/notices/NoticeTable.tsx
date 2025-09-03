@@ -119,6 +119,12 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
   const [restoreLoading, setRestoreLoading] = useState(false);
 
+  // currentCategory 변경시 localCategory 동기화
+  useEffect(() => {
+    setLocalCategory(currentCategory || '공사점검');
+    setSelectedBidStage(currentCategory === '무관' ? '무관' : '관심');
+  }, [currentCategory]);
+
   // 페이지 로딩 공통 함수
   const loadPage = async (url: string) => {
     try {
@@ -509,7 +515,6 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
       });
 
       if (data?.excludeNotices?.success) {
-        alert(data.excludeNotices.message || '선택된 공고가 업무에서 제외되었습니다.');
         // 성공 후 모달 닫기 및 선택 초기화
         setIsExcludeModalOpen(false);
         setSelectedNids([]);
@@ -552,7 +557,6 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
       });
 
       if (data?.restoreNotices?.success) {
-        alert(data.restoreNotices.message || '선택된 공고가 업무에 복원되었습니다.');
         // 성공 후 모달 닫기 및 선택 초기화
         setIsRestoreModalOpen(false);
         setSelectedNids([]);
@@ -712,6 +716,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
                     }
                   }}
                   aria-label="모든 항목 선택"
+                  className="!w-4 !h-4 !min-w-4 !min-h-4 !max-w-4 !max-h-4 !bg-white !border-white hover:!bg-white focus:!bg-white data-[state=checked]:!bg-white data-[state=unchecked]:!bg-white data-[state=checked]:!text-[var(--table-header-bg)]"
                 />
               </TableHead>
               {currentCategory === '제외' && (
