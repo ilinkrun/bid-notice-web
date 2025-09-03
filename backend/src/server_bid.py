@@ -23,7 +23,7 @@ from mysql_notice import (find_notice_list_with_category, find_last_notice,
                           find_notice_list_by_category,
                           find_notice_list_for_statistics, search_notice_list,
                           upsert_notice_list, find_my_bids, find_my_bids_by_status, update_all_category,
-                          update_notice_category_by_nids)
+                          update_notice_category_by_nids, exclude_notices_by_nids, restore_notices_by_nids)
 
 from mysql_logs import (find_logs_notice_scraping, find_errors_notice_scraping)
 from spider_list import scrape_list, ERROR_CODES
@@ -97,6 +97,10 @@ class UpdateCategoryRequest(BaseModel):
 
 
 class ExcludeNoticesRequest(BaseModel):
+  nids: List[int]
+
+
+class RestoreNoticesRequest(BaseModel):
   nids: List[int]
 
 
@@ -578,20 +582,7 @@ def exclude_notices_endpoint(request: ExcludeNoticesRequest):
   여러 공고를 업무에서 제외합니다 (is_selected=-1로 설정).
   """
   try:
-    from utils_mysql import get_connection
-    
-    updated_count = 0
-    with get_connection() as conn:
-      cursor = conn.cursor()
-      
-      # nids를 문자열로 변환하여 IN 절에 사용
-      nids_str = ','.join(map(str, request.nids))
-      
-      # is_selected를 -1로 업데이트
-      query = f"UPDATE notices SET is_selected = -1 WHERE nid IN ({nids_str})"
-      cursor.execute(query)
-      updated_count = cursor.rowcount
-      conn.commit()
+    updated_count = exclude_notices_by_nids(request.nids)
     
     if updated_count > 0:
       return {
@@ -607,6 +598,30 @@ def exclude_notices_endpoint(request: ExcludeNoticesRequest):
   except Exception as e:
     print(f"Error in exclude_notices_endpoint: {str(e)}")
     raise HTTPException(status_code=500, detail=f"공고 제외 처리 중 오류가 발생했습니다: {str(e)}")
+
+
+@app.post("/restore_notices")
+def restore_notices_endpoint(request: RestoreNoticesRequest):
+  """
+  여러 공고를 업무에 복원합니다 (is_selected=0으로 설정).
+  """
+  try:
+    updated_count = restore_notices_by_nids(request.nids)
+    
+    if updated_count > 0:
+      return {
+        "success": True,
+        "message": f"{updated_count}개의 공고가 업무에 복원되었습니다.",
+        "updated_count": updated_count
+      }
+    else:
+      return {
+        "success": False,
+        "message": "복원된 공고가 없습니다. 해당 nid들이 존재하지 않을 수 있습니다."
+      }
+  except Exception as e:
+    print(f"Error in restore_notices_endpoint: {str(e)}")
+    raise HTTPException(status_code=500, detail=f"공고 복원 처리 중 오류가 발생했습니다: {str(e)}")
 
 
 # ** bids

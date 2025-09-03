@@ -177,6 +177,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
   const [newPost, setNewPost] = useState<any>({
     title: '',
     content: '',
+    markdown_source: null,
     format: 'text',
     writer: '',
     password: '',
@@ -474,6 +475,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
         id: parseInt(selectedPost.id.toString()),
         title: selectedPost.title.trim(),
         content: selectedPost.content,
+        markdown_source: selectedPost.markdown_source || null,
         format: selectedPost.format || 'text',
         writer: selectedPost.writer.trim(),
         password: selectedPost.password
@@ -519,38 +521,14 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
 
       const updatedPost = result.data.updatePost;
       
-      // 게시글 목록 업데이트
-      setPosts(posts.map(post => 
-        post.id === updatedPost.id 
-          ? updatedPost
-          : post
-      ));
-      
-      setSelectedPost(updatedPost);
-      setIsEditMode(false);
-      setIsSourceMode(false);
-      setActiveTab('list'); // 수정 완료 후 목록으로 이동
-
-      // 성공 후 게시글 목록 새로고침
-      const refreshResponse = await fetch('/api/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: GET_POSTS,
-          variables: {
-            board: channelBoard,
-          },
-        }),
-      });
-      
-      const refreshResult = await refreshResponse.json();
-      if (!refreshResult.errors && refreshResult.data?.posts) {
-        setPosts(refreshResult.data.posts);
-      }
-      
       finishLoading();
+      
+      // 수정 완료 후 해당 게시글 상세 페이지로 리다이렉트
+      const redirectUrl = `/channels/board/${board}/${updatedPost.id}`;
+      console.log('수정 완료, 리다이렉트 URL:', redirectUrl);
+      
+      // window.location.href를 사용한 강제 리다이렉트
+      window.location.href = redirectUrl;
     } catch (err) {
       console.error('게시글 수정 오류:', err);
       setError(err instanceof Error ? err.message : '게시글 수정에 실패했습니다.');
@@ -619,6 +597,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
       setNewPost({
         title: '',
         content: '',
+        markdown_source: null,
         format: 'text',
         writer: '',
         password: '',
@@ -870,9 +849,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                     </div>
                   </div>
                   <Button onClick={() => {
-                    setActiveTab('write');
-                    setIsSourceMode(true);
-                    setEditorMode('html'); // 기본값은 HTML 에디터
+                    navigate(`/channels/board/${board}/new?format=markdown`);
                   }}>
                     <Plus className="mr-2 h-4 w-4" />
                     글쓰기

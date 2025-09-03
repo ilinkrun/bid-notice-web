@@ -149,7 +149,7 @@ def get_post(post_id: int, table_name: str = 'board_dev'):
   mysql = Mysql()
   try:
     fields = [
-        "id", "title", "content", "format", "writer", "password", "created_at",
+        "id", "title", "content", "markdown_source", "format", "writer", "password", "created_at",
         "updated_at", "is_visible"
     ]
     # fields = ["id", "title", "content", "format", "writer", "password", "created_at", "updated_at", "is_visible"]
@@ -223,6 +223,13 @@ def update_post(post_id: int,
     # 내용 업데이트
     if 'content' in data:
       update_data['content'] = data['content']
+
+    # 마크다운 원본 업데이트
+    if 'markdown_source' in data:
+      print(f"Backend received markdown_source: {data['markdown_source']}")
+      update_data['markdown_source'] = data['markdown_source']
+    else:
+      print("Backend did not receive markdown_source field")
 
     # 형식 업데이트
     if 'format' in data:
@@ -531,8 +538,7 @@ def update_comment(comment_id: int, data: dict, password: str):
                                  fields=["password"],
                                  addStr=f"WHERE id = {comment_id}")
     print(
-        f"댓글 수정 비밀번호 검증 - ID: {comment_id}, 입력: '{password}', 저장된: '{
-            stored_password[0][0] if stored_password else None}'")
+        f"댓글 수정 비밀번호 검증 - ID: {comment_id}, 입력: '{password}', 저장된: '{stored_password[0][0] if stored_password else None}'")
 
     if not stored_password:
       print(f"댓글 ID {comment_id}를 찾을 수 없습니다.")
@@ -542,10 +548,7 @@ def update_comment(comment_id: int, data: dict, password: str):
     input_pwd = str(password).strip()
 
     if stored_pwd != input_pwd:
-      print(
-          f"비밀번호 불일치: 저장된='{stored_pwd}' (길이:{
-              len(stored_pwd)}), 입력='{input_pwd}' (길이:{
-              len(input_pwd)})")
+      print(f"비밀번호 불일치: 저장된='{stored_pwd}' (길이:{len(stored_pwd)}), 입력='{input_pwd}' (길이:{len(input_pwd)})")
       return False
 
     print(f"비밀번호 일치 확인됨")
@@ -586,9 +589,7 @@ def delete_comment(comment_id: int, password: str):
     stored_password = mysql.find("comments_board",
                                  fields=["password"],
                                  addStr=f"WHERE id = {comment_id}")
-    print(
-        f"댓글 삭제 비밀번호 검증 - ID: {comment_id}, 입력: '{password}', 저장된: '{
-            stored_password[0][0] if stored_password else None}'")
+    print(f"댓글 삭제 비밀번호 검증 - ID: {comment_id}, 입력: '{password}', 저장된: '{stored_password[0][0] if stored_password else None}'")
 
     if not stored_password:
       print(f"댓글 ID {comment_id}를 찾을 수 없습니다.")
@@ -598,10 +599,7 @@ def delete_comment(comment_id: int, password: str):
     input_pwd = str(password).strip()
 
     if stored_pwd != input_pwd:
-      print(
-          f"비밀번호 불일치: 저장된='{stored_pwd}' (길이:{
-              len(stored_pwd)}), 입력='{input_pwd}' (길이:{
-              len(input_pwd)})")
+      print(f"비밀번호 불일치: 저장된='{stored_pwd}' (길이:{len(stored_pwd)}), 입력='{input_pwd}' (길이:{len(input_pwd)})")
       return False
 
     print(f"비밀번호 일치 확인됨")
@@ -664,6 +662,7 @@ def update_post_endpoint(table_name: str, post_id: int,
                          update_data: Dict[str, Any]):
   """게시글을 수정합니다."""
   try:
+    print(f"Backend API received data: {update_data}")
     password = update_data.pop("password", None)
     if not password:
       raise HTTPException(status_code=400, detail="비밀번호가 필요합니다.")
@@ -727,9 +726,7 @@ def create_comment_endpoint(comment_data: Dict[str, Any]):
     raise HTTPException(status_code=400, detail=str(e))
   except Exception as e:
     import traceback
-    error_detail = f"Error creating comment: {
-        str(e)}\n{
-        traceback.format_exc()}"
+    error_detail = f"Error creating comment: {str(e)}\n{traceback.format_exc()}"
     print(error_detail)
     raise HTTPException(status_code=500, detail=error_detail)
 

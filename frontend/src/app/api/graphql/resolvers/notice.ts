@@ -161,5 +161,24 @@ export const noticeResolvers = {
         };
       }
     },
+
+    restoreNotices: async (_: unknown, { nids }: { nids: string[] }) => {
+      try {
+        // server_bid.py로 is_selected=0 업데이트 요청
+        const response = await apiClient.post('/restore_notices', { 
+          nids: nids.map(id => parseInt(id))
+        });
+        return {
+          success: response.data.success || true,
+          message: response.data.message || `${nids.length}개의 공고가 업무에 복원되었습니다.`
+        };
+      } catch (error) {
+        console.error('Error restoring notices:', error);
+        return {
+          success: false,
+          message: '공고 복원 처리 중 오류가 발생했습니다.'
+        };
+      }
+    },
   },
 };

@@ -73,6 +73,10 @@ def create_post(data: dict, table_name: str = 'board_dev'):
         'format': data.get('format', 'text'),
         'is_visible': 1 if data.get('is_visible', True) else 0
     }
+    
+    # 마크다운 원본이 제공된 경우 추가
+    if 'markdown_source' in data:
+        insert_data['markdown_source'] = data['markdown_source']
 
     # format 유효성 검사
     if insert_data['format'] not in ['text', 'markdown', 'html']:
@@ -100,7 +104,7 @@ def get_post(post_id: int, table_name: str = 'board_dev'):
   try:
     result = mysql.find(table_name,
                         fields=[
-                            "id", "title", "content", "password", "format",
+                            "id", "title", "content", "markdown_source", "password", "format",
                             "writer", "created_at", "updated_at", "is_visible"
                         ],
                         addStr=f"WHERE id = {post_id}")
@@ -108,7 +112,7 @@ def get_post(post_id: int, table_name: str = 'board_dev'):
       return None
 
     fields = [
-        "id", "title", "content", "password", "format", "writer", "created_at",
+        "id", "title", "content", "markdown_source", "password", "format", "writer", "created_at",
         "updated_at", "is_visible"
     ]
     return dict_from_tuple(fields, result[0])
@@ -163,6 +167,10 @@ def update_post(post_id: int,
     # 내용 업데이트
     if 'content' in data:
       update_data['content'] = data['content']
+
+    # 마크다운 원본 업데이트
+    if 'markdown_source' in data:
+      update_data['markdown_source'] = data['markdown_source']
 
     # 형식 업데이트
     if 'format' in data:

@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Star, Loader2, Edit3, Minus } from 'lucide-react';
+import { Search, Star, Loader2, Edit3, Minus, Plus } from 'lucide-react';
 import { type Notice } from '@/types/notice';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -48,7 +48,16 @@ const EXCLUDE_NOTICES = gql`
   }
 `;
 
-type SortField = '제목' | '기관명' | '작성일' | '지역' | '등록';
+const RESTORE_NOTICES = gql`
+  mutation RestoreNotices($nids: [ID!]!) {
+    restoreNotices(nids: $nids) {
+      success
+      message
+    }
+  }
+`;
+
+type SortField = '제목' | '기관명' | '작성일' | '지역' | '등록' | 'category';
 type SortOrder = 'asc' | 'desc';
 
 interface NoticeTableProps {
@@ -62,6 +71,7 @@ const CATEGORIES = [
   { value: '성능평가', label: '성능평가' },
   { value: '기타', label: '기타' },
   { value: '무관', label: '무관' },
+  { value: '제외', label: '제외' },
 ];
 
 const BID_STAGES = [
@@ -81,6 +91,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
   const [noticeToProgress] = useMutation(NOTICE_TO_PROGRESS);
   const [updateNoticeCategory] = useMutation(UPDATE_NOTICE_CATEGORY);
   const [excludeNotices] = useMutation(EXCLUDE_NOTICES);
+  const [restoreNotices] = useMutation(RESTORE_NOTICES);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -105,6 +116,8 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
   const [categoryLoading, setCategoryLoading] = useState(false);
   const [isExcludeModalOpen, setIsExcludeModalOpen] = useState(false);
   const [excludeLoading, setExcludeLoading] = useState(false);
+  const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
+  const [restoreLoading, setRestoreLoading] = useState(false);
 
   // 페이지 로딩 공통 함수
   const loadPage = async (url: string) => {
@@ -218,6 +231,8 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
         return 'green';
       case '기타':
         return 'blue';
+      case '제외':
+        return 'gray';
       default:
         return 'gray';
     }
@@ -514,6 +529,49 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
     }
   };
 
+  // 복원 모달 열기
+  const handleRestore = () => {
+    if (selectedNids.length === 0) {
+      alert('선택된 공고가 없습니다.');
+      return;
+    }
+    setIsRestoreModalOpen(true);
+  };
+
+  // 복원 확인 처리
+  const handleConfirmRestore = async () => {
+    if (selectedNids.length === 0) return;
+    
+    setRestoreLoading(true);
+    
+    try {
+      const { data } = await restoreNotices({
+        variables: {
+          nids: selectedNids.map(nid => nid.toString())
+        }
+      });
+
+      if (data?.restoreNotices?.success) {
+        alert(data.restoreNotices.message || '선택된 공고가 업무에 복원되었습니다.');
+        // 성공 후 모달 닫기 및 선택 초기화
+        setIsRestoreModalOpen(false);
+        setSelectedNids([]);
+        
+        // 페이지 새로고침하여 변경된 데이터 반영
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } else {
+        throw new Error(data?.restoreNotices?.message || '복원 처리에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('복원 처리 중 오류 발생:', error);
+      alert('복원 처리 중 오류가 발생했습니다.');
+    } finally {
+      setRestoreLoading(false);
+    }
+  };
+
   // 행 클릭 핸들러
   const handleRowClick = (notice: Notice, event: React.MouseEvent) => {
     // 체크박스와 제목 링크를 클릭한 경우는 제외
@@ -598,14 +656,25 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button 
-            onClick={handleExclude} 
-            variant="outline" 
-            className="bg-red-50 border-red-300 text-red-700 hover:bg-red-100 h-10 w-10 flex items-center justify-center"
-            title="업무에서 제외"
-          >
-            <Minus className="h-4 w-4" />
-          </Button>
+          {currentCategory === '제외' ? (
+            <Button 
+              onClick={handleRestore} 
+              variant="outline" 
+              className="bg-green-50 border-green-300 text-green-700 hover:bg-green-100 h-10 w-10 flex items-center justify-center"
+              title="업무에 복원"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          ) : (
+            <Button 
+              onClick={handleExclude} 
+              variant="outline" 
+              className="bg-red-50 border-red-300 text-red-700 hover:bg-red-100 h-10 w-10 flex items-center justify-center"
+              title="업무에서 제외"
+            >
+              <Minus className="h-4 w-4" />
+            </Button>
+          )}
           <Button 
             onClick={handleCategoryEdit} 
             variant="outline" 
@@ -645,6 +714,16 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
                   aria-label="모든 항목 선택"
                 />
               </TableHead>
+              {currentCategory === '제외' && (
+                <TableHead className="w-[80px] [background:var(--table-header-bg)_!important] text-white">
+                  <button
+                    className="flex items-center gap-2 text-white"
+                    onClick={() => toggleSort('category')}
+                  >
+                    유형
+                  </button>
+                </TableHead>
+              )}
               <TableHead className="w-auto [background:var(--table-header-bg)_!important] text-white">
                 <button
                   className="flex items-center gap-2 text-white"
@@ -690,7 +769,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
           <TableBody>
             {paginatedNotices.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-[300px]" />
+                <TableCell colSpan={currentCategory === '제외' ? 7 : 6} className="h-[300px]" />
               </TableRow>
             ) : (
               paginatedNotices.map((notice) => (
@@ -706,6 +785,11 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
                       aria-label={`${notice.제목} 선택`}
                     />
                   </TableCell>
+                  {currentCategory === '제외' && (
+                    <TableCell className="w-[80px] whitespace-nowrap">
+                      {notice.category}
+                    </TableCell>
+                  )}
                   <TableCell className="w-auto max-w-0">
                     <div className="flex items-center gap-2">
                       <div className="flex-1 min-w-0">
@@ -919,6 +1003,45 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
               variant="destructive"
             >
               {excludeLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  처리 중...
+                </>
+              ) : (
+                '확인'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 복원 확인 모달 */}
+      <Dialog open={isRestoreModalOpen} onOpenChange={setIsRestoreModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>업무에 복원</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-gray-600">
+              선택된 {selectedNids.length}개 공고를 업무에 복원할까요?
+            </p>
+            <p className="text-xs text-gray-500 mt-2">
+              복원된 공고는 다시 해당 카테고리 목록에 표시됩니다.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsRestoreModalOpen(false)}
+              disabled={restoreLoading}
+            >
+              취소
+            </Button>
+            <Button 
+              onClick={handleConfirmRestore}
+              disabled={restoreLoading}
+            >
+              {restoreLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   처리 중...

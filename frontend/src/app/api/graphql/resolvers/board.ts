@@ -71,6 +71,7 @@ export const boardResolvers = {
         const response = await boardApiClient.post<any>(`/posts/${board}`, {
           title: input.title,
           content: input.content,
+          markdown_source: input.markdown_source || null,
           format: input.format || 'text',
           writer: input.writer,
           password: input.password,
@@ -112,6 +113,7 @@ export const boardResolvers = {
         const response = await boardApiClient.put<any>(`/posts/${board}/${input.id}`, {
           title: input.title,
           content: input.content,
+          markdown_source: input.markdown_source,
           format: input.format,
           writer: input.writer,
           password: input.password,

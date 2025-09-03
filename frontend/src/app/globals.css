@@ -281,3 +281,175 @@
 .table-container th {
   @apply hover:bg-transparent !important;
 }
+
+/* Markdown content styles */
+.markdown-content {
+  line-height: 1.6 !important;
+}
+
+.markdown-content h1, .markdown-content h2, .markdown-content h3, 
+.markdown-content h4, .markdown-content h5, .markdown-content h6 {
+  margin-top: 0.75rem !important;
+  margin-bottom: 0.25rem !important;
+  font-weight: bold !important;
+}
+
+.markdown-content h1 {
+  font-size: 1.5rem !important;
+}
+
+.markdown-content h2 {
+  font-size: 1.25rem !important;
+}
+
+.markdown-content h3 {
+  font-size: 1.125rem !important;
+}
+
+.markdown-content p {
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.markdown-content ul, .markdown-content ol {
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.25rem !important;
+  padding-left: 1.5rem !important;
+  margin-block-start: 0.25rem !important;
+  margin-block-end: 0.25rem !important;
+}
+
+.markdown-content li {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  list-style-type: disc !important;
+  margin-block-start: 0 !important;
+  margin-block-end: 0 !important;
+}
+
+.markdown-content ol li {
+  list-style-type: decimal !important;
+}
+
+.markdown-content ul ul li, .markdown-content ol ul li {
+  list-style-type: circle !important;
+}
+
+.markdown-content strong {
+  font-weight: bold !important;
+}
+
+.markdown-content em {
+  font-style: italic !important;
+}
+
+.markdown-content code {
+  background-color: #f3f4f6 !important;
+  padding: 0.125rem 0.25rem !important;
+  border-radius: 0.25rem !important;
+  font-family: monospace !important;
+}
+
+.markdown-content pre {
+  background-color: #f3f4f6 !important;
+  padding: 0.5rem !important;
+  border-radius: 0.25rem !important;
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.25rem !important;
+  overflow-x: auto !important;
+}
+
+.markdown-content blockquote {
+  border-left: 4px solid #d1d5db !important;
+  padding-left: 1rem !important;
+  margin: 0.25rem 0 !important;
+  color: #6b7280 !important;
+  margin-block-start: 0.25rem !important;
+  margin-block-end: 0.25rem !important;
+}
+
+/* MDEditor preview styles */
+.w-md-editor-preview ul, .w-markdown-preview ul {
+  list-style-type: disc !important;
+  padding-left: 1.5rem !important;
+  margin: 0.25rem 0 !important;
+}
+
+.w-md-editor-preview ol, .w-markdown-preview ol {
+  list-style-type: decimal !important;
+  padding-left: 1.5rem !important;
+  margin: 0.25rem 0 !important;
+}
+
+.w-md-editor-preview li, .w-markdown-preview li {
+  display: list-item !important;
+  list-style-position: outside !important;
+  margin: 0 !important;
+}
+
+.w-md-editor-preview ul ul, .w-markdown-preview ul ul {
+  list-style-type: circle !important;
+}
+
+.w-md-editor-preview ul ul ul, .w-markdown-preview ul ul ul {
+  list-style-type: square !important;
+}
+
+.w-md-editor-preview p, .w-markdown-preview p {
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.w-md-editor-preview h1, .w-md-editor-preview h2, .w-md-editor-preview h3,
+.w-md-editor-preview h4, .w-md-editor-preview h5, .w-md-editor-preview h6,
+.w-markdown-preview h1, .w-markdown-preview h2, .w-markdown-preview h3,
+.w-markdown-preview h4, .w-markdown-preview h5, .w-markdown-preview h6 {
+  margin-top: 0.75rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.w-md-editor-preview blockquote, .w-markdown-preview blockquote {
+  margin: 0.25rem 0 !important;
+}
+
+/* Compact markdown preview styles */
+.compact-markdown-preview ul {
+  list-style-type: disc !important;
+  padding-left: 1.5rem !important;
+  margin: 0.25rem 0 !important;
+}
+
+.compact-markdown-preview ol {
+  list-style-type: decimal !important;
+  padding-left: 1.5rem !important;
+  margin: 0.25rem 0 !important;
+}
+
+.compact-markdown-preview li {
+  display: list-item !important;
+  list-style-position: outside !important;
+  margin: 0 !important;
+}
+
+.compact-markdown-preview ul ul {
+  list-style-type: circle !important;
+}
+
+.compact-markdown-preview ul ul ul {
+  list-style-type: square !important;
+}
+
+.compact-markdown-preview p {
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.compact-markdown-preview h1, .compact-markdown-preview h2, .compact-markdown-preview h3,
+.compact-markdown-preview h4, .compact-markdown-preview h5, .compact-markdown-preview h6 {
+  margin-top: 0.75rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.compact-markdown-preview blockquote {
+  margin: 0.25rem 0 !important;
+}

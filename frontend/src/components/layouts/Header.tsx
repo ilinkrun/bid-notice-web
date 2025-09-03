@@ -54,6 +54,11 @@ const notices = [
     href: '/notices/무관?gap=1',
     icon: Bookmark,
   },
+  {
+    title: '제외',
+    href: '/notices/제외?gap=1',
+    icon: Archive,
+  },
 ];
 
 const bids = [

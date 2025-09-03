@@ -16,7 +16,8 @@ const categoryThemes = {
   '공사점검': 'theme-construction',
   '성능평가': 'theme-performance',
   '기타': 'theme-etc',
-  '무관': 'theme-default'
+  '무관': 'theme-default',
+  '제외': 'theme-default'
 } as const;
 
 type CategoryType = keyof typeof categoryThemes;
@@ -56,6 +57,8 @@ export default function CategoryPageClient({ notices, category, gap }: CategoryP
         return 'green';
       case '기타':
         return 'blue';
+      case '제외':
+        return 'gray';
       default:
         return 'gray';
     }

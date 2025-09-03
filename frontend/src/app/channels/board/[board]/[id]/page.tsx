@@ -44,6 +44,12 @@ import {
 import Comments from '@/components/board/Comments';
 
 import dynamic from 'next/dynamic';
+import { marked } from 'marked';
+import TurndownService from 'turndown';
+
+// MDEditor CSS 임포트
+import '@uiw/react-md-editor/markdown-editor.css';
+import '@uiw/react-markdown-preview/markdown.css';
 
 // MDEditor 동적 임포트 (SSR 방지)
 const MDEditor = dynamic(
@@ -57,6 +63,12 @@ const ReactMarkdown = dynamic(
   { ssr: false }
 );
 
+// MDEditor Preview 컴포넌트 동적 임포트
+const MarkdownPreview = dynamic(
+  () => import('@uiw/react-markdown-preview'),
+  { ssr: false }
+);
+
 // GraphQL 쿼리
 const GET_POST = `
   query GetPost($id: Int!, $board: String!) {
@@ -64,6 +76,7 @@ const GET_POST = `
       id
       title
       content
+      markdown_source
       format
       writer
       password
@@ -80,6 +93,7 @@ const UPDATE_POST = `
       id
       title
       content
+      markdown_source
       format
       writer
       password
@@ -110,14 +124,42 @@ const DELETE_POST = `
 const inputClass = "text-gray-800 focus:placeholder:text-transparent focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-200";
 const textareaClass = "text-gray-800 focus:placeholder:text-transparent focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-200";
 
+// 마크다운을 HTML로 변환하는 함수
+const convertMarkdownToHtml = (markdown: string): string => {
+  try {
+    const result = marked(markdown || '');
+    return typeof result === 'string' ? result : markdown || '';
+  } catch (error) {
+    console.error('Markdown conversion error:', error);
+    return markdown || '';
+  }
+};
+
+// HTML을 마크다운으로 변환하는 함수
+const convertHtmlToMarkdown = (html: string): string => {
+  try {
+    const turndownService = new TurndownService({
+      headingStyle: 'atx',
+      bulletListMarker: '-'
+    });
+    return turndownService.turndown(html || '');
+  } catch (error) {
+    console.error('HTML to markdown conversion error:', error);
+    return html || '';
+  }
+};
+
 export default function PostDetailPage({ params }: { params: Promise<any> }) {
   const { board, id } = use(params);
   const { navigate } = useUnifiedNavigation();
   const { startLoading, finishLoading, setCustomMessage } = useUnifiedLoading();
   const searchParams = useSearchParams();
   const mode = searchParams.get('mode'); // 'edit' 모드 확인
+  const formatParam = searchParams.get('format'); // 'format' 파라미터 확인
   
   const [post, setPost] = useState<any>(null);
+  const [originalMarkdownSource, setOriginalMarkdownSource] = useState<string>(''); // 원본 마크다운 저장
+  const [editingMarkdown, setEditingMarkdown] = useState<string>(''); // 편집 중인 마크다운
   const [isEditMode, setIsEditMode] = useState(mode === 'edit');
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
@@ -163,8 +205,61 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
           if (postData.password === null || postData.password === undefined) {
             postData.password = '';
           }
-          setPost(postData);
-          setEditorMode(postData.format === 'markdown' ? 'markdown' : 'html');
+          
+          console.log('📝 Loading post data:');
+          console.log('postData.markdown_source:', postData.markdown_source);
+          console.log('postData.markdown_source type:', typeof postData.markdown_source);
+          console.log('postData.markdown_source === null:', postData.markdown_source === null);
+          console.log('postData.content:', postData.content?.substring(0, 100) + '...');
+          console.log('postData.format:', postData.format);
+          console.log('formatParam from URL:', formatParam);
+          
+          // 마크다운 원본 소스 관리
+          let markdownSource = '';
+          let htmlContent = postData.content || '';
+          
+          // 마크다운 원본이 데이터베이스에 저장되어 있는 경우 - 우선순위 1
+          if (postData.markdown_source && postData.markdown_source.trim() !== '') {
+            markdownSource = postData.markdown_source;
+            console.log('✅ Found stored markdown_source from database:', markdownSource.substring(0, 100) + '...');
+          }
+          // 마크다운 원본이 없고 format이 markdown인 경우, content를 마크다운으로 간주 - 우선순위 2
+          else if (postData.format === 'markdown') {
+            markdownSource = postData.content || '';
+            htmlContent = convertMarkdownToHtml(markdownSource);
+            console.log('📄 No markdown_source found, treating content as markdown:', markdownSource.substring(0, 100) + '...');
+          }
+          // HTML/텍스트 형식인 경우, 필요시 HTML을 마크다운으로 변환 - 우선순위 3
+          else {
+            markdownSource = convertHtmlToMarkdown(postData.content || '');
+            console.log('🔄 Converting HTML to markdown for editing:', markdownSource.substring(0, 100) + '...');
+          }
+          
+          // 상태 설정 - 편집용과 원본 모두 동일한 값으로 설정
+          setOriginalMarkdownSource(markdownSource);
+          setEditingMarkdown(markdownSource);
+          console.log('🎯 Set editingMarkdown to:', markdownSource.substring(0, 100) + '...');
+          
+          // editor 모드 결정 - URL 파라미터 우선
+          let initialEditorMode: 'html' | 'markdown';
+          if (formatParam === 'markdown') {
+            initialEditorMode = 'markdown';
+            console.log('🔗 URL format=markdown parameter detected, forcing markdown mode');
+          } else {
+            initialEditorMode = postData.format === 'markdown' ? 'markdown' : 'html';
+            console.log('📋 Using post format for editor mode:', postData.format, '->', initialEditorMode);
+          }
+          
+          // 표시용 content 설정 (상세보기용)
+          let displayContent = htmlContent;
+          if (postData.format === 'markdown' && formatParam !== 'markdown') {
+            // 마크다운 게시글을 상세보기할 때는 변환된 HTML 표시
+            displayContent = convertMarkdownToHtml(markdownSource);
+          }
+          
+          setPost({ ...postData, content: displayContent });
+          setEditorMode(initialEditorMode);
+          console.log(`🎯 Set editor mode to: ${initialEditorMode}`);
           finishLoading();
         } else {
           throw new Error('게시글을 찾을 수 없습니다.');
@@ -230,8 +325,8 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
       setPasswordError('');
       
       if (actionType === 'edit') {
-        // URL에 mode=edit 파라미터 추가
-        navigate(`/channels/board/${board}/${id}?mode=edit`);
+        // URL에 mode=edit&format=markdown 파라미터 추가 (기본 마크다운 모드)
+        navigate(`/channels/board/${board}/${id}?mode=edit&format=markdown`);
       } else if (actionType === 'delete') {
         setIsDeleteDialogOpen(true);
       }
@@ -249,14 +344,48 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
       startLoading();
       setError(null);
       
+      console.log('💾 Saving post with editor mode:', editorMode);
+      console.log('editingMarkdown:', editingMarkdown);
+      console.log('post.content:', post.content);
+      
+      // 저장할 데이터 준비
+      let contentToSave = '';
+      let markdownSourceToSave = null;
+      let formatToSave = editorMode;
+
+      if (editorMode === 'markdown') {
+        // 마크다운 모드: 편집중인 마크다운을 HTML로 변환해서 content에 저장
+        markdownSourceToSave = editingMarkdown;
+        contentToSave = convertMarkdownToHtml(editingMarkdown);
+        formatToSave = 'markdown';
+        
+        console.log('📝 Markdown mode save:');
+        console.log('markdownSourceToSave:', markdownSourceToSave);
+        console.log('contentToSave (converted HTML):', contentToSave);
+        
+        // 다음 편집을 위해 원본 마크다운도 업데이트
+        setOriginalMarkdownSource(editingMarkdown);
+      } else {
+        // HTML/텍스트 모드: post.content를 그대로 저장, markdown_source는 null
+        contentToSave = post.content;
+        markdownSourceToSave = null;
+        formatToSave = 'html';
+        
+        console.log('🏷️ HTML mode save:');
+        console.log('contentToSave:', contentToSave);
+      }
+
       const updateData = {
         id: parseInt(post.id.toString()),
         title: post.title.trim(),
-        content: post.content,
-        format: post.format || 'text',
+        content: contentToSave,
+        markdown_source: markdownSourceToSave,
+        format: formatToSave,
         writer: post.writer.trim(),
         password: post.password
       };
+
+      console.log('🚀 Frontend sending updateData:', updateData);
 
       if (!updateData.id || !updateData.title || !updateData.writer || !updateData.password) {
         throw new Error('필수 입력값이 누락되었습니다.');
@@ -286,12 +415,10 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
         throw new Error('게시글 수정에 실패했습니다.');
       }
 
-      const updatedPost = result.data.updatePost;
-      setPost(updatedPost);
-      
-      // URL에서 mode 파라미터 제거
-      navigate(`/channels/board/${board}/${id}`);
       finishLoading();
+      
+      // 저장 완료 후 상세보기 화면으로 이동
+      navigate(`/channels/board/${board}/${id}`);
       
     } catch (err) {
       console.error('게시글 수정 오류:', err);
@@ -438,13 +565,46 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
                   <div className="flex justify-between items-center mb-2">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium">에디터:</span>
-                      <Tabs value={post.format === 'markdown' ? 'markdown' : 'html'} onValueChange={(value) => {
+                      <Tabs value={editorMode} onValueChange={(value) => {
                         const newFormat = value as 'html' | 'markdown';
+                        
+                        console.log('🔄 Editor mode change:', editorMode, '->', newFormat);
+                        
+                        // 마크다운에서 HTML로 전환시
+                        if (editorMode === 'markdown' && newFormat === 'html') {
+                          // 현재 편집중인 마크다운을 HTML로 변환해서 post.content에 설정
+                          const convertedHtml = convertMarkdownToHtml(editingMarkdown);
+                          setPost({ ...post, content: convertedHtml, format: newFormat });
+                          console.log('📝➡️🏷️ Markdown to HTML conversion completed');
+                        } 
+                        // HTML에서 마크다운으로 전환시
+                        else if (editorMode === 'html' && newFormat === 'markdown') {
+                          // 원본 마크다운을 우선 사용
+                          let markdownToEdit = originalMarkdownSource;
+                          if (!markdownToEdit || markdownToEdit.trim() === '') {
+                            markdownToEdit = convertHtmlToMarkdown(post.content);
+                            console.log('🏷️➡️📝 No original markdown, converting HTML to markdown');
+                          } else {
+                            console.log('🏷️➡️📝 Using original markdown_source for editing');
+                          }
+                          setEditingMarkdown(markdownToEdit);
+                          console.log('📝 Set editing markdown content:', markdownToEdit.substring(0, 100) + '...');
+                        }
+                        
                         setEditorMode(newFormat);
-                        setPost({ ...post, format: newFormat === 'markdown' ? 'markdown' : 'text' });
+                        
+                        // URL에 format 파라미터 추가
+                        const searchParams = new URLSearchParams(window.location.search);
+                        searchParams.set('format', newFormat);
+                        const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
+                        window.history.replaceState({}, '', newUrl);
                       }}>
                         <TabsList className="grid w-full grid-cols-2">
-                          <TabsTrigger value="html" className="flex items-center gap-1">
+                          <TabsTrigger 
+                            value="html" 
+                            className="flex items-center gap-1 opacity-50 cursor-not-allowed"
+                            disabled
+                          >
                             <Code className="h-4 w-4" />
                             HTML
                           </TabsTrigger>
@@ -457,18 +617,22 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
                     </div>
                   </div>
                   
-                  {post.format === 'markdown' ? (
+                  {editorMode === 'markdown' ? (
                     <div className="space-y-2">
                       <p className="text-sm text-muted-foreground">
                         마크다운 문법을 사용하여 편집하세요.
                       </p>
                       <MDEditor
-                        value={post.content}
-                        onChange={(value) => setPost({ 
-                          ...post, 
-                          content: value || '',
-                          format: 'markdown'
-                        })}
+                        value={editingMarkdown || ''}
+                        onChange={(value) => {
+                          const newMarkdown = value || '';
+                          setEditingMarkdown(newMarkdown);
+                          setPost({ 
+                            ...post, 
+                            format: 'markdown'
+                          });
+                          console.log('✏️ Markdown content updated:', newMarkdown);
+                        }}
                         data-color-mode="light"
                         height={400}
                       />
@@ -511,10 +675,16 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
                   )}
                 </div>
               ) : (
-                <div className="whitespace-pre-wrap">
+                <div className={post.format === 'markdown' ? '' : 'whitespace-pre-wrap'}>
                   {post.format === 'markdown' ? (
-                    <div className="prose max-w-none">
-                      <ReactMarkdown>{post.content || ''}</ReactMarkdown>
+                    <div className="compact-markdown-preview">
+                      <MarkdownPreview 
+                        source={originalMarkdownSource || post.content || ''}
+                        data-color-mode="light"
+                        wrapperElement={{
+                          "data-color-mode": "light"
+                        }}
+                      />
                     </div>
                   ) : (
                     <div dangerouslySetInnerHTML={{ __html: post.content || '' }} />

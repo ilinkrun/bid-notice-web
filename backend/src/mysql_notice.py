@@ -117,8 +117,7 @@ def find_notice_list_for_statistics(
     result = mysql.find(
         "notice_list",
         fields=fields,
-        addStr=f"WHERE STR_TO_DATE(`posted_date`, '%Y-%m-%d') >= '{
-            get_gap_date(day_gap)}' ORDER BY `posted_date` DESC")
+        addStr=f"WHERE STR_TO_DATE(`posted_date`, '%Y-%m-%d') >= '{get_gap_date(day_gap)}' ORDER BY `posted_date` DESC")
 
     # settings_notice_list에서 기관별 org_region 정보 조회
     settings = dicts_from_tuples(["orgName", "region"],
@@ -208,7 +207,7 @@ def find_notice_list_by_category(category, day_gap=2, is_selected=0):
   카테고리별로 notices를 검색하는 함수
 
   Args:
-      category (str): 카테고리명('무관' 또는 카테고리명)
+      category (str): 카테고리명('무관' 또는 카테고리명 또는 '제외')
       day_gap (int): 현재 시간으로부터 몇 일 전까지의 notices를 검색할지 (기본값: 2일)
 
   Returns:
@@ -216,12 +215,16 @@ def find_notice_list_by_category(category, day_gap=2, is_selected=0):
   """
   mysql = Mysql()
   try:
-    # 카테고리별 notices 검색
-    # !! 업무로 선택된 공고(is_selected = 1)
-    search_str = f"WHERE category = '{category}' AND is_selected = {is_selected}"
+    # 제외된 공고를 조회하는 경우
+    if category == '제외':
+      search_str = f"WHERE is_selected = -1"
+    else:
+      # 카테고리별 notices 검색
+      # !! 업무로 선택된 공고(is_selected = 1)
+      search_str = f"WHERE category = '{category}' AND is_selected = {is_selected}"
+    
     if day_gap > 0:
-      search_str += f" AND STR_TO_DATE(`posted_date`, '%Y-%m-%d') >= '{
-          get_gap_date(day_gap)}' ORDER BY `posted_date` DESC"
+      search_str += f" AND STR_TO_DATE(`posted_date`, '%Y-%m-%d') >= '{get_gap_date(day_gap)}' ORDER BY `posted_date` DESC"
 
     fields = [
         "nid", "title", "detail_url", "posted_date", "posted_by", "org_name",
@@ -347,6 +350,82 @@ def update_notice_category_by_nids(nids, category):
     
   except Exception as e:
     print(f"Error updating notice categories: {str(e)}")
+    raise e
+  finally:
+    mysql.close()
+
+
+def exclude_notices_by_nids(nids):
+  """
+  특정 nid들을 업무에서 제외하는 함수 (is_selected=-1로 설정)
+  
+  Args:
+      nids (list): 제외할 nid 리스트
+  
+  Returns:
+      int: 업데이트된 레코드 수
+  """
+  if not nids:
+    return 0
+    
+  mysql = Mysql()
+  updated_count = 0
+  
+  try:
+    for nid in nids:
+      # nid가 존재하는지 확인
+      existing = mysql.find("notice_list", ["nid"], f"WHERE nid = {nid}")
+      if existing:
+        # is_selected를 -1로 업데이트
+        mysql.update("notice_list", {"is_selected": -1}, f"nid = {nid}")
+        updated_count += 1
+        print(f"Excluded nid {nid} from work")
+      else:
+        print(f"Notice with nid {nid} not found")
+    
+    print(f"Total excluded: {updated_count} notices")
+    return updated_count
+    
+  except Exception as e:
+    print(f"Error excluding notices: {str(e)}")
+    raise e
+  finally:
+    mysql.close()
+
+
+def restore_notices_by_nids(nids):
+  """
+  특정 nid들을 업무에 복원하는 함수 (is_selected=0으로 설정)
+  
+  Args:
+      nids (list): 복원할 nid 리스트
+  
+  Returns:
+      int: 업데이트된 레코드 수
+  """
+  if not nids:
+    return 0
+    
+  mysql = Mysql()
+  updated_count = 0
+  
+  try:
+    for nid in nids:
+      # nid가 존재하는지 확인
+      existing = mysql.find("notice_list", ["nid"], f"WHERE nid = {nid}")
+      if existing:
+        # is_selected를 0으로 업데이트
+        mysql.update("notice_list", {"is_selected": 0}, f"nid = {nid}")
+        updated_count += 1
+        print(f"Restored nid {nid} to work")
+      else:
+        print(f"Notice with nid {nid} not found")
+    
+    print(f"Total restored: {updated_count} notices")
+    return updated_count
+    
+  except Exception as e:
+    print(f"Error restoring notices: {str(e)}")
     raise e
   finally:
     mysql.close()

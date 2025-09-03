@@ -41,6 +41,7 @@ export const noticeTypeDefs = `#graphql
     noticeToProgress(nids: [ID!]!): UpdateResult!
     updateNoticeCategory(nids: [ID!]!, category: String!): UpdateResult!
     excludeNotices(nids: [ID!]!): UpdateResult!
+    restoreNotices(nids: [ID!]!): UpdateResult!
   }
 
   input NoticeInput {

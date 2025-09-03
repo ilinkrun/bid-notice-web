@@ -3,6 +3,7 @@ export const boardTypeDefs = `#graphql
     id: Int!
     title: String
     content: String
+    markdown_source: String
     format: String
     writer: String
     password: String
@@ -32,6 +33,7 @@ export const boardTypeDefs = `#graphql
   input CreatePostInput {
     title: String!
     content: String!
+    markdown_source: String
     format: String!
     writer: String!
     password: String!
@@ -42,6 +44,7 @@ export const boardTypeDefs = `#graphql
     id: Int!
     title: String
     content: String
+    markdown_source: String
     format: String
     writer: String
     password: String
