@@ -220,12 +220,6 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                   <span className="text-sm">{bid.detail}</span>
                 </div>
               )}
-              {/* 스크랩 실패 정보 - 수동 다운로드 알림 */}
-              <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <span className="text-sm text-yellow-800">
-                  📥 스크랩 실패 시 수동 다운로드가 필요합니다
-                </span>
-              </div>
             </div>
           </div>
 
@@ -317,6 +311,12 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
               </div>
               <div className="text-sm text-gray-500 pt-2 border-t">
                 총 3개 파일 • 마지막 업데이트: {bid.postedAt?.split('T')[0]}
+              </div>
+              {/* 스크랩 실패 정보 - 수동 다운로드 알림 */}
+              <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <span className="text-sm text-yellow-800">
+                  📥 스크랩 실패 시 수동 다운로드가 필요합니다
+                </span>
               </div>
             </div>
           </div>

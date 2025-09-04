@@ -1,6 +1,6 @@
 export const noticeTypeDefs = `#graphql
   type Notice {
-    nid: ID!
+    nid: Int!
     title: String!
     orgName: String!
     region: String!
@@ -38,14 +38,14 @@ export const noticeTypeDefs = `#graphql
 
   extend type Mutation {
     upsertNotice(data: [NoticeInput!]!): Boolean
-    noticeToProgress(nids: [ID!]!): UpdateResult!
-    updateNoticeCategory(nids: [ID!]!, category: String!): UpdateResult!
-    excludeNotices(nids: [ID!]!): UpdateResult!
-    restoreNotices(nids: [ID!]!): UpdateResult!
+    noticeToProgress(nids: [Int!]!): UpdateResult!
+    updateNoticeCategory(nids: [Int!]!, category: String!): UpdateResult!
+    excludeNotices(nids: [Int!]!): UpdateResult!
+    restoreNotices(nids: [Int!]!): UpdateResult!
   }
 
   input NoticeInput {
-    nid: ID
+    nid: Int
     title: String
     orgName: String
     region: String

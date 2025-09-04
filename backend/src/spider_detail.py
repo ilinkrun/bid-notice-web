@@ -703,6 +703,7 @@ if __name__ == "__main__":
   pass
   nid = 2392
   nid = 3229
+  nid = 6224
   # _fetch_detail_by_nid(nid)
   # upsert_detail_by_nid(nid)
   notice_to_progress(nid)

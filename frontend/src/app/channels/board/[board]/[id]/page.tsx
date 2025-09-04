@@ -54,8 +54,19 @@ import '@uiw/react-markdown-preview/markdown.css';
 // MDEditor 동적 임포트 (SSR 방지)
 const MDEditor = dynamic(
   () => import('@uiw/react-md-editor'),
-  { ssr: false }
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center h-96 border rounded">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
+          <p className="text-sm text-gray-600">마크다운 에디터를 불러오는 중...</p>
+        </div>
+      </div>
+    )
+  }
 );
+
 
 // markdown-to-jsx로 대체
 const ReactMarkdown = dynamic(
@@ -135,6 +146,39 @@ const convertMarkdownToHtml = (markdown: string): string => {
   }
 };
 
+// 파일 업로드 헬퍼 함수
+const uploadImageFile = async (file: File, setIsUploading: (loading: boolean) => void, editingMarkdown: string, setEditingMarkdown: (value: string) => void, setPost: any, post: any) => {
+  setIsUploading(true);
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+    
+    if (response.ok) {
+      const result = await response.json();
+      const imageMarkdown = `![${result.filename}](${result.url})`;
+      const newValue = `${editingMarkdown}\n\n${imageMarkdown}`;
+      setEditingMarkdown(newValue);
+      setPost({ 
+        ...post, 
+        format: 'markdown'
+      });
+    } else {
+      const error = await response.json();
+      alert(`파일 업로드 실패: ${error.error}`);
+    }
+  } catch (error) {
+    console.error('파일 업로드 오류:', error);
+    alert('파일 업로드 중 오류가 발생했습니다.');
+  } finally {
+    setIsUploading(false);
+  }
+};
+
 // HTML을 마크다운으로 변환하는 함수
 const convertHtmlToMarkdown = (html: string): string => {
   try {
@@ -169,6 +213,7 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
   const [isSourceMode, setIsSourceMode] = useState(false);
   const [editorMode, setEditorMode] = useState<'html' | 'markdown'>('html');
   const [error, setError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   // board 값을 board_${board} 형식으로 변환
   const channelBoard = `board_${board}`;
@@ -256,6 +301,11 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
             // 마크다운 게시글을 상세보기할 때는 변환된 HTML 표시
             displayContent = convertMarkdownToHtml(markdownSource);
           }
+          
+          console.log('📄 Final display content setup:');
+          console.log('displayContent length:', displayContent?.length || 0);
+          console.log('markdownSource length:', markdownSource?.length || 0);
+          console.log('postData.format:', postData.format);
           
           setPost({ ...postData, content: displayContent });
           setEditorMode(initialEditorMode);
@@ -486,7 +536,7 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
 
   if (error) {
     return (
-      <div className="container mx-auto py-10">
+      <div className="container mx-auto">
         <Card>
           <CardContent className="p-10 text-center">
             <div className="text-red-500 mb-4">{error}</div>
@@ -502,7 +552,7 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
 
   if (!post) {
     return (
-      <div className="container mx-auto py-10">
+      <div className="container mx-auto">
         <Card>
           <CardContent className="p-10 text-center">
             로딩 중...
@@ -513,7 +563,7 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
   }
 
   return (
-    <div className="container mx-auto py-10">
+    <div className="container mx-auto">
       <Card>
         <CardContent>
           <div className="mb-4 flex justify-between items-center">
@@ -620,22 +670,77 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
                   {editorMode === 'markdown' ? (
                     <div className="space-y-2">
                       <p className="text-sm text-muted-foreground">
-                        마크다운 문법을 사용하여 편집하세요.
+                        마크다운 문법을 사용하여 편집하세요. 이미지를 드래그 앤 드롭하거나 클립보드에서 붙여넣기할 수 있습니다.
                       </p>
-                      <MDEditor
-                        value={editingMarkdown || ''}
-                        onChange={(value) => {
-                          const newMarkdown = value || '';
-                          setEditingMarkdown(newMarkdown);
-                          setPost({ 
-                            ...post, 
-                            format: 'markdown'
-                          });
-                          console.log('✏️ Markdown content updated:', newMarkdown);
-                        }}
-                        data-color-mode="light"
-                        height={400}
-                      />
+                      {isUploading && (
+                        <div className="flex items-center gap-2 text-sm text-blue-600">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                          파일을 업로드하는 중...
+                        </div>
+                      )}
+                      {typeof window !== 'undefined' ? (
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              multiple
+                              onChange={async (e) => {
+                                const files = Array.from(e.target.files || []);
+                                for (const file of files) {
+                                  if (file.type.startsWith('image/')) {
+                                    await uploadImageFile(file, setIsUploading, editingMarkdown, setEditingMarkdown, setPost, post);
+                                  }
+                                }
+                              }}
+                              style={{ display: 'none' }}
+                              id="image-upload"
+                            />
+                            <label 
+                              htmlFor="image-upload" 
+                              className="inline-flex items-center px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer"
+                            >
+                              📷 이미지 업로드
+                            </label>
+                            <span className="text-xs text-gray-500">또는 이미지를 드래그해서 놓으세요</span>
+                          </div>
+                          <div 
+                            onDrop={async (event) => {
+                              event.preventDefault();
+                              const files = Array.from(event.dataTransfer?.files || []);
+                              
+                              for (const file of files) {
+                                if (file.type.startsWith('image/')) {
+                                  await uploadImageFile(file, setIsUploading, editingMarkdown, setEditingMarkdown, setPost, post);
+                                }
+                              }
+                            }}
+                            onDragOver={(event) => event.preventDefault()}
+                            onDragEnter={(event) => event.preventDefault()}
+                            onDragLeave={(event) => event.preventDefault()}
+                          >
+                            <MDEditor
+                              value={editingMarkdown || ''}
+                              onChange={(value) => {
+                                const newMarkdown = value || '';
+                                setEditingMarkdown(newMarkdown);
+                                setPost({ 
+                                  ...post, 
+                                  format: 'markdown'
+                                });
+                                console.log('✏️ Markdown content updated:', newMarkdown);
+                              }}
+                              data-color-mode="light"
+                              height={400}
+                              preview="edit"
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center h-96 border rounded">
+                          <p className="text-sm text-gray-600">에디터를 초기화하는 중...</p>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <>
@@ -675,19 +780,34 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
                   )}
                 </div>
               ) : (
-                <div className={post.format === 'markdown' ? '' : 'whitespace-pre-wrap'}>
+                <div className="min-h-[300px] border rounded-md p-4">
                   {post.format === 'markdown' ? (
-                    <div className="compact-markdown-preview">
-                      <MarkdownPreview 
-                        source={originalMarkdownSource || post.content || ''}
-                        data-color-mode="light"
-                        wrapperElement={{
-                          "data-color-mode": "light"
-                        }}
-                      />
+                    <div className="prose max-w-none">
+                      {originalMarkdownSource && originalMarkdownSource.trim() ? (
+                        <MarkdownPreview 
+                          source={originalMarkdownSource}
+                          data-color-mode="light"
+                          wrapperElement={{
+                            "data-color-mode": "light"
+                          }}
+                        />
+                      ) : post.content && post.content.trim() ? (
+                        <div dangerouslySetInnerHTML={{ __html: post.content }} />
+                      ) : (
+                        <div className="text-gray-500 italic">내용이 없습니다.</div>
+                      )}
                     </div>
                   ) : (
-                    <div dangerouslySetInnerHTML={{ __html: post.content || '' }} />
+                    <>
+                      {post.content && post.content.trim() ? (
+                        <div 
+                          className="whitespace-pre-wrap break-words"
+                          dangerouslySetInnerHTML={{ __html: post.content }} 
+                        />
+                      ) : (
+                        <div className="text-gray-500 italic">내용이 없습니다.</div>
+                      )}
+                    </>
                   )}
                 </div>
               )}

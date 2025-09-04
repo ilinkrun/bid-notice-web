@@ -59,11 +59,11 @@ def get_notice_category_org_com(nid):
   return [org_name, category, title, oid, company_in_charge]
 
 
-def get_nas_folder(name='root', level=1):
+def get_nas_folder(name='root', depth=1):
   mysql = Mysql()
   result = mysql.find("settings_nas_path",
                       fields=['folder'],
-                      addStr=f"WHERE name = '{name}' AND level={level}")
+                      addStr=f"WHERE name = '{name}' AND depth={depth}")
   mysql.close()
   return result[0][0]
 
@@ -86,15 +86,15 @@ def get_notice_nas_folder(nid):
   [org_name, category, title, oid,
    company_in_charge] = get_notice_category_org_com(nid)
 
-  levels = [['root', 1], [category, 2], ['공고', 3], ['기관명', 4], ['공고명', 5],
+  depths = [['root', 1], [category, 2], ['공고', 3], ['기관명', 4], ['공고명', 5],
             ['공고파일', 6]]
-  # print(levels)
+  # print(depths)
   mysql = Mysql()
   paths = [(mysql.find(
       "settings_nas_path",
       fields=['folder'],
-      addStr=f"WHERE name = '{level[0]}' AND level={level[1]}"))[0][0]
-      for level in levels]
+      addStr=f"WHERE name = '{depth[0]}' AND depth={depth[1]}"))[0][0]
+      for depth in depths]
   mysql.close()
   # print(paths)
 
@@ -116,5 +116,5 @@ def get_notice_nas_folder(nid):
 
 if __name__ == "__main__":
   pass
-  nid = 536548
+  nid = 6224
   print(get_notice_nas_folder(nid))

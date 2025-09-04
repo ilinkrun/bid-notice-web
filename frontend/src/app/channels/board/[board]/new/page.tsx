@@ -32,7 +32,17 @@ import '@uiw/react-markdown-preview/markdown.css';
 // MDEditor 동적 임포트 (SSR 방지)
 const MDEditor = dynamic(
   () => import('@uiw/react-md-editor'),
-  { ssr: false }
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center h-96 border rounded">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
+          <p className="text-sm text-gray-600">마크다운 에디터를 불러오는 중...</p>
+        </div>
+      </div>
+    )
+  }
 );
 
 // GraphQL 쿼리
@@ -67,6 +77,35 @@ const convertMarkdownToHtml = (markdown: string): string => {
   }
 };
 
+// 파일 업로드 헬퍼 함수
+const uploadImageFile = async (file: File, setIsUploading: (loading: boolean) => void, editingMarkdown: string, setEditingMarkdown: (value: string) => void) => {
+  setIsUploading(true);
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+    
+    if (response.ok) {
+      const result = await response.json();
+      const imageMarkdown = `![${result.filename}](${result.url})`;
+      const newValue = `${editingMarkdown}\n\n${imageMarkdown}`;
+      setEditingMarkdown(newValue);
+    } else {
+      const error = await response.json();
+      alert(`파일 업로드 실패: ${error.error}`);
+    }
+  } catch (error) {
+    console.error('파일 업로드 오류:', error);
+    alert('파일 업로드 중 오류가 발생했습니다.');
+  } finally {
+    setIsUploading(false);
+  }
+};
+
 export default function NewPostPage({ params }: { params: Promise<any> }) {
   const { board } = use(params);
   const { navigate } = useUnifiedNavigation();
@@ -85,6 +124,7 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
   const [editingMarkdown, setEditingMarkdown] = useState<string>(''); // 편집 중인 마크다운
   const [editorMode, setEditorMode] = useState<'html' | 'markdown'>('markdown'); // 기본값 markdown
   const [error, setError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   // board 값을 board_${board} 형식으로 변환
   const channelBoard = `board_${board}`;
@@ -189,7 +229,7 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
 
   if (error) {
     return (
-      <div className="container mx-auto py-10">
+      <div className="container mx-auto">
         <Card>
           <CardContent className="p-10 text-center">
             <div className="text-red-500 mb-4">{error}</div>
@@ -204,7 +244,7 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
   }
 
   return (
-    <div className="container mx-auto py-10">
+    <div className="container mx-auto">
       <Card>
         <CardContent>
           <div className="mb-4 flex justify-between items-center">
@@ -281,18 +321,73 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
                 
                 <div className="space-y-2">
                   <p className="text-sm text-muted-foreground">
-                    마크다운 문법을 사용하여 작성하세요.
+                    마크다운 문법을 사용하여 작성하세요. 이미지를 드래그 앤 드롭하거나 클립보드에서 붙여넣기할 수 있습니다.
                   </p>
-                  <MDEditor
-                    value={editingMarkdown || ''}
-                    onChange={(value) => {
-                      const newMarkdown = value || '';
-                      setEditingMarkdown(newMarkdown);
-                      console.log('✏️ Markdown content updated:', newMarkdown);
-                    }}
-                    data-color-mode="light"
-                    height={400}
-                  />
+                  {isUploading && (
+                    <div className="flex items-center gap-2 text-sm text-blue-600">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                      파일을 업로드하는 중...
+                    </div>
+                  )}
+                  {typeof window !== 'undefined' ? (
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={async (e) => {
+                            const files = Array.from(e.target.files || []);
+                            for (const file of files) {
+                              if (file.type.startsWith('image/')) {
+                                await uploadImageFile(file, setIsUploading, editingMarkdown, setEditingMarkdown);
+                              }
+                            }
+                          }}
+                          style={{ display: 'none' }}
+                          id="image-upload-new"
+                        />
+                        <label 
+                          htmlFor="image-upload-new" 
+                          className="inline-flex items-center px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer"
+                        >
+                          📷 이미지 업로드
+                        </label>
+                        <span className="text-xs text-gray-500">또는 이미지를 드래그해서 놓으세요</span>
+                      </div>
+                      <div
+                        onDrop={async (event) => {
+                          event.preventDefault();
+                          const files = Array.from(event.dataTransfer?.files || []);
+                          
+                          for (const file of files) {
+                            if (file.type.startsWith('image/')) {
+                              await uploadImageFile(file, setIsUploading, editingMarkdown, setEditingMarkdown);
+                            }
+                          }
+                        }}
+                        onDragOver={(event) => event.preventDefault()}
+                        onDragEnter={(event) => event.preventDefault()}
+                        onDragLeave={(event) => event.preventDefault()}
+                      >
+                        <MDEditor
+                          value={editingMarkdown || ''}
+                          onChange={(value) => {
+                            const newMarkdown = value || '';
+                            setEditingMarkdown(newMarkdown);
+                            console.log('✏️ Markdown content updated:', newMarkdown);
+                          }}
+                          data-color-mode="light"
+                          height={400}
+                          preview="edit"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center h-96 border rounded">
+                      <p className="text-sm text-gray-600">에디터를 초기화하는 중...</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

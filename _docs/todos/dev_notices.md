@@ -61,5 +61,44 @@ CREATE TABLE `notice_list` (
   - '공고 목록 > 무관(관련없음)'과 유사하지만, '-' 버튼 대신 '+'버튼을 넣고, 버튼 클릭시 'is_selected = 0'이 되도록 해주세요.
   - 페이지 테이블의 컬럼은 '제목' 앞에 '유형'을 추가하고, category 값을 넣어주세요.
 
+===
 
+'http://14.34.23.70:11501/notices/공사점검' 페이지 우상단의 '입찰진행' 버튼을 누르면
+'입찰 진행 처리 중 오류가 발생했습니다.' 오류가 발생해요.
+
+- backend의 /_exp/projects/bid-notice-web/backend/src/spider_detail.py 에 있는 notice_to_progress(nid) 함수를 실행시키면 에러없이 잘 수행됩니다.
+
+- graphql:
+  - /_exp/projects/bid-notice-web/frontend/src/app/api/graphql/resolvers/myBid.ts
+  - /_exp/projects/bid-notice-web/frontend/src/app/api/graphql/schema/myBid.ts
+
+
+noticeToProgress
+
+아직도 '입찰 진행 처리 중 오류가 발생했습니다.' 에러가 뜹니다
+
+---
+
+mutation NoticeToProgress($nids: [Int!]!) {
+  noticeToProgress(nids: $nids) {
+    message
+    success
+  }
+}
+
+
+{
+  "nids": [2392]
+}
+
+---
+
+{
+  "data": {
+    "noticeToProgress": {
+      "message": "모든 1개의 공고가 성공적으로 진행 상태로 변경되었습니다.",
+      "success": true
+    }
+  }
+}
 

@@ -1,7 +1,7 @@
 export const bidTypeDefs = `#graphql
   type Bid {
-    mid: String!
-    nid: String!
+    mid: Int!
+    nid: Int!
     title: String!
     status: String!
     started_at: String
@@ -17,7 +17,7 @@ export const bidTypeDefs = `#graphql
   extend type Query {
     myBids: [Bid!]!
     bidByStatus(status: String!): [Bid!]!
-    bidByNid(nid: String!): Bid
+    bidByNid(nid: Int!): Bid
   }
 
   extend type Mutation {

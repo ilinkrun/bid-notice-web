@@ -6,8 +6,8 @@ export const bidResolvers = {
       try {
         const response = await apiClient.get('/my_bids');
         return response.data.map((bd: any) => ({
-          mid: bd.mid.toString(),
-          nid: bd.nid.toString(),
+          mid: parseInt(bd.mid),
+          nid: parseInt(bd.nid),
           title: bd.title,
           status: bd.status,
           started_at: bd.started_at,
@@ -29,8 +29,8 @@ export const bidResolvers = {
       try {
         const response = await apiClient.get(`/my_bids/${status}`);
         return response.data.map((bd: any) => ({
-          mid: bd.mid.toString(),
-          nid: bd.nid.toString(),
+          mid: parseInt(bd.mid),
+          nid: parseInt(bd.nid),
           title: bd.title,
           status: bd.status,
           started_at: bd.started_at,
@@ -48,13 +48,13 @@ export const bidResolvers = {
       }
     },
 
-    bidByNid: async (_: unknown, { nid }: { nid: string }) => {
+    bidByNid: async (_: unknown, { nid }: { nid: number }) => {
       try {
         const response = await apiClient.get(`/my_bids/detail/${nid}`);
         const bd = response.data;
         return {
-          mid: bd.mid.toString(),
-          nid: bd.nid.toString(),
+          mid: parseInt(bd.mid),
+          nid: parseInt(bd.nid),
           title: bd.title,
           status: bd.status,
           started_at: bd.started_at,

@@ -6,7 +6,7 @@ import { notFound } from 'next/navigation';
 import '../../../themes.css';
 
 const GET_BID_DETAIL = gql`
-  query GetBidDetail($nid: String!) {
+  query GetBidDetail($nid: Int!) {
     bidByNid(nid: $nid) {
       mid
       nid
@@ -29,7 +29,7 @@ async function getBidDetail(nid: string) {
     const client = getClient();
     const result = await client.query({
       query: GET_BID_DETAIL,
-      variables: { nid },
+      variables: { nid: parseInt(nid) },
       fetchPolicy: 'no-cache',
       errorPolicy: 'all'
     });

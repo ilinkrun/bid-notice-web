@@ -6,7 +6,7 @@ export const noticeResolvers = {
       try {
         const response = await apiClient.get(`/notice_list/${category}`, { params: { gap } });
         return response.data.map((notice: any) => ({
-          nid: notice.nid.toString(),
+          nid: parseInt(notice.nid),
           title: notice.title,
           orgName: notice.org_name,
           postedAt: notice.posted_date,
@@ -25,7 +25,7 @@ export const noticeResolvers = {
       try {
         const response = await apiClient.get('/notice_list', { params: { gap } });
         return response.data.map((notice: any) => ({
-          nid: notice.nid.toString(),
+          nid: parseInt(notice.nid),
           title: notice.title,
           orgName: notice.org_name,
           postedAt: notice.posted_date,
@@ -68,7 +68,7 @@ export const noticeResolvers = {
           add_sql: ""
         });
         return response.data.map((notice: any) => ({
-          nid: notice.nid.toString(),
+          nid: parseInt(notice.nid),
           title: notice.title,
           orgName: notice.org_name,
           postedAt: notice.posted_date,
@@ -107,7 +107,7 @@ export const noticeResolvers = {
       }
     },
 
-    noticeToProgress: async (_: unknown, { nids }: { nids: string[] }) => {
+    noticeToProgress: async (_: unknown, { nids }: { nids: number[] }) => {
       try {
         const response = await apiClient.post('/notice_to_progress', { nids });
         return {
@@ -123,11 +123,11 @@ export const noticeResolvers = {
       }
     },
 
-    updateNoticeCategory: async (_: unknown, { nids, category }: { nids: string[]; category: string }) => {
+    updateNoticeCategory: async (_: unknown, { nids, category }: { nids: number[]; category: string }) => {
       try {
         // server_bid.py (포트 11303)로 요청 전송
         const response = await apiClient.post('/update_notice_category', { 
-          nids: nids.map(id => parseInt(id)), 
+          nids: nids, 
           category 
         });
         return {
@@ -143,11 +143,11 @@ export const noticeResolvers = {
       }
     },
 
-    excludeNotices: async (_: unknown, { nids }: { nids: string[] }) => {
+    excludeNotices: async (_: unknown, { nids }: { nids: number[] }) => {
       try {
         // server_bid.py로 is_selected=-1 업데이트 요청
         const response = await apiClient.post('/exclude_notices', { 
-          nids: nids.map(id => parseInt(id))
+          nids: nids
         });
         return {
           success: response.data.success || true,
@@ -162,11 +162,11 @@ export const noticeResolvers = {
       }
     },
 
-    restoreNotices: async (_: unknown, { nids }: { nids: string[] }) => {
+    restoreNotices: async (_: unknown, { nids }: { nids: number[] }) => {
       try {
         // server_bid.py로 is_selected=0 업데이트 요청
         const response = await apiClient.post('/restore_notices', { 
-          nids: nids.map(id => parseInt(id))
+          nids: nids
         });
         return {
           success: response.data.success || true,

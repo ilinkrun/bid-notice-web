@@ -3,6 +3,7 @@ import { noticeTypeDefs } from './notice';
 import { settingsListTypeDefs } from './settingsList';
 import { settingsCategoryTypeDefs } from './settingsCategory';
 import { settingsDetailTypeDefs } from './settingsDetail';
+import { settingsDefaultTypeDefs } from './settingsDefault';
 import { logScrapingTypeDefs } from './logScraping';
 import { errorScrapingTypeDefs } from './errorScraping';
 import { boardTypeDefs } from './board';
@@ -26,6 +27,7 @@ export const typeDefs = [
   settingsListTypeDefs,
   settingsCategoryTypeDefs,
   settingsDetailTypeDefs,
+  settingsDefaultTypeDefs,
   logScrapingTypeDefs,
   errorScrapingTypeDefs,
   boardTypeDefs,

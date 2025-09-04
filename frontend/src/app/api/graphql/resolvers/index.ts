@@ -2,6 +2,7 @@ import { baseResolvers } from './base';
 import { noticeResolvers } from './notice';
 import { settingsListResolvers } from './settingsList';
 import { settingsDetailResolvers } from './settingsDetail';
+import { settingsDefaultResolvers } from './settingsDefault';
 import { settingsCategoryResolvers } from './settingsCategory';
 import { logScrapingResolvers } from './logScraping';
 import { errorScrapingResolvers } from './errorScraping';
@@ -15,6 +16,7 @@ export const resolvers = [
   noticeResolvers,
   settingsListResolvers,
   settingsDetailResolvers,
+  settingsDefaultResolvers,
   settingsCategoryResolvers,
   logScrapingResolvers,
   errorScrapingResolvers,

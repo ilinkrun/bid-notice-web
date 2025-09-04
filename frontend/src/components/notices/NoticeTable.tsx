@@ -22,7 +22,7 @@ import { gql } from '@apollo/client';
 
 // GraphQL mutation 정의
 const NOTICE_TO_PROGRESS = gql`
-  mutation NoticeToProgress($nids: [ID!]!) {
+  mutation NoticeToProgress($nids: [Int!]!) {
     noticeToProgress(nids: $nids) {
       success
       message
@@ -31,7 +31,7 @@ const NOTICE_TO_PROGRESS = gql`
 `;
 
 const UPDATE_NOTICE_CATEGORY = gql`
-  mutation UpdateNoticeCategory($nids: [ID!]!, $category: String!) {
+  mutation UpdateNoticeCategory($nids: [Int!]!, $category: String!) {
     updateNoticeCategory(nids: $nids, category: $category) {
       success
       message
@@ -40,7 +40,7 @@ const UPDATE_NOTICE_CATEGORY = gql`
 `;
 
 const EXCLUDE_NOTICES = gql`
-  mutation ExcludeNotices($nids: [ID!]!) {
+  mutation ExcludeNotices($nids: [Int!]!) {
     excludeNotices(nids: $nids) {
       success
       message
@@ -49,7 +49,7 @@ const EXCLUDE_NOTICES = gql`
 `;
 
 const RESTORE_NOTICES = gql`
-  mutation RestoreNotices($nids: [ID!]!) {
+  mutation RestoreNotices($nids: [Int!]!) {
     restoreNotices(nids: $nids) {
       success
       message
@@ -408,7 +408,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
     try {
       const { data } = await noticeToProgress({
         variables: {
-          nids: selectedNids.map(nid => nid.toString())
+          nids: selectedNids
         }
       });
 
@@ -466,7 +466,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
     try {
       const { data } = await updateNoticeCategory({
         variables: {
-          nids: selectedNids.map(nid => nid.toString()),
+          nids: selectedNids,
           category: localCategory
         }
       });
@@ -510,7 +510,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
     try {
       const { data } = await excludeNotices({
         variables: {
-          nids: selectedNids.map(nid => nid.toString())
+          nids: selectedNids
         }
       });
 
@@ -552,7 +552,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
     try {
       const { data } = await restoreNotices({
         variables: {
-          nids: selectedNids.map(nid => nid.toString())
+          nids: selectedNids
         }
       });
 

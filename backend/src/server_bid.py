@@ -104,6 +104,22 @@ class RestoreNoticesRequest(BaseModel):
   nids: List[int]
 
 
+class NasPathSetting(BaseModel):
+  name: str
+  area: str
+  depth: int
+  folder: str
+  remark: Optional[str] = None
+
+
+class UpdateNasPathSetting(BaseModel):
+  name: Optional[str] = None
+  area: Optional[str] = None
+  depth: Optional[int] = None
+  folder: Optional[str] = None
+  remark: Optional[str] = None
+
+
 class CheckResult(BaseModel):
   org_name: str
   success: bool
@@ -875,6 +891,169 @@ def parse_keyword_weights(keyword_weight_str: str):
   try:
     result = get_keyword_weight_list(keyword_weight_str)
     return result
+  except Exception as e:
+    raise HTTPException(status_code=500, detail=str(e))
+
+
+# ** NAS PATH SETTINGS
+# ------------------------------------------------------------
+
+@app.get("/settings_nas_path")
+def get_nas_path_settings():
+  """
+  모든 NAS 경로 설정을 반환합니다.
+  """
+  try:
+    mysql = Mysql()
+    result = mysql.find("settings_nas_path",
+                       fields=['id', 'name', 'area', 'depth', 'folder', 'remark'],
+                       addStr="ORDER BY depth, id")
+    mysql.close()
+    
+    # 딕셔너리 형태로 변환
+    nas_settings = []
+    for row in result:
+      nas_settings.append({
+        'id': row[0],
+        'name': row[1],
+        'area': row[2],
+        'depth': row[3],
+        'folder': row[4],
+        'remark': row[5]
+      })
+    
+    return nas_settings
+  except Exception as e:
+    raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/settings_nas_path/{nas_id}")
+def get_nas_path_setting(nas_id: int):
+  """
+  특정 ID의 NAS 경로 설정을 반환합니다.
+  """
+  try:
+    mysql = Mysql()
+    result = mysql.find("settings_nas_path",
+                       fields=['id', 'name', 'area', 'depth', 'folder', 'remark'],
+                       addStr=f"WHERE id = {nas_id}")
+    mysql.close()
+    
+    if not result:
+      raise HTTPException(status_code=404, detail="NAS 경로 설정을 찾을 수 없습니다")
+    
+    row = result[0]
+    return {
+      'id': row[0],
+      'name': row[1],
+      'area': row[2],
+      'depth': row[3],
+      'folder': row[4],
+      'remark': row[5]
+    }
+  except HTTPException as he:
+    raise he
+  except Exception as e:
+    raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/settings_nas_path")
+def create_nas_path_setting(setting: NasPathSetting):
+  """
+  새로운 NAS 경로 설정을 생성합니다.
+  """
+  try:
+    mysql = Mysql()
+    
+    # 데이터 삽입
+    data = {
+      'name': setting.name,
+      'area': setting.area,
+      'depth': setting.depth,
+      'folder': setting.folder,
+      'remark': setting.remark
+    }
+    
+    result = mysql.upsert("settings_nas_path", data)
+    mysql.close()
+    
+    return {
+      "success": True,
+      "message": "NAS 경로 설정이 성공적으로 생성되었습니다.",
+      "id": result
+    }
+  except Exception as e:
+    raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.put("/settings_nas_path/{nas_id}")
+def update_nas_path_setting(nas_id: int, setting: UpdateNasPathSetting):
+  """
+  기존 NAS 경로 설정을 업데이트합니다.
+  """
+  try:
+    mysql = Mysql()
+    
+    # 기존 데이터 확인
+    existing = mysql.find("settings_nas_path",
+                         fields=['id'],
+                         addStr=f"WHERE id = {nas_id}")
+    if not existing:
+      mysql.close()
+      raise HTTPException(status_code=404, detail="NAS 경로 설정을 찾을 수 없습니다")
+    
+    # 업데이트할 데이터만 포함
+    update_data = {'id': nas_id}
+    if setting.name is not None:
+      update_data['name'] = setting.name
+    if setting.area is not None:
+      update_data['area'] = setting.area
+    if setting.depth is not None:
+      update_data['depth'] = setting.depth
+    if setting.folder is not None:
+      update_data['folder'] = setting.folder
+    if setting.remark is not None:
+      update_data['remark'] = setting.remark
+    
+    mysql.upsert("settings_nas_path", update_data)
+    mysql.close()
+    
+    return {
+      "success": True,
+      "message": "NAS 경로 설정이 성공적으로 업데이트되었습니다."
+    }
+  except HTTPException as he:
+    raise he
+  except Exception as e:
+    raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.delete("/settings_nas_path/{nas_id}")
+def delete_nas_path_setting(nas_id: int):
+  """
+  NAS 경로 설정을 삭제합니다.
+  """
+  try:
+    mysql = Mysql()
+    
+    # 기존 데이터 확인
+    existing = mysql.find("settings_nas_path",
+                         fields=['id'],
+                         addStr=f"WHERE id = {nas_id}")
+    if not existing:
+      mysql.close()
+      raise HTTPException(status_code=404, detail="NAS 경로 설정을 찾을 수 없습니다")
+    
+    # 삭제 실행
+    mysql.remove("settings_nas_path", f"WHERE id = {nas_id}")
+    mysql.close()
+    
+    return {
+      "success": True,
+      "message": "NAS 경로 설정이 성공적으로 삭제되었습니다."
+    }
+  except HTTPException as he:
+    raise he
   except Exception as e:
     raise HTTPException(status_code=500, detail=str(e))
 
