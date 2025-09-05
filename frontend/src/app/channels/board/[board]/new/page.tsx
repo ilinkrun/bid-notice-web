@@ -229,8 +229,8 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
 
   if (error) {
     return (
-      <div className="container mx-auto">
-        <Card>
+      <div className="w-full">
+        <Card className="border-0 shadow-none">
           <CardContent className="p-10 text-center">
             <div className="text-red-500 mb-4">{error}</div>
             <Button onClick={() => navigate(`/channels/board/${board}`)}>
@@ -244,9 +244,9 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
   }
 
   return (
-    <div className="container mx-auto">
-      <Card>
-        <CardContent>
+    <div className="w-full">
+      <Card className="border-0 shadow-none">
+        <CardContent className="p-0">
           <div className="mb-4 flex justify-between items-center">
             <Button variant="outline" onClick={() => navigate(`/channels/board/${board}`)}>
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -379,7 +379,7 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
                           }}
                           data-color-mode="light"
                           height={400}
-                          preview="edit"
+                          preview="live"
                         />
                       </div>
                     </div>

@@ -124,6 +124,8 @@ export const boardResolvers = {
         if (response.data && response.data.success === true) {
           // 수정된 게시글 정보 조회
           return input;
+        } else {
+          throw new Error('게시글 수정 응답이 올바르지 않습니다.');
         }
       } catch (error) {
         console.error('게시글 수정 오류:', error);

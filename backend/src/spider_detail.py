@@ -20,6 +20,10 @@ import requests
 from playwright.sync_api import Playwright, sync_playwright
 from utils_data import fix_encoding_response
 import urllib3
+from dotenv import load_dotenv
+
+# 환경 변수 로드
+load_dotenv()
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -379,7 +383,11 @@ def _fetch_html_by_playwright(url,
   with sync_playwright() as playwright:
     try:
       # 브라우저 실행 (헤드리스 모드)
-      browser = playwright.chromium.launch(headless=True)
+      chromium_path = os.getenv('CHROMIUM_EXECUTABLE_PATH')
+      browser = playwright.chromium.launch(
+          headless=True,
+          # executable_path=chromium_path if chromium_path else None
+      )
 
       # 새 페이지 컨텍스트 생성
       context = browser.new_context(

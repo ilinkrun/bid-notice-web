@@ -457,18 +457,31 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
       
       const result = await response.json();
       
+      console.log('✅ GraphQL 응답:', result);
+      
       if (result.errors) {
+        console.error('❌ GraphQL 에러:', result.errors);
         throw new Error(result.errors[0].message);
       }
 
+      console.log('📝 result.data?.updatePost:', result.data?.updatePost);
+      
       if (!result.data?.updatePost) {
+        console.error('❌ updatePost 데이터가 없음');
         throw new Error('게시글 수정에 실패했습니다.');
       }
 
+      console.log('✅ 게시글 수정 성공, 페이지 이동 시작');
       finishLoading();
       
       // 저장 완료 후 상세보기 화면으로 이동
-      navigate(`/channels/board/${board}/${id}`);
+      const targetUrl = `/channels/board/${board}/${id}`;
+      console.log('🔄 페이지 이동 시도:', targetUrl);
+      console.log('📍 현재 URL:', window.location.href);
+      
+      // URL 직접 변경으로 이동 (쿼리 파라미터 제거)
+      window.location.href = targetUrl;
+      console.log('✅ window.location.href로 페이지 이동 완료');
       
     } catch (err) {
       console.error('게시글 수정 오류:', err);
@@ -536,8 +549,8 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
 
   if (error) {
     return (
-      <div className="container mx-auto">
-        <Card>
+      <div className="w-full">
+        <Card className="border-0 shadow-none">
           <CardContent className="p-10 text-center">
             <div className="text-red-500 mb-4">{error}</div>
             <Button onClick={() => navigate(`/channels/board/${board}`)}>
@@ -552,8 +565,8 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
 
   if (!post) {
     return (
-      <div className="container mx-auto">
-        <Card>
+      <div className="w-full">
+        <Card className="border-0 shadow-none">
           <CardContent className="p-10 text-center">
             로딩 중...
           </CardContent>
@@ -563,9 +576,9 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
   }
 
   return (
-    <div className="container mx-auto">
-      <Card>
-        <CardContent>
+    <div className="w-full">
+      <Card className="border-0 shadow-none">
+        <CardContent className="p-0">
           <div className="mb-4 flex justify-between items-center">
             <Button variant="outline" onClick={() => navigate(`/channels/board/${board}`)}>
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -732,7 +745,7 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
                               }}
                               data-color-mode="light"
                               height={400}
-                              preview="edit"
+                              preview="live"
                             />
                           </div>
                         </div>

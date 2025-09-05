@@ -19,6 +19,10 @@ import re
 import os
 import urllib
 import ssl
+from dotenv import load_dotenv
+
+# 환경 변수 로드
+load_dotenv()
 
 # 경고 메시지 비활성화 (상단으로 이동)
 from urllib3.exceptions import InsecureRequestWarning
@@ -541,7 +545,11 @@ def scrape_list_with_playwright(org_name, start_page, end_page, url, rowXpath,
   try:
     with sync_playwright() as playwright:
       try:
-        browser = playwright.chromium.launch(headless=HEADLESS)
+        chromium_path = os.getenv('CHROMIUM_EXECUTABLE_PATH')
+        browser = playwright.chromium.launch(
+            headless=HEADLESS,
+            # executable_path=chromium_path if chromium_path else None
+        )
         # print(f"[2] browser launch 후: {org_name} 페이지 {start_page}: page 처리 시작")
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",

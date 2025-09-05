@@ -1,6 +1,7 @@
 # common
 _backups/
 _drafts/
+uploads/
 .env
 .env.*
 

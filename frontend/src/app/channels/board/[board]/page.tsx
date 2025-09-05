@@ -823,9 +823,9 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
   };
 
   return (
-    <div className="container mx-auto py-10">
-      <Card>
-        <CardContent>
+    <div className="w-full">
+      <Card className="border-0 shadow-none">
+        <CardContent className="p-0">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <div className="flex justify-between items-center mb-4">
               {activeTab === 'list' && (
