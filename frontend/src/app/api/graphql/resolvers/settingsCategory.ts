@@ -1,13 +1,43 @@
 import { apiClient } from '@/lib/api/backendClient';
 
+interface SettingsCategoryData {
+  sn: number;
+  keywords: string;
+  nots: string;
+  min_point: number;
+  category: string;
+  creator?: string;
+  memo?: string;
+}
+
+interface SettingsCategoryInput {
+  sn?: number;
+  keywords: string;
+  nots: string;
+  minPoint: number;
+  category: string;
+  creator?: string;
+  memo?: string;
+}
+
+interface NoticeSearchResult {
+  nid?: number;
+  title: string;
+  org_name: string;
+  posted_date: string;
+  detail_url: string;
+  category?: string;
+  org_region?: string;
+}
+
 export const settingsCategoryResolvers = {
   Query: {
-    settingsCategorys: async (_: any) => {
+    settingsCategorys: async () => {
       try {
         const response = await apiClient.get('/settings_notice_categorys');
         console.log(`response.data: ${JSON.stringify(response.data)}`);
         return response.data
-          .map((category: any) => ({
+          .map((category: SettingsCategoryData) => ({
             sn: category.sn,
             keywords: category.keywords,
             nots: category.nots,
@@ -16,17 +46,17 @@ export const settingsCategoryResolvers = {
             creator: category.creator || '',
             memo: category.memo || ''
           }))
-          .sort((a: any, b: any) => a.sn - b.sn);
+          .sort((a: SettingsCategoryData, b: SettingsCategoryData) => a.sn - b.sn);
       } catch (error) {
         console.error('Error fetching settings categories:', error);
         return [];
       }
     },
 
-    settingsCategoryByCategory: async (_: any, { category }: { category: string }) => {
+    settingsCategoryByCategory: async (_: unknown, { category }: { category: string }) => {
       try {
         const response = await apiClient.get(`/settings_notice_categorys/${category}`);
-        return response.data.map((item: any) => ({
+        return response.data.map((item: SettingsCategoryData) => ({
           sn: item.sn,
           keywords: item.keywords,
           nots: item.nots,
@@ -41,7 +71,7 @@ export const settingsCategoryResolvers = {
       }
     },
 
-    parseKeywordWeights: async (_: any, { keywordWeightStr }: { keywordWeightStr: string }) => {
+    parseKeywordWeights: async (_: unknown, { keywordWeightStr }: { keywordWeightStr: string }) => {
       try {
         const response = await apiClient.get('/parse_keyword_weights', {
           params: { keyword_weight_str: keywordWeightStr }
@@ -54,7 +84,7 @@ export const settingsCategoryResolvers = {
     },
   },
   Mutation: {
-    categoryWeightSearch: async (_: any, { 
+    categoryWeightSearch: async (_: unknown, { 
       keywords, minPoint, field, tableName, addFields, addWhere 
     }: {
       keywords: string;
@@ -74,7 +104,7 @@ export const settingsCategoryResolvers = {
           add_where: addWhere || ''
         });
         
-        return response.data.map((notice: any) => ({
+        return response.data.map((notice: NoticeSearchResult) => ({
           nid: notice.nid?.toString(),
           title: notice.title,
           orgName: notice.org_name,
@@ -89,9 +119,9 @@ export const settingsCategoryResolvers = {
       }
     },
 
-    filterNoticeList: async (_: any, { notStr, dicts, field }: {
+    filterNoticeList: async (_: unknown, { notStr, dicts, field }: {
       notStr: string;
-      dicts: any[];
+      dicts: unknown[];
       field?: string;
     }) => {
       try {
@@ -101,7 +131,7 @@ export const settingsCategoryResolvers = {
           field: field || 'title'
         });
         
-        return response.data.map((notice: any) => ({
+        return response.data.map((notice: NoticeSearchResult) => ({
           nid: notice.nid?.toString(),
           title: notice.title,
           orgName: notice.org_name,
@@ -116,7 +146,7 @@ export const settingsCategoryResolvers = {
       }
     },
 
-    createSettingsCategory: async (_: any, { input }: any) => {
+    createSettingsCategory: async (_: unknown, { input }: { input: SettingsCategoryInput }) => {
       try {
         const response = await apiClient.post('/settings_notice_categorys', {
           sn: input.sn,
@@ -142,7 +172,7 @@ export const settingsCategoryResolvers = {
       }
     },
 
-    updateSettingsCategory: async (_: any, { input }: any) => {
+    updateSettingsCategory: async (_: unknown, { input }: { input: SettingsCategoryInput }) => {
       try {
         const response = await apiClient.put(`/settings_notice_categorys/${input.category}`, {
           sn: input.sn,

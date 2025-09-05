@@ -3,7 +3,7 @@ from lxml.html import fromstring
 from lxml.etree import tostring
 from lxml import etree
 import requests
-from utils_data import valid_str, decode_html_text
+from utils.utils_data import valid_str, decode_html_text
 import codecs
 import html
 import re

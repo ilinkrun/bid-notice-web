@@ -16,13 +16,13 @@ def test_server_imports():
   print("Testing server module imports...")
 
   try:
-    from server_bid import app as bid_app
+    from server.server_bid import app as bid_app
     print("✓ server_bid import successful")
 
-    from server_mysql import app as mysql_app
+    from server.server_mysql import app as mysql_app
     print("✓ server_mysql import successful")
 
-    from server_spider import app as spider_app
+    from server.server_spider import app as spider_app
     print("✓ server_spider import successful")
 
     return True
@@ -39,9 +39,9 @@ def test_fastapi_clients():
 
   try:
     from fastapi.testclient import TestClient
-    from server_bid import app as bid_app
-    from server_mysql import app as mysql_app
-    from server_spider import app as spider_app
+    from server.server_bid import app as bid_app
+    from server.server_mysql import app as mysql_app
+    from server.server_spider import app as spider_app
 
     bid_client = TestClient(bid_app)
     mysql_client = TestClient(mysql_app)
@@ -62,8 +62,8 @@ def test_basic_endpoints():
 
   try:
     from fastapi.testclient import TestClient
-    from server_bid import app as bid_app
-    from server_spider import app as spider_app
+    from server.server_bid import app as bid_app
+    from server.server_spider import app as spider_app
 
     # Test server_bid hello endpoint
     bid_client = TestClient(bid_app)

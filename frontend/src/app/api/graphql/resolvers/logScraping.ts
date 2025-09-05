@@ -1,11 +1,20 @@
 import { apiClient } from '@/lib/api/backendClient';
 
+interface LogScrapingInput {
+  orgName?: string;
+  errorCode?: string;
+  errorMessage?: string;
+  scrapedCount?: number;
+  insertedCount?: number;
+  time?: string;
+}
+
 export const logScrapingResolvers = {
   Query: {
-    logScrapings: async (_: any, { gap }: any) => {
+    logScrapings: async (_: unknown, { gap }: { gap?: number }) => {
       try {
         const response = await apiClient.get('/logs_notice_scraping', { params: { gap } });
-        return response.data.map((log: any) => ({
+        return response.data.map((log: { org_name: string; error_code: string; error_message: string; scraped_count: number; inserted_count: number; time: string }) => ({
           orgName: log.org_name,
           errorCode: log.error_code,
           errorMessage: log.error_message,
@@ -20,7 +29,7 @@ export const logScrapingResolvers = {
     },
   },
   Mutation: {
-    createLogScraping: async (_: any, { input }: any) => {
+    createLogScraping: async (_: unknown, { input }: { input: LogScrapingInput }) => {
       try {
         // TODO: 실제 로그 생성 로직 구현
         const newLog = {

@@ -13,7 +13,7 @@ export function filterNotices(notices: Notice[], filter: NoticeFilter): Notice[]
     if (filter.endDate) {
       const endDate = new Date(filter.endDate);
       const startDate = subDays(endDate, filter.period);
-      const noticeDate = new Date(notice.postedAt);
+      const noticeDate = new Date(notice.postedAt || notice.작성일);
       if (noticeDate < startDate || noticeDate > endDate) {
         return false;
       }
@@ -32,14 +32,16 @@ export function filterNotices(notices: Notice[], filter: NoticeFilter): Notice[]
     // 기관 필터링
     if (filter.excludedOrgs) {
       const excludedOrgList = filter.excludedOrgs.split(',').map((org) => org.trim());
-      if (excludedOrgList.some((org) => notice.orgName.includes(org))) {
+      const orgName = notice.orgName || notice.기관명;
+      if (excludedOrgList.some((org) => orgName?.includes(org))) {
         return false;
       }
     }
 
     if (filter.includedOrgs) {
       const includedOrgList = filter.includedOrgs.split(',').map((org) => org.trim());
-      if (!includedOrgList.some((org) => notice.orgName.includes(org))) {
+      const orgName = notice.orgName || notice.기관명;
+      if (!includedOrgList.some((org) => orgName?.includes(org))) {
         return false;
       }
     }

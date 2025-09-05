@@ -59,13 +59,18 @@ const processNoticeStatistics = (notices: any[] = []): any[] => {
     .slice(-10);
 };
 
+interface ErrorScraping {
+  orgNames: string[];
+  time: string;
+}
+
 // 서버 컴포넌트에서 데이터 가져오기
 async function getDashboardData() {
   const client = getClient();
   
   // 개별적으로 데이터 가져오기
-  let noticesStatistics = [];
-  let errorScrapings = [];
+  let noticesStatistics: any[] = [];
+  let errorScrapings: ErrorScraping[] = [];
   
   try {
     const noticesResult = await client.query({

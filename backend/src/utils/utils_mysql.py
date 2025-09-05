@@ -11,13 +11,13 @@ from pymysql import cursors
 from dotenv import load_dotenv
 
 # .env 파일의 경로 설정 (상위 디렉토리에 있는 .env 파일을 로드)
-dotenv_path = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.env')
+# dotenv_path = os.path.join(
+#     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.env')
 # print(f"ENV 파일 경로: {dotenv_path}")
-
 # .env 파일 로드
-load_dotenv(dotenv_path)
+# load_dotenv(dotenv_path)
 
+load_dotenv('/_exp/.env')
 
 def get_mysql_config():
   """
@@ -221,11 +221,9 @@ class Mysql(object):
         table_name (str): 테이블명
         close (bool): 쿼리 실행 후 연결 종료 여부
     """
-    sql = f"INSERT IGNORE INTO {table_name} ({
-        _join_keys(
-            dic.keys)}) VALUES ({
-        _join_vals(
-            dic.values)});"
+    keys_str = _join_keys(dic.keys())
+    vals_str = _join_vals(dic.values())
+    sql = f"INSERT IGNORE INTO {table_name} ({keys_str}) VALUES ({vals_str});"
     self.exec(sql, close)
 
   def insert_one(self, table_name, csv, close=False):
@@ -237,11 +235,9 @@ class Mysql(object):
         table_name (str): 테이블명
         close (bool): 쿼리 실행 후 연결 종료 여부
     """
-    sql = f"INSERT IGNORE INTO {table_name} ({
-        _join_keys(
-            csv[0])}) VALUES ({
-        _join_vals(
-            csv[1])});"
+    keys_str = _join_keys(csv[0])
+    vals_str = _join_vals(csv[1])
+    sql = f"INSERT IGNORE INTO {table_name} ({keys_str}) VALUES ({vals_str});"
     self.exec(sql, close)
 
   def insert(self, table_name, data, close=False, inType="csv"):
@@ -256,14 +252,13 @@ class Mysql(object):
     if inType == "csv":
       csv = data
     elif inType == "dicts":
-      from utils_data import csv_from_dicts
+      from utils.utils_data import csv_from_dicts
       csv = csv_from_dicts(data)
 
     values = ",".join(
         ["(" + _join_vals(csv[i]) + ")" for i in range(1, len(csv))])
-    sql = f"INSERT IGNORE INTO {table_name} ({
-        _join_keys(
-            csv[0])}) VALUES {values};"
+    keys_str = _join_keys(csv[0])
+    sql = f"INSERT IGNORE INTO {table_name} ({keys_str}) VALUES {values};"
     self.exec(sql, close)
 
   def upsert(self, table_name, data, updKeys=[], close=False, inType="csv"):
@@ -279,7 +274,7 @@ class Mysql(object):
     if inType == "csv":
       csv = data
     elif inType == "dicts":
-      from utils_data import csv_from_dicts
+      from utils.utils_data import csv_from_dicts
       csv = csv_from_dicts(data)
 
     fields = csv[0]

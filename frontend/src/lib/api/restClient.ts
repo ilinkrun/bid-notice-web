@@ -7,7 +7,7 @@ let client: AxiosInstance | null = null;
 export function getClient() {
   if (!client) {
     client = axios.create({
-      baseURL: 'http://localhost:11303',
+      baseURL: 'http://14.34.23.70:11303',
       headers: {
         'Content-Type': 'application/json',
       },

@@ -143,7 +143,7 @@ export default function SettingsListOrgPage({ params }: PageProps) {
   };
 
   // 편집 가능한 데이터 업데이트
-  const updateEditableData = (field: string, value: string | boolean | number) => {
+  const updateEditableData = (field: string, value: string | boolean | number | any[]) => {
     setEditableData(prev => ({
       ...prev,
       [field]: value

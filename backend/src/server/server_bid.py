@@ -7,9 +7,9 @@ from fastapi import FastAPI, HTTPException, Query
 import uvicorn
 import os
 from dotenv import load_dotenv
-from utils_mysql import Mysql
+from utils.utils_mysql import Mysql
 # Import from separated mysql modules
-from mysql_settings import (
+from mysql.mysql_settings import (
     find_settings_notice_list, find_settings_notice_list_by_org_name,
     _upsert_settings_notice_list_by_org_name, upsert_settings_notice_list_by_org_name,
     find_settings_notice_list_by_oid, upsert_settings_notice_list_by_oid,
@@ -19,27 +19,24 @@ from mysql_settings import (
     find_all_settings_notice_category, find_settings_notice_category,
     get_keyword_weight_list, get_search_weight, filter_by_not)
 
-from mysql_notice import (find_notice_list_with_category, find_last_notice,
+from mysql.mysql_notice import (find_notice_list_with_category, find_last_notice,
                           find_notice_list_by_category,
                           find_notice_list_for_statistics, search_notice_list,
                           upsert_notice_list, find_my_bids, find_my_bids_by_status, find_my_bid_by_nid, update_all_category,
                           update_notice_category_by_nids, exclude_notices_by_nids, restore_notices_by_nids)
 
-from mysql_logs import (find_logs_notice_scraping, find_errors_notice_scraping)
-from spider_list import scrape_list, ERROR_CODES
-from spider_detail import notice_to_progress
+from mysql.mysql_logs import (find_logs_notice_scraping, find_errors_notice_scraping)
+from spider.spider_list import scrape_list, ERROR_CODES
+from spider.spider_detail import notice_to_progress
 import json
 from fastapi.middleware.cors import CORSMiddleware
 import time
 
 # 환경 변수 로드
-dotenv_path = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.env')
-
-# .env 파일 로드
-load_dotenv(dotenv_path)
+load_dotenv('/_exp/.env')
 
 DAY_GAP = os.getenv("DAY_GAP")
+SERVER_BID_LOCAL_PORT = int(os.getenv("SERVER_BID_LOCAL_PORT", 1303))
 
 # ** Global Variables(scraping)
 # ------------------------------------------------------------
@@ -1062,7 +1059,7 @@ if __name__ == "__main__":
   uvicorn.run(
       "server_bid:app",
       host="0.0.0.0",
-      port=11303,
+      port=SERVER_BID_LOCAL_PORT,
       workers=4,  # CPU 코어 수에 따라 조정
       reload=True  # 개발 환경에서만 사용
   )

@@ -1,0 +1,1 @@
+cd /_exp/projects/bid-notice-web/backend && PYTHONPATH=src uv run src/spider/spider_list.py

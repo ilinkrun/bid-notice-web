@@ -57,7 +57,7 @@ const RESTORE_NOTICES = gql`
   }
 `;
 
-type SortField = '제목' | '기관명' | '작성일' | '지역' | '등록' | 'category';
+type SortField = '제목' | '기관명' | '작성일' | '지역' | '등록' | 'category' | 'region' | 'registration';
 type SortOrder = 'asc' | 'desc';
 
 interface NoticeTableProps {

@@ -1,5 +1,5 @@
 from fastapi.testclient import TestClient
-from server_mysql import app
+from server.server_mysql import app
 import pytest
 import sys
 import os

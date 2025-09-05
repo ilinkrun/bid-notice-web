@@ -1,11 +1,35 @@
 import { apiClient } from '@/lib/api/backendClient';
 
+interface NoticeData {
+  nid: string;
+  title: string;
+  org_name: string;
+  posted_date: string;
+  detail_url: string;
+  category?: string;
+  카테고리?: string;
+  org_region?: string;
+  registration?: string;
+}
+
+interface StatisticsData {
+  org_name?: string;
+  orgName?: string;
+  posted_date?: string;
+  postedAt?: string;
+  category?: string;
+  카테고리?: string;
+  org_region?: string;
+  region?: string;
+  지역?: string;
+}
+
 export const noticeResolvers = {
   Query: {
     noticesByCategory: async (_: unknown, { category, gap }: { category: string; gap: number }) => {
       try {
         const response = await apiClient.get(`/notice_list/${category}`, { params: { gap } });
-        return response.data.map((notice: any) => ({
+        return response.data.map((notice: NoticeData) => ({
           nid: parseInt(notice.nid),
           title: notice.title,
           orgName: notice.org_name,
@@ -24,7 +48,7 @@ export const noticeResolvers = {
     notices: async (_: unknown, { gap }: { gap: number }) => {
       try {
         const response = await apiClient.get('/notice_list', { params: { gap } });
-        return response.data.map((notice: any) => ({
+        return response.data.map((notice: NoticeData) => ({
           nid: parseInt(notice.nid),
           title: notice.title,
           orgName: notice.org_name,
@@ -43,7 +67,7 @@ export const noticeResolvers = {
     noticesStatistics: async (_: unknown, { gap }: { gap: number }) => {
       try {
         const response = await apiClient.get('/notice_list_statistics', { params: { gap } });
-        return response.data.map((item: any) => ({
+        return response.data.map((item: StatisticsData) => ({
           orgName: item.org_name || item.orgName || '',
           postedAt: item.posted_date || item.postedAt || '',
           category: item.category || item.카테고리 || '',
@@ -67,7 +91,7 @@ export const noticeResolvers = {
           base_sql: "",
           add_sql: ""
         });
-        return response.data.map((notice: any) => ({
+        return response.data.map((notice: NoticeData) => ({
           nid: parseInt(notice.nid),
           title: notice.title,
           orgName: notice.org_name,
@@ -97,7 +121,7 @@ export const noticeResolvers = {
   },
 
   Mutation: {
-    upsertNotice: async (_: unknown, { data }: { data: any[] }) => {
+    upsertNotice: async (_: unknown, { data }: { data: unknown[] }) => {
       try {
         const response = await apiClient.post('/notice_list', data);
         return response.data;

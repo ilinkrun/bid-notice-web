@@ -408,7 +408,7 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
       
       // 저장할 데이터 준비
       let contentToSave = '';
-      let markdownSourceToSave = null;
+      let markdownSourceToSave: string | null = null;
       let formatToSave = editorMode;
 
       if (editorMode === 'markdown') {

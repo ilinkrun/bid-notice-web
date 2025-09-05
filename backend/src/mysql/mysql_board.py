@@ -5,8 +5,8 @@ import pymysql
 import json
 from pymysql import cursors
 from datetime import datetime, timezone, timedelta
-from utils_mysql import Mysql, _where_like_unit, _where_eq_unit
-from utils_data import arr_from_csv, dict_from_tuple, dicts_from_tuples, csv_from_dicts, csv_added_defaults
+from utils.utils_mysql import Mysql, _where_like_unit, _where_eq_unit
+from utils.utils_data import arr_from_csv, dict_from_tuple, dicts_from_tuples, csv_from_dicts, csv_added_defaults
 """
 CREATE TABLE board_dev (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

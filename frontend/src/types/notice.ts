@@ -8,6 +8,7 @@ export interface Notice {
   지역?: string;
   등록?: number;
   작성자?: string;
+  description?: string;
   // 호환성을 위한 영어 필드 (optional)
   title?: string;
   orgName?: string;
@@ -15,6 +16,7 @@ export interface Notice {
   detailUrl?: string;
   region?: string;
   registration?: string;
+  scrapDate?: string;
 }
 
 export interface RawNotice {

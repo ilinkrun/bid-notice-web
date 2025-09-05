@@ -7,6 +7,7 @@ import { resolvers } from './resolvers';
 const server = new ApolloServer({
   typeDefs,
   resolvers,
+  introspection: process.env.NODE_ENV !== 'production',
   formatError: (error) => {
     console.error('GraphQL Error:', error);
     return {

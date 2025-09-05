@@ -5,9 +5,9 @@ import pymysql
 import json
 from pymysql import cursors
 from datetime import datetime, timezone, timedelta
-from utils_mysql import Mysql, _where_like_unit, _where_eq_unit
-from utils_data import arr_from_csv, dict_from_tuple, dicts_from_tuples, csv_from_dicts, csv_added_defaults, _now
-from mysql_settings import (CATEGORIES, find_settings_notice_category,
+from utils.utils_mysql import Mysql, _where_like_unit, _where_eq_unit
+from utils.utils_data import arr_from_csv, dict_from_tuple, dicts_from_tuples, csv_from_dicts, csv_added_defaults, _now
+from mysql.mysql_settings import (CATEGORIES, find_settings_notice_category,
                             get_search_weight, filter_by_not,
                             add_settings_to_notice)
 
@@ -109,7 +109,7 @@ def find_notice_list_for_statistics(
   Returns:
       list: [{"orgName": "org_name", "region": "org_region", "postedAt": "YYYY-MM-DD", "createdAt": "YYYY-MM-DD", "category": ""}, ...]
   """
-  from mysql_settings import find_settings_notice_list
+  from mysql.mysql_settings import find_settings_notice_list
 
   mysql = Mysql()
   try:
@@ -493,7 +493,7 @@ def find_my_bids(fields=[
     "mid", "nid", "status", "title", "started_at", "ended_at", "detail", "memo"
 ],
         addStr=""):
-  from mysql_settings import find_settings_notice_list
+  from mysql.mysql_settings import find_settings_notice_list
 
   mysql = Mysql()
   my_bids = mysql.find("my_bids", fields=fields, addStr=addStr)
@@ -535,7 +535,7 @@ def find_my_bid_by_nid(nid, fields=["mid", "nid", "status", "title", "started_at
   Returns:
       dict: 입찰 정보 딕셔너리 또는 None
   """
-  from mysql_settings import find_settings_notice_list
+  from mysql.mysql_settings import find_settings_notice_list
   
   mysql = Mysql()
   my_bid = mysql.find("my_bids", fields=fields, addStr=f"WHERE nid = {nid}")

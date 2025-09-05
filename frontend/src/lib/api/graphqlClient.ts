@@ -1,6 +1,6 @@
 import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client';
 
-let client: ApolloClient<any> | null = null;
+let client: ApolloClient<object> | null = null;
 
 export function getClient() {
   if (!client) {

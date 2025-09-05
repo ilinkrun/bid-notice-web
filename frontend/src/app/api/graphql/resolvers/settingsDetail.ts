@@ -57,7 +57,12 @@ export const settingsDetailResolvers = {
         }
 
         // 백엔드에서 받은 데이터 구조 처리 (실제 응답에 맞게 수정)
-        let elements = [];
+        let elements: Array<{
+          key: string;
+          xpath: string;
+          target: string | null;
+          callback: string | null;
+        }> = [];
         
         // 백엔드 응답이 배열 형태인 경우 (실제 응답 형태)
         if (Array.isArray(setting)) {

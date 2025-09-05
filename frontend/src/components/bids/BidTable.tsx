@@ -611,8 +611,8 @@ export default function BidTable({ bids, currentStatus }) {
                 >
                   <TableCell className="w-[40px]">
                     <Checkbox
-                      checked={selectedBids.includes(parseInt(bid.mid))}
-                      onCheckedChange={() => toggleCheckbox(parseInt(bid.mid))}
+                      checked={selectedBids.includes(bid.mid)}
+                      onCheckedChange={() => toggleCheckbox(bid.mid)}
                       onClick={(e) => e.stopPropagation()}
                       aria-label={`${bid.title} 선택`}
                     />

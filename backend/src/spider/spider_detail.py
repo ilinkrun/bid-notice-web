@@ -4,21 +4,21 @@ import codecs
 import html
 import re
 import urllib
-from utils_data import valid_str, fix_encoding, decode_html_text, _now
-from utils_mysql import Mysql, _where_like_unit, _where_eq_unit
+from utils.utils_data import valid_str, fix_encoding, decode_html_text, _now
+from utils.utils_mysql import Mysql, _where_like_unit, _where_eq_unit
 # Import from separated mysql modules
-from mysql_settings import (SEPERATOR, SETTINGS_NOTICE_DETAIL_FIELDS,
+from mysql.mysql_settings import (SEPERATOR, SETTINGS_NOTICE_DETAIL_FIELDS,
                             find_settings_notice_list,
                             _find_settings_notice_detail_by_org_name,
                             find_settings_notice_detail_by_org_name,
                             unpack_settings_elements)
-from mysql_notice import upsert_notice_list
-from utils_lxml import _get_outerhtml, get_val, get_dict, download_by_url, download_by_url_with_headers
-from utils_nas import get_notice_nas_folder
+from mysql.mysql_notice import upsert_notice_list
+from utils.utils_lxml import _get_outerhtml, get_val, get_dict, download_by_url, download_by_url_with_headers
+from utils.utils_nas import get_notice_nas_folder
 
 import requests
 from playwright.sync_api import Playwright, sync_playwright
-from utils_data import fix_encoding_response
+from utils.utils_data import fix_encoding_response
 import urllib3
 from dotenv import load_dotenv
 

@@ -4,8 +4,15 @@ from typing import Optional, List
 
 from fastapi import FastAPI, HTTPException
 import uvicorn
-from utils_mysql import Mysql
-from mysql_database import delete_old_notice_list, backup_db_sql, schema_backup
+import os
+from dotenv import load_dotenv
+from utils.utils_mysql import Mysql
+from mysql.mysql_database import delete_old_notice_list, backup_db_sql, schema_backup
+
+# 환경 변수 로드
+load_dotenv('/_exp/.env')
+
+SERVER_BID_LOCAL_MYSQL = int(os.getenv("SERVER_BID_LOCAL_MYSQL", 1302))
 
 #    ** Global Variables
 # MYSQL_CONFIG = dict(host='172.17.0.3', port=3306, user='root', passwd='mysqlIlmac1!', db='ilmac_bid_db', charset='utf8')
@@ -257,4 +264,4 @@ def update_notice_category(update_data: UpdateNoticeCategory):
 
 
 if __name__ == "__main__":
-  uvicorn.run("server_mysql:app", host="0.0.0.0", reload=False, port=11302)
+  uvicorn.run("server_mysql:app", host="0.0.0.0", reload=False, port=SERVER_BID_LOCAL_MYSQL)

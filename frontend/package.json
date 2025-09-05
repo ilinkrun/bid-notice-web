@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev -p 11501",
-    "start": "next start -p 11501",
+    "dev": "next dev -p 3000",
+    "start": "next start -p 3000",
     "build": "next build",
     "scrape:test": "tsx src/lib/scraper/test/gangnam.ts"
   },

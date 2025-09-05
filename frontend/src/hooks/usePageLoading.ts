@@ -8,7 +8,7 @@ import { useUnifiedLoading } from '@/components/providers/UnifiedLoadingProvider
  */
 export function usePageLoading(options?: {
   loading?: boolean;
-  data?: any;
+  data?: unknown;
   delay?: number;
 }) {
   const { finishLoading } = useUnifiedLoading();

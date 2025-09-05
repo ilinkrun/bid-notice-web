@@ -3,8 +3,8 @@ from datetime import datetime
 import codecs
 import html
 import os
-from utils_mysql import Mysql
-from utils_data import (find_folders)
+from utils.utils_mysql import Mysql
+from utils.utils_data import (find_folders)
 
 # def get_com_sn_org_from_folder(folder='[일맥] 15. 종로구청(60)'):
 #     (com, sn, org) = ('', 1, '')

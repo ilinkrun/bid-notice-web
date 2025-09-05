@@ -4,13 +4,20 @@
 from typing import Optional, List, Dict, Any
 from fastapi import FastAPI, HTTPException, Query
 import uvicorn
+import os
+from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
+
+# 환경 변수 로드
+load_dotenv('/_exp/.env')
+
+SERVER_BOARD_LOCAL_PORT = int(os.getenv("SERVER_BOARD_LOCAL_PORT", 1307))
 
 # 게시판 관련 함수
 from pymysql import cursors
 from datetime import datetime, timezone, timedelta
-from utils_mysql import Mysql, _where_like_unit, _where_eq_unit
-from utils_data import arr_from_csv, dict_from_tuple, dicts_from_tuples, csv_from_dicts, csv_added_defaults
+from utils.utils_mysql import Mysql, _where_like_unit, _where_eq_unit
+from utils.utils_data import arr_from_csv, dict_from_tuple, dicts_from_tuples, csv_from_dicts, csv_added_defaults
 """
 CREATE TABLE board_dev (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -800,7 +807,7 @@ def delete_comment_endpoint(comment_id: int, delete_data: Dict[str, str]):
 
 # 서버 실행 코드 (직접 실행 시)
 if __name__ == "__main__":
-  uvicorn.run(app, host="0.0.0.0", port=11307)
+  uvicorn.run(app, host="0.0.0.0", port=SERVER_BOARD_LOCAL_PORT)
 
 # * CREATE
 # POST http://{{ip}}:{{board_port}}/posts/{{board_name}}

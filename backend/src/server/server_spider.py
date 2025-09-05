@@ -9,11 +9,13 @@ import uvicorn
 import os
 from dotenv import load_dotenv
 
-from spider_list import scrape_list, ERROR_CODES
+from spider.spider_list import scrape_list, ERROR_CODES
 import json
 
 # 환경 변수 로드
-load_dotenv()
+load_dotenv('/_exp/.env')
+
+SERVER_BID_LOCAL_SPIDER = int(os.getenv("SERVER_BID_LOCAL_SPIDER", 1301))
 
 
 class CSVRequest(BaseModel):
@@ -137,5 +139,5 @@ if __name__ == "__main__":
       "server_spider:app",
       host="0.0.0.0",
       reload=False,
-      port=11301  # 컨테이너 내부 포트는 고정
+      port=SERVER_BID_LOCAL_SPIDER
   )

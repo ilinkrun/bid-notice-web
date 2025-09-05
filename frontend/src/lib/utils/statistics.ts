@@ -56,13 +56,13 @@ export const processNoticeStatistics = {
 
     return Object.entries(groupedByDate)
       .map(([date, stats]) => {
-        const regions = Object.entries(stats.regions).map(([region, regionStats]: [string, any]) => ({
+        const regions = Object.entries((stats as { regions: Record<string, { construction: number; performance: number; etc: number; total?: number }> }).regions).map(([region, regionStats]) => ({
           region,
           construction: regionStats.construction,
           performance: regionStats.performance,
           etc: regionStats.etc,
           subtotal: regionStats.construction + regionStats.performance + regionStats.etc,
-          total: regionStats.total
+          total: regionStats.total || (regionStats.construction + regionStats.performance + regionStats.etc)
         }));
 
         return {

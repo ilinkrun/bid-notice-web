@@ -40,9 +40,25 @@ const SETTINGS_DEFAULT_QUERY = `
   }
 `;
 
+interface NasSetting {
+  id: string;
+  name: string;
+  area: string;
+  depth: string;
+  folder: string;
+  remark?: string;
+}
+
+interface NasInfo {
+  type: string;
+  model: string;
+  version: string;
+  status: string;
+}
+
 export default function DefaultSettingsPage() {
-  const [nasSettings, setNasSettings] = useState([]);
-  const [nasInfo, setNasInfo] = useState(null);
+  const [nasSettings, setNasSettings] = useState<NasSetting[]>([]);
+  const [nasInfo, setNasInfo] = useState<NasInfo | null>(null);
   const [uiSettings, setUiSettings] = useState({
     darkMode: false,
     language: 'ko',
@@ -60,7 +76,7 @@ export default function DefaultSettingsPage() {
     nextRun: null
   });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   // GraphQL 쿼리 실행 함수
   const fetchSettingsData = async () => {

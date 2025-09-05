@@ -29,7 +29,7 @@ export async function fetchFromApi<T>(endpoint: string, options?: RequestInit): 
   }
 }
 
-export async function postToApi<T>(endpoint: string, body: any, options?: RequestInit): Promise<ApiResponse<T>> {
+export async function postToApi<T>(endpoint: string, body: unknown, options?: RequestInit): Promise<ApiResponse<T>> {
   return fetchFromApi<T>(endpoint, {
     ...options,
     method: 'POST',
@@ -37,7 +37,7 @@ export async function postToApi<T>(endpoint: string, body: any, options?: Reques
   });
 }
 
-export async function putToApi<T>(endpoint: string, body: any, options?: RequestInit): Promise<ApiResponse<T>> {
+export async function putToApi<T>(endpoint: string, body: unknown, options?: RequestInit): Promise<ApiResponse<T>> {
   return fetchFromApi<T>(endpoint, {
     ...options,
     method: 'PUT',

@@ -1,34 +1,73 @@
 import { boardApiClient } from '@/lib/api/backendClient';
 
+interface PostInput {
+  id?: number;
+  title: string;
+  content: string;
+  markdown_source?: string;
+  format?: string;
+  writer: string;
+  password: string;
+  is_visible?: number | boolean;
+}
+
+interface CommentInput {
+  id?: number;
+  board: string;
+  post_id: number;
+  content: string;
+  writer: string;
+  password: string;
+  is_visible?: boolean;
+}
+
+interface ApiResponse<T = unknown> {
+  data: T;
+  success?: boolean;
+}
+
+interface ErrorWithResponse {
+  message?: string;
+  response?: {
+    data?: unknown;
+    status?: number;
+  };
+  config?: {
+    url?: string;
+    method?: string;
+    baseURL?: string;
+  };
+}
+
 export const boardResolvers = {
   Query: {
-    posts: async (_: any, { board }: { board: string }) => {
+    posts: async (_: unknown, { board }: { board: string }) => {
       try {
         console.log(`게시판 목록 조회 요청: ${board}`);
         // API 호출
-        const response = await boardApiClient.get<any>(`/posts/${board}/`);
+        const response = await boardApiClient.get(`/posts/${board}/`);
         return response.data.posts;
       } catch (error) {
         console.error('게시판 목록 조회 오류:', error);
         return [];
       }
     },
-    post: async (_: any, { id, board }: { id: number, board: string }) => {
+    post: async (_: unknown, { id, board }: { id: number, board: string }) => {
       try {
         console.log(`게시글 상세 조회 요청: ${board}, ${id}`);
         // API 호출
-        const response = await boardApiClient.get<any>(`/posts/${board}/${id}`);
+        const response = await boardApiClient.get<ApiResponse>(`/posts/${board}/${id}`);
         return response.data;
       } catch (error) {
         console.error('게시글 상세 조회 오류:', error);
         return null;
       }
     },
-    comments: async (_: any, { board, post_id, page = 1, per_page = 50 }: { board: string, post_id: number, page?: number, per_page?: number }) => {
+    comments: async (_: unknown, { board, post_id, page = 1, per_page = 50 }: { board: string, post_id: number, page?: number, per_page?: number }) => {
       try {
         console.log(`댓글 목록 조회 요청: ${board}, ${post_id}, page=${page}, per_page=${per_page}`);
         // API 호출
-        const response = await boardApiClient.get<any>(`/comments/${board}/${post_id}?page=${page}&per_page=${per_page}`);
+        const response = await boardApiClient.get<ApiResponse>(`/comments/${board}/${post_id}?page=${page}&per_page=${per_page}`);
         return response.data;
       } catch (error: any) {
         console.error('댓글 목록 조회 상세 오류:', {
@@ -51,11 +90,11 @@ export const boardResolvers = {
         };
       }
     },
-    comment: async (_: any, { id }: { id: number }) => {
+    comment: async (_: unknown, { id }: { id: number }) => {
       try {
         console.log(`댓글 상세 조회 요청: ${id}`);
         // API 호출
-        const response = await boardApiClient.get<any>(`/comments/${id}`);
+        const response = await boardApiClient.get<ApiResponse>(`/comments/${id}`);
         return response.data;
       } catch (error) {
         console.error('댓글 상세 조회 오류:', error);
@@ -64,11 +103,11 @@ export const boardResolvers = {
     },
   },
   Mutation: {
-    createPost: async (_: any, { board, input }: { board: string, input: any }) => {
+    createPost: async (_: unknown, { board, input }: { board: string, input: PostInput }) => {
       try {
         console.log(`게시글 생성 요청: ${board}`, input);
         // API 호출
-        const response = await boardApiClient.post<any>(`/posts/${board}`, {
+        const response = await boardApiClient.post(`/posts/${board}`, {
           title: input.title,
           content: input.content,
           markdown_source: input.markdown_source || null,

@@ -1,5 +1,5 @@
 from fastapi.testclient import TestClient
-from server_bid import app
+from server.server_bid import app
 import pytest
 import sys
 import os

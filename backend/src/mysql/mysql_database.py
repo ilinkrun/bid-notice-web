@@ -1,8 +1,8 @@
 import os
 import csv
 from datetime import datetime, timezone, timedelta
-from utils_mysql import Mysql
-from utils_data import _now
+from utils.utils_mysql import Mysql
+from utils.utils_data import _now
 
 
 def get_filename(prefix="schema_backup",

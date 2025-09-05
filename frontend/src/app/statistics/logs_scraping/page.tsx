@@ -43,12 +43,13 @@ async function getLogScrapings(gap: number = 2): Promise<LogScraping[]> {
 }
 
 interface PageProps {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export default async function LogScrapingStatisticsPage({ searchParams }: PageProps) {
   // gap 파라미터 처리
-  const gapParam = typeof searchParams?.gap === 'string' ? searchParams.gap : '2';
+  const resolvedSearchParams = await searchParams;
+  const gapParam = typeof resolvedSearchParams?.gap === 'string' ? resolvedSearchParams.gap : '2';
   const gap = parseInt(gapParam, 10);
 
   // 유효하지 않은 gap 값 처리

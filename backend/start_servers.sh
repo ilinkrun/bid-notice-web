@@ -1,8 +1,13 @@
 # start backend servers in parallel
-cd /_exp/projects/bid-notice-web/backend/src && nohup uv run server_spider.py &
-cd /_exp/projects/bid-notice-web/backend/src && nohup uv run server_bid.py &
-cd /_exp/projects/bid-notice-web/backend/src && nohup uv run server_mysql.py &
-cd /_exp/projects/bid-notice-web/backend/src && nohup uv run server_board.py &
+cd /_exp/projects/bid-notice-web/backend/src/server && nohup uv run server_spider.py &
+cd /_exp/projects/bid-notice-web/backend/src/server && nohup uv run server_bid.py &
+cd /_exp/projects/bid-notice-web/backend/src/server && nohup uv run server_mysql.py &
+cd /_exp/projects/bid-notice-web/backend/src/server && nohup uv run server_board.py &
+
+
+# cd /_exp/projects/bid-notice-web/backend/src/spider && PYTHONPATH=src uv run src/spider/spider_list.py
+# !! 수정 예정
+# cd /_exp/projects/bid-notice-web/backend && PYTHONPATH=src uv run src/spider/spider_list.py
 
 # set -e
 

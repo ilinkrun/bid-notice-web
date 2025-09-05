@@ -70,11 +70,14 @@ export function SettingsListTable({ initialData }: SettingsListTableProps) {
   const sortedData = useMemo(() => {
     if (!sortConfig.key) return initialData;
 
+    const key = sortConfig.key;
     return [...initialData].sort((a, b) => {
-      if (a[sortConfig.key!] < b[sortConfig.key!]) {
+      const aValue = a[key] ?? '';
+      const bValue = b[key] ?? '';
+      if (aValue < bValue) {
         return sortConfig.direction === 'asc' ? -1 : 1;
       }
-      if (a[sortConfig.key!] > b[sortConfig.key!]) {
+      if (aValue > bValue) {
         return sortConfig.direction === 'asc' ? 1 : -1;
       }
       return 0;

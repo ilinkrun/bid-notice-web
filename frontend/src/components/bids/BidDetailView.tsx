@@ -87,7 +87,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
               <Checkbox
                 id="createProject"
                 checked={createProject}
-                onCheckedChange={setCreateProject}
+                onCheckedChange={(checked) => setCreateProject(checked === true)}
               />
               <Label htmlFor="createProject">프로젝트 생성</Label>
             </div>

@@ -2,13 +2,13 @@
 
 # 1~3페이지 목록 스크랩 후, 'detail_url'가 일치하는 항목 제외로 수정
 
-from utils_search import find_nids_for_fetch_notice_details
-from utils_data import save_html, load_html, valid_str, arr_from_csv, dict_from_tuple, dicts_from_tuples, csv_from_dict, csv_from_dicts, csv_added_defaults, fix_encoding_response, _now
-from mysql_logs import insert_all_logs, insert_all_errors
-from mysql_notice import find_last_notice, update_all_category
-from mysql_settings import find_settings_notice_list, find_settings_notice_list_by_org_name
-from utils_mysql import Mysql
-from utils_lxml import get_rows, get_dict, get_val, remove_scripts_from_html, remove_els_from_html
+from utils.utils_search import find_nids_for_fetch_notice_details
+from utils.utils_data import save_html, load_html, valid_str, arr_from_csv, dict_from_tuple, dicts_from_tuples, csv_from_dict, csv_from_dicts, csv_added_defaults, fix_encoding_response, _now
+from mysql.mysql_logs import insert_all_logs, insert_all_errors
+from mysql.mysql_notice import find_last_notice, update_all_category
+from mysql.mysql_settings import find_settings_notice_list, find_settings_notice_list_by_org_name
+from utils.utils_mysql import Mysql
+from utils.utils_lxml import get_rows, get_dict, get_val, remove_scripts_from_html, remove_els_from_html
 from playwright.sync_api import Playwright, sync_playwright
 import pytz
 import time
@@ -447,8 +447,7 @@ def scrape_list(org_name, start_page=1, end_page=1, debug=False):
 
             if next_url:
               if not next_url.startswith('http'):
-                next_url = f"{domain}{
-                    next_url if next_url.startswith('/') else '/' + next_url}"
+                next_url = f"{domain}{next_url if next_url.startswith('/') else '/' + next_url}"
 
               # 다음 페이지 로드
               next_response = session.get(next_url,
@@ -862,6 +861,6 @@ def fetch_list_pages(names, save=True):
 if __name__ == "__main__":
   print("[SCARPING] 공고 고시 게시판(spider_list)")
   names = find_org_names()
-  names = ["한국공항공사"]
+  # names = ["한국공항공사"]
   # ** save list
   fetch_list_pages(names)

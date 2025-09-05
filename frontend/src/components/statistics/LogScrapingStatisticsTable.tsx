@@ -279,7 +279,7 @@ export function LogScrapingStatisticsTable({
           )}
           {sortColumn && (
             <div className="bg-muted px-2 py-1 rounded-md flex items-center gap-1">
-              <span>정렬: {columnDisplayNames[sortColumn]} ({sortDirection === 'asc' ? '오름차순' : '내림차순'})</span>
+              <span>정렬: {columnDisplayNames[sortColumn as string] || sortColumn} ({sortDirection === 'asc' ? '오름차순' : '내림차순'})</span>
               <Button variant="ghost" size="sm" className="h-4 w-4 p-0" onClick={handleClearSort}>
                 ✕
               </Button>

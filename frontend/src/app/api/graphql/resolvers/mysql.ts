@@ -36,7 +36,7 @@ export const mysqlResolvers = {
           add_sql: addSql || "ORDER BY `posted_date` DESC"
         });
         
-        return response.data.map((notice: any) => ({
+        return response.data.map((notice: { nid?: number; title: string; org_name: string; posted_date: string; detail_url: string; category?: string; org_region?: string }) => ({
           nid: notice.nid?.toString(),
           title: notice.title,
           orgName: notice.org_name,

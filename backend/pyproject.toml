@@ -38,7 +38,10 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["app"]
+packages = ["src"]
+
+[tool.hatch.envs.default]
+python = "3.12"
 
 [tool.black]
 line-length = 88

@@ -162,7 +162,7 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
       
       // 저장할 데이터 준비
       let contentToSave = '';
-      let markdownSourceToSave = null;
+      let markdownSourceToSave: string | null = null;
       let formatToSave = 'markdown';
 
       if (editorMode === 'markdown') {

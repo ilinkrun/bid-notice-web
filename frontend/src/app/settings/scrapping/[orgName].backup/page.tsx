@@ -12,7 +12,7 @@ export default function ScrappingSettingsRedirectPage() {
 
   useEffect(() => {
     // 기본적으로 목록 탭으로 리디렉션
-    navigate(`/settings/scrapping/${orgName}/list`, { replace: true });
+    navigate(`/settings/scrapping/${orgName}/list`);
   }, [orgName, navigate]);
 
   // 리디렉션 중 로딩 표시

@@ -1,5 +1,5 @@
 from fastapi.testclient import TestClient
-from server_spider import app
+from server.server_spider import app
 import pytest
 import sys
 import os
