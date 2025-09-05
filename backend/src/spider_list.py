@@ -548,7 +548,7 @@ def scrape_list_with_playwright(org_name, start_page, end_page, url, rowXpath,
         chromium_path = os.getenv('CHROMIUM_EXECUTABLE_PATH')
         browser = playwright.chromium.launch(
             headless=HEADLESS,
-            # executable_path=chromium_path if chromium_path else None
+            executable_path=chromium_path if chromium_path else None
         )
         # print(f"[2] browser launch 후: {org_name} 페이지 {start_page}: page 처리 시작")
         context = browser.new_context(
@@ -862,5 +862,6 @@ def fetch_list_pages(names, save=True):
 if __name__ == "__main__":
   print("[SCARPING] 공고 고시 게시판(spider_list)")
   names = find_org_names()
+  names = ["한국공항공사"]
   # ** save list
   fetch_list_pages(names)

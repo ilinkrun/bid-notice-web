@@ -261,4 +261,5 @@ def list_posts(page: int = 1,
 
 if __name__ == "__main__":
   pass
-  print(list_posts())
+#   print(list_posts())
+  print(get_post(1, "board_dev"))

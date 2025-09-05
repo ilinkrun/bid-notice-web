@@ -386,7 +386,7 @@ def _fetch_html_by_playwright(url,
       chromium_path = os.getenv('CHROMIUM_EXECUTABLE_PATH')
       browser = playwright.chromium.launch(
           headless=True,
-          # executable_path=chromium_path if chromium_path else None
+          executable_path=chromium_path if chromium_path else None
       )
 
       # 새 페이지 컨텍스트 생성
