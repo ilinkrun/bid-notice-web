@@ -17,19 +17,28 @@ export async function POST(request: NextRequest) {
     
     // 파일 확장자 확인
     const fileExtension = file.name.split('.').pop()?.toLowerCase();
-    const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
     
-    if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
+    if (!fileExtension) {
       return NextResponse.json(
-        { error: '지원하지 않는 파일 형식입니다.' },
+        { error: '파일 확장자가 없습니다.' },
         { status: 400 }
       );
     }
     
-    // 파일 크기 확인 (5MB 제한)
-    if (file.size > 5 * 1024 * 1024) {
+    // 보안상 위험한 파일 타입은 제외
+    const blockedExtensions = ['exe', 'bat', 'cmd', 'com', 'scr', 'vbs', 'js', 'jar'];
+    
+    if (blockedExtensions.includes(fileExtension)) {
       return NextResponse.json(
-        { error: '파일 크기는 5MB를 초과할 수 없습니다.' },
+        { error: '보안상 위험한 파일 형식입니다.' },
+        { status: 400 }
+      );
+    }
+    
+    // 파일 크기 확인 (20MB 제한)
+    if (file.size > 20 * 1024 * 1024) {
+      return NextResponse.json(
+        { error: '파일 크기는 20MB를 초과할 수 없습니다.' },
         { status: 400 }
       );
     }

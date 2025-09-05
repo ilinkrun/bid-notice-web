@@ -147,7 +147,7 @@ const convertMarkdownToHtml = (markdown: string): string => {
 };
 
 // 파일 업로드 헬퍼 함수
-const uploadImageFile = async (file: File, setIsUploading: (loading: boolean) => void, editingMarkdown: string, setEditingMarkdown: (value: string) => void, setPost: any, post: any) => {
+const uploadFile = async (file: File, setIsUploading: (loading: boolean) => void, editingMarkdown: string, setEditingMarkdown: (value: string) => void, setPost: any, post: any) => {
   setIsUploading(true);
   try {
     const formData = new FormData();
@@ -160,8 +160,16 @@ const uploadImageFile = async (file: File, setIsUploading: (loading: boolean) =>
     
     if (response.ok) {
       const result = await response.json();
-      const imageMarkdown = `![${result.filename}](${result.url})`;
-      const newValue = `${editingMarkdown}\n\n${imageMarkdown}`;
+      
+      // 이미지 파일인 경우 이미지 마크다운, 그 외는 링크 마크다운
+      let fileMarkdown;
+      if (file.type.startsWith('image/')) {
+        fileMarkdown = `![${result.filename}](${result.url})`;
+      } else {
+        fileMarkdown = `[${result.filename}](${result.url})`;
+      }
+      
+      const newValue = `${editingMarkdown}\n\n${fileMarkdown}`;
       setEditingMarkdown(newValue);
       setPost({ 
         ...post, 
@@ -685,7 +693,7 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
                   {editorMode === 'markdown' ? (
                     <div className="space-y-2">
                       <p className="text-sm text-muted-foreground">
-                        마크다운 문법을 사용하여 편집하세요. 이미지를 드래그 앤 드롭하거나 클립보드에서 붙여넣기할 수 있습니다.
+                        마크다운 문법을 사용하여 편집하세요. 파일을 드래그 앤 드롭하거나 클립보드에서 붙여넣기할 수 있습니다.
                       </p>
                       {isUploading && (
                         <div className="flex items-center gap-2 text-sm text-blue-600">
@@ -698,26 +706,23 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
                           <div className="flex items-center gap-2 mb-2">
                             <input
                               type="file"
-                              accept="image/*"
                               multiple
                               onChange={async (e) => {
                                 const files = Array.from(e.target.files || []);
                                 for (const file of files) {
-                                  if (file.type.startsWith('image/')) {
-                                    await uploadImageFile(file, setIsUploading, editingMarkdown, setEditingMarkdown, setPost, post);
-                                  }
+                                  await uploadFile(file, setIsUploading, editingMarkdown, setEditingMarkdown, setPost, post);
                                 }
                               }}
                               style={{ display: 'none' }}
-                              id="image-upload"
+                              id="file-upload"
                             />
                             <label 
-                              htmlFor="image-upload" 
+                              htmlFor="file-upload" 
                               className="inline-flex items-center px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer"
                             >
-                              📷 이미지 업로드
+                              📎 파일 업로드
                             </label>
-                            <span className="text-xs text-gray-500">또는 이미지를 드래그해서 놓으세요</span>
+                            <span className="text-xs text-gray-500">또는 파일을 드래그해서 놓으세요</span>
                           </div>
                           <div 
                             onDrop={async (event) => {
@@ -725,9 +730,7 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
                               const files = Array.from(event.dataTransfer?.files || []);
                               
                               for (const file of files) {
-                                if (file.type.startsWith('image/')) {
-                                  await uploadImageFile(file, setIsUploading, editingMarkdown, setEditingMarkdown, setPost, post);
-                                }
+                                await uploadFile(file, setIsUploading, editingMarkdown, setEditingMarkdown, setPost, post);
                               }
                             }}
                             onDragOver={(event) => event.preventDefault()}
