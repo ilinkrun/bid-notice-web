@@ -285,7 +285,7 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
             <div className="min-h-[300px] mb-4">
               <div>
                 <div className="flex justify-between items-center mb-2">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 hidden">
                     <span className="text-sm font-medium">에디터:</span>
                     <Tabs value={editorMode} onValueChange={(value) => {
                       // HTML 모드는 비활성화

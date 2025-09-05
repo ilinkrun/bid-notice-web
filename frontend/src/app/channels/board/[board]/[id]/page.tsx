@@ -579,11 +579,35 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
     <div className="w-full">
       <Card className="border-0 shadow-none">
         <CardContent className="p-0">
-          <div className="mb-4 flex justify-between items-center">
-            <Button variant="outline" onClick={() => navigate(`/channels/board/${board}`)}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              목록으로
-            </Button>
+          <div className="mb-4 flex justify-between items-start">
+            <div className="flex items-center">
+              <Button variant="outline" onClick={() => navigate(`/channels/board/${board}`)}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                목록으로
+              </Button>
+            </div>
+            <div className="flex-1 mx-6">
+              <h1 className="text-2xl font-bold mb-2">
+                {isEditMode ? (
+                  <Input
+                    value={post.title}
+                    onChange={(e) => setPost({ ...post, title: e.target.value })}
+                    className={`text-2xl font-bold ${inputClass}`}
+                  />
+                ) : (
+                  post.title
+                )}
+              </h1>
+              {!isEditMode && (
+                <div className="flex space-x-4 text-sm text-muted-foreground">
+                  <span>작성자: {post.writer}</span>
+                  <span>작성일: {formatDate(post.created_at)}</span>
+                  {post.updated_at !== post.created_at && (
+                    <span>수정일: {formatDate(post.updated_at)}</span>
+                  )}
+                </div>
+              )}
+            </div>
             {!isEditMode && (
               <div className="flex space-x-2">
                 <Button variant="outline" onClick={handleEditClick}>
@@ -599,34 +623,12 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
           </div>
 
           <div className="border rounded-lg p-4">
-            <div className="border-b pb-4 mb-4">
-              <h1 className="text-2xl font-bold mb-2">
-                {isEditMode ? (
-                  <Input
-                    value={post.title}
-                    onChange={(e) => setPost({ ...post, title: e.target.value })}
-                    className={`text-2xl font-bold ${inputClass}`}
-                  />
-                ) : (
-                  post.title
-                )}
-              </h1>
-              <div className="flex justify-between text-sm text-muted-foreground">
-                <div className="flex space-x-4">
-                  <span>작성자: {post.writer}</span>
-                  <span>작성일: {formatDate(post.created_at)}</span>
-                  {post.updated_at !== post.created_at && (
-                    <span>수정일: {formatDate(post.updated_at)}</span>
-                  )}
-                </div>
-              </div>
-            </div>
 
             <div className="min-h-[300px] mb-4">
               {isEditMode ? (
                 <div>
                   <div className="flex justify-between items-center mb-2">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 hidden">
                       <span className="text-sm font-medium">에디터:</span>
                       <Tabs value={editorMode} onValueChange={(value) => {
                         const newFormat = value as 'html' | 'markdown';
