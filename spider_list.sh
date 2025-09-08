@@ -7,7 +7,7 @@ mkdir -p /exposed/projects/bid-notice-web/logs
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Spider list script started" >> /exposed/projects/bid-notice-web/logs/spider_list.log
 
 # 스크립트 실행
-cd /exposed/projects/bid-notice-web/backend && PYTHONPATH=src uv run src/spider/spider_list.py
+cd /exposed/projects/bid-notice-web/backend/python && PYTHONPATH=src uv run src/spider/spider_list.py
 
 # 실행 종료 시간 로그
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Spider list script completed (Exit code: $?)" >> /exposed/projects/bid-notice-web/logs/spider_list.log

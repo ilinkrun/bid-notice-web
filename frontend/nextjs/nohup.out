@@ -1,0 +1,5 @@
+
+> ts-nextjs-shadcn@0.1.0 dev
+> next dev -p 11501
+
+sh: 1: next: not found
