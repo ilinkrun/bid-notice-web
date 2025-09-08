@@ -1,0 +1,68 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "app"
+version = "0.1.0"
+description = "FastAPI application with various dependencies"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Developer", email = "developer@example.com"}
+]
+
+dependencies = [
+    "python-dotenv>=1.0.0",
+    "fastapi>=0.104.0",
+    "lxml>=5.0.0",
+    "playwright>=1.40.0",
+    "pydantic>=2.5.0",
+    "pymysql>=1.1.0",
+    "requests>=2.31.0",
+    "requests-toolbelt>=1.0.0",
+    "typing_extensions>=4.8.0",
+    "urllib3>=2.0.0",
+    "uvicorn>=0.24.0",
+    "pytz>=2023.3",
+    "httpx>=0.28.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+    "isort>=5.10.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[tool.hatch.envs.default]
+python = "3.12"
+
+[tool.black]
+line-length = 88
+target-version = ["py38", "py39", "py310"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+]

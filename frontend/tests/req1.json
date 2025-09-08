@@ -1,0 +1,8 @@
+{
+  "keywords": "수행기관*3,건설,공사,점검",
+  "nots": "건축물관리점검,토목,교량,도로",
+  "min_point": 4,
+  "add_where": "WHERE `작성일` >= '2025-03-01'",
+  "base_sql": "SELECT `작성일`, `기관명`, `제목`, `상세페이지주소` FROM notices",
+  "add_sql": "ORDER BY `작성일` DESC"
+}

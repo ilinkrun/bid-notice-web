@@ -1,0 +1,477 @@
+{
+	"info": {
+		"_postman_id": "board-server-collection",
+		"name": "Server Board API Collection",
+		"description": "API collection for server_board.py - Bulletin board system for manual content management",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://{{ip}}:{{port_board}}",
+			"type": "string"
+		},
+		{
+			"key": "board_name",
+			"value": "board_dev",
+			"type": "string"
+		},
+		{
+			"key": "post_id",
+			"value": "1",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Posts Management",
+			"item": [
+				{
+					"name": "Create Post",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"첫 번째 게시글\",\n    \"content\": \"안녕하세요. 게시판 테스트 중입니다.\",\n    \"writer\": \"테스터\",\n    \"password\": \"1234\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/posts/{{board_name}}",
+							"host": ["{{base_url}}"],
+							"path": ["posts", "{{board_name}}"]
+						}
+					}
+				},
+				{
+					"name": "Create Post - HTML Content",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"HTML 형식의 게시글\",\n    \"content\": \"<h2>제목</h2><p>HTML 형식의 <strong>내용</strong>입니다.</p><ul><li>항목1</li><li>항목2</li></ul>\",\n    \"format\": \"html\",\n    \"writer\": \"HTML작성자\",\n    \"password\": \"1234\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/posts/{{board_name}}",
+							"host": ["{{base_url}}"],
+							"path": ["posts", "{{board_name}}"]
+						}
+					}
+				},
+				{
+					"name": "Create Post - Markdown Content",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Markdown 형식의 게시글\",\n    \"content\": \"## 제목\\n\\n**굵은 글씨**와 *기울임* 텍스트\\n\\n- 리스트 항목1\\n- 리스트 항목2\\n\\n[링크](http://example.com)\",\n    \"format\": \"markdown\",\n    \"writer\": \"MD작성자\",\n    \"password\": \"1234\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/posts/{{board_name}}",
+							"host": ["{{base_url}}"],
+							"path": ["posts", "{{board_name}}"]
+						}
+					}
+				},
+				{
+					"name": "Get Post by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/posts/{{board_name}}/{{post_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["posts", "{{board_name}}", "{{post_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Update Post",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"[수정]첫 번째 게시글입니다\",\n    \"content\": \"[수정]안녕하세요. 게시판 테스트 중입니다. 내용이 수정되었습니다.\",\n    \"format\": \"text\",\n    \"writer\": \"테스터\",\n    \"password\": \"1234\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/posts/{{board_name}}/{{post_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["posts", "{{board_name}}", "{{post_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Delete Post",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"password\": \"1234\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/posts/{{board_name}}/{{post_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["posts", "{{board_name}}", "{{post_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Get All Posts in Board",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/posts/{{board_name}}",
+							"host": ["{{base_url}}"],
+							"path": ["posts", "{{board_name}}"]
+						}
+					}
+				},
+				{
+					"name": "Get Posts with Pagination",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/posts/{{board_name}}?page=1&limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["posts", "{{board_name}}"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Comments Management",
+			"item": [
+				{
+					"name": "Create Comment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"board\": \"{{board_name}}\",\n    \"post_id\": {{post_id}},\n    \"content\": \"첫 번째 댓글입니다.\",\n    \"writer\": \"댓글작성자\",\n    \"password\": \"1234\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/comments",
+							"host": ["{{base_url}}"],
+							"path": ["comments"]
+						}
+					}
+				},
+				{
+					"name": "Create Reply Comment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"board\": \"{{board_name}}\",\n    \"post_id\": {{post_id}},\n    \"content\": \"댓글에 대한 답글입니다.\",\n    \"writer\": \"답글작성자\",\n    \"password\": \"1234\",\n    \"parent_comment_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/comments",
+							"host": ["{{base_url}}"],
+							"path": ["comments"]
+						}
+					}
+				},
+				{
+					"name": "Get Comments by Post",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/comments/{{board_name}}/{{post_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["comments", "{{board_name}}", "{{post_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Get Comment by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/comments/1",
+							"host": ["{{base_url}}"],
+							"path": ["comments", "1"]
+						}
+					}
+				},
+				{
+					"name": "Update Comment",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"content\": \"[수정된] 댓글 내용입니다.\",\n    \"writer\": \"댓글작성자\",\n    \"password\": \"1234\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/comments/1",
+							"host": ["{{base_url}}"],
+							"path": ["comments", "1"]
+						}
+					}
+				},
+				{
+					"name": "Delete Comment",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"password\": \"1234\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/comments/1",
+							"host": ["{{base_url}}"],
+							"path": ["comments", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Board Types Testing",
+			"item": [
+				{
+					"name": "Create Post in Different Board",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"다른 게시판의 글\",\n    \"content\": \"이것은 다른 게시판에 작성된 글입니다.\",\n    \"writer\": \"다른작성자\",\n    \"password\": \"1234\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/posts/board_test",
+							"host": ["{{base_url}}"],
+							"path": ["posts", "board_test"]
+						}
+					}
+				},
+				{
+					"name": "Get Posts from Different Board",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/posts/board_test",
+							"host": ["{{base_url}}"],
+							"path": ["posts", "board_test"]
+						}
+					}
+				},
+				{
+					"name": "Create Post in Notice Board",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"[공지] 중요 공지사항\",\n    \"content\": \"이것은 중요한 공지사항입니다. 모든 사용자는 확인해주세요.\",\n    \"writer\": \"관리자\",\n    \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/posts/notice_board",
+							"host": ["{{base_url}}"],
+							"path": ["posts", "notice_board"]
+						}
+					}
+				},
+				{
+					"name": "Create Post in FAQ Board",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Q: 자주 묻는 질문\",\n    \"content\": \"A: 이것은 자주 묻는 질문에 대한 답변입니다.\",\n    \"writer\": \"FAQ담당자\",\n    \"password\": \"faq123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/posts/faq_board",
+							"host": ["{{base_url}}"],
+							"path": ["posts", "faq_board"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Error Scenarios",
+			"item": [
+				{
+					"name": "Create Post - Missing Required Fields",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"제목만 있는 글\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/posts/{{board_name}}",
+							"host": ["{{base_url}}"],
+							"path": ["posts", "{{board_name}}"]
+						}
+					}
+				},
+				{
+					"name": "Get Non-existent Post",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/posts/{{board_name}}/99999",
+							"host": ["{{base_url}}"],
+							"path": ["posts", "{{board_name}}", "99999"]
+						}
+					}
+				},
+				{
+					"name": "Update Post - Wrong Password",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"수정 시도\",\n    \"content\": \"잘못된 비밀번호로 수정 시도\",\n    \"format\": \"text\",\n    \"writer\": \"테스터\",\n    \"password\": \"wrong_password\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/posts/{{board_name}}/{{post_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["posts", "{{board_name}}", "{{post_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Delete Post - Wrong Password",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"password\": \"wrong_password\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/posts/{{board_name}}/{{post_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["posts", "{{board_name}}", "{{post_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Create Comment - Invalid Post ID",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"board\": \"{{board_name}}\",\n    \"post_id\": 99999,\n    \"content\": \"존재하지 않는 게시글에 댓글\",\n    \"writer\": \"테스터\",\n    \"password\": \"1234\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/comments",
+							"host": ["{{base_url}}"],
+							"path": ["comments"]
+						}
+					}
+				}
+			]
+		}
+	]
+}

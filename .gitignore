@@ -1,0 +1,27 @@
+# os, lang
+## nodejs
+node_modules/
+.next/
+
+## python
+.venv/
+__pycache__/
+
+## macos
+.DS_Store
+
+# env
+## claude
+.claude/
+.env
+!.env.sample
+
+# private
+_*/
+database/
+logs/
+
+# zip, tar
+*.zip
+*.tar
+*.gz
