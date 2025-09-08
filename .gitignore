@@ -16,10 +16,13 @@ __pycache__/
 .env
 !.env.sample
 
+## log
+logs/
+*.out
+
 # private
 _*/
 database/
-logs/
 
 # zip, tar
 *.zip

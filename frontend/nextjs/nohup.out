@@ -20,3 +20,347 @@ sh: 1: next: not found
  ✓ Compiled /api/graphql in 25.2s (2270 modules)
  POST /api/graphql 200 in 24595ms
  POST /api/graphql 200 in 77ms
+
+> ts-nextjs-shadcn@0.1.0 dev
+> next dev -p 11501
+
+   ▲ Next.js 15.5.2
+   - Local:        http://localhost:11501
+   - Network:      http://192.168.192.2:11501
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 4.1s
+ ○ Compiling /channels/board/[board]/[id] ...
+ ✓ Compiled / in 61.7s (3487 modules)
+ ○ Compiling /api/graphql ...
+ GET /channels/board/dev/5?mode=edit&format=markdown 200 in 67177ms
+ ⚠ Blocked cross-origin request from bid.ilmaceng.com to /_next/* resource. To allow this, configure "allowedDevOrigins" in next.config
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+ ✓ Compiled /favicon.ico in 12.9s (4016 modules)
+게시글 상세 조회 요청: board_dev, 5
+ GET /favicon.ico 200 in 4472ms
+ POST /api/graphql 200 in 4497ms
+ POST /api/graphql 200 in 15355ms
+ POST /api/graphql 200 in 95ms
+ GET / 200 in 70586ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 3.4s (2186 modules)
+ GET /actuator/gateway/routes 404 in 4665ms
+ ○ Compiling / ...
+ ✓ Compiled / in 3.1s (1096 modules)
+ ○ Compiling /api/graphql ...
+ ✓ Compiled /api/graphql in 965ms (1627 modules)
+ POST /api/graphql 200 in 3734ms
+ POST /api/graphql 200 in 64ms
+ GET / 200 in 9292ms
+ POST /api/graphql 200 in 132ms
+ POST /api/graphql 200 in 274ms
+ POST /api/graphql 200 in 107ms
+ POST /api/graphql 200 in 92ms
+ POST /api/graphql 200 in 83ms
+ POST /api/graphql 200 in 84ms
+ POST /api/graphql 200 in 80ms
+ POST /api/graphql 200 in 147ms
+ POST /api/graphql 200 in 175ms
+ POST /api/graphql 200 in 94ms
+ POST /api/graphql 200 in 66ms
+ POST /api/graphql 200 in 83ms
+ POST /api/graphql 200 in 77ms
+ POST /api/graphql 200 in 78ms
+ POST /api/graphql 200 in 85ms
+ POST /api/graphql 200 in 124ms
+ POST /api/graphql 200 in 66ms
+ POST /api/graphql 200 in 99ms
+ POST /api/graphql 200 in 77ms
+ POST /api/graphql 200 in 85ms
+ POST /api/graphql 200 in 66ms
+ POST /api/graphql 200 in 101ms
+ POST /api/graphql 200 in 65ms
+ POST /api/graphql 200 in 109ms
+ POST /api/graphql 200 in 89ms
+ POST /api/graphql 200 in 75ms
+ POST /api/graphql 200 in 68ms
+ POST /api/graphql 200 in 83ms
+ POST /api/graphql 200 in 79ms
+ POST /api/graphql 200 in 76ms
+ POST /api/graphql 200 in 77ms
+ POST /api/graphql 200 in 100ms
+ POST /api/graphql 200 in 95ms
+ POST /api/graphql 200 in 126ms
+ POST /api/graphql 200 in 69ms
+ POST /api/graphql 200 in 72ms
+ POST /api/graphql 200 in 68ms
+ POST /api/graphql 200 in 89ms
+ POST /api/graphql 200 in 69ms
+ POST /api/graphql 200 in 79ms
+ POST /api/graphql 200 in 66ms
+ POST /api/graphql 200 in 78ms
+ POST /api/graphql 200 in 64ms
+ POST /api/graphql 200 in 79ms
+ POST /api/graphql 200 in 68ms
+ POST /api/graphql 200 in 82ms
+ POST /api/graphql 200 in 83ms
+ POST /api/graphql 200 in 77ms
+ POST /api/graphql 200 in 87ms
+ POST /api/graphql 200 in 80ms
+ POST /api/graphql 200 in 111ms
+ POST /api/graphql 200 in 81ms
+ POST /api/graphql 200 in 73ms
+ POST /api/graphql 200 in 84ms
+ POST /api/graphql 200 in 84ms
+ POST /api/graphql 200 in 924ms
+ POST /api/graphql 200 in 713ms
+ POST /api/graphql 200 in 1119ms
+ GET / 200 in 3755ms
+ POST /api/graphql 200 in 68ms
+ POST /api/graphql 200 in 77ms
+ POST /api/graphql 200 in 66ms
+ POST /api/graphql 200 in 123ms
+ POST /api/graphql 200 in 74ms
+ POST /api/graphql 200 in 82ms
+ POST /api/graphql 200 in 73ms
+ POST /api/graphql 200 in 80ms
+ POST /api/graphql 200 in 111ms
+ POST /api/graphql 200 in 84ms
+ POST /api/graphql 200 in 112ms
+ POST /api/graphql 200 in 111ms
+ POST /api/graphql 200 in 101ms
+ POST /api/graphql 200 in 92ms
+ POST /api/graphql 200 in 106ms
+ POST /api/graphql 200 in 139ms
+ POST /api/graphql 200 in 76ms
+ POST /api/graphql 200 in 89ms
+ POST /api/graphql 200 in 72ms
+ POST /api/graphql 200 in 79ms
+ POST /api/graphql 200 in 73ms
+ POST /api/graphql 200 in 79ms
+ POST /api/graphql 200 in 69ms
+ POST /api/graphql 200 in 77ms
+ POST /api/graphql 200 in 79ms
+ POST /api/graphql 200 in 68ms
+ POST /api/graphql 200 in 83ms
+ POST /api/graphql 200 in 94ms
+ POST /api/graphql 200 in 81ms
+ POST /api/graphql 200 in 80ms
+ POST /api/graphql 200 in 107ms
+ POST /api/graphql 200 in 68ms
+ POST /api/graphql 200 in 95ms
+ POST /api/graphql 200 in 67ms
+ POST /api/graphql 200 in 85ms
+ POST /api/graphql 200 in 101ms
+ POST /api/graphql 200 in 84ms
+ POST /api/graphql 200 in 71ms
+ POST /api/graphql 200 in 85ms
+ POST /api/graphql 200 in 73ms
+ POST /api/graphql 200 in 90ms
+ POST /api/graphql 200 in 108ms
+ POST /api/graphql 200 in 81ms
+ POST /api/graphql 200 in 76ms
+ POST /api/graphql 200 in 80ms
+ POST /api/graphql 200 in 122ms
+ POST /api/graphql 200 in 80ms
+ POST /api/graphql 200 in 82ms
+ POST /api/graphql 200 in 97ms
+ POST /api/graphql 200 in 122ms
+ POST /api/graphql 200 in 81ms
+ POST /api/graphql 200 in 69ms
+ POST /api/graphql 200 in 79ms
+ POST /api/graphql 200 in 69ms
+ POST /api/graphql 200 in 77ms
+ POST /api/graphql 200 in 71ms
+ POST /api/graphql 200 in 79ms
+ POST /api/graphql 200 in 70ms
+ POST /api/graphql 200 in 76ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 1964ms (1369 modules)
+ POST /api/graphql 200 in 2659ms
+ GET /robots.txt 404 in 5081ms
+ ○ Compiling / ...
+ ✓ Compiled / in 937ms (1628 modules)
+ POST /api/graphql 200 in 3817ms
+ POST /api/graphql 200 in 133ms
+ POST /api/graphql 200 in 1105ms
+ POST /api/graphql 200 in 72ms
+ GET / 200 in 7554ms
+ POST /api/graphql 200 in 89ms
+ POST /api/graphql 200 in 90ms
+ POST /api/graphql 200 in 77ms
+ POST /api/graphql 200 in 79ms
+ POST /api/graphql 200 in 72ms
+ POST /api/graphql 200 in 83ms
+ POST /api/graphql 200 in 82ms
+ POST /api/graphql 200 in 107ms
+ POST /api/graphql 200 in 64ms
+ POST /api/graphql 200 in 118ms
+ POST /api/graphql 200 in 75ms
+ POST /api/graphql 200 in 816ms
+ POST /api/graphql 200 in 78ms
+ POST /api/graphql 200 in 69ms
+ POST /api/graphql 200 in 111ms
+ POST /api/graphql 200 in 71ms
+ POST /api/graphql 200 in 117ms
+ POST /api/graphql 200 in 66ms
+ POST /api/graphql 200 in 95ms
+ POST /api/graphql 200 in 70ms
+ POST /api/graphql 200 in 92ms
+ POST /api/graphql 200 in 179ms
+ POST /api/graphql 200 in 85ms
+ POST /api/graphql 200 in 134ms
+ POST /api/graphql 200 in 94ms
+ POST /api/graphql 200 in 95ms
+ POST /api/graphql 200 in 99ms
+ POST /api/graphql 200 in 121ms
+ POST /api/graphql 200 in 97ms
+ POST /api/graphql 200 in 95ms
+ POST /api/graphql 200 in 73ms
+ POST /api/graphql 200 in 110ms
+ POST /api/graphql 200 in 877ms
+ POST /api/graphql 200 in 92ms
+ POST /api/graphql 200 in 104ms
+ POST /api/graphql 200 in 79ms
+ POST /api/graphql 200 in 94ms
+ POST /api/graphql 200 in 79ms
+ POST /api/graphql 200 in 90ms
+ POST /api/graphql 200 in 82ms
+ POST /api/graphql 200 in 112ms
+ POST /api/graphql 200 in 76ms
+ POST /api/graphql 200 in 99ms
+ POST /api/graphql 200 in 80ms
+ POST /api/graphql 200 in 102ms
+ POST /api/graphql 200 in 88ms
+ POST /api/graphql 200 in 66ms
+ POST /api/graphql 200 in 86ms
+ POST /api/graphql 200 in 91ms
+ POST /api/graphql 200 in 84ms
+ POST /api/graphql 200 in 106ms
+ POST /api/graphql 200 in 113ms
+ POST /api/graphql 200 in 71ms
+ POST /api/graphql 200 in 110ms
+ POST /api/graphql 200 in 70ms
+ POST /api/graphql 200 in 83ms
+ POST /api/graphql 200 in 64ms
+ POST /api/graphql 200 in 76ms
+ POST /api/graphql 200 in 70ms
+ POST /api/graphql 200 in 86ms
+ POST /api/graphql 200 in 76ms
+ POST /api/graphql 200 in 97ms
+ POST /api/graphql 200 in 85ms
+ POST /api/graphql 200 in 83ms
+ POST /api/graphql 200 in 109ms
+ POST /api/graphql 200 in 97ms
+ POST /api/graphql 200 in 112ms
+ POST /api/graphql 200 in 82ms
+ POST /api/graphql 200 in 70ms
+ POST /api/graphql 200 in 79ms
+ POST /api/graphql 200 in 117ms
+ POST /api/graphql 200 in 80ms
+ POST /api/graphql 200 in 84ms
+ POST /api/graphql 200 in 72ms
+ POST /api/graphql 200 in 84ms
+ POST /api/graphql 200 in 72ms
+ POST /api/graphql 200 in 89ms
+ POST /api/graphql 200 in 81ms
+ POST /api/graphql 200 in 66ms
+ POST /api/graphql 200 in 74ms
+ POST /api/graphql 200 in 70ms
+ POST /api/graphql 200 in 85ms
+ POST /api/graphql 200 in 67ms
+ POST /api/graphql 200 in 118ms
+ POST /api/graphql 200 in 68ms
+ POST /api/graphql 200 in 94ms
+ POST /api/graphql 200 in 70ms
+ POST /api/graphql 200 in 78ms
+ POST /api/graphql 200 in 89ms
+ POST /api/graphql 200 in 78ms
+ POST /api/graphql 200 in 64ms
+ POST /api/graphql 200 in 86ms
+ POST /api/graphql 200 in 66ms
+ POST /api/graphql 200 in 80ms
+ POST /api/graphql 200 in 70ms
+ POST /api/graphql 200 in 73ms
+ POST /api/graphql 200 in 68ms
+ POST /api/graphql 200 in 75ms
+ POST /api/graphql 200 in 85ms
+ POST /api/graphql 200 in 77ms
+ POST /api/graphql 200 in 76ms
+ POST /api/graphql 200 in 84ms
+ POST /api/graphql 200 in 69ms
+ POST /api/graphql 200 in 82ms
+ POST /api/graphql 200 in 89ms
+ POST /api/graphql 200 in 78ms
+ POST /api/graphql 200 in 64ms
+ POST /api/graphql 200 in 76ms
+ POST /api/graphql 200 in 100ms
+ POST /api/graphql 200 in 73ms
+ POST /api/graphql 200 in 67ms
+ GET /9152694258 404 in 334ms
+ ○ Compiling /settings/scrapping ...
+ ✓ Compiled /settings/scrapping in 9.4s (2481 modules)
+ ○ Compiling /api/graphql ...
+ ✓ Compiled /api/graphql in 1192ms (1536 modules)
+ POST /api/graphql 200 in 2712ms
+ GET /settings/scrapping 200 in 13026ms
+ ○ Compiling /settings/scrapping/[oid]/list ...
+ ✓ Compiled /settings/scrapping/[oid]/list in 7.7s (3099 modules)
+ GET /settings/scrapping/5/list 200 in 10041ms
+ OPTIONS /api/graphql 204 in 760ms
+ POST /api/graphql 200 in 137ms
+ ○ Compiling /settings/scrapping/[oid]/detail ...
+ ✓ Compiled /settings/scrapping/[oid]/detail in 3.2s (3106 modules)
+ GET /settings/scrapping/5/detail 200 in 5312ms
+ OPTIONS /api/graphql 204 in 646ms
+ POST /api/graphql 200 in 138ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 3.3s (712 modules)
+ GET /.env 404 in 5012ms
+ GET /api/.env 404 in 236ms
+ GET /backend/.env 404 in 300ms
+ GET /admin/.env 404 in 181ms
+ GET /.env.example 404 in 211ms
+ GET /app_dev.php/_profiler/phpinfo 404 in 197ms
+ ○ Compiling / ...
+ ✓ Compiled / in 9.1s (1097 modules)
+ ○ Compiling /api/graphql ...
+ ✓ Compiled /api/graphql in 1313ms (1628 modules)
+ POST /api/graphql 200 in 4635ms
+ POST /api/graphql 200 in 159ms
+ GET /?phpinfo=-1 200 in 16689ms
+ GET /getcfg.php 404 in 1046ms
+ POST /api/graphql 200 in 1054ms
+ POST /api/graphql 200 in 58ms
+ GET / 200 in 2447ms
+ GET /cp/.env 404 in 303ms
+ GET /ads/.env 404 in 285ms
+ GET /config/aws.yml 404 in 168ms
+ GET /staticfiles/.env 404 in 191ms
+ GET /opt/.env 404 in 163ms
+ GET /Api/.env 404 in 229ms
+ GET /App/.env 404 in 166ms
+ GET /psnlink/.env 404 in 216ms
+ GET /ftpmaster/.env 404 in 178ms
+ GET /error/.env 404 in 228ms
+ GET /940-605-6441 404 in 142ms
+ GET /div/.env 404 in 174ms
+ GET /theme/.env 404 in 174ms
+ GET /well-known/.env 404 in 971ms
+ GET /old.env 404 in 156ms
+ GET /environments/local/.env 404 in 203ms
+ GET /environments/production/.env 404 in 176ms
+ GET /scripts/.env 404 in 139ms
+ GET /styles/.env 404 in 171ms
+ GET /inc/.env 404 in 183ms
+ GET /.env_bak 404 in 146ms
+ GET /.env-sample 404 in 159ms
+ GET /fastlane/.env 404 in 181ms
+
+> ts-nextjs-shadcn@0.1.0 dev
+> next dev -p 11501
+
+   ▲ Next.js 15.5.2
+   - Local:        http://localhost:11501
+   - Network:      http://192.168.208.2:11501
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 4.5s

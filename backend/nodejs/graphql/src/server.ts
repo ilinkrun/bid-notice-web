@@ -18,7 +18,12 @@ async function startServer() {
 
   // Enable CORS for all routes
   app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:11501',
+    origin: [
+      process.env.FRONTEND_URL || 'http://localhost:11501',
+      'http://1.231.118.217:11501',
+      'http://localhost:3000',
+      'http://127.0.0.1:3000'
+    ],
     credentials: true,
   }));
 
@@ -50,11 +55,16 @@ async function startServer() {
   });
 
   const PORT = process.env.PORT || 11401;
+  const HOST = process.env.HOST || '0.0.0.0';
 
-  await new Promise<void>((resolve) => httpServer.listen({ port: PORT }, resolve));
+  await new Promise<void>((resolve) => httpServer.listen({ port: PORT, host: HOST }, resolve));
 
-  console.log(`🚀 GraphQL Server ready at http://localhost:${PORT}/graphql`);
-  console.log(`🏥 Health check available at http://localhost:${PORT}/health`);
+  console.log(`🚀 GraphQL Server ready at:`);
+  console.log(`   - http://localhost:${PORT}/graphql`);
+  console.log(`   - http://1.231.118.217:${PORT}/graphql`);
+  console.log(`🏥 Health check available at:`);
+  console.log(`   - http://localhost:${PORT}/health`);
+  console.log(`   - http://1.231.118.217:${PORT}/health`);
 }
 
 startServer().catch((error) => {
