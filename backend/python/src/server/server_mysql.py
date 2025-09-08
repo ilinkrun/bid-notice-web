@@ -5,7 +5,11 @@ from typing import Optional, List
 from fastapi import FastAPI, HTTPException
 import uvicorn
 import os
+import sys
 from dotenv import load_dotenv
+
+# Add the parent directory to sys.path to enable imports
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from utils.utils_mysql import Mysql
 from mysql.mysql_database import delete_old_notice_list, backup_db_sql, schema_backup
 

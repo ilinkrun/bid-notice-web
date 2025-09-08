@@ -7,7 +7,11 @@ from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException
 import uvicorn
 import os
+import sys
 from dotenv import load_dotenv
+
+# Add the parent directory to sys.path to enable imports
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from spider.spider_list import scrape_list, ERROR_CODES
 import json

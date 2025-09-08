@@ -6,7 +6,11 @@ from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException, Query
 import uvicorn
 import os
+import sys
 from dotenv import load_dotenv
+
+# Add the parent directory to sys.path to enable imports
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from utils.utils_mysql import Mysql
 # Import from separated mysql modules
 from mysql.mysql_settings import (

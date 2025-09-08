@@ -3,3 +3,20 @@
 > next dev -p 11501
 
 sh: 1: next: not found
+
+> ts-nextjs-shadcn@0.1.0 dev
+> next dev -p 11501
+
+   ▲ Next.js 15.5.2
+   - Local:        http://localhost:11501
+   - Network:      http://192.168.144.2:11501
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 3.9s
+ ○ Compiling / ...
+ ✓ Compiled / in 30.7s (1775 modules)
+ ○ Compiling /api/graphql ...
+ ✓ Compiled /api/graphql in 25.2s (2270 modules)
+ POST /api/graphql 200 in 24595ms
+ POST /api/graphql 200 in 77ms

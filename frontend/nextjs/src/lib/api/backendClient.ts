@@ -7,14 +7,14 @@ export type ApiType = 'bid' | 'board' | 'mysql' | 'spider';
 const getBaseUrl = (type: ApiType = 'bid'): string => {
   switch (type) {
     case 'board':
-      return process.env.NEXT_PUBLIC_BACKEND_BOARD_URL || 'http://14.34.23.70:11307';
+      return process.env.NEXT_PUBLIC_BACKEND_BOARD_URL || 'http://localhost:11307';
     case 'mysql':
-      return process.env.NEXT_PUBLIC_BACKEND_MYSQL_URL || 'http://14.34.23.70:11302';
+      return process.env.NEXT_PUBLIC_BACKEND_MYSQL_URL || 'http://localhost:11302';
     case 'spider':
-      return process.env.NEXT_PUBLIC_BACKEND_SPIDER_URL || 'http://14.34.23.70:11301';
+      return process.env.NEXT_PUBLIC_BACKEND_SPIDER_URL || 'http://localhost:11301';
     case 'bid':
     default:
-      return process.env.NEXT_PUBLIC_BACKEND_BID_URL || 'http://14.34.23.70:11303';
+      return process.env.NEXT_PUBLIC_BACKEND_BID_URL || 'http://localhost:11303';
   }
 };
 
