@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // API client for general backend services (port 11303)
 export const apiClient = axios.create({
-  baseURL: 'http://localhost:11303',
+  baseURL: process.env.BACKEND_BID_URL || 'http://1.231.118.217:11303',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
@@ -11,7 +11,7 @@ export const apiClient = axios.create({
 
 // API client for spider services (port 11301)
 export const spiderApiClient = axios.create({
-  baseURL: 'http://localhost:11301',
+  baseURL: process.env.BACKEND_SPIDER_URL || 'http://1.231.118.217:11301',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
@@ -20,7 +20,7 @@ export const spiderApiClient = axios.create({
 
 // API client for MySQL services (port 11302) 
 export const mysqlApiClient = axios.create({
-  baseURL: 'http://localhost:11302',
+  baseURL: process.env.BACKEND_MYSQL_URL || 'http://1.231.118.217:11302',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
@@ -29,7 +29,7 @@ export const mysqlApiClient = axios.create({
 
 // API client for board services (port 11307)
 export const boardApiClient = axios.create({
-  baseURL: 'http://localhost:11307',
+  baseURL: process.env.BACKEND_BOARD_URL || 'http://1.231.118.217:11307',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',

@@ -1,12 +1,12 @@
 import { gql } from 'graphql-tag';
 
-export const mysqlTypeDefs = gql`
-  type Query {
-    executeSql(sql: String!): [JSONObject]
+export const databaseTypeDefs = gql`
+  extend type Query {
+    databaseExecuteSql(sql: String!): [JSONObject]
   }
 
-  type Mutation {
-    searchNoticesByWeight(
+  extend type Mutation {
+    databaseSearchNoticesByWeight(
       keywords: String!
       nots: String!
       minPoint: Float!

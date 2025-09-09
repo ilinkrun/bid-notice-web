@@ -76,7 +76,7 @@ const ReactMarkdown = dynamic(
 // GraphQL 쿼리
 const GET_POSTS = `
   query GetPosts($board: String!) {
-    posts(board: $board) {
+    boardsPostsAll(board: $board) {
       id
       title
       writer
@@ -89,7 +89,7 @@ const GET_POSTS = `
 
 const GET_POST = `
   query GetPost($id: Int!, $board: String!) {
-    post(id: $id, board: $board) {
+    boardsPostsOne(id: $id, board: $board) {
       id
       title
       content

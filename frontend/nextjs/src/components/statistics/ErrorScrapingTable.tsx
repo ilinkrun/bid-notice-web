@@ -17,8 +17,10 @@ import {
 
 const GET_ERROR_SCRAPINGS = gql`
   query GetErrorScrapings($gap: Int!) {
-    errorScrapings(gap: $gap) {
-      orgNames
+    logsErrorAll(gap: $gap) {
+      id
+      orgName
+      errorMessage
       time
     }
   }
@@ -26,7 +28,9 @@ const GET_ERROR_SCRAPINGS = gql`
 
 interface ErrorScrapingTableProps {
   initialData: {
-    orgNames: string[];
+    id: string;
+    orgName: string;
+    errorMessage: string;
     time: string;
   }[];
 }
@@ -39,7 +43,7 @@ export function ErrorScrapingTable({ initialData }: ErrorScrapingTableProps) {
     fetchPolicy: 'no-cache', // 캐시를 사용하지 않고 항상 새로운 데이터를 가져옴
   });
 
-  const errorScrapings = data?.errorScrapings || initialData || [];
+  const errorScrapings = data?.logsErrorAll || initialData || [];
 
   const handleGapChange = (value: string) => {
     // 문자열 값을 숫자로 변환
@@ -103,18 +107,18 @@ export function ErrorScrapingTable({ initialData }: ErrorScrapingTableProps) {
             <TableHeader>
               <TableRow>
                 <TableHead>시간</TableHead>
-                <TableHead>오류 발생 기관 수</TableHead>
-                <TableHead>오류 발생 기관</TableHead>
+                <TableHead>기관명</TableHead>
+                <TableHead>오류 메시지</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {errorScrapings.map((item, index) => (
-                <TableRow key={index}>
+              {errorScrapings.map((item) => (
+                <TableRow key={item.id}>
                   <TableCell>{item.time.replace('T', ' ')}</TableCell>
-                  <TableCell>{item.orgNames.length}</TableCell>
+                  <TableCell>{item.orgName || '에러 없음'}</TableCell>
                   <TableCell>
                     <div className="max-w-md overflow-hidden text-ellipsis whitespace-nowrap">
-                      {item.orgNames.join(', ')}
+                      {item.errorMessage}
                     </div>
                   </TableCell>
                 </TableRow>

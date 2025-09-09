@@ -5,15 +5,15 @@ import ApolloWrapper from '@/components/providers/ApolloWrapper';
 import UnifiedDataLoadingWrapper from '@/components/shared/UnifiedDataLoadingWrapper';
 import '../../themes.css';
 
-const GET_COMPLETED_BIDS = gql`
-  query GetCompletedBids {
-    myBids {
+const GET_PROGRESS_BIDS = gql`
+  query GetProgressBids {
+    mybidsByStatus(status: "진행") {
       mid
       nid
       title
       status
-      started_at
-      ended_at
+      startedAt
+      endedAt
       memo
       orgName
       postedAt
@@ -25,36 +25,29 @@ const GET_COMPLETED_BIDS = gql`
 `;
 
 // 서버 컴포넌트에서 데이터 가져오기
-async function getCompletedBids() {
+async function getProgressBids() {
   try {
     const client = getClient();
     const result = await client.query({
-      query: GET_COMPLETED_BIDS,
+      query: GET_PROGRESS_BIDS,
       fetchPolicy: 'no-cache',
       errorPolicy: 'all'
     });
-    
-    // status가 '포기', '낙찰', '패찰' 중 하나인 것만 필터링
-    const completedStatuses = ['포기', '낙찰', '패찰'];
-    const completedBids = result.data?.myBids?.filter(bid => 
-      completedStatuses.includes(bid.status)
-    ) || [];
-    
-    return completedBids;
+    return result.data?.mybidsByStatus || [];
   } catch (error) {
-    console.error('Failed to fetch completed bids:', error);
+    console.error('Failed to fetch progress bids:', error);
     return [];
   }
 }
 
-export default async function EndedPage() {
-  const bids = await getCompletedBids();
+export default async function BidProgressPage() {
+  const bids = await getProgressBids();
 
   return (
-    <div className="theme-default">
+    <div className="theme-etc">
       <ApolloWrapper>
         <UnifiedDataLoadingWrapper data={bids}>
-          <BidTable bids={bids} currentStatus="ended" />
+          <BidTable bids={bids} currentStatus="progress" />
         </UnifiedDataLoadingWrapper>
       </ApolloWrapper>
     </div>

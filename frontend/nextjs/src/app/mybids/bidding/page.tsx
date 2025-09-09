@@ -5,15 +5,15 @@ import ApolloWrapper from '@/components/providers/ApolloWrapper';
 import UnifiedDataLoadingWrapper from '@/components/shared/UnifiedDataLoadingWrapper';
 import '../../themes.css';
 
-const GET_PROGRESS_BIDS = gql`
-  query GetProgressBids {
-    bidByStatus(status: "진행") {
+const GET_BIDDING_BIDS = gql`
+  query GetBiddingBids {
+    mybidsByStatus(status: "응찰") {
       mid
       nid
       title
       status
-      started_at
-      ended_at
+      startedAt
+      endedAt
       memo
       orgName
       postedAt
@@ -25,29 +25,29 @@ const GET_PROGRESS_BIDS = gql`
 `;
 
 // 서버 컴포넌트에서 데이터 가져오기
-async function getProgressBids() {
+async function getBiddingBids() {
   try {
     const client = getClient();
     const result = await client.query({
-      query: GET_PROGRESS_BIDS,
+      query: GET_BIDDING_BIDS,
       fetchPolicy: 'no-cache',
       errorPolicy: 'all'
     });
-    return result.data?.bidByStatus || [];
+    return result.data?.mybidsByStatus || [];
   } catch (error) {
-    console.error('Failed to fetch progress bids:', error);
+    console.error('Failed to fetch bidding bids:', error);
     return [];
   }
 }
 
-export default async function BidProgressPage() {
-  const bids = await getProgressBids();
+export default async function BiddingPage() {
+  const bids = await getBiddingBids();
 
   return (
     <div className="theme-etc">
       <ApolloWrapper>
         <UnifiedDataLoadingWrapper data={bids}>
-          <BidTable bids={bids} currentStatus="progress" />
+          <BidTable bids={bids} currentStatus="bidding" />
         </UnifiedDataLoadingWrapper>
       </ApolloWrapper>
     </div>

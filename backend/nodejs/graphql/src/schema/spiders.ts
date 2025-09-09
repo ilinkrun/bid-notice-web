@@ -1,6 +1,6 @@
 import { gql } from 'graphql-tag';
 
-export const spiderTypeDefs = gql`
+export const spidersTypeDefs = gql`
   type SpiderFetchResult {
     orgName: String!
     success: Boolean!
@@ -14,13 +14,13 @@ export const spiderTypeDefs = gql`
     message: String!
   }
 
-  type Query {
-    checkFetchList(orgName: String!): SpiderFetchResult
-    spiderHello: SpiderHelloResult
+  extend type Query {
+    spidersCheckFetchList(orgName: String!): SpiderFetchResult
+    spidersHello: SpiderHelloResult
   }
 
-  type Mutation {
-    testCsv(csvData: String!): JSONObject
+  extend type Mutation {
+    spidersTestCsv(csvData: String!): JSONObject
   }
 
   scalar JSONObject

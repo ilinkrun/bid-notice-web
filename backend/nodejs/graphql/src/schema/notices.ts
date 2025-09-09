@@ -1,4 +1,4 @@
-export const noticeTypeDefs = `#graphql
+export const noticesTypeDefs = `#graphql
   type Notice {
     nid: Int!
     title: String!
@@ -23,25 +23,25 @@ export const noticeTypeDefs = `#graphql
   }
 
   extend type Query {
+    noticesAll(gap: Int): [Notice!]!
     noticesByCategory(category: String!, gap: Int): [Notice!]!
-    notices(category: String, gap: Int): [Notice!]!
     noticesStatistics(gap: Int): [NoticeStatistics]!
-    noticeRegionStatistics(gap: Int): [NoticeRegionStatistics]!
-    searchNotices(
+    noticesRegionStatistics(gap: Int): [NoticeRegionStatistics]!
+    noticesSearch(
       keywords: String!
       nots: String!
       minPoint: Float!
       addWhere: String
     ): [Notice]
-    lastNotice(orgName: String!, field: String): String
+    noticesOne(orgName: String!, field: String): String
   }
 
   extend type Mutation {
-    upsertNotice(data: [NoticeInput!]!): Boolean
-    noticeToProgress(nids: [Int!]!): UpdateResult!
-    updateNoticeCategory(nids: [Int!]!, category: String!): UpdateResult!
-    excludeNotices(nids: [Int!]!): UpdateResult!
-    restoreNotices(nids: [Int!]!): UpdateResult!
+    noticesUpsert(data: [NoticeInput!]!): Boolean
+    noticesUpdateToProgress(nids: [Int!]!): UpdateResult!
+    noticesUpdateCategory(nids: [Int!]!, category: String!): UpdateResult!
+    noticesExclude(nids: [Int!]!): UpdateResult!
+    noticesRestore(nids: [Int!]!): UpdateResult!
   }
 
   input NoticeInput {

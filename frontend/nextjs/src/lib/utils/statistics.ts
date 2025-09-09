@@ -190,7 +190,8 @@ export const processNoticeStatistics = {
         acc[orgName].construction++;
       } else if (item.category === '성능평가') {
         acc[orgName].performance++;
-      } else if (item.category === '기타') {
+      } else {
+        // "기타", "무관" 및 기타 모든 카테고리는 etc로 분류
         acc[orgName].etc++;
       }
 

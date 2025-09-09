@@ -124,14 +124,15 @@ export function NoticeStatisticsTable({
 
   // 기관별 통계 데이터 로드
   useEffect(() => {
-    const loadOrgStatistics = async () => {
+    const loadOrgStatistics = () => {
       if (statisticsType === 'organization') {
         setIsLoadingOrg(true);
         try {
-          const orgData = await processNoticeStatistics.organization(initialData);
+          const orgData = processNoticeStatistics.organization(initialData);
           setOrgStatistics(orgData);
         } catch (error) {
           console.error('기관별 통계 데이터 로드 중 오류 발생:', error);
+          setOrgStatistics([]);
         } finally {
           setIsLoadingOrg(false);
         }

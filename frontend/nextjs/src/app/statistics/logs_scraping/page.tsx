@@ -11,11 +11,13 @@ export const metadata: Metadata = {
 
 const GET_LOG_SCRAPINGS = gql`
   query GetLogScrapings($gap: Int!) {
-    logScrapings(gap: $gap) {
+    logsScrapingAll(gap: $gap) {
       time
       scrapedCount
       orgName
       insertedCount
+      errorCode
+      errorMessage
     }
   }
 `;
@@ -35,7 +37,7 @@ async function getLogScrapings(gap: number = 2): Promise<LogScraping[]> {
       variables: { gap },
       fetchPolicy: 'no-cache',
     });
-    return data.logScrapings;
+    return data.logsScrapingAll;
   } catch (error) {
     console.error('Failed to fetch log scrapings:', error);
     return [];

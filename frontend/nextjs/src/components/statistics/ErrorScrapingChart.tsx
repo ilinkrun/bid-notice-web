@@ -27,15 +27,19 @@ ChartJS.register(
 
 const GET_ERROR_SCRAPINGS = gql`
   query GetErrorScrapings($gap: Int!) {
-    errorScrapings(gap: $gap) {
-      orgNames
+    logsErrorAll(gap: $gap) {
+      id
+      orgName
+      errorMessage
       time
     }
   }
 `;
 
 interface ErrorScraping {
-  orgNames: string[];
+  id: string;
+  orgName: string;
+  errorMessage: string;
   time: string;
 }
 
@@ -51,7 +55,7 @@ export function ErrorScrapingChart({ initialData }: ErrorScrapingChartProps) {
     fetchPolicy: 'no-cache', // 캐시를 사용하지 않고 항상 새로운 데이터를 가져옴
   });
 
-  const errorScrapings = data?.errorScrapings || initialData || [];
+  const errorScrapings = data?.logsErrorAll || initialData || [];
 
   if (loading && !errorScrapings.length) {
     return <div>로딩 중...</div>;
@@ -61,12 +65,26 @@ export function ErrorScrapingChart({ initialData }: ErrorScrapingChartProps) {
     return <div>에러가 발생했습니다: {error.message}</div>;
   }
 
+  // 시간별로 오류 그룹화
+  const groupedErrors = errorScrapings.reduce((acc: Record<string, Set<string>>, item) => {
+    const timeKey = item.time.split('T')[0]; // 날짜만 추출
+    if (!acc[timeKey]) {
+      acc[timeKey] = new Set();
+    }
+    // 쉼표로 구분된 기관명들을 개별적으로 처리
+    if (item.orgName) {
+      const orgNames = item.orgName.split(',').map(name => name.trim()).filter(name => name);
+      orgNames.forEach(orgName => acc[timeKey].add(orgName));
+    }
+    return acc;
+  }, {});
+
   const chartData = {
-    labels: errorScrapings.map(item => item.time),
+    labels: Object.keys(groupedErrors).sort(),
     datasets: [
       {
         label: '오류 발생 기관 수',
-        data: errorScrapings.map(item => item.orgNames.length),
+        data: Object.values(groupedErrors).map(orgSet => orgSet.size),
         backgroundColor: '#ef4444',
         borderColor: '#dc2626',
         borderWidth: 1,

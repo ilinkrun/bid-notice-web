@@ -1,8 +1,8 @@
 import { mysqlApiClient } from '@/lib/api/backendClient';
 
-export const mysqlResolvers = {
+export const databaseResolvers = {
   Query: {
-    executeSql: async (_: unknown, { sql }: { sql: string }) => {
+    databaseExecuteSql: async (_: unknown, { sql }: { sql: string }) => {
       try {
         const response = await mysqlApiClient.post('/fetch_by_sql/', {
           sql
@@ -16,7 +16,7 @@ export const mysqlResolvers = {
   },
 
   Mutation: {
-    searchNoticesByWeight: async (_: unknown, { 
+    databaseSearchNoticesByWeight: async (_: unknown, { 
       keywords, nots, minPoint, addWhere, baseSql, addSql 
     }: { 
       keywords: string; 

@@ -64,19 +64,19 @@ const notices = [
 const bids = [
   {
     title: '진행(응찰전)',
-    href: '/bids/progress',
+    href: '/mybids/progress',
     description: '입찰 준비중인 공고 목록',
     icon: Clock,
   },
   {
     title: '응찰(응찰후 종료전)',
-    href: '/bids/bidding',
+    href: '/mybids/bidding',
     description: '응찰 완료된 공고 목록',
     icon: Target,
   },
   {
     title: '종료(낙찰/패찰/포기)',
-    href: '/bids/ended',
+    href: '/mybids/ended',
     description: '낙찰/패찰/포기된 공고 목록',
     icon: CheckCircle,
   },

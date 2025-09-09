@@ -1,8 +1,8 @@
 import { spiderApiClient } from '@/lib/api/backendClient';
 
-export const spiderResolvers = {
+export const spidersResolvers = {
   Query: {
-    checkFetchList: async (_: unknown, { orgName }: { orgName: string }) => {
+    spidersCheckFetchList: async (_: unknown, { orgName }: { orgName: string }) => {
       try {
         const response = await spiderApiClient.get('/check_fetch_list', {
           params: { org_name: orgName }
@@ -29,7 +29,7 @@ export const spiderResolvers = {
       }
     },
 
-    spiderHello: async () => {
+    spidersHello: async () => {
       try {
         const response = await spiderApiClient.get('/hello');
         return response.data;
@@ -41,7 +41,7 @@ export const spiderResolvers = {
   },
 
   Mutation: {
-    testCsv: async (_: unknown, { csvData }: { csvData: string }) => {
+    spidersTestCsv: async (_: unknown, { csvData }: { csvData: string }) => {
       try {
         const response = await spiderApiClient.post('/test_csv/', {
           csv: csvData

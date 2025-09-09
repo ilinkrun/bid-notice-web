@@ -1,4 +1,4 @@
-import { apiClient } from '@/lib/api/backendClient';
+import { apiClient, mysqlApiClient } from '@/lib/api/backendClient';
 
 interface NoticeData {
   nid: string;
@@ -24,30 +24,11 @@ interface StatisticsData {
   지역?: string;
 }
 
-export const noticeResolvers = {
+export const noticesResolvers = {
   Query: {
-    noticesByCategory: async (_: unknown, { category, gap }: { category: string; gap: number }) => {
+    noticesAll: async (_: unknown, { gap }: { gap?: number }) => {
       try {
-        const response = await apiClient.get(`/notice_list/${category}`, { params: { gap } });
-        return response.data.map((notice: NoticeData) => ({
-          nid: parseInt(notice.nid),
-          title: notice.title,
-          orgName: notice.org_name,
-          postedAt: notice.posted_date,
-          detailUrl: notice.detail_url,
-          category: notice.category || notice.카테고리 || "",
-          region: notice.org_region || "미지정",
-          registration: notice.registration
-        }));
-      } catch (error) {
-        console.error('Error fetching notices by category:', error);
-        return [];
-      }
-    },
-
-    notices: async (_: unknown, { gap }: { gap: number }) => {
-      try {
-        const response = await apiClient.get('/notice_list', { params: { gap } });
+        const response = await apiClient.get('/notice_list', { params: { gap: gap || 15 } });
         return response.data.map((notice: NoticeData) => ({
           nid: parseInt(notice.nid),
           title: notice.title,
@@ -60,6 +41,25 @@ export const noticeResolvers = {
         }));
       } catch (error) {
         console.error('Error fetching all notices:', error);
+        return [];
+      }
+    },
+
+    noticesByCategory: async (_: unknown, { category, gap }: { category: string; gap?: number }) => {
+      try {
+        const response = await apiClient.get(`/notice_list/${category}`, { params: { gap: gap || 15 } });
+        return response.data.map((notice: NoticeData) => ({
+          nid: parseInt(notice.nid),
+          title: notice.title,
+          orgName: notice.org_name,
+          postedAt: notice.posted_date,
+          detailUrl: notice.detail_url,
+          category: notice.category || notice.카테고리 || "",
+          region: notice.org_region || "미지정",
+          registration: notice.registration
+        }));
+      } catch (error) {
+        console.error('Error fetching notices by category:', error);
         return [];
       }
     },
@@ -79,7 +79,30 @@ export const noticeResolvers = {
       }
     },
 
-    searchNotices: async (_: unknown, { keywords, nots, minPoint, addWhere }: {
+    noticesRegionStatistics: async (_: unknown, { gap }: { gap?: number }) => {
+      try {
+        const response = await apiClient.get('/notice_list_statistics', { params: { gap: gap || 15 } });
+        
+        // 지역별로 공고 수 집계
+        const regionStats: { [key: string]: number } = {};
+        
+        response.data.forEach((item: StatisticsData) => {
+          const region = item.org_region || item.region || item.지역 || '미지정';
+          regionStats[region] = (regionStats[region] || 0) + 1;
+        });
+        
+        // 객체를 배열로 변환하여 반환
+        return Object.entries(regionStats).map(([region, noticeCount]) => ({
+          region,
+          noticeCount
+        }));
+      } catch (error) {
+        console.error('Error fetching notice region statistics:', error);
+        return [];
+      }
+    },
+
+    noticesSearch: async (_: unknown, { keywords, nots, minPoint, addWhere }: {
       keywords: string; nots: string; minPoint: number; addWhere?: string
     }) => {
       try {
@@ -107,7 +130,7 @@ export const noticeResolvers = {
       }
     },
 
-    lastNotice: async (_: unknown, { orgName, field }: { orgName: string; field?: string }) => {
+    noticesOne: async (_: unknown, { orgName, field }: { orgName: string; field?: string }) => {
       try {
         const response = await apiClient.get(`/last_notice/${orgName}`, {
           params: { field: field || 'title' }
@@ -121,7 +144,7 @@ export const noticeResolvers = {
   },
 
   Mutation: {
-    upsertNotice: async (_: unknown, { data }: { data: unknown[] }) => {
+    noticesUpsert: async (_: unknown, { data }: { data: unknown[] }) => {
       try {
         const response = await apiClient.post('/notice_list', data);
         return response.data;
@@ -131,7 +154,7 @@ export const noticeResolvers = {
       }
     },
 
-    noticeToProgress: async (_: unknown, { nids }: { nids: number[] }) => {
+    noticesUpdateToProgress: async (_: unknown, { nids }: { nids: number[] }) => {
       try {
         const response = await apiClient.post('/notice_to_progress', { nids });
         return {
@@ -147,10 +170,9 @@ export const noticeResolvers = {
       }
     },
 
-    updateNoticeCategory: async (_: unknown, { nids, category }: { nids: number[]; category: string }) => {
+    noticesUpdateCategory: async (_: unknown, { nids, category }: { nids: number[]; category: string }) => {
       try {
-        // server_bid.py (포트 11303)로 요청 전송
-        const response = await apiClient.post('/update_notice_category', { 
+        const response = await mysqlApiClient.post('/update_notice_category', { 
           nids: nids, 
           category 
         });
@@ -167,9 +189,8 @@ export const noticeResolvers = {
       }
     },
 
-    excludeNotices: async (_: unknown, { nids }: { nids: number[] }) => {
+    noticesExclude: async (_: unknown, { nids }: { nids: number[] }) => {
       try {
-        // server_bid.py로 is_selected=-1 업데이트 요청
         const response = await apiClient.post('/exclude_notices', { 
           nids: nids
         });
@@ -186,9 +207,8 @@ export const noticeResolvers = {
       }
     },
 
-    restoreNotices: async (_: unknown, { nids }: { nids: number[] }) => {
+    noticesRestore: async (_: unknown, { nids }: { nids: number[] }) => {
       try {
-        // server_bid.py로 is_selected=0 업데이트 요청
         const response = await apiClient.post('/restore_notices', { 
           nids: nids
         });

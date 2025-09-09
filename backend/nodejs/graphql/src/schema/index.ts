@@ -1,15 +1,11 @@
 import { gql } from 'graphql-tag';
-import { noticeTypeDefs } from './notice';
-import { settingsListTypeDefs } from './settingsList';
-import { settingsCategoryTypeDefs } from './settingsCategory';
-import { settingsDetailTypeDefs } from './settingsDetail';
-import { settingsDefaultTypeDefs } from './settingsDefault';
-import { logScrapingTypeDefs } from './logScraping';
-import { errorScrapingTypeDefs } from './errorScraping';
-import { boardTypeDefs } from './board';
-import { bidTypeDefs } from './myBid';
-import { spiderTypeDefs } from './spider';
-import { mysqlTypeDefs } from './mysql';
+import { noticesTypeDefs } from './notices';
+import { settingsTypeDefs } from './settings';
+import { logsTypeDefs } from './logs';
+import { mybidsTypeDefs } from './mybids';
+import { boardsTypeDefs } from './boards';
+import { spidersTypeDefs } from './spiders';
+import { databaseTypeDefs } from './database';
 
 const baseTypeDefs = gql`
   type Query {
@@ -23,15 +19,11 @@ const baseTypeDefs = gql`
 
 export const typeDefs = [
   baseTypeDefs,
-  noticeTypeDefs,
-  settingsListTypeDefs,
-  settingsCategoryTypeDefs,
-  settingsDetailTypeDefs,
-  settingsDefaultTypeDefs,
-  logScrapingTypeDefs,
-  errorScrapingTypeDefs,
-  boardTypeDefs,
-  bidTypeDefs,
-  spiderTypeDefs,
-  mysqlTypeDefs,
+  noticesTypeDefs,
+  settingsTypeDefs,
+  logsTypeDefs,
+  mybidsTypeDefs,
+  boardsTypeDefs,
+  spidersTypeDefs,
+  databaseTypeDefs,
 ];

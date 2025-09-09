@@ -5,48 +5,29 @@ import { HardDrive, Palette, Settings, Clock, Database } from 'lucide-react';
 
 const SETTINGS_DEFAULT_QUERY = `
   query GetSettingsDefault {
-    settingsDefault {
-      nasPathSettings {
-        id
-        name
-        area
-        depth
-        folder
-        remark
-      }
-      nasInfo {
-        type
-        model
-        version
-        status
-      }
-      uiSettings {
-        darkMode
-        language
-        timezone
-      }
-      themeSettings {
-        defaultTheme
-        noticeTheme
-        bidTheme
-      }
-      scrapingSettings {
-        schedule
-        isActive
-        lastRun
-        nextRun
-      }
+    settingsNasPathAll {
+      id
+      pathName
+      pathValue
+      description
+      isActive
+    }
+    settingsAppDefaultAll {
+      id
+      settingKey
+      settingValue
+      description
+      category
     }
   }
 `;
 
 interface NasSetting {
   id: string;
-  name: string;
-  area: string;
-  depth: string;
-  folder: string;
-  remark?: string;
+  pathName: string;
+  pathValue: string;
+  description?: string;
+  isActive: boolean;
 }
 
 interface NasInfo {
@@ -100,13 +81,28 @@ export default function DefaultSettingsPage() {
         return;
       }
 
-      const data = result.data?.settingsDefault;
+      const data = result.data;
       if (data) {
-        setNasSettings(data.nasPathSettings || []);
-        setNasInfo(data.nasInfo);
-        setUiSettings(data.uiSettings);
-        setThemeSettings(data.themeSettings);
-        setScrapingSettings(data.scrapingSettings);
+        setNasSettings(data.settingsNasPathAll || []);
+        
+        // 앱 기본값에서 UI 설정 추출 (예시)
+        const appDefaults = data.settingsAppDefaultAll || [];
+        const uiDefaults = appDefaults.filter(item => item.category === 'ui');
+        const themeDefaults = appDefaults.filter(item => item.category === 'theme');
+        const scrapingDefaults = appDefaults.filter(item => item.category === 'scraping');
+        
+        // 기본값 설정 (실제 값이 없으면 초기값 사용)
+        setUiSettings({
+          darkMode: uiDefaults.find(item => item.settingKey === 'darkMode')?.settingValue === 'true' || false,
+          language: uiDefaults.find(item => item.settingKey === 'language')?.settingValue || 'ko',
+          timezone: uiDefaults.find(item => item.settingKey === 'timezone')?.settingValue || 'Asia/Seoul'
+        });
+        
+        setThemeSettings({
+          defaultTheme: themeDefaults.find(item => item.settingKey === 'defaultTheme')?.settingValue || 'gray',
+          noticeTheme: themeDefaults.find(item => item.settingKey === 'noticeTheme')?.settingValue || 'green',
+          bidTheme: themeDefaults.find(item => item.settingKey === 'bidTheme')?.settingValue || 'blue'
+        });
       }
     } catch (err) {
       console.error('Error fetching settings data:', err);
@@ -187,22 +183,26 @@ export default function DefaultSettingsPage() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">순번</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">이름</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">사용영역</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">깊이</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">폴더명</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">비고</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">경로명</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">경로값</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">활성화</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">설명</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {nasSettings.map((setting, index) => (
                     <tr key={setting.id}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{index + 1}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{setting.name}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{setting.area}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{setting.depth}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{setting.folder}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{setting.remark || '-'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{setting.pathName}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{setting.pathValue}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          setting.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {setting.isActive ? '활성' : '비활성'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{setting.description || '-'}</td>
                     </tr>
                   ))}
                 </tbody>

@@ -7,7 +7,9 @@ import { ErrorScrapingChart } from '@/components/statistics/ErrorScrapingChart';
 import { ErrorScrapingTable } from '@/components/statistics/ErrorScrapingTable';
 
 interface ErrorScraping {
-  orgNames: string[];
+  id: string;
+  orgName: string;
+  errorMessage: string;
   time: string;
 }
 

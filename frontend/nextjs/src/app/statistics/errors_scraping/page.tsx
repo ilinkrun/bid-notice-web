@@ -10,8 +10,10 @@ export const metadata: Metadata = {
 
 const GET_ERROR_SCRAPINGS = gql`
   query GetErrorScrapings($gap: Int!) {
-    errorScrapings(gap: $gap) {
-      orgNames
+    logsErrorAll(gap: $gap) {
+      id
+      orgName
+      errorMessage
       time
     }
   }
@@ -31,12 +33,12 @@ async function getErrorScrapings() {
       return [];
     }
 
-    if (!data?.errorScrapings) {
+    if (!data?.logsErrorAll) {
       console.error('데이터가 없습니다.');
       return [];
     }
 
-    return data.errorScrapings;
+    return data.logsErrorAll;
   } catch (error) {
     console.error('스크래핑 오류 데이터를 불러오는데 실패했습니다:', error);
     return [];

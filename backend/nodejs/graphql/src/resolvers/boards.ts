@@ -47,9 +47,9 @@ interface ErrorWithResponse {
   };
 }
 
-export const boardResolvers = {
+export const boardsResolvers = {
   Query: {
-    posts: async (_: unknown, { board }: { board: string }) => {
+    boardsPostsAll: async (_: unknown, { board }: { board: string }) => {
       try {
         console.log(`게시판 목록 조회 요청: ${board}`);
         // API 호출
@@ -60,7 +60,7 @@ export const boardResolvers = {
         return [];
       }
     },
-    post: async (_: unknown, { id, board }: { id: number, board: string }) => {
+    boardsPostsOne: async (_: unknown, { id, board }: { id: number, board: string }) => {
       try {
         console.log(`게시글 상세 조회 요청: ${board}, ${id}`);
         // API 호출
@@ -83,7 +83,7 @@ export const boardResolvers = {
         return null;
       }
     },
-    comments: async (_: unknown, { board, post_id, page = 1, per_page = 50 }: { board: string, post_id: number, page?: number, per_page?: number }) => {
+    boardsCommentsAll: async (_: unknown, { board, post_id, page = 1, per_page = 50 }: { board: string, post_id: number, page?: number, per_page?: number }) => {
       try {
         console.log(`댓글 목록 조회 요청: ${board}, ${post_id}, page=${page}, per_page=${per_page}`);
         // API 호출
@@ -110,7 +110,7 @@ export const boardResolvers = {
         };
       }
     },
-    comment: async (_: unknown, { id }: { id: number }) => {
+    boardsCommentsOne: async (_: unknown, { id }: { id: number }) => {
       try {
         console.log(`댓글 상세 조회 요청: ${id}`);
         // API 호출
@@ -123,7 +123,7 @@ export const boardResolvers = {
     },
   },
   Mutation: {
-    createPost: async (_: unknown, { board, input }: { board: string, input: PostInput }) => {
+    boardsPostCreate: async (_: unknown, { board, input }: { board: string, input: PostInput }) => {
       try {
         console.log(`게시글 생성 요청: ${board}`, input);
         // API 호출
@@ -181,7 +181,7 @@ export const boardResolvers = {
         }
       }
     },
-    updatePost: async (_: any, { board, input }: { board: string, input: any }) => {
+    boardsPostUpdate: async (_: any, { board, input }: { board: string, input: any }) => {
       try {
         console.log(`게시글 수정 요청: ${board}, ${input.id}`, input);
         // API 호출
@@ -214,7 +214,7 @@ export const boardResolvers = {
         throw new Error('게시글 수정에 실패했습니다.');
       }
     },
-    deletePost: async (_: any, { board, input }: { board: string, input: any }) => {
+    boardsPostDelete: async (_: any, { board, input }: { board: string, input: any }) => {
       try {
         console.log(`게시글 삭제 요청: ${board}, ${input.id}`);
         // API 호출 (is_visible을 0으로 변경)
@@ -232,7 +232,7 @@ export const boardResolvers = {
         throw new Error('게시글 삭제에 실패했습니다.');
       }
     },
-    createComment: async (_: any, { input }: { input: any }) => {
+    boardsCommentCreate: async (_: any, { input }: { input: any }) => {
       try {
         console.log('댓글 생성 요청:', input);
         // API 호출
@@ -288,7 +288,7 @@ export const boardResolvers = {
         }
       }
     },
-    updateComment: async (_: any, { input }: { input: any }) => {
+    boardsCommentUpdate: async (_: any, { input }: { input: any }) => {
       try {
         console.log(`댓글 수정 요청: ${input.id}`, input);
         
@@ -349,7 +349,7 @@ export const boardResolvers = {
         }
       }
     },
-    deleteComment: async (_: any, { input }: { input: any }) => {
+    boardsCommentDelete: async (_: any, { input }: { input: any }) => {
       try {
         console.log(`댓글 삭제 요청: ${input.id}`);
         

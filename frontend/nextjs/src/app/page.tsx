@@ -21,8 +21,10 @@ const GET_NOTICES_STATISTICS = gql`
 
 const GET_ERROR_SCRAPINGS = gql`
   query GetErrorScrapings($gap: Int!) {
-    errorScrapings(gap: $gap) {
-      orgNames
+    logsErrorAll(gap: $gap) {
+      id
+      orgName
+      errorMessage
       time
     }
   }
@@ -60,7 +62,9 @@ const processNoticeStatistics = (notices: any[] = []): any[] => {
 };
 
 interface ErrorScraping {
-  orgNames: string[];
+  id: string;
+  orgName: string;
+  errorMessage: string;
   time: string;
 }
 
@@ -91,7 +95,7 @@ async function getDashboardData() {
       fetchPolicy: 'no-cache',
       errorPolicy: 'all'
     });
-    errorScrapings = errorsResult.data?.errorScrapings || [];
+    errorScrapings = errorsResult.data?.logsErrorAll || [];
   } catch (error) {
     console.error('Failed to fetch error scrapings:', error);
   }
@@ -128,18 +132,19 @@ export default async function Home() {
             <CardTitle>최근 스크랩 에러</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-2">
               {data?.errorScrapings
-                ?.slice(0, 4)
+                ?.slice(0, 6)
                 .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
                 .map((error, index) => (
-                  <Alert key={index} variant="destructive" className="mb-0 rounded-none">
-                    <AlertCircle className="h-4 w-4 hidden" />
-                    <div className={`flex justify-between w-full ${index < 2 ? 'text-red-700' : 'text-orange-700'}`}>
-                      <div className="text-left">{error.orgNames.join(', ')}</div>
-                      <div className="text-right">{new Date(error.time).toLocaleString('ko-KR')}</div>
+                  <div key={error.id} className="flex justify-between items-center p-2 bg-red-50 border border-red-200 rounded">
+                    <div className="text-sm font-medium text-red-800">
+                      {new Date(error.time).toLocaleDateString('ko-KR')} {new Date(error.time).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
                     </div>
-                  </Alert>
+                    <div className="text-sm text-red-600 truncate ml-2">
+                      {error.orgName || '에러없음'}
+                    </div>
+                  </div>
                 ))}
             </div>
           </CardContent>

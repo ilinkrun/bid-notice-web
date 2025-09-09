@@ -1,27 +1,19 @@
 import { baseResolvers } from './base';
-import { noticeResolvers } from './notice';
-import { settingsListResolvers } from './settingsList';
-import { settingsDetailResolvers } from './settingsDetail';
-import { settingsDefaultResolvers } from './settingsDefault';
-import { settingsCategoryResolvers } from './settingsCategory';
-import { logScrapingResolvers } from './logScraping';
-import { errorScrapingResolvers } from './errorScraping';
-import { boardResolvers } from './board';
-import { bidResolvers } from './myBid';
-import { spiderResolvers } from './spider';
-import { mysqlResolvers } from './mysql';
+import { noticesResolvers } from './notices';
+import { settingsResolvers } from './settings';
+import { logsResolvers } from './logs';
+import { mybidsResolvers } from './mybids';
+import { boardsResolvers } from './boards';
+import { spidersResolvers } from './spiders';
+import { databaseResolvers } from './database';
 
 export const resolvers = [
   baseResolvers,
-  noticeResolvers,
-  settingsListResolvers,
-  settingsDetailResolvers,
-  settingsDefaultResolvers,
-  settingsCategoryResolvers,
-  logScrapingResolvers,
-  errorScrapingResolvers,
-  boardResolvers,
-  bidResolvers,
-  spiderResolvers,
-  mysqlResolvers,
+  noticesResolvers,
+  settingsResolvers,
+  logsResolvers,
+  mybidsResolvers,
+  boardsResolvers,
+  spidersResolvers,
+  databaseResolvers,
 ];

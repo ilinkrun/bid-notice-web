@@ -139,7 +139,8 @@ logsErrorAll
 
 ===
 
-- graphql 코드 /volume1/docker/platforms/ilmac-ubuntu-dev/projects/bid-notice-web/backend/nodejs/graphql/src/resolvers, /volume1/docker/platforms/ilmac-ubuntu-dev/projects/bid-notice-web/backend/nodejs/graphql/src/schema 에서 파일이름과 query, mutation 이름들을 체계적으로 변경하고 싶어요. 어떤 방식이 좋을까요? 다음 방식 중 무엇이 좋은지 선택하고, 이유를 말해주세요. 그리고 추천할 만한 다른 방식이 있으면 알려주세요. 코드를 수정하지는 마세요.
+- graphql 코드(/volume1/docker/platforms/ilmac-ubuntu-dev/projects/bid-notice-web/backend/nodejs/graphql/src/resolvers, /volume1/docker/platforms/ilmac-ubuntu-dev/projects/bid-notice-web/backend/nodejs/graphql/src/schema) 에서 파일이름과 query, mutation 이름들을 아래와 같은 방식으로 수정하려고 해요.
+- 이와 같이 파일을 통합하고, 파일 이름, 쿼리, 뮤테이션 등을 변경해주세요. 그리고 이러한 변경 사항이 frontend(/exposed/projects/bid-notice-web/frontend/nextjs/src) 에도 잘 반영되도록 해주세요.
 
 """
 ● 도메인 중심 + 기능 구분 방식
@@ -413,3 +414,48 @@ http://1.231.118.217:11501/channels/board/dev/new?format=markdown
 backend /exposed/projects/bid-notice-web/backend/python/src/server/server_board.py 의 
 
 update_post 함수를 활용해서, create_post 함수에 markdown_source 관련부분을 반영해주세요
+
+
+===
+
+settings 관련해서는 파일은 settings.ts 1개로 통합하더라도 쿼리, 뮤테이션 등에서는 settingsNoticeList, settingsNoticeDetail, settingsNoticeCategory , settingsNasPath, settingsAppDefault 등 세팅 영역을 명시해주세요. 
+
+
+===
+
+- backend python server는 /exposed/projects/bid-notice-web/backend/python/src/server 디렉토리의 파일들을 참고해주세요. 그리고 python api의 접근 포트는 아래와 같아요.
+
+- 11301: server_spider
+- 11301: server_mysql
+- 11303: server_bid
+- 11307: server_board
+
+---
+- http://1.231.118.217:11401/graphql 에는 아래와 같이 에러가 없는데, http://1.231.118.217:11501/channels/board/dev 페이지에서는 게시글 목록을 불러오는데 실패했습니다. 에러가 발생해요. 에러를 제거하고, 'board/dev' 로 되어 있는 페이지를 'board/board_dev'로 게시판 전체 이름으로 접근하도록 수정해주세요.
+
+query BoardsPostsAll($board: String!) {
+  boardsPostsAll(board: $board) {
+    id
+    title
+  }
+}
+
+{
+  "board": "board_dev"
+}
+
+> response
+
+{
+  "data": {
+    "boardsPostsAll": [
+      {
+        "id": 14,
+        "title": "test"
+      },
+      {
+        "id": 13,
+        "title": "GraphQL Test Fixed"
+      },
+  ...
+}
