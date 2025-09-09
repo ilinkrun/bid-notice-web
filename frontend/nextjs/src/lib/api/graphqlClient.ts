@@ -4,7 +4,7 @@ let client: ApolloClient<object> | null = null;
 
 export function getClient() {
   if (!client) {
-    const uri = process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:11501/api/graphql';
+    const uri = process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql';
     
     client = new ApolloClient({
       link: new HttpLink({

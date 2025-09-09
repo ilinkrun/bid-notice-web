@@ -82,7 +82,7 @@ export default function DefaultSettingsPage() {
   const fetchSettingsData = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/graphql', {
+      const response = await fetch('${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

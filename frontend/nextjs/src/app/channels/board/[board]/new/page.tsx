@@ -191,7 +191,7 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
         throw new Error('필수 입력값이 누락되었습니다.');
       }
 
-      const response = await fetch('/api/graphql', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -364,3 +364,1333 @@ Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allow
 
  ✓ Starting...
  ✓ Ready in 4.5s
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 25.1s (1297 modules)
+ ✓ Compiled in 2.9s (563 modules)
+ GET /ab2g 404 in 272ms
+ GET /ab2h 404 in 205ms
+ GET /alive.php 404 in 204ms
+ ○ Compiling / ...
+ ✓ Compiled / in 12.7s (1740 modules)
+ GET /teorema505?t=1 404 in 3639ms
+ ○ Compiling /api/graphql ...
+ ✓ Compiled /api/graphql in 9.8s (2271 modules)
+ POST /api/graphql 200 in 12102ms
+ POST /api/graphql 200 in 67ms
+ POST /webapi/query.cgi 404 in 852ms
+ GET /.env 404 in 257ms
+ GET /.git/config 404 in 191ms
+ GET / 200 in 455ms
+ POST /api/graphql 200 in 1065ms
+ POST /api/graphql 200 in 59ms
+ GET / 200 in 2231ms
+ ⚠ Blocked cross-origin request from bid.ilmaceng.com to /_next/* resource. To allow this, configure "allowedDevOrigins" in next.config
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+ ○ Compiling /notices/[category] ...
+ ✓ Compiled /notices/[category] in 17.2s (4020 modules)
+ GET /notices/%EA%B3%B5%EC%82%AC%EC%A0%90%EA%B2%80?gap=1 200 in 19806ms
+ POST /api/graphql 200 in 1647ms
+ POST /api/graphql 200 in 69ms
+ GET / 200 in 3668ms
+ POST /api/graphql 200 in 989ms
+ POST /api/graphql 200 in 66ms
+ GET / 200 in 2634ms
+ POST /api/graphql 200 in 970ms
+ POST /api/graphql 200 in 100ms
+ GET / 200 in 1884ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 1705ms (712 modules)
+ GET /owa/auth/x.js 404 in 2935ms
+ GET /7804391592 404 in 203ms
+ ○ Compiling / ...
+ ✓ Compiled / in 3.2s (1096 modules)
+ ○ Compiling /api/graphql ...
+ ✓ Compiled /api/graphql in 1041ms (1627 modules)
+ GET / 200 in 7491ms
+ POST /api/graphql 200 in 3965ms
+ POST /api/graphql 200 in 63ms
+ POST /api/graphql 200 in 1007ms
+ POST /api/graphql 200 in 76ms
+ GET / 200 in 3308ms
+ POST /api/graphql 200 in 904ms
+ POST /api/graphql 200 in 67ms
+ GET / 200 in 2067ms
+ POST /api/graphql 200 in 941ms
+ POST /api/graphql 200 in 92ms
+ GET / 200 in 1822ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 1644ms (712 modules)
+ GET /.env 404 in 2756ms
+ ○ Compiling / ...
+ ✓ Compiled / in 1775ms (1096 modules)
+ ○ Compiling /api/graphql ...
+ ✓ Compiled /api/graphql in 911ms (1627 modules)
+ POST /api/graphql 200 in 2930ms
+ POST /api/graphql 200 in 76ms
+ GET / 200 in 6615ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 1607ms (712 modules)
+ GET /.git/config 404 in 2680ms
+ ○ Compiling / ...
+ ✓ Compiled / in 1730ms (1096 modules)
+ ○ Compiling /api/graphql ...
+ ✓ Compiled /api/graphql in 863ms (1627 modules)
+ POST /api/graphql 200 in 2962ms
+ POST /api/graphql 200 in 74ms
+ GET / 200 in 6555ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 3.8s (100 modules)
+ GET /favicon.ico 200 in 3987ms
+ GET /favicon.ico 200 in 4006ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 2.5s (712 modules)
+ GET /version 404 in 3674ms
+ GET /.env 404 in 213ms
+ ○ Compiling / ...
+ ✓ Compiled / in 1603ms (1096 modules)
+ ○ Compiling /api/graphql ...
+ ✓ Compiled /api/graphql in 895ms (1627 modules)
+ POST /api/graphql 200 in 3045ms
+ POST /api/graphql 200 in 70ms
+ GET / 200 in 6657ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 1538ms (712 modules)
+ GET /developmentserver/metadatauploader 404 in 2619ms
+ ○ Compiling / ...
+ ✓ Compiled / in 1502ms (1096 modules)
+ ○ Compiling /api/graphql ...
+ ✓ Compiled /api/graphql in 869ms (1627 modules)
+ POST /api/graphql 200 in 2979ms
+ POST /api/graphql 200 in 75ms
+ GET / 200 in 6383ms
+ POST /api/graphql 200 in 948ms
+ POST /api/graphql 200 in 51ms
+ GET / 200 in 2798ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 3.5s (1641 modules)
+ GET /favicon.ico 200 in 3860ms
+ GET /favicon.ico 200 in 37ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 858ms (1642 modules)
+ GET /wiki 404 in 1765ms
+ GET / 200 in 1368ms
+ POST /api/graphql 200 in 1796ms
+ POST /api/graphql 200 in 92ms
+ POST /api/graphql 200 in 992ms
+ POST /api/graphql 200 in 59ms
+ GET / 200 in 2385ms
+ GET /favicon.ico 200 in 82ms
+ POST /api/graphql 200 in 916ms
+ POST /api/graphql 200 in 56ms
+ GET / 200 in 1722ms
+ GET /.env 404 in 188ms
+ ✓ Compiled in 4.1s (1524 modules)
+ ✓ Compiled in 5.1s (1524 modules)
+ ✓ Compiled in 1745ms (1524 modules)
+ ✓ Compiled in 1480ms (1524 modules)
+ ✓ Compiled in 1452ms (1524 modules)
+   Reload env: .env.local
+ ✓ Compiled in 17.7s (1546 modules)
+ ✓ Compiled in 4.1s (1524 modules)
+ ✓ Compiled in 1609ms (1524 modules)
+ ○ Compiling /api/graphql ...
+ ✓ Compiled / in 12s (738 modules)
+ ✓ Compiled (1627 modules)
+Failed to fetch notices statistics: Error [ApolloError]: fetch failed
+    at new Promise (<anonymous>) {
+  graphQLErrors: [],
+  protocolErrors: [],
+  clientErrors: [],
+  networkError: [TypeError: fetch failed] {
+    [cause]: Error: connect ECONNREFUSED 127.0.0.1:11401
+        at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:11401) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 11401
+    }
+  },
+  extraInfo: undefined,
+  constructor: [Function: ApolloError],
+  [cause]: [TypeError: fetch failed] {
+    [cause]: Error: connect ECONNREFUSED 127.0.0.1:11401
+        at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:11401) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 11401
+    }
+  }
+}
+Failed to fetch notices statistics: Error [ApolloError]: fetch failed
+    at new Promise (<anonymous>) {
+  graphQLErrors: [],
+  protocolErrors: [],
+  clientErrors: [],
+  networkError: [TypeError: fetch failed] {
+    [cause]: Error: connect ECONNREFUSED 127.0.0.1:11401
+        at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:11401) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 11401
+    }
+  },
+  extraInfo: undefined,
+  constructor: [Function: ApolloError],
+  [cause]: [TypeError: fetch failed] {
+    [cause]: Error: connect ECONNREFUSED 127.0.0.1:11401
+        at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:11401) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 11401
+    }
+  }
+}
+Failed to fetch error scrapings: Error [ApolloError]: fetch failed
+    at new Promise (<anonymous>) {
+  graphQLErrors: [],
+  protocolErrors: [],
+  clientErrors: [],
+  networkError: [TypeError: fetch failed] {
+    [cause]: Error: connect ECONNREFUSED 127.0.0.1:11401
+        at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:11401) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 11401
+    }
+  },
+  extraInfo: undefined,
+  constructor: [Function: ApolloError],
+  [cause]: [TypeError: fetch failed] {
+    [cause]: Error: connect ECONNREFUSED 127.0.0.1:11401
+        at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:11401) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 11401
+    }
+  }
+}
+Failed to fetch error scrapings: Error [ApolloError]: fetch failed
+    at new Promise (<anonymous>) {
+  graphQLErrors: [],
+  protocolErrors: [],
+  clientErrors: [],
+  networkError: [TypeError: fetch failed] {
+    [cause]: Error: connect ECONNREFUSED 127.0.0.1:11401
+        at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:11401) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 11401
+    }
+  },
+  extraInfo: undefined,
+  constructor: [Function: ApolloError],
+  [cause]: [TypeError: fetch failed] {
+    [cause]: Error: connect ECONNREFUSED 127.0.0.1:11401
+        at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:11401) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 11401
+    }
+  }
+}
+ GET / 200 in 26175ms
+ ○ Compiling /notices/[category] ...
+ ✓ Compiled /notices/[category] in 8.6s (2510 modules)
+Failed to fetch notices by category: Error [ApolloError]: fetch failed
+    at new Promise (<anonymous>) {
+  graphQLErrors: [],
+  protocolErrors: [],
+  clientErrors: [],
+  networkError: [TypeError: fetch failed] {
+    [cause]: Error: connect ECONNREFUSED 127.0.0.1:11401
+        at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:11401) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 11401
+    }
+  },
+  extraInfo: undefined,
+  constructor: [Function: ApolloError],
+  [cause]: [TypeError: fetch failed] {
+    [cause]: Error: connect ECONNREFUSED 127.0.0.1:11401
+        at <unknown> (Error: connect ECONNREFUSED 127.0.0.1:11401) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 11401
+    }
+  }
+}
+Error in CategoryPage: Error: 공고 데이터를 불러오는데 실패했습니다.
+    at NoticeService.eval (src/lib/api/noticeService.ts:85:31)
+    at step (src/lib/api/noticeService.ts:36:23)
+    at Object.eval [as throw] (src/lib/api/noticeService.ts:17:53)
+    at rejected (src/lib/api/noticeService.ts:9:65)
+  83 |                         error_1 = _a.sent();
+  84 |                         console.error('Failed to fetch notices by category:', error_1);
+> 85 |                         throw new Error('공고 데이터를 불러오는데 실패했습니다.');
+     |                               ^
+  86 |                     case 3: return [2 /*return*/];
+  87 |                 }
+  88 |             });
+ GET /notices/%EA%B3%B5%EC%82%AC%EC%A0%90%EA%B2%80?gap=1 200 in 10148ms
+ GET /api/graphql 200 in 763ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 3.2s (759 modules)
+ GET /favicon.ico 200 in 3489ms
+ ○ Compiling /notices/[category] ...
+ ✓ Compiled /notices/[category] in 1263ms (2495 modules)
+Search Debug: {
+  searchTerm: '',
+  totalNotices: 11,
+  filteredNotices: 11,
+  notices: [
+    {
+      title: '삼선동2가 296번지 일대 삼선5구역 내 택지5 구세군돈암영문 신축공사 안전점검 수행기관 지정결과 공고',
+      org: '성북구'
+    },
+    {
+      title: '보문제5구역 지하철출입구 이설 및 정비기반시설공사 안전점검 수행기관 지정결과 공고',
+      org: '성북구'
+    },
+    { title: '건설공사 안전점검(건축분야) 수행기관 지정 모집 공고[사동 1342번지]', org: '안산시청' },
+    {
+      title: '건설(건축)공사 안전점검 수행기관 지정 신청평가 결과 상위 업체 알림(송도동 117-107번지)',
+      org: '인천경제자유구역청'
+    },
+    { title: '안전점검 수행기관 지정 공고「논현동 90-2 업무시설 해체공사」', org: '강남구' },
+    { title: '안전점검 수행기관 지정 공고「역삼동 697-62 근린생활시설 신축공사」', org: '강남구' },
+    { title: '안전점검 수행기관 지정 결과「청담동 52-3 근린생활시설 해체공사」', org: '강남구' },
+    { title: '안전점검 수행기관 지정 공고「논현동 107-26 근린생활시설 신축공사」', org: '강남구' },
+    { title: '안전점검 수행기관 지정 공고「역삼동 643-1 근린생활시설 신축공사」', org: '강남구' },
+    { title: '건설공사(건축분야) 안전점검 수행기관 지정 공고 (삼정동 60-22)', org: '부천시청' },
+    {
+      title: '건설공사 안전점검 수행기관 지정결과 알림(서초동 1574-7 근린생활시설 신축공사)',
+      org: '서초구'
+    }
+  ]
+}
+Filter Debug: {
+  filter: {
+    categories: [],
+    endDate: null,
+    period: 14,
+    scrapEndDate: null,
+    scrapPeriod: 14,
+    excludedOrgs: '',
+    includedOrgs: '',
+    excludedRegions: '',
+    includedRegions: ''
+  },
+  afterFilterCount: 11
+}
+ GET /notices/%EA%B3%B5%EC%82%AC%EC%A0%90%EA%B2%80?gap=1 200 in 4235ms
+ GET /favicon.ico 200 in 120ms
+ ○ Compiling /bids/progress ...
+ ✓ Compiled /bids/progress in 5.4s (4036 modules)
+ GET /bids/progress 200 in 6083ms
+ ○ Compiling /channels/board/[board] ...
+ ✓ Compiled /channels/board/[board] in 19.9s (5231 modules)
+ GET /channels/board/dev 200 in 22004ms
+ ○ Compiling /api/graphql ...
+ ✓ Compiled /api/graphql in 1141ms (2270 modules)
+게시판 목록 조회 요청: board_dev
+게시판 목록 조회 요청: board_dev
+ POST /api/graphql 200 in 2517ms
+ POST /api/graphql 200 in 2535ms
+ GET /channels/board/dev 200 in 1339ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 1254ms (2284 modules)
+ GET /favicon.ico 200 in 2477ms
+게시판 목록 조회 요청: board_dev
+ POST /api/graphql 200 in 3081ms
+ ○ Compiling / ...
+ ✓ Compiled / in 4.8s (2486 modules)
+ GET / 200 in 16721ms
+ ✓ Compiled in 5.9s (2334 modules)
+ ✓ Compiled in 2.7s (2348 modules)
+ ✓ Compiled in 2s (2348 modules)
+ ✓ Compiled in 1513ms (2348 modules)
+   Reload env: .env.local
+ ✓ Compiled in 30s (2448 modules)
+ ✓ Compiled in 3.5s (2348 modules)
+ ✓ Compiled in 2.1s (2348 modules)
+ ✓ Compiled in 1550ms (2348 modules)
+ ✓ Compiled in 1409ms (2348 modules)
+ ✓ Compiled in 1408ms (2348 modules)
+ ○ Compiling / ...
+ ✓ Compiled / in 14.4s (1096 modules)
+ GET / 200 in 17801ms
+ GET / 200 in 1607ms
+ ○ Compiling /favicon.ico ...
+ GET / 200 in 3136ms
+ ✓ Compiled /favicon.ico in 3.5s (1113 modules)
+ GET /favicon.ico 200 in 3885ms
+ GET /favicon.ico 200 in 56ms
+ ○ Compiling /notices/[category] ...
+ ✓ Compiled /notices/[category] in 10s (1949 modules)
+ GET /notices/%EA%B3%B5%EC%82%AC%EC%A0%90%EA%B2%80?gap=1 200 in 11469ms
+ ○ Compiling /channels/board/[board] ...
+ ✓ Compiled /channels/board/[board] in 9s (1615 modules)
+ GET /channels/board/dev 200 in 9758ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 2.7s (1616 modules)
+ POST /api/graphql 404 in 4311ms
+ POST /api/graphql 404 in 4296ms
+ GET /channels/board/board_dev 200 in 697ms
+ POST /api/graphql 404 in 188ms
+ ✓ Compiled in 10.8s (2348 modules)
+ ✓ Compiled in 2.6s (2348 modules)
+ ✓ Compiled in 1757ms (2348 modules)
+ ✓ Compiled in 1521ms (2348 modules)
+ ✓ Compiled in 4.4s (2348 modules)
+ ⨯ ./src/app/channels/board/[board]/page.tsx
+Error:   [31mx[0m Expected ',', got 'http'
+     ,-[[36;1;4m/exposed/projects/bid-notice-web/frontend/nextjs/src/app/channels/board/[board]/page.tsx[0m:429:1]
+ [2m426[0m |       }
+ [2m427[0m |       
+ [2m428[0m |       // 게시글 목록 새로고침
+ [2m429[0m |       const refreshResponse = await fetch('${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}', {
+     : [35;1m                                                                                             ^^^^[0m
+ [2m430[0m |         method: 'POST',
+ [2m431[0m |         headers: {
+ [2m432[0m |           'Content-Type': 'application/json',
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/channels/board/[board]/page.tsx
+ ⨯ ./src/app/channels/board/[board]/page.tsx
+Error:   [31mx[0m Expected ',', got 'http'
+     ,-[[36;1;4m/exposed/projects/bid-notice-web/frontend/nextjs/src/app/channels/board/[board]/page.tsx[0m:429:1]
+ [2m426[0m |       }
+ [2m427[0m |       
+ [2m428[0m |       // 게시글 목록 새로고침
+ [2m429[0m |       const refreshResponse = await fetch('${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}', {
+     : [35;1m                                                                                             ^^^^[0m
+ [2m430[0m |         method: 'POST',
+ [2m431[0m |         headers: {
+ [2m432[0m |           'Content-Type': 'application/json',
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/channels/board/[board]/page.tsx
+ ⨯ ./src/app/channels/board/[board]/page.tsx
+Error:   [31mx[0m Expected ',', got 'http'
+     ,-[[36;1;4m/exposed/projects/bid-notice-web/frontend/nextjs/src/app/channels/board/[board]/page.tsx[0m:429:1]
+ [2m426[0m |       }
+ [2m427[0m |       
+ [2m428[0m |       // 게시글 목록 새로고침
+ [2m429[0m |       const refreshResponse = await fetch('${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}', {
+     : [35;1m                                                                                             ^^^^[0m
+ [2m430[0m |         method: 'POST',
+ [2m431[0m |         headers: {
+ [2m432[0m |           'Content-Type': 'application/json',
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/channels/board/[board]/page.tsx
+ ✓ Compiled in 6.1s (2348 modules)
+ ✓ Compiled in 1684ms (2348 modules)
+ ✓ Compiled in 1519ms (2348 modules)
+ ✓ Compiled in 1571ms (2348 modules)
+ ○ Compiling /channels/board/[board] ...
+ ✓ Compiled /channels/board/[board] in 4.2s (1615 modules)
+ GET /channels/board/board_dev 200 in 5912ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 4.6s (1632 modules)
+ GET /favicon.ico 200 in 4927ms
+ GET /channels/board/board_dev 200 in 1400ms
+ GET /favicon.ico 200 in 47ms
+ GET /channels/board/dev 200 in 6074ms
+ GET /channels/board/dev 200 in 499ms
+ GET /favicon.ico 200 in 87ms
+ GET /channels/board/board_dev 200 in 380ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 2.1s (712 modules)
+ GET /.git/index 404 in 3516ms
+ ○ Compiling /channels/board/[board] ...
+ ✓ Compiled /channels/board/[board] in 844ms (1615 modules)
+ GET /channels/board/board_dev 200 in 2939ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 805ms (1632 modules)
+ GET /favicon.ico 200 in 1184ms
+ ✓ Compiled in 12.3s (3980 modules)
+   Reload env: .env.local
+ ✓ Compiled in 3s (2334 modules)
+ ✓ Compiled in 3.5s (2348 modules)
+ ✓ Compiled in 1708ms (2348 modules)
+ ✓ Compiled in 1616ms (2348 modules)
+ ✓ Compiled in 1501ms (2348 modules)
+ ○ Compiling /channels/board/[board] ...
+ ✓ Compiled /channels/board/[board] in 5.5s (1615 modules)
+ GET /channels/board/board_dev 200 in 7310ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 657ms (1632 modules)
+ GET /favicon.ico 200 in 1013ms
+ GET /channels/board/dev 200 in 1255ms
+ GET /channels/board/dev 200 in 411ms
+ GET /favicon.ico 200 in 56ms
+ GET /channels/board/dev 200 in 177ms
+ GET /channels/board/dev 200 in 444ms
+ GET /favicon.ico 200 in 97ms
+   Reload env: .env.local
+ ✓ Compiled in 6s (2334 modules)
+ ○ Compiling /notices/[category] ...
+ ✓ Compiled /notices/[category] in 19.1s (1949 modules)
+Failed to fetch notices by category: Error [ApolloError]: fetch failed
+    at new Promise (<anonymous>) {
+  graphQLErrors: [],
+  protocolErrors: [],
+  clientErrors: [],
+  networkError: [TypeError: fetch failed] {
+    [cause]: [Error: C0ACE0E68C7F0000:error:0A00010B:SSL routines:ssl3_get_record:wrong version number:../deps/openssl/openssl/ssl/record/ssl3_record.c:354:
+    ] {
+      library: 'SSL routines',
+      reason: 'wrong version number',
+      code: 'ERR_SSL_WRONG_VERSION_NUMBER'
+    }
+  },
+  extraInfo: undefined,
+  constructor: [Function: ApolloError],
+  [cause]: [TypeError: fetch failed] {
+    [cause]: [Error: C0ACE0E68C7F0000:error:0A00010B:SSL routines:ssl3_get_record:wrong version number:../deps/openssl/openssl/ssl/record/ssl3_record.c:354:
+    ] {
+      library: 'SSL routines',
+      reason: 'wrong version number',
+      code: 'ERR_SSL_WRONG_VERSION_NUMBER'
+    }
+  }
+}
+Failed to fetch notices by category: Error [ApolloError]: fetch failed
+    at new Promise (<anonymous>) {
+  graphQLErrors: [],
+  protocolErrors: [],
+  clientErrors: [],
+  networkError: [TypeError: fetch failed] {
+    [cause]: [Error: C0ACE0E68C7F0000:error:0A00010B:SSL routines:ssl3_get_record:wrong version number:../deps/openssl/openssl/ssl/record/ssl3_record.c:354:
+    ] {
+      library: 'SSL routines',
+      reason: 'wrong version number',
+      code: 'ERR_SSL_WRONG_VERSION_NUMBER'
+    }
+  },
+  extraInfo: undefined,
+  constructor: [Function: ApolloError],
+  [cause]: [TypeError: fetch failed] {
+    [cause]: [Error: C0ACE0E68C7F0000:error:0A00010B:SSL routines:ssl3_get_record:wrong version number:../deps/openssl/openssl/ssl/record/ssl3_record.c:354:
+    ] {
+      library: 'SSL routines',
+      reason: 'wrong version number',
+      code: 'ERR_SSL_WRONG_VERSION_NUMBER'
+    }
+  }
+}
+Error in CategoryPage: Error: 공고 데이터를 불러오는데 실패했습니다.
+    at getNoticesByCategory (src/app/notices/[category]/page.tsx:59:11)
+    at async CategoryPage (src/app/notices/[category]/page.tsx:94:21)
+  57 |   } catch (error) {
+  58 |     console.error('Failed to fetch notices by category:', error);
+> 59 |     throw new Error('공고 데이터를 불러오는데 실패했습니다.');
+     |           ^
+  60 |   }
+  61 | }
+  62 |
+Error in CategoryPage: Error: 공고 데이터를 불러오는데 실패했습니다.
+    at getNoticesByCategory (src/app/notices/[category]/page.tsx:59:11)
+    at async CategoryPage (src/app/notices/[category]/page.tsx:94:21)
+  57 |   } catch (error) {
+  58 |     console.error('Failed to fetch notices by category:', error);
+> 59 |     throw new Error('공고 데이터를 불러오는데 실패했습니다.');
+     |           ^
+  60 |   }
+  61 | }
+  62 |
+ GET /notices/%EA%B3%B5%EC%82%AC%EC%A0%90%EA%B2%80?gap=1 200 in 21200ms
+ GET /notices/%EA%B3%B5%EC%82%AC%EC%A0%90%EA%B2%80?gap=1 200 in 3287ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 1076ms (1966 modules)
+ GET /favicon.ico 200 in 1452ms
+ ○ Compiling / ...
+ ✓ Compiled / in 9.3s (1096 modules)
+Failed to fetch notices statistics: Error [ApolloError]: fetch failed
+    at new Promise (<anonymous>) {
+  graphQLErrors: [],
+  protocolErrors: [],
+  clientErrors: [],
+  networkError: [TypeError: fetch failed] {
+    [cause]: [Error: C0ACE0E68C7F0000:error:0A00010B:SSL routines:ssl3_get_record:wrong version number:../deps/openssl/openssl/ssl/record/ssl3_record.c:354:
+    ] {
+      library: 'SSL routines',
+      reason: 'wrong version number',
+      code: 'ERR_SSL_WRONG_VERSION_NUMBER'
+    }
+  },
+  extraInfo: undefined,
+  constructor: [Function: ApolloError],
+  [cause]: [TypeError: fetch failed] {
+    [cause]: [Error: C0ACE0E68C7F0000:error:0A00010B:SSL routines:ssl3_get_record:wrong version number:../deps/openssl/openssl/ssl/record/ssl3_record.c:354:
+    ] {
+      library: 'SSL routines',
+      reason: 'wrong version number',
+      code: 'ERR_SSL_WRONG_VERSION_NUMBER'
+    }
+  }
+}
+Failed to fetch error scrapings: Error [ApolloError]: fetch failed
+    at new Promise (<anonymous>) {
+  graphQLErrors: [],
+  protocolErrors: [],
+  clientErrors: [],
+  networkError: [TypeError: fetch failed] {
+    [cause]: [Error: C0ACE0E68C7F0000:error:0A00010B:SSL routines:ssl3_get_record:wrong version number:../deps/openssl/openssl/ssl/record/ssl3_record.c:354:
+    ] {
+      library: 'SSL routines',
+      reason: 'wrong version number',
+      code: 'ERR_SSL_WRONG_VERSION_NUMBER'
+    }
+  },
+  extraInfo: undefined,
+  constructor: [Function: ApolloError],
+  [cause]: [TypeError: fetch failed] {
+    [cause]: [Error: C0ACE0E68C7F0000:error:0A00010B:SSL routines:ssl3_get_record:wrong version number:../deps/openssl/openssl/ssl/record/ssl3_record.c:354:
+    ] {
+      library: 'SSL routines',
+      reason: 'wrong version number',
+      code: 'ERR_SSL_WRONG_VERSION_NUMBER'
+    }
+  }
+}
+ GET / 200 in 11002ms
+ ⚠ Blocked cross-origin request from 1.231.118.217 to /_next/* resource. To allow this, configure "allowedDevOrigins" in next.config
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+   Reload env: .env.local
+ ✓ Compiled in 3.5s (2334 modules)
+ ○ Compiling /channels/board/[board] ...
+ ✓ Compiled /channels/board/[board] in 6.4s (1615 modules)
+ GET /channels/board/dev 200 in 8183ms
+ ○ Compiling / ...
+ ✓ Compiled / in 1013ms (1943 modules)
+ GET / 200 in 3031ms
+ ○ Compiling /notices/[category] ...
+ ✓ Compiled /notices/[category] in 6.9s (2817 modules)
+ GET /notices/%EA%B3%B5%EC%82%AC%EC%A0%90%EA%B2%80?gap=1 200 in 8275ms
+ ○ Compiling /settings/scrapping ...
+ ✓ Compiled /settings/scrapping in 11.6s (3340 modules)
+ GET /settings/scrapping 200 in 12871ms
+ ○ Compiling /channels/board/[board] ...
+ ✓ Compiled /channels/board/[board] in 751ms (1615 modules)
+ GET /channels/board/dev 200 in 1532ms
+ ○ Compiling /channels/board/[board]/new ...
+ ⨯ ./src/app/channels/board/[board]/new/page.tsx
+Error:   [31mx[0m Expected ',', got 'http'
+     ,-[[36;1;4m/exposed/projects/bid-notice-web/frontend/nextjs/src/app/channels/board/[board]/new/page.tsx[0m:194:1]
+ [2m191[0m |         throw new Error('필수 입력값이 누락되었습니다.');
+ [2m192[0m |       }
+ [2m193[0m | 
+ [2m194[0m |       const response = await fetch('${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}', {
+     : [35;1m                                                                                      ^^^^[0m
+ [2m195[0m |         method: 'POST',
+ [2m196[0m |         headers: {
+ [2m197[0m |           'Content-Type': 'application/json',
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/channels/board/[board]/new/page.tsx
+ ⨯ ./src/app/channels/board/[board]/[id]/page.tsx
+Error:   [31mx[0m Expected ',', got 'http'
+     ,-[[36;1;4m/exposed/projects/bid-notice-web/frontend/nextjs/src/app/channels/board/[board]/[id]/page.tsx[0m:236:1]
+ [2m233[0m |         setCustomMessage('게시글을 불러오는 중입니다...');
+ [2m234[0m |         setError(null);
+ [2m235[0m |         
+ [2m236[0m |         const response = await fetch('${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}', {
+     : [35;1m                                                                                        ^^^^[0m
+ [2m237[0m |           method: 'POST',
+ [2m238[0m |           headers: {
+ [2m239[0m |             'Content-Type': 'application/json',
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/channels/board/[board]/[id]/page.tsx
+ ⨯ ./src/app/channels/board/[board]/[id]/page.tsx
+Error:   [31mx[0m Expected ',', got 'http'
+     ,-[[36;1;4m/exposed/projects/bid-notice-web/frontend/nextjs/src/app/channels/board/[board]/[id]/page.tsx[0m:236:1]
+ [2m233[0m |         setCustomMessage('게시글을 불러오는 중입니다...');
+ [2m234[0m |         setError(null);
+ [2m235[0m |         
+ [2m236[0m |         const response = await fetch('${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}', {
+     : [35;1m                                                                                        ^^^^[0m
+ [2m237[0m |           method: 'POST',
+ [2m238[0m |           headers: {
+ [2m239[0m |             'Content-Type': 'application/json',
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/channels/board/[board]/[id]/page.tsx
+ ⨯ ./src/app/channels/board/[board]/[id]/page.tsx
+Error:   [31mx[0m Expected ',', got 'http'
+     ,-[[36;1;4m/exposed/projects/bid-notice-web/frontend/nextjs/src/app/channels/board/[board]/[id]/page.tsx[0m:236:1]
+ [2m233[0m |         setCustomMessage('게시글을 불러오는 중입니다...');
+ [2m234[0m |         setError(null);
+ [2m235[0m |         
+ [2m236[0m |         const response = await fetch('${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}', {
+     : [35;1m                                                                                        ^^^^[0m
+ [2m237[0m |           method: 'POST',
+ [2m238[0m |           headers: {
+ [2m239[0m |             'Content-Type': 'application/json',
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/channels/board/[board]/[id]/page.tsx
+ GET /channels/board/dev/new?format=markdown 500 in 29009ms
+ GET /channels/board/dev/new?format=markdown 500 in 135ms
+ GET /channels/board/dev/new?format=markdown 500 in 83ms
+ GET /channels/board/dev/new?format=markdown 500 in 97ms
+ ⨯ ./src/app/channels/board/[board]/[id]/page.tsx
+Error:   [31mx[0m Expected ',', got 'http'
+     ,-[[36;1;4m/exposed/projects/bid-notice-web/frontend/nextjs/src/app/channels/board/[board]/[id]/page.tsx[0m:236:1]
+ [2m233[0m |         setCustomMessage('게시글을 불러오는 중입니다...');
+ [2m234[0m |         setError(null);
+ [2m235[0m |         
+ [2m236[0m |         const response = await fetch('${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}', {
+     : [35;1m                                                                                        ^^^^[0m
+ [2m237[0m |           method: 'POST',
+ [2m238[0m |           headers: {
+ [2m239[0m |             'Content-Type': 'application/json',
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/channels/board/[board]/[id]/page.tsx
+ ✓ Compiled /favicon.ico in 11.1s (2500 modules)
+ ○ Compiling /_error ...
+ ⨯ ./src/app/channels/board/[board]/[id]/page.tsx
+Error:   [31mx[0m Expected ',', got 'http'
+     ,-[[36;1;4m/exposed/projects/bid-notice-web/frontend/nextjs/src/app/channels/board/[board]/[id]/page.tsx[0m:236:1]
+ [2m233[0m |         setCustomMessage('게시글을 불러오는 중입니다...');
+ [2m234[0m |         setError(null);
+ [2m235[0m |         
+ [2m236[0m |         const response = await fetch('${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}', {
+     : [35;1m                                                                                        ^^^^[0m
+ [2m237[0m |           method: 'POST',
+ [2m238[0m |           headers: {
+ [2m239[0m |             'Content-Type': 'application/json',
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/channels/board/[board]/[id]/page.tsx
+ GET /channels/board/dev/new?format=markdown 500 in 6966ms
+ ✓ Compiled /_error in 2s (2501 modules)
+ ✓ Compiled in 4s (2501 modules)
+ GET /channels/board/dev/new?format=markdown 500 in 793ms
+ ○ Compiling /channels/board/[board] ...
+ ⨯ ./src/app/channels/board/[board]/new/page.tsx
+Error:   [31mx[0m Expected ',', got 'http'
+     ,-[[36;1;4m/exposed/projects/bid-notice-web/frontend/nextjs/src/app/channels/board/[board]/new/page.tsx[0m:194:1]
+ [2m191[0m |         throw new Error('필수 입력값이 누락되었습니다.');
+ [2m192[0m |       }
+ [2m193[0m | 
+ [2m194[0m |       const response = await fetch('${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}', {
+     : [35;1m                                                                                      ^^^^[0m
+ [2m195[0m |         method: 'POST',
+ [2m196[0m |         headers: {
+ [2m197[0m |           'Content-Type': 'application/json',
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/channels/board/[board]/new/page.tsx
+ ⨯ ./src/app/channels/board/[board]/new/page.tsx
+Error:   [31mx[0m Expected ',', got 'http'
+     ,-[[36;1;4m/exposed/projects/bid-notice-web/frontend/nextjs/src/app/channels/board/[board]/new/page.tsx[0m:194:1]
+ [2m191[0m |         throw new Error('필수 입력값이 누락되었습니다.');
+ [2m192[0m |       }
+ [2m193[0m | 
+ [2m194[0m |       const response = await fetch('${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}', {
+     : [35;1m                                                                                      ^^^^[0m
+ [2m195[0m |         method: 'POST',
+ [2m196[0m |         headers: {
+ [2m197[0m |           'Content-Type': 'application/json',
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/channels/board/[board]/new/page.tsx
+ GET /channels/board/dev 500 in 7442ms
+ GET /query?q=SHOW+DIAGNOSTICS 500 in 38ms
+ GET /solr/admin/info/system 500 in 37ms
+ GET /v2/_catalog 500 in 32ms
+ ✓ Compiled / in 14s (1285 modules)
+Failed to fetch notices statistics: Error [ApolloError]: fetch failed
+    at new Promise (<anonymous>) {
+  graphQLErrors: [],
+  protocolErrors: [],
+  clientErrors: [],
+  networkError: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '192.168.208.2',
+        localPort: 47464,
+        remoteAddress: undefined,
+        remotePort: undefined,
+        remoteFamily: undefined,
+        timeout: undefined,
+        bytesWritten: 503,
+        bytesRead: 0
+      }
+    }
+  },
+  extraInfo: undefined,
+  constructor: [Function: ApolloError],
+  [cause]: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '192.168.208.2',
+        localPort: 47464,
+        remoteAddress: undefined,
+        remotePort: undefined,
+        remoteFamily: undefined,
+        timeout: undefined,
+        bytesWritten: 503,
+        bytesRead: 0
+      }
+    }
+  }
+}
+Failed to fetch error scrapings: Error [ApolloError]: fetch failed
+    at new Promise (<anonymous>) {
+  graphQLErrors: [],
+  protocolErrors: [],
+  clientErrors: [],
+  networkError: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '192.168.208.2',
+        localPort: 47468,
+        remoteAddress: undefined,
+        remotePort: undefined,
+        remoteFamily: undefined,
+        timeout: undefined,
+        bytesWritten: 465,
+        bytesRead: 0
+      }
+    }
+  },
+  extraInfo: undefined,
+  constructor: [Function: ApolloError],
+  [cause]: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '192.168.208.2',
+        localPort: 47468,
+        remoteAddress: undefined,
+        remotePort: undefined,
+        remoteFamily: undefined,
+        timeout: undefined,
+        bytesWritten: 465,
+        bytesRead: 0
+      }
+    }
+  }
+}
+ GET / 200 in 16829ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 4.2s (1302 modules)
+ GET /favicon.ico 200 in 950ms
+Failed to fetch notices statistics: Error [ApolloError]: fetch failed
+    at new Promise (<anonymous>) {
+  graphQLErrors: [],
+  protocolErrors: [],
+  clientErrors: [],
+  networkError: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '192.168.208.2',
+        localPort: 47644,
+        remoteAddress: undefined,
+        remotePort: undefined,
+        remoteFamily: undefined,
+        timeout: undefined,
+        bytesWritten: 503,
+        bytesRead: 0
+      }
+    }
+  },
+  extraInfo: undefined,
+  constructor: [Function: ApolloError],
+  [cause]: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '192.168.208.2',
+        localPort: 47644,
+        remoteAddress: undefined,
+        remotePort: undefined,
+        remoteFamily: undefined,
+        timeout: undefined,
+        bytesWritten: 503,
+        bytesRead: 0
+      }
+    }
+  }
+}
+Failed to fetch error scrapings: Error [ApolloError]: fetch failed
+    at new Promise (<anonymous>) {
+  graphQLErrors: [],
+  protocolErrors: [],
+  clientErrors: [],
+  networkError: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '192.168.208.2',
+        localPort: 47648,
+        remoteAddress: undefined,
+        remotePort: undefined,
+        remoteFamily: undefined,
+        timeout: undefined,
+        bytesWritten: 465,
+        bytesRead: 0
+      }
+    }
+  },
+  extraInfo: undefined,
+  constructor: [Function: ApolloError],
+  [cause]: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '192.168.208.2',
+        localPort: 47648,
+        remoteAddress: undefined,
+        remotePort: undefined,
+        remoteFamily: undefined,
+        timeout: undefined,
+        bytesWritten: 465,
+        bytesRead: 0
+      }
+    }
+  }
+}
+ GET / 200 in 1297ms
+Failed to fetch notices statistics: Error [ApolloError]: fetch failed
+    at new Promise (<anonymous>) {
+  graphQLErrors: [],
+  protocolErrors: [],
+  clientErrors: [],
+  networkError: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '192.168.208.2',
+        localPort: 47714,
+        remoteAddress: undefined,
+        remotePort: undefined,
+        remoteFamily: undefined,
+        timeout: undefined,
+        bytesWritten: 503,
+        bytesRead: 0
+      }
+    }
+  },
+  extraInfo: undefined,
+  constructor: [Function: ApolloError],
+  [cause]: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '192.168.208.2',
+        localPort: 47714,
+        remoteAddress: undefined,
+        remotePort: undefined,
+        remoteFamily: undefined,
+        timeout: undefined,
+        bytesWritten: 503,
+        bytesRead: 0
+      }
+    }
+  }
+}
+Failed to fetch error scrapings: Error [ApolloError]: fetch failed
+    at new Promise (<anonymous>) {
+  graphQLErrors: [],
+  protocolErrors: [],
+  clientErrors: [],
+  networkError: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '192.168.208.2',
+        localPort: 47718,
+        remoteAddress: undefined,
+        remotePort: undefined,
+        remoteFamily: undefined,
+        timeout: undefined,
+        bytesWritten: 465,
+        bytesRead: 0
+      }
+    }
+  },
+  extraInfo: undefined,
+  constructor: [Function: ApolloError],
+  [cause]: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '192.168.208.2',
+        localPort: 47718,
+        remoteAddress: undefined,
+        remotePort: undefined,
+        remoteFamily: undefined,
+        timeout: undefined,
+        bytesWritten: 465,
+        bytesRead: 0
+      }
+    }
+  }
+}
+ GET / 200 in 510ms
+Failed to fetch notices statistics: Error [ApolloError]: fetch failed
+    at new Promise (<anonymous>) {
+  graphQLErrors: [],
+  protocolErrors: [],
+  clientErrors: [],
+  networkError: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '192.168.208.2',
+        localPort: 47736,
+        remoteAddress: undefined,
+        remotePort: undefined,
+        remoteFamily: undefined,
+        timeout: undefined,
+        bytesWritten: 503,
+        bytesRead: 0
+      }
+    }
+  },
+  extraInfo: undefined,
+  constructor: [Function: ApolloError],
+  [cause]: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '192.168.208.2',
+        localPort: 47736,
+        remoteAddress: undefined,
+        remotePort: undefined,
+        remoteFamily: undefined,
+        timeout: undefined,
+        bytesWritten: 503,
+        bytesRead: 0
+      }
+    }
+  }
+}
+Failed to fetch error scrapings: Error [ApolloError]: fetch failed
+    at new Promise (<anonymous>) {
+  graphQLErrors: [],
+  protocolErrors: [],
+  clientErrors: [],
+  networkError: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '192.168.208.2',
+        localPort: 47740,
+        remoteAddress: undefined,
+        remotePort: undefined,
+        remoteFamily: undefined,
+        timeout: undefined,
+        bytesWritten: 465,
+        bytesRead: 0
+      }
+    }
+  },
+  extraInfo: undefined,
+  constructor: [Function: ApolloError],
+  [cause]: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '192.168.208.2',
+        localPort: 47740,
+        remoteAddress: undefined,
+        remotePort: undefined,
+        remoteFamily: undefined,
+        timeout: undefined,
+        bytesWritten: 465,
+        bytesRead: 0
+      }
+    }
+  }
+}
+ GET / 200 in 638ms
+ ○ Compiling /notices/[category] ...
+ ✓ Compiled /notices/[category] in 13.2s (2074 modules)
+Failed to fetch notices by category: Error [ApolloError]: fetch failed
+    at new Promise (<anonymous>) {
+  graphQLErrors: [],
+  protocolErrors: [],
+  clientErrors: [],
+  networkError: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '192.168.208.2',
+        localPort: 47758,
+        remoteAddress: undefined,
+        remotePort: undefined,
+        remoteFamily: undefined,
+        timeout: undefined,
+        bytesWritten: 621,
+        bytesRead: 0
+      }
+    }
+  },
+  extraInfo: undefined,
+  constructor: [Function: ApolloError],
+  [cause]: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '192.168.208.2',
+        localPort: 47758,
+        remoteAddress: undefined,
+        remotePort: undefined,
+        remoteFamily: undefined,
+        timeout: undefined,
+        bytesWritten: 621,
+        bytesRead: 0
+      }
+    }
+  }
+}
+Error in CategoryPage: Error: 공고 데이터를 불러오는데 실패했습니다.
+    at getNoticesByCategory (src/app/notices/[category]/page.tsx:59:11)
+    at async CategoryPage (src/app/notices/[category]/page.tsx:94:21)
+  57 |   } catch (error) {
+  58 |     console.error('Failed to fetch notices by category:', error);
+> 59 |     throw new Error('공고 데이터를 불러오는데 실패했습니다.');
+     |           ^
+  60 |   }
+  61 | }
+  62 |
+ GET /notices/%EA%B3%B5%EC%82%AC%EC%A0%90%EA%B2%80?gap=1 200 in 14369ms
+Search Debug: {
+  searchTerm: '',
+  totalNotices: 11,
+  filteredNotices: 11,
+  notices: [
+    {
+      title: '삼선동2가 296번지 일대 삼선5구역 내 택지5 구세군돈암영문 신축공사 안전점검 수행기관 지정결과 공고',
+      org: '성북구'
+    },
+    {
+      title: '보문제5구역 지하철출입구 이설 및 정비기반시설공사 안전점검 수행기관 지정결과 공고',
+      org: '성북구'
+    },
+    { title: '건설공사 안전점검(건축분야) 수행기관 지정 모집 공고[사동 1342번지]', org: '안산시청' },
+    {
+      title: '건설(건축)공사 안전점검 수행기관 지정 신청평가 결과 상위 업체 알림(송도동 117-107번지)',
+      org: '인천경제자유구역청'
+    },
+    { title: '안전점검 수행기관 지정 공고「논현동 90-2 업무시설 해체공사」', org: '강남구' },
+    { title: '안전점검 수행기관 지정 공고「역삼동 697-62 근린생활시설 신축공사」', org: '강남구' },
+    { title: '안전점검 수행기관 지정 결과「청담동 52-3 근린생활시설 해체공사」', org: '강남구' },
+    { title: '안전점검 수행기관 지정 공고「논현동 107-26 근린생활시설 신축공사」', org: '강남구' },
+    { title: '안전점검 수행기관 지정 공고「역삼동 643-1 근린생활시설 신축공사」', org: '강남구' },
+    { title: '건설공사(건축분야) 안전점검 수행기관 지정 공고 (삼정동 60-22)', org: '부천시청' },
+    {
+      title: '건설공사 안전점검 수행기관 지정결과 알림(서초동 1574-7 근린생활시설 신축공사)',
+      org: '서초구'
+    }
+  ]
+}
+Filter Debug: {
+  filter: {
+    categories: [],
+    endDate: null,
+    period: 14,
+    scrapEndDate: null,
+    scrapPeriod: 14,
+    excludedOrgs: '',
+    includedOrgs: '',
+    excludedRegions: '',
+    includedRegions: ''
+  },
+  afterFilterCount: 11
+}
+ GET /notices/%EA%B3%B5%EC%82%AC%EC%A0%90%EA%B2%80?gap=1 200 in 2272ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 3s (2062 modules)
+ GET /favicon.ico 200 in 3351ms
+ ○ Compiling /channels/board/[board] ...
+ ✓ Compiled /channels/board/[board] in 18.4s (1711 modules)
+ GET /channels/board/dev 200 in 19179ms
+ ○ Compiling /channels/board/[board]/[id] ...
+ ⨯ ./src/app/channels/board/[board]/[id]/page.tsx
+Error:   [31mx[0m Expected ',', got 'http'
+     ,-[[36;1;4m/exposed/projects/bid-notice-web/frontend/nextjs/src/app/channels/board/[board]/[id]/page.tsx[0m:236:1]
+ [2m233[0m |         setCustomMessage('게시글을 불러오는 중입니다...');
+ [2m234[0m |         setError(null);
+ [2m235[0m |         
+ [2m236[0m |         const response = await fetch('${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}', {
+     : [35;1m                                                                                        ^^^^[0m
+ [2m237[0m |           method: 'POST',
+ [2m238[0m |           headers: {
+ [2m239[0m |             'Content-Type': 'application/json',
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/channels/board/[board]/[id]/page.tsx
+ ⨯ ./src/app/channels/board/[board]/[id]/page.tsx
+Error:   [31mx[0m Expected ',', got 'http'
+     ,-[[36;1;4m/exposed/projects/bid-notice-web/frontend/nextjs/src/app/channels/board/[board]/[id]/page.tsx[0m:236:1]
+ [2m233[0m |         setCustomMessage('게시글을 불러오는 중입니다...');
+ [2m234[0m |         setError(null);
+ [2m235[0m |         
+ [2m236[0m |         const response = await fetch('${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}', {
+     : [35;1m                                                                                        ^^^^[0m
+ [2m237[0m |           method: 'POST',
+ [2m238[0m |           headers: {
+ [2m239[0m |             'Content-Type': 'application/json',
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/channels/board/[board]/[id]/page.tsx
+ ⨯ ./src/app/channels/board/[board]/[id]/page.tsx
+Error:   [31mx[0m Expected ',', got 'http'
+     ,-[[36;1;4m/exposed/projects/bid-notice-web/frontend/nextjs/src/app/channels/board/[board]/[id]/page.tsx[0m:236:1]
+ [2m233[0m |         setCustomMessage('게시글을 불러오는 중입니다...');
+ [2m234[0m |         setError(null);
+ [2m235[0m |         
+ [2m236[0m |         const response = await fetch('${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}', {
+     : [35;1m                                                                                        ^^^^[0m
+ [2m237[0m |           method: 'POST',
+ [2m238[0m |           headers: {
+ [2m239[0m |             'Content-Type': 'application/json',
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/channels/board/[board]/[id]/page.tsx
+ GET /channels/board/dev/5 500 in 22393ms
+ GET /channels/board/dev/5 500 in 75ms
+ GET /channels/board/board_dev/5 500 in 83ms
+ GET /channels/board/dev/5 500 in 171ms
+ GET /channels/board/dev/5 500 in 70ms
+ ⨯ ./src/app/channels/board/[board]/[id]/page.tsx
+Error:   [31mx[0m Expected ',', got 'http'
+     ,-[[36;1;4m/exposed/projects/bid-notice-web/frontend/nextjs/src/app/channels/board/[board]/[id]/page.tsx[0m:236:1]
+ [2m233[0m |         setCustomMessage('게시글을 불러오는 중입니다...');
+ [2m234[0m |         setError(null);
+ [2m235[0m |         
+ [2m236[0m |         const response = await fetch('${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}', {
+     : [35;1m                                                                                        ^^^^[0m
+ [2m237[0m |           method: 'POST',
+ [2m238[0m |           headers: {
+ [2m239[0m |             'Content-Type': 'application/json',
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/channels/board/[board]/[id]/page.tsx
+ ⨯ ./src/app/channels/board/[board]/[id]/page.tsx
+Error:   [31mx[0m Expected ',', got 'http'
+     ,-[[36;1;4m/exposed/projects/bid-notice-web/frontend/nextjs/src/app/channels/board/[board]/[id]/page.tsx[0m:236:1]
+ [2m233[0m |         setCustomMessage('게시글을 불러오는 중입니다...');
+ [2m234[0m |         setError(null);
+ [2m235[0m |         
+ [2m236[0m |         const response = await fetch('${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}', {
+     : [35;1m                                                                                        ^^^^[0m
+ [2m237[0m |           method: 'POST',
+ [2m238[0m |           headers: {
+ [2m239[0m |             'Content-Type': 'application/json',
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/channels/board/[board]/[id]/page.tsx
+ GET /channels/board/dev/5 500 in 2858ms
+ GET /channels/board/dev/5 500 in 70ms
+ GET /channels/board/dev/5 500 in 88ms
+ GET /channels/board/dev/5 500 in 64ms
+ GET /channels/board/dev/5 500 in 65ms
+ ✓ Compiled /favicon.ico in 9s (2605 modules)
+ ✓ Compiled in 3.2s (2500 modules)
+ ✓ Compiled in 3.4s (2500 modules)
+ ○ Compiling /channels/board/[board]/[id] ...
+ ✓ Compiled /channels/board/[board]/[id] in 22.7s (4302 modules)
+ GET /channels/board/dev/5 200 in 27075ms
+ HEAD /channels/board/dev/5 200 in 434ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 922ms (1767 modules)
+ POST /api/graphql 404 in 2029ms
+ GET /channels/board/dev/5?mode=edit&format=markdown 200 in 210ms
+[?25h

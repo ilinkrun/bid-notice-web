@@ -80,6 +80,7 @@ def create_post(data: dict, table_name: str = 'board_dev'):
               'writer': str,       # 필수: 글쓴이 이름
               'password': str,     # 필수: 숫자 4자리 비밀번호
               'format': str,       # 선택: 내용 형식 ('text', 'markdown', 'html'). 기본값 'text'
+              'markdown_source': str, # 선택: 마크다운 원본 소스
               'is_visible': bool   # 선택: 글 노출 여부. 기본값 True
           }
       table_name (str, optional): 테이블명. 기본값 'board_dev'
@@ -111,6 +112,13 @@ def create_post(data: dict, table_name: str = 'board_dev'):
         'format': data.get('format', 'text'),
         'is_visible': 1 if data.get('is_visible', True) else 0
     }
+    
+    # 마크다운 원본 소스 추가
+    if 'markdown_source' in data:
+      print(f"Backend received markdown_source: {data['markdown_source']}")
+      insert_data['markdown_source'] = data['markdown_source']
+    else:
+      print("Backend did not receive markdown_source field")
 
     # format 유효성 검사
     if insert_data['format'] not in ['text', 'markdown', 'html']:

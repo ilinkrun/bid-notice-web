@@ -22,7 +22,8 @@ async function startServer() {
       process.env.FRONTEND_URL || 'http://localhost:11501',
       'http://1.231.118.217:11501',
       'http://localhost:3000',
-      'http://127.0.0.1:3000'
+      'http://127.0.0.1:3000',
+      'https://bid.ilmaceng.com'
     ],
     credentials: true,
   }));

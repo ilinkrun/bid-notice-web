@@ -1,5 +1,13 @@
 import { boardApiClient } from '@/lib/api/backendClient';
 
+// Temporary in-memory storage for markdown_source data
+// TODO: This should be replaced with proper database storage
+const markdownSourceStore = new Map<string, string>();
+
+const getMarkdownStoreKey = (board: string, postId: number): string => {
+  return `${board}:${postId}`;
+};
+
 interface PostInput {
   id?: number;
   title: string;
@@ -57,7 +65,19 @@ export const boardResolvers = {
         console.log(`게시글 상세 조회 요청: ${board}, ${id}`);
         // API 호출
         const response = await boardApiClient.get<ApiResponse>(`/posts/${board}/${id}`);
-        return response.data;
+        const post = response.data;
+        
+        // In-memory store에서 markdown_source 확인
+        if (post && !post.markdown_source) {
+          const storeKey = getMarkdownStoreKey(board, id);
+          const storedMarkdownSource = markdownSourceStore.get(storeKey);
+          if (storedMarkdownSource) {
+            console.log(`In-memory store에서 markdown_source 복원: ${storeKey}`);
+            post.markdown_source = storedMarkdownSource;
+          }
+        }
+        
+        return post;
       } catch (error) {
         console.error('게시글 상세 조회 오류:', error);
         return null;
@@ -118,21 +138,37 @@ export const boardResolvers = {
         
         console.log('게시글 생성 응답:', response.data);
         
-        if (response.data) {
-          // 응답 데이터 구조에 따라 처리
-          if (response.data.id) {
-            input.id = response.data.id;
-          } else if (response.data.success === true) {
-            // success가 true이면 임시 ID 생성
-            input.id = Date.now();
-          }
+        if (response.data && response.data.id) {
+          // 생성된 게시글 ID로 다시 조회해서 정확한 데이터 반환
+          const createdPostId = response.data.id;
           
-          return {
-            ...input,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            is_visible: 1
-          };
+          try {
+            const getResponse = await boardApiClient.get(`/posts/${board}/${createdPostId}`);
+            console.log('생성된 게시글 조회 응답:', getResponse.data);
+            
+            // Backend API가 markdown_source를 지원하지 않는 경우를 대비해서 
+            // 입력으로 받은 markdown_source를 보존
+            const savedPost = getResponse.data;
+            if (!savedPost.markdown_source && input.markdown_source) {
+              console.log('Backend API가 markdown_source를 지원하지 않아 클라이언트 데이터로 보완');
+              // In-memory store에 markdown_source 저장
+              const storeKey = getMarkdownStoreKey(board, createdPostId);
+              markdownSourceStore.set(storeKey, input.markdown_source);
+              savedPost.markdown_source = input.markdown_source;
+            }
+            
+            return savedPost;
+          } catch (error) {
+            console.error('생성된 게시글 조회 오류:', error);
+            // 조회 실패시 입력 데이터로 대체하되 ID는 설정
+            return {
+              ...input,
+              id: createdPostId,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              is_visible: 1
+            };
+          }
         } else {
           throw new Error('서버 응답이 올바르지 않습니다.');
         }
@@ -161,6 +197,13 @@ export const boardResolvers = {
         
         // API 응답이 { success: true } 형태인 경우
         if (response.data && response.data.success === true) {
+          // markdown_source가 있으면 in-memory store에 저장
+          if (input.markdown_source) {
+            const storeKey = getMarkdownStoreKey(board, input.id);
+            markdownSourceStore.set(storeKey, input.markdown_source);
+            console.log(`In-memory store에 markdown_source 저장: ${storeKey}`);
+          }
+          
           // 수정된 게시글 정보 조회
           return input;
         } else {

@@ -9,27 +9,27 @@ export const apiClient = axios.create({
   },
 });
 
-// API client for spider services (port 11304)
+// API client for spider services (port 11301)
 export const spiderApiClient = axios.create({
-  baseURL: 'http://localhost:11304',
+  baseURL: 'http://localhost:11301',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// API client for MySQL services (port 11305) 
+// API client for MySQL services (port 11302) 
 export const mysqlApiClient = axios.create({
-  baseURL: 'http://localhost:11305',
+  baseURL: 'http://localhost:11302',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// API client for board services (port 11306)
+// API client for board services (port 11307)
 export const boardApiClient = axios.create({
-  baseURL: 'http://localhost:11306',
+  baseURL: 'http://localhost:11307',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',

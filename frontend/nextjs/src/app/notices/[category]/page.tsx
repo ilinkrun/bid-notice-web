@@ -1,7 +1,8 @@
 import { Suspense } from 'react';
 import NoticeTableSkeleton from '@/components/notices/NoticeTableSkeleton';
 import { Metadata } from 'next';
-import { getClient } from '@/lib/api/restClient';
+import { getClient } from '@/lib/api/graphqlClient';
+import { gql } from '@apollo/client';
 import { Notice } from '@/types/notice';
 import '../../themes.css';
 import { redirect } from 'next/navigation';
@@ -12,32 +13,49 @@ interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
+const GET_NOTICES_BY_CATEGORY = gql`
+  query GetNoticesByCategory($category: String!, $gap: Int) {
+    noticesByCategory(category: $category, gap: $gap) {
+      nid
+      title
+      orgName
+      region
+      detailUrl
+      category
+      registration
+      postedAt
+    }
+  }
+`;
+
 async function getNoticesByCategory(category: string, gap: number): Promise<Notice[]> {
   try {
-    const response = await getClient().get<any[]>(`/notice_list/${encodeURIComponent(category)}?gap=${gap}`);
-    
-    // API 응답 데이터를 Notice 타입에 맞게 변환
-    const notices = response.data.map((notice: any) => ({
+    const client = getClient();
+    const { data } = await client.query({
+      query: GET_NOTICES_BY_CATEGORY,
+      variables: { category, gap },
+      fetchPolicy: 'no-cache'
+    });
+
+    return data.noticesByCategory.map((notice: any) => ({
       nid: notice.nid,
-      제목: notice.title || notice.제목 || '',
-      기관명: notice.org_name || notice.기관명 || '',
-      작성일: notice.posted_date || notice.작성일 || '',
-      상세페이지주소: notice.detail_url || notice.상세페이지주소 || '',
-      category: notice.category || notice.카테고리 || '',
-      지역: notice.org_region || notice.지역 || '미지정',
-      등록: notice.registration || notice.등록 || 0,
-      // 호환성을 위한 영어 필드도 설정
-      title: notice.title || notice.제목,
-      orgName: notice.org_name || notice.기관명,
-      postedAt: notice.posted_date || notice.작성일,
-      detailUrl: notice.detail_url || notice.상세페이지주소,
-      region: notice.org_region || notice.지역 || '미지정',
-      registration: String(notice.registration || notice.등록 || 0)
+      제목: notice.title,
+      기관명: notice.orgName,
+      작성일: notice.postedAt,
+      상세페이지주소: notice.detailUrl,
+      category: notice.category,
+      지역: notice.region || '미지정',
+      등록: notice.registration || 0,
+      // 호환성을 위한 영어 필드
+      title: notice.title,
+      orgName: notice.orgName,
+      postedAt: notice.postedAt,
+      detailUrl: notice.detailUrl,
+      region: notice.region || '미지정',
+      registration: String(notice.registration || 0)
     })) as Notice[];
-    
-    return notices;
   } catch (error) {
-    console.error('Failed to fetch notices:', error);
+    console.error('Failed to fetch notices by category:', error);
     throw new Error('공고 데이터를 불러오는데 실패했습니다.');
   }
 }
