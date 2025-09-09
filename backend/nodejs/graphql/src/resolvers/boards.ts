@@ -68,12 +68,12 @@ export const boardsResolvers = {
         const post = response.data;
         
         // In-memory store에서 markdown_source 확인
-        if (post && !post.markdown_source) {
+        if (post && !(post as any).markdown_source) {
           const storeKey = getMarkdownStoreKey(board, id);
           const storedMarkdownSource = markdownSourceStore.get(storeKey);
           if (storedMarkdownSource) {
             console.log(`In-memory store에서 markdown_source 복원: ${storeKey}`);
-            post.markdown_source = storedMarkdownSource;
+            (post as any).markdown_source = storedMarkdownSource;
           }
         }
         

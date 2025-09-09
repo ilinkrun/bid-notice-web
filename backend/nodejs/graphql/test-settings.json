@@ -1,0 +1,3 @@
+{
+  "query": "query TestSettings { settingsNasPathAll { id pathName pathValue description isActive } settingsAppDefaultAll { id settingKey settingValue description category } settingsNoticeCategoryAll { sn category keywords minPoint nots creator memo } settingsNoticeListAll { id orgName crawlUrl crawlUrlDetail isActive lastCrawledAt memo } }"
+}

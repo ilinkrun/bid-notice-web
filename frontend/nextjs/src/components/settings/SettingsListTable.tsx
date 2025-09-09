@@ -16,11 +16,12 @@ interface SettingsListTableProps {
   initialData: {
     oid: number;
     orgName: string;
+    url: string;
     detailUrl: string;
-    region: string;
-    registration: string;
-    use: boolean;
-    companyInCharge?: string;
+    use: number;
+    orgRegion: string;
+    companyInCharge: string;
+    orgMan: string;
   }[];
 }
 
@@ -29,15 +30,23 @@ type SortConfig = {
   direction: 'asc' | 'desc';
 };
 
-const detailUrlHref = (detailUrl: string) => {
+const detailUrlHref = (detailUrl: string | undefined) => {
+  if (!detailUrl || detailUrl.length < 2) {
+    return '#';
+  }
   return detailUrl.replace('${i}', '1');
 };
 
-const detailUrlA = (detailUrl: string) => {
-  if (detailUrl.length < 2) {
+const detailUrlA = (detailUrl: string | undefined) => {
+  if (!detailUrl || detailUrl.length < 2) {
     return '';
   }
-  return detailUrl.split('://')[0] + '://' + detailUrl.split('://')[1].split('/')[0];
+  const urlParts = detailUrl.split('://');
+  if (urlParts.length < 2) {
+    return detailUrl;
+  }
+  const domain = urlParts[1].split('/')[0];
+  return urlParts[0] + '://' + domain;
 };
 
 export function SettingsListTable({ initialData }: SettingsListTableProps) {
@@ -100,26 +109,26 @@ export function SettingsListTable({ initialData }: SettingsListTableProps) {
               </TableHead>
               <TableHead>
                 <button
-                  onClick={() => handleSort('detailUrl')}
-                  className={sortConfig.key === 'detailUrl' ? 'text-red-500' : ''}
+                  onClick={() => handleSort('url')}
+                  className={sortConfig.key === 'url' ? 'text-red-500' : ''}
                 >
-                  상세 URL
+                  크롤링 URL
                 </button>
               </TableHead>
               <TableHead>
                 <button
-                  onClick={() => handleSort('region')}
-                  className={sortConfig.key === 'region' ? 'text-red-500' : ''}
+                  onClick={() => handleSort('companyInCharge')}
+                  className={sortConfig.key === 'companyInCharge' ? 'text-red-500' : ''}
+                >
+                  담당업체
+                </button>
+              </TableHead>
+              <TableHead>
+                <button
+                  onClick={() => handleSort('orgRegion')}
+                  className={sortConfig.key === 'orgRegion' ? 'text-red-500' : ''}
                 >
                   지역
-                </button>
-              </TableHead>
-              <TableHead>
-                <button
-                  onClick={() => handleSort('registration')}
-                  className={sortConfig.key === 'registration' ? 'text-red-500' : ''}
-                >
-                  등록
                 </button>
               </TableHead>
               <TableHead>
@@ -127,7 +136,7 @@ export function SettingsListTable({ initialData }: SettingsListTableProps) {
                   onClick={() => handleSort('use')}
                   className={sortConfig.key === 'use' ? 'text-red-500' : ''}
                 >
-                  사용
+                  상태
                 </button>
               </TableHead>
             </TableRow>
@@ -142,18 +151,26 @@ export function SettingsListTable({ initialData }: SettingsListTableProps) {
                 <TableCell>{item.orgName}</TableCell>
                 <TableCell>
                 <a
-                  href={detailUrlHref(item.detailUrl)}
+                  href={detailUrlHref(item.url)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 hover:underline"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  {detailUrlA(item.detailUrl)}
+                  {detailUrlA(item.url)}
                 </a>
                 </TableCell>
-                <TableCell>{item.region}</TableCell>
-                <TableCell>{item.registration}</TableCell>
-                <TableCell>{item.use}</TableCell>
+                <TableCell>{item.companyInCharge || '-'}</TableCell>
+                <TableCell>{item.orgRegion || '-'}</TableCell>
+                <TableCell>
+                  <span className={`px-2 py-1 rounded-full text-xs ${
+                    item.use === 1
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {item.use === 1 ? '활성' : '비활성'}
+                  </span>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

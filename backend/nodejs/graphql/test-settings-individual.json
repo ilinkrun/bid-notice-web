@@ -1,0 +1,3 @@
+{
+  "query": "query TestSettings { settingsAppDefaultAll { id settingKey settingValue description category } }"
+}

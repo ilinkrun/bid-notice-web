@@ -104,8 +104,8 @@ const GET_POST = `
 `;
 
 const CREATE_POST = `
-  mutation CreatePost($board: String!, $input: CreatePostInput!) {
-    createPost(board: $board, input: $input) {
+  mutation CreatePost($board: String!, $input: BoardPostInput!) {
+    boardsPostCreate(board: $board, input: $input) {
       id
       title
       content
@@ -120,8 +120,8 @@ const CREATE_POST = `
 `;
 
 const UPDATE_POST = `
-  mutation UpdatePost($board: String!, $input: UpdatePostInput!) {
-    updatePost(board: $board, input: $input) {
+  mutation UpdatePost($board: String!, $input: BoardPostInput!) {
+    boardsPostUpdate(board: $board, input: $input) {
       id
       title
       content
@@ -136,8 +136,8 @@ const UPDATE_POST = `
 `;
 
 const DELETE_POST = `
-  mutation DeletePost($board: String!, $input: DeletePostInput!) {
-    deletePost(board: $board, input: $input) {
+  mutation DeletePost($board: String!, $input: BoardPostDeleteInput!) {
+    boardsPostDelete(board: $board, input: $input) {
       id
       title
       content
@@ -189,8 +189,8 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
   const contentRef = useRef<HTMLTextAreaElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
 
-  // board 값을 board_${board} 형식으로 변환
-  const channelBoard = `board_${board}`;
+  // board 값이 이미 board_ 접두사를 포함하는지 확인
+  const channelBoard = board.startsWith('board_') ? board : `board_${board}`;
 
   // 페이지 마운트시 초기화 - 로딩은 데이터 로딩 완료시 해제
 
@@ -204,7 +204,16 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
         const graphqlUrl = process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://1.231.118.217:11401/graphql';
         console.log('GraphQL URL:', graphqlUrl);
         console.log('Sending board variable:', channelBoard);
+        console.log('Original board param:', board);
+        console.log('Full query:', GET_POSTS);
+        console.log('Full request body:', JSON.stringify({
+          query: GET_POSTS,
+          variables: {
+            board: channelBoard,
+          },
+        }, null, 2));
         
+        console.log('About to make fetch request...');
         const response = await fetch(graphqlUrl, {
           method: 'POST',
           headers: {
@@ -218,31 +227,48 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
           }),
         });
         
+        console.log('Fetch response received:');
+        console.log('- Status:', response.status);
+        console.log('- StatusText:', response.statusText);
+        console.log('- OK:', response.ok);
+        console.log('- Headers:', Object.fromEntries(response.headers.entries()));
+        
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const result = await response.json();
-        console.log('GraphQL Response:', result);
+        console.log('GraphQL Response:', JSON.stringify(result, null, 2));
+        console.log('Response type:', typeof result);
+        console.log('Has data:', !!result.data);
+        console.log('Data keys:', result.data ? Object.keys(result.data) : 'no data');
         
         if (result.errors) {
           console.error('GraphQL 에러:', result.errors);
           throw new Error(result.errors[0].message);
         }
         
-        if (!result.data || !result.data.posts) {
+        if (!result.data || !result.data.boardsPostsAll) {
           console.error('응답 구조가 올바르지 않습니다:', result);
+          console.log('Available keys in result.data:', result.data ? Object.keys(result.data) : 'no data');
           throw new Error('응답 구조가 올바르지 않습니다.');
         }
         
-        console.log('게시글 목록 조회 성공:', result.data.posts);
-        setPosts(result.data.posts);
+        console.log('게시글 목록 조회 성공:', result.data.boardsPostsAll);
+        setPosts(result.data.boardsPostsAll);
         
         // 게시글 목록 로딩 완료
         finishLoading();
       } catch (err) {
         console.error('게시글 목록 조회 오류:', err);
-        setError('게시글 목록을 불러오는데 실패했습니다.');
+        console.error('Error details:', {
+          message: err instanceof Error ? err.message : 'Unknown error',
+          stack: err instanceof Error ? err.stack : undefined,
+          type: typeof err,
+          err: err
+        });
+        const errorMessage = err instanceof Error ? err.message : '게시글 목록을 불러오는데 실패했습니다.';
+        setError(`게시글 목록을 불러오는데 실패했습니다: ${errorMessage}`);
         finishLoading();
       }
     };
@@ -456,8 +482,8 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
       });
       
       const refreshResult = await refreshResponse.json();
-      if (refreshResult.data?.posts) {
-        setPosts(refreshResult.data.posts);
+      if (refreshResult.data?.boardsPostsAll) {
+        setPosts(refreshResult.data.boardsPostsAll);
       }
       
       // 선택된 게시글 초기화
@@ -531,11 +557,11 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
         throw new Error(errorMessage);
       }
 
-      if (!result.data?.updatePost) {
+      if (!result.data?.boardsPostUpdate) {
         throw new Error('게시글 수정에 실패했습니다.');
       }
 
-      const updatedPost = result.data.updatePost;
+      const updatedPost = result.data.boardsPostUpdate;
       
       finishLoading();
       
@@ -586,7 +612,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
         throw new Error(errorMessage);
       }
 
-      if (!result.data?.createPost) {
+      if (!result.data?.boardsPostCreate) {
         throw new Error('게시글 작성에 실패했습니다.');
       }
 
@@ -605,8 +631,8 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
       });
 
       const refreshResult = await refreshResponse.json();
-      if (refreshResult.data?.posts) {
-        setPosts(refreshResult.data.posts);
+      if (refreshResult.data?.boardsPostsAll) {
+        setPosts(refreshResult.data.boardsPostsAll);
       }
 
       // 입력 필드 초기화
@@ -635,8 +661,9 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
 
   // 채널 변경
   const handleChannelChange = (channelId: string) => {
-    if (channelId !== board) {
-      navigate(`/channels/board/${channelId}`);
+    const fullChannelId = `board_${channelId}`;
+    if (fullChannelId !== board) {
+      navigate(`/channels/board/${fullChannelId}`);
     }
   };
 
@@ -847,7 +874,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
               {activeTab === 'list' && (
                 <>
                   <div className="flex items-center space-x-4">
-                    <Tabs defaultValue={board} onValueChange={handleChannelChange}>
+                    <Tabs defaultValue={board.replace('board_', '')} onValueChange={handleChannelChange}>
                       <TabsList>
                         <TabsTrigger value="dev">개발</TabsTrigger>
                         <TabsTrigger value="op">운영</TabsTrigger>

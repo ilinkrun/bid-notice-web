@@ -83,7 +83,7 @@ const MarkdownPreview = dynamic(
 // GraphQL 쿼리
 const GET_POST = `
   query GetPost($id: Int!, $board: String!) {
-    post(id: $id, board: $board) {
+    boardsPostsOne(id: $id, board: $board) {
       id
       title
       content
@@ -99,8 +99,8 @@ const GET_POST = `
 `;
 
 const UPDATE_POST = `
-  mutation UpdatePost($board: String!, $input: UpdatePostInput!) {
-    updatePost(board: $board, input: $input) {
+  mutation UpdatePost($board: String!, $input: BoardPostInput!) {
+    boardsPostUpdate(board: $board, input: $input) {
       id
       title
       content
@@ -116,8 +116,8 @@ const UPDATE_POST = `
 `;
 
 const DELETE_POST = `
-  mutation DeletePost($board: String!, $input: DeletePostInput!) {
-    deletePost(board: $board, input: $input) {
+  mutation DeletePost($board: String!, $input: BoardPostDeleteInput!) {
+    boardsPostDelete(board: $board, input: $input) {
       id
       title
       content
@@ -223,8 +223,8 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
   const [error, setError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  // board 값을 board_${board} 형식으로 변환
-  const channelBoard = `board_${board}`;
+  // board 값이 이미 board_ 접두사를 포함하는지 확인
+  const channelBoard = board.startsWith('board_') ? board : `board_${board}`;
 
   // 게시글 조회
   useEffect(() => {
@@ -253,8 +253,8 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
           throw new Error(result.errors[0].message);
         }
         
-        if (result.data && result.data.post) {
-          const postData = result.data.post;
+        if (result.data && result.data.boardsPostsOne) {
+          const postData = result.data.boardsPostsOne;
           if (postData.password === null || postData.password === undefined) {
             postData.password = '';
           }

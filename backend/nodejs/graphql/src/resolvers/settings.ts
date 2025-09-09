@@ -2,42 +2,84 @@ import { apiClient } from '@/lib/api/backendClient';
 
 // Settings Notice List
 interface SettingsNoticeListData {
-  id: string;
+  oid: number;
   org_name: string;
-  crawl_url: string;
-  crawl_url_detail?: string;
-  is_active: boolean;
-  last_crawled_at?: string;
-  memo?: string;
+  url: string;
+  iframe: string;
+  rowXpath: string;
+  paging: string;
+  startPage: number;
+  endPage: number;
+  login: string;
+  use: number;
+  org_region: string;
+  registration: string;
+  title: string;
+  detail_url: string;
+  posted_date: string;
+  posted_by: string;
+  company_in_charge: string;
+  org_man: string;
+  exception_row: string;
 }
 
 interface SettingsNoticeListInput {
-  id?: string;
+  oid?: number;
   orgName: string;
-  crawlUrl: string;
-  crawlUrlDetail?: string;
-  isActive?: boolean;
-  lastCrawledAt?: string;
-  memo?: string;
+  url: string;
+  iframe?: string;
+  rowXpath?: string;
+  paging?: string;
+  startPage?: number;
+  endPage?: number;
+  login?: string;
+  use?: number;
+  orgRegion?: string;
+  registration?: string;
+  title?: string;
+  detailUrl?: string;
+  postedDate?: string;
+  postedBy?: string;
+  companyInCharge?: string;
+  orgMan?: string;
+  exceptionRow?: string;
 }
 
 // Settings Notice Detail
 interface SettingsNoticeDetailData {
-  id: string;
+  oid: number;
   org_name: string;
-  detail_url: string;
-  selector?: string;
-  is_active: boolean;
-  memo?: string;
+  title: string;
+  body_html: string;
+  file_name: string;
+  file_url: string;
+  preview: string;
+  notice_div: string;
+  notice_num: string;
+  org_dept: string;
+  org_man: string;
+  org_tel: string;
+  use: number;
+  sample_url: string;
+  down: string;
 }
 
 interface SettingsNoticeDetailInput {
-  id?: string;
+  oid?: number;
   orgName: string;
-  detailUrl: string;
-  selector?: string;
-  isActive?: boolean;
-  memo?: string;
+  title?: string;
+  bodyHtml?: string;
+  fileName?: string;
+  fileUrl?: string;
+  preview?: string;
+  noticeDiv?: string;
+  noticeNum?: string;
+  orgDept?: string;
+  orgMan?: string;
+  orgTel?: string;
+  use?: number;
+  sampleUrl?: string;
+  down?: string;
 }
 
 // Settings Notice Category
@@ -113,13 +155,25 @@ export const settingsResolvers = {
       try {
         const response = await apiClient.get('/settings_notice_list');
         return response.data.map((setting: SettingsNoticeListData) => ({
-          id: setting.id,
+          oid: setting.oid,
           orgName: setting.org_name,
-          crawlUrl: setting.crawl_url,
-          crawlUrlDetail: setting.crawl_url_detail || '',
-          isActive: setting.is_active,
-          lastCrawledAt: setting.last_crawled_at || '',
-          memo: setting.memo || ''
+          url: setting.url,
+          iframe: setting.iframe || '',
+          rowXpath: setting.rowXpath || '',
+          paging: setting.paging || '',
+          startPage: setting.startPage || 0,
+          endPage: setting.endPage || 0,
+          login: setting.login || '',
+          use: setting.use,
+          orgRegion: setting.org_region || '',
+          registration: setting.registration || '',
+          title: setting.title || '',
+          detailUrl: setting.detail_url || '',
+          postedDate: setting.posted_date || '',
+          postedBy: setting.posted_by || '',
+          companyInCharge: setting.company_in_charge || '',
+          orgMan: setting.org_man || '',
+          exceptionRow: setting.exception_row || ''
         }));
       } catch (error) {
         console.error('Error fetching all notice list settings:', error);
@@ -127,21 +181,66 @@ export const settingsResolvers = {
       }
     },
 
-    settingsNoticeListOne: async (_: unknown, { orgName }: { orgName: string }) => {
+    settingsNoticeListOne: async (_: unknown, { oid }: { oid: number }) => {
       try {
-        const response = await apiClient.get(`/settings_notice_list/${orgName}`);
+        const response = await apiClient.get(`/settings_notice_list_by_oid/${oid}`);
         const setting = response.data;
         return {
-          id: setting.id,
+          oid: setting.oid,
           orgName: setting.org_name,
-          crawlUrl: setting.crawl_url,
-          crawlUrlDetail: setting.crawl_url_detail || '',
-          isActive: setting.is_active,
-          lastCrawledAt: setting.last_crawled_at || '',
-          memo: setting.memo || ''
+          url: setting.url,
+          iframe: setting.iframe || '',
+          rowXpath: setting.rowXpath || '',
+          paging: setting.paging || '',
+          startPage: setting.startPage || 0,
+          endPage: setting.endPage || 0,
+          login: setting.login || '',
+          use: setting.use,
+          orgRegion: setting.org_region || '',
+          registration: setting.registration || '',
+          title: setting.title || '',
+          detailUrl: setting.detail_url || '',
+          postedDate: setting.posted_date || '',
+          postedBy: setting.posted_by || '',
+          companyInCharge: setting.company_in_charge || '',
+          orgMan: setting.org_man || '',
+          exceptionRow: setting.exception_row || '',
+          elements: setting.elements || []
         };
       } catch (error) {
-        console.error('Error fetching notice list settings by org name:', error);
+        console.error('Error fetching notice list settings by oid:', error);
+        return null;
+      }
+    },
+
+    settingListByOid: async (_: unknown, { oid }: { oid: number }) => {
+      try {
+        const response = await apiClient.get(`/settings_notice_list_by_oid/${oid}`);
+        const setting = response.data;
+        return {
+          oid: setting.oid,
+          orgName: setting.org_name,
+          url: setting.url,
+          detailUrl: setting.url || '',
+          iframe: setting.iframe || '',
+          rowXpath: setting.rowXpath || '',
+          paging: setting.paging || '',
+          startPage: setting.startPage || 0,
+          endPage: setting.endPage || 0,
+          login: setting.login || '',
+          use: setting.use,
+          orgRegion: setting.org_region || '',
+          registration: setting.registration || '',
+          title: setting.title || '',
+          postedDate: setting.posted_date || '',
+          postedBy: setting.posted_by || '',
+          companyInCharge: setting.company_in_charge || '',
+          orgMan: setting.org_man || '',
+          exceptionRow: setting.exception_row || '',
+          elements: setting.elements || []
+        };
+      } catch (error) {
+        console.error('Error fetching setting list by oid:', error);
         return null;
       }
     },
@@ -150,13 +249,25 @@ export const settingsResolvers = {
       try {
         const response = await apiClient.get(`/settings_notice_list/org/${orgName}`);
         return response.data.map((setting: SettingsNoticeListData) => ({
-          id: setting.id,
+          oid: setting.oid,
           orgName: setting.org_name,
-          crawlUrl: setting.crawl_url,
-          crawlUrlDetail: setting.crawl_url_detail || '',
-          isActive: setting.is_active,
-          lastCrawledAt: setting.last_crawled_at || '',
-          memo: setting.memo || ''
+          url: setting.url,
+          iframe: setting.iframe || '',
+          rowXpath: setting.rowXpath || '',
+          paging: setting.paging || '',
+          startPage: setting.startPage || 0,
+          endPage: setting.endPage || 0,
+          login: setting.login || '',
+          use: setting.use,
+          orgRegion: setting.org_region || '',
+          registration: setting.registration || '',
+          title: setting.title || '',
+          detailUrl: setting.detail_url || '',
+          postedDate: setting.posted_date || '',
+          postedBy: setting.posted_by || '',
+          companyInCharge: setting.company_in_charge || '',
+          orgMan: setting.org_man || '',
+          exceptionRow: setting.exception_row || ''
         }));
       } catch (error) {
         console.error('Error fetching notice list settings by org:', error);
@@ -169,12 +280,21 @@ export const settingsResolvers = {
       try {
         const response = await apiClient.get('/settings_notice_detail');
         return response.data.map((setting: SettingsNoticeDetailData) => ({
-          id: setting.id,
+          oid: setting.oid,
           orgName: setting.org_name,
-          detailUrl: setting.detail_url,
-          selector: setting.selector || '',
-          isActive: setting.is_active,
-          memo: setting.memo || ''
+          title: setting.title || '',
+          bodyHtml: setting.body_html || '',
+          fileName: setting.file_name || '',
+          fileUrl: setting.file_url || '',
+          preview: setting.preview || '',
+          noticeDiv: setting.notice_div || '',
+          noticeNum: setting.notice_num || '',
+          orgDept: setting.org_dept || '',
+          orgMan: setting.org_man || '',
+          orgTel: setting.org_tel || '',
+          use: setting.use,
+          sampleUrl: setting.sample_url || '',
+          down: setting.down || ''
         }));
       } catch (error) {
         console.error('Error fetching all notice detail settings:', error);
@@ -182,20 +302,56 @@ export const settingsResolvers = {
       }
     },
 
-    settingsNoticeDetailOne: async (_: unknown, { orgName }: { orgName: string }) => {
+    settingsNoticeDetailOne: async (_: unknown, { oid }: { oid: number }) => {
       try {
-        const response = await apiClient.get(`/settings_notice_detail/${orgName}`);
+        const response = await apiClient.get(`/settings_notice_detail_by_oid/${oid}`);
         const setting = response.data;
         return {
-          id: setting.id,
+          oid: setting.oid,
           orgName: setting.org_name,
-          detailUrl: setting.detail_url,
-          selector: setting.selector || '',
-          isActive: setting.is_active,
-          memo: setting.memo || ''
+          title: setting.title || '',
+          bodyHtml: setting.body_html || '',
+          fileName: setting.file_name || '',
+          fileUrl: setting.file_url || '',
+          preview: setting.preview || '',
+          noticeDiv: setting.notice_div || '',
+          noticeNum: setting.notice_num || '',
+          orgDept: setting.org_dept || '',
+          orgMan: setting.org_man || '',
+          orgTel: setting.org_tel || '',
+          use: setting.use,
+          sampleUrl: setting.sample_url || '',
+          down: setting.down || ''
         };
       } catch (error) {
-        console.error('Error fetching notice detail settings by org name:', error);
+        console.error('Error fetching notice detail settings by oid:', error);
+        return null;
+      }
+    },
+
+    settingsDetailByOid: async (_: unknown, { oid }: { oid: number }) => {
+      try {
+        const response = await apiClient.get(`/settings_notice_detail_by_oid/${oid}`);
+        const setting = response.data;
+        return {
+          oid: setting.oid,
+          orgName: setting.org_name,
+          title: setting.title || '',
+          bodyHtml: setting.body_html || '',
+          fileName: setting.file_name || '',
+          fileUrl: setting.file_url || '',
+          preview: setting.preview || '',
+          noticeDiv: setting.notice_div || '',
+          noticeNum: setting.notice_num || '',
+          orgDept: setting.org_dept || '',
+          orgMan: setting.org_man || '',
+          orgTel: setting.org_tel || '',
+          use: setting.use,
+          sampleUrl: setting.sample_url || '',
+          down: setting.down || ''
+        };
+      } catch (error) {
+        console.error('Error fetching settings detail by oid:', error);
         return null;
       }
     },
@@ -204,12 +360,21 @@ export const settingsResolvers = {
       try {
         const response = await apiClient.get(`/settings_notice_detail/org/${orgName}`);
         return response.data.map((setting: SettingsNoticeDetailData) => ({
-          id: setting.id,
+          oid: setting.oid,
           orgName: setting.org_name,
-          detailUrl: setting.detail_url,
-          selector: setting.selector || '',
-          isActive: setting.is_active,
-          memo: setting.memo || ''
+          title: setting.title || '',
+          bodyHtml: setting.body_html || '',
+          fileName: setting.file_name || '',
+          fileUrl: setting.file_url || '',
+          preview: setting.preview || '',
+          noticeDiv: setting.notice_div || '',
+          noticeNum: setting.notice_num || '',
+          orgDept: setting.org_dept || '',
+          orgMan: setting.org_man || '',
+          orgTel: setting.org_tel || '',
+          use: setting.use,
+          sampleUrl: setting.sample_url || '',
+          down: setting.down || ''
         }));
       } catch (error) {
         console.error('Error fetching notice detail settings by org:', error);
@@ -359,19 +524,44 @@ export const settingsResolvers = {
       try {
         const response = await apiClient.post('/settings_notice_list', {
           org_name: input.orgName,
-          crawl_url: input.crawlUrl,
-          crawl_url_detail: input.crawlUrlDetail || '',
-          is_active: input.isActive !== undefined ? input.isActive : true,
-          memo: input.memo || ''
+          url: input.url,
+          iframe: input.iframe || '',
+          rowXpath: input.rowXpath || '',
+          paging: input.paging || '',
+          startPage: input.startPage || 0,
+          endPage: input.endPage || 0,
+          login: input.login || '',
+          use: input.use !== undefined ? input.use : 1,
+          org_region: input.orgRegion || '',
+          registration: input.registration || '',
+          title: input.title || '',
+          detail_url: input.detailUrl || '',
+          posted_date: input.postedDate || '',
+          posted_by: input.postedBy || '',
+          company_in_charge: input.companyInCharge || '',
+          org_man: input.orgMan || '',
+          exception_row: input.exceptionRow || ''
         });
         return {
-          id: response.data.id,
+          oid: response.data.oid,
           orgName: response.data.org_name,
-          crawlUrl: response.data.crawl_url,
-          crawlUrlDetail: response.data.crawl_url_detail || '',
-          isActive: response.data.is_active,
-          lastCrawledAt: response.data.last_crawled_at || '',
-          memo: response.data.memo || ''
+          url: response.data.url,
+          iframe: response.data.iframe || '',
+          rowXpath: response.data.rowXpath || '',
+          paging: response.data.paging || '',
+          startPage: response.data.startPage || 0,
+          endPage: response.data.endPage || 0,
+          login: response.data.login || '',
+          use: response.data.use,
+          orgRegion: response.data.org_region || '',
+          registration: response.data.registration || '',
+          title: response.data.title || '',
+          detailUrl: response.data.detail_url || '',
+          postedDate: response.data.posted_date || '',
+          postedBy: response.data.posted_by || '',
+          companyInCharge: response.data.company_in_charge || '',
+          orgMan: response.data.org_man || '',
+          exceptionRow: response.data.exception_row || ''
         };
       } catch (error) {
         console.error('Error creating notice list settings:', error);
@@ -381,21 +571,46 @@ export const settingsResolvers = {
 
     settingsNoticeListUpdate: async (_: unknown, { input }: { input: SettingsNoticeListInput }) => {
       try {
-        const response = await apiClient.put(`/settings_notice_list/${input.id}`, {
+        const response = await apiClient.post(`/settings_notice_list_by_oid/${input.oid}`, {
           org_name: input.orgName,
-          crawl_url: input.crawlUrl,
-          crawl_url_detail: input.crawlUrlDetail || '',
-          is_active: input.isActive !== undefined ? input.isActive : true,
-          memo: input.memo || ''
+          url: input.url,
+          iframe: input.iframe || '',
+          rowXpath: input.rowXpath || '',
+          paging: input.paging || '',
+          startPage: input.startPage || 0,
+          endPage: input.endPage || 0,
+          login: input.login || '',
+          use: input.use !== undefined ? input.use : 1,
+          org_region: input.orgRegion || '',
+          registration: input.registration || '',
+          title: input.title || '',
+          detail_url: input.detailUrl || '',
+          posted_date: input.postedDate || '',
+          posted_by: input.postedBy || '',
+          company_in_charge: input.companyInCharge || '',
+          org_man: input.orgMan || '',
+          exception_row: input.exceptionRow || ''
         });
         return {
-          id: response.data.id,
+          oid: response.data.oid,
           orgName: response.data.org_name,
-          crawlUrl: response.data.crawl_url,
-          crawlUrlDetail: response.data.crawl_url_detail || '',
-          isActive: response.data.is_active,
-          lastCrawledAt: response.data.last_crawled_at || '',
-          memo: response.data.memo || ''
+          url: response.data.url,
+          iframe: response.data.iframe || '',
+          rowXpath: response.data.rowXpath || '',
+          paging: response.data.paging || '',
+          startPage: response.data.startPage || 0,
+          endPage: response.data.endPage || 0,
+          login: response.data.login || '',
+          use: response.data.use,
+          orgRegion: response.data.org_region || '',
+          registration: response.data.registration || '',
+          title: response.data.title || '',
+          detailUrl: response.data.detail_url || '',
+          postedDate: response.data.posted_date || '',
+          postedBy: response.data.posted_by || '',
+          companyInCharge: response.data.company_in_charge || '',
+          orgMan: response.data.org_man || '',
+          exceptionRow: response.data.exception_row || ''
         };
       } catch (error) {
         console.error('Error updating notice list settings:', error);
@@ -403,9 +618,9 @@ export const settingsResolvers = {
       }
     },
 
-    settingsNoticeListDelete: async (_: unknown, { id }: { id: string }) => {
+    settingsNoticeListDelete: async (_: unknown, { oid }: { oid: number }) => {
       try {
-        await apiClient.delete(`/settings_notice_list/${id}`);
+        await apiClient.delete(`/settings_notice_list_by_oid/${oid}`);
         return true;
       } catch (error) {
         console.error('Error deleting notice list settings:', error);
@@ -418,18 +633,36 @@ export const settingsResolvers = {
       try {
         const response = await apiClient.post('/settings_notice_detail', {
           org_name: input.orgName,
-          detail_url: input.detailUrl,
-          selector: input.selector || '',
-          is_active: input.isActive !== undefined ? input.isActive : true,
-          memo: input.memo || ''
+          title: input.title || '',
+          body_html: input.bodyHtml || '',
+          file_name: input.fileName || '',
+          file_url: input.fileUrl || '',
+          preview: input.preview || '',
+          notice_div: input.noticeDiv || '',
+          notice_num: input.noticeNum || '',
+          org_dept: input.orgDept || '',
+          org_man: input.orgMan || '',
+          org_tel: input.orgTel || '',
+          use: input.use !== undefined ? input.use : 1,
+          sample_url: input.sampleUrl || '',
+          down: input.down || ''
         });
         return {
-          id: response.data.id,
+          oid: response.data.oid,
           orgName: response.data.org_name,
-          detailUrl: response.data.detail_url,
-          selector: response.data.selector || '',
-          isActive: response.data.is_active,
-          memo: response.data.memo || ''
+          title: response.data.title || '',
+          bodyHtml: response.data.body_html || '',
+          fileName: response.data.file_name || '',
+          fileUrl: response.data.file_url || '',
+          preview: response.data.preview || '',
+          noticeDiv: response.data.notice_div || '',
+          noticeNum: response.data.notice_num || '',
+          orgDept: response.data.org_dept || '',
+          orgMan: response.data.org_man || '',
+          orgTel: response.data.org_tel || '',
+          use: response.data.use,
+          sampleUrl: response.data.sample_url || '',
+          down: response.data.down || ''
         };
       } catch (error) {
         console.error('Error creating notice detail settings:', error);
@@ -439,20 +672,38 @@ export const settingsResolvers = {
 
     settingsNoticeDetailUpdate: async (_: unknown, { input }: { input: SettingsNoticeDetailInput }) => {
       try {
-        const response = await apiClient.put(`/settings_notice_detail/${input.id}`, {
+        const response = await apiClient.post(`/settings_notice_detail_by_oid/${input.oid}`, {
           org_name: input.orgName,
-          detail_url: input.detailUrl,
-          selector: input.selector || '',
-          is_active: input.isActive !== undefined ? input.isActive : true,
-          memo: input.memo || ''
+          title: input.title || '',
+          body_html: input.bodyHtml || '',
+          file_name: input.fileName || '',
+          file_url: input.fileUrl || '',
+          preview: input.preview || '',
+          notice_div: input.noticeDiv || '',
+          notice_num: input.noticeNum || '',
+          org_dept: input.orgDept || '',
+          org_man: input.orgMan || '',
+          org_tel: input.orgTel || '',
+          use: input.use !== undefined ? input.use : 1,
+          sample_url: input.sampleUrl || '',
+          down: input.down || ''
         });
         return {
-          id: response.data.id,
+          oid: response.data.oid,
           orgName: response.data.org_name,
-          detailUrl: response.data.detail_url,
-          selector: response.data.selector || '',
-          isActive: response.data.is_active,
-          memo: response.data.memo || ''
+          title: response.data.title || '',
+          bodyHtml: response.data.body_html || '',
+          fileName: response.data.file_name || '',
+          fileUrl: response.data.file_url || '',
+          preview: response.data.preview || '',
+          noticeDiv: response.data.notice_div || '',
+          noticeNum: response.data.notice_num || '',
+          orgDept: response.data.org_dept || '',
+          orgMan: response.data.org_man || '',
+          orgTel: response.data.org_tel || '',
+          use: response.data.use,
+          sampleUrl: response.data.sample_url || '',
+          down: response.data.down || ''
         };
       } catch (error) {
         console.error('Error updating notice detail settings:', error);
@@ -460,13 +711,54 @@ export const settingsResolvers = {
       }
     },
 
-    settingsNoticeDetailDelete: async (_: unknown, { id }: { id: string }) => {
+    settingsNoticeDetailDelete: async (_: unknown, { oid }: { oid: number }) => {
       try {
-        await apiClient.delete(`/settings_notice_detail/${id}`);
+        await apiClient.delete(`/settings_notice_detail_by_oid/${oid}`);
         return true;
       } catch (error) {
         console.error('Error deleting notice detail settings:', error);
         throw new Error('Failed to delete notice detail settings');
+      }
+    },
+
+    upsertSettingsDetailByOid: async (_: unknown, { oid, input }: { oid: number; input: SettingsNoticeDetailInput }) => {
+      try {
+        const response = await apiClient.post(`/settings_notice_detail_by_oid/${oid}`, {
+          org_name: input.orgName,
+          title: input.title || '',
+          body_html: input.bodyHtml || '',
+          file_name: input.fileName || '',
+          file_url: input.fileUrl || '',
+          preview: input.preview || '',
+          notice_div: input.noticeDiv || '',
+          notice_num: input.noticeNum || '',
+          org_dept: input.orgDept || '',
+          org_man: input.orgMan || '',
+          org_tel: input.orgTel || '',
+          use: input.use !== undefined ? input.use : 1,
+          sample_url: input.sampleUrl || '',
+          down: input.down || ''
+        });
+        return {
+          oid: response.data.oid,
+          orgName: response.data.org_name,
+          title: response.data.title || '',
+          bodyHtml: response.data.body_html || '',
+          fileName: response.data.file_name || '',
+          fileUrl: response.data.file_url || '',
+          preview: response.data.preview || '',
+          noticeDiv: response.data.notice_div || '',
+          noticeNum: response.data.notice_num || '',
+          orgDept: response.data.org_dept || '',
+          orgMan: response.data.org_man || '',
+          orgTel: response.data.org_tel || '',
+          use: response.data.use,
+          sampleUrl: response.data.sample_url || '',
+          down: response.data.down || ''
+        };
+      } catch (error) {
+        console.error('Error upserting settings detail by oid:', error);
+        throw new Error('Failed to upsert settings detail');
       }
     },
 

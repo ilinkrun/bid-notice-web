@@ -1694,3 +1694,1005 @@ Import trace for requested module:
  POST /api/graphql 404 in 2029ms
  GET /channels/board/dev/5?mode=edit&format=markdown 200 in 210ms
 [?25h
+
+> ts-nextjs-shadcn@0.1.0 dev
+> next dev -p 11501
+
+   ▲ Next.js 15.5.2
+   - Local:        http://localhost:11501
+   - Network:      http://192.168.224.2:11501
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 5.7s
+ ○ Compiling / ...
+ ✓ Compiled / in 35.3s (1771 modules)
+ ✓ Compiled in 5s (657 modules)
+ GET / 200 in 12996ms
+ ⚠ Blocked cross-origin request from 1.231.118.217 to /_next/* resource. To allow this, configure "allowedDevOrigins" in next.config
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /channels/board/[board] in 11.1s (1109 modules)
+ ✓ Compiled in 15.3s (1548 modules)
+ GET /favicon.ico 200 in 3363ms
+ GET /favicon.ico 200 in 27371ms
+ GET /channels/board/dev 200 in 25474ms
+ ○ Compiling /channels/board/[board]/[id] ...
+ ✓ Compiled /channels/board/[board]/[id] in 3.2s (3202 modules)
+ GET /channels/board/dev/1 200 in 5678ms
+ GET /channels/board/dev/1?mode=edit&format=markdown 200 in 190ms
+ GET /channels/board/dev/6 200 in 194ms
+ GET /channels/board/dev/5 200 in 116ms
+ ○ Compiling /settings/scrapping ...
+ ✓ Compiled /settings/scrapping in 3.4s (3443 modules)
+Failed to fetch settings lists: Error [ApolloError]: Response not successful: Received status code 400
+    at new Promise (<anonymous>) {
+  graphQLErrors: [],
+  protocolErrors: [],
+  clientErrors: [],
+  networkError: [Error [ServerError]: Response not successful: Received status code 400] {
+    response: Response {
+      status: 400,
+      statusText: 'Bad Request',
+      headers: Headers {
+        'x-powered-by': 'Express',
+        vary: 'Origin',
+        'access-control-allow-credentials': 'true',
+        'access-control-allow-origin': '*',
+        'cache-control': 'no-store',
+        'content-type': 'application/json; charset=utf-8',
+        'content-length': '9739',
+        etag: 'W/"260b-vsZaTAg3dJUudPyphJaw6nJRNmE"',
+        date: 'Tue, 09 Sep 2025 12:29:50 GMT',
+        connection: 'keep-alive',
+        'keep-alive': 'timeout=5'
+      },
+      body: ReadableStream { locked: true, state: 'closed', supportsBYOB: true },
+      bodyUsed: true,
+      ok: false,
+      redirected: false,
+      type: 'basic',
+      url: 'http://1.231.118.217:11401/graphql'
+    },
+    statusCode: 400,
+    result: { errors: [Array] }
+  },
+  extraInfo: undefined,
+  constructor: [Function: ApolloError],
+  [cause]: [Error [ServerError]: Response not successful: Received status code 400] {
+    response: Response {
+      status: 400,
+      statusText: 'Bad Request',
+      headers: Headers {
+        'x-powered-by': 'Express',
+        vary: 'Origin',
+        'access-control-allow-credentials': 'true',
+        'access-control-allow-origin': '*',
+        'cache-control': 'no-store',
+        'content-type': 'application/json; charset=utf-8',
+        'content-length': '9739',
+        etag: 'W/"260b-vsZaTAg3dJUudPyphJaw6nJRNmE"',
+        date: 'Tue, 09 Sep 2025 12:29:50 GMT',
+        connection: 'keep-alive',
+        'keep-alive': 'timeout=5'
+      },
+      body: ReadableStream { locked: true, state: 'closed', supportsBYOB: true },
+      bodyUsed: true,
+      ok: false,
+      redirected: false,
+      type: 'basic',
+      url: 'http://1.231.118.217:11401/graphql'
+    },
+    statusCode: 400,
+    result: { errors: [Array] }
+  }
+}
+ GET /settings/scrapping 200 in 4555ms
+Failed to fetch settings lists: Error [ApolloError]: Response not successful: Received status code 400
+    at new Promise (<anonymous>) {
+  graphQLErrors: [],
+  protocolErrors: [],
+  clientErrors: [],
+  networkError: [Error [ServerError]: Response not successful: Received status code 400] {
+    response: Response {
+      status: 400,
+      statusText: 'Bad Request',
+      headers: Headers {
+        'x-powered-by': 'Express',
+        vary: 'Origin',
+        'access-control-allow-credentials': 'true',
+        'access-control-allow-origin': '*',
+        'cache-control': 'no-store',
+        'content-type': 'application/json; charset=utf-8',
+        'content-length': '9739',
+        etag: 'W/"260b-vsZaTAg3dJUudPyphJaw6nJRNmE"',
+        date: 'Tue, 09 Sep 2025 12:29:55 GMT',
+        connection: 'keep-alive',
+        'keep-alive': 'timeout=5'
+      },
+      body: ReadableStream { locked: true, state: 'closed', supportsBYOB: true },
+      bodyUsed: true,
+      ok: false,
+      redirected: false,
+      type: 'basic',
+      url: 'http://1.231.118.217:11401/graphql'
+    },
+    statusCode: 400,
+    result: { errors: [Array] }
+  },
+  extraInfo: undefined,
+  constructor: [Function: ApolloError],
+  [cause]: [Error [ServerError]: Response not successful: Received status code 400] {
+    response: Response {
+      status: 400,
+      statusText: 'Bad Request',
+      headers: Headers {
+        'x-powered-by': 'Express',
+        vary: 'Origin',
+        'access-control-allow-credentials': 'true',
+        'access-control-allow-origin': '*',
+        'cache-control': 'no-store',
+        'content-type': 'application/json; charset=utf-8',
+        'content-length': '9739',
+        etag: 'W/"260b-vsZaTAg3dJUudPyphJaw6nJRNmE"',
+        date: 'Tue, 09 Sep 2025 12:29:55 GMT',
+        connection: 'keep-alive',
+        'keep-alive': 'timeout=5'
+      },
+      body: ReadableStream { locked: true, state: 'closed', supportsBYOB: true },
+      bodyUsed: true,
+      ok: false,
+      redirected: false,
+      type: 'basic',
+      url: 'http://1.231.118.217:11401/graphql'
+    },
+    statusCode: 400,
+    result: { errors: [Array] }
+  }
+}
+ GET /settings/scrapping 200 in 904ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 936ms (1979 modules)
+ GET /favicon.ico 200 in 1170ms
+ ○ Compiling /settings/scrapping/[oid]/list ...
+ ✓ Compiled /settings/scrapping/[oid]/list in 6.3s (2284 modules)
+An error occurred! For more details, see the full error text at https://go.apollo.dev/c/err#%7B%22version%22%3A%223.14.0%22%2C%22message%22%3A78%2C%22args%22%3A%5B%22useQuery%22%2C%22onCompleted%22%2C%22If%20your%20%60onCompleted%60%20callback%20sets%20local%20state%2C%20switch%20to%20use%20derived%20state%20using%20%60data%60%20returned%20from%20the%20hook%20instead.%20Use%20%60useEffect%60%20to%20perform%20side-effects%20as%20a%20result%20of%20updates%20to%20%60data%60.%22%5D%7D
+An error occurred! For more details, see the full error text at https://go.apollo.dev/c/err#%7B%22version%22%3A%223.14.0%22%2C%22message%22%3A78%2C%22args%22%3A%5B%22useQuery%22%2C%22onError%22%2C%22If%20your%20%60onError%60%20callback%20sets%20local%20state%2C%20switch%20to%20use%20derived%20state%20using%20%60data%60%2C%20%60error%60%20or%20%60errors%60%20returned%20from%20the%20hook%20instead.%20Use%20%60useEffect%60%20if%20you%20need%20to%20perform%20side-effects%20as%20a%20result%20of%20updates%20to%20%60data%60%2C%20%60error%60%20or%20%60errors%60.%22%5D%7D
+ GET /settings/scrapping/2/list 200 in 9147ms
+ ○ Compiling /statistics/notice ...
+ ✓ Compiled /statistics/notice in 4.5s (2605 modules)
+ GET /statistics/notice 200 in 6217ms
+ GET /statistics/notice?type=orgName 200 in 1090ms
+ ○ Compiling /notices/[category] ...
+ ✓ Compiled /notices/[category] in 20s (4319 modules)
+ GET /notices/%EA%B3%B5%EC%82%AC%EC%A0%90%EA%B2%80?gap=1 200 in 22702ms
+ ○ Compiling /statistics/logs_scraping ...
+ ✓ Compiled /statistics/logs_scraping in 2.1s (4318 modules)
+ GET /statistics/logs_scraping 200 in 2674ms
+ ○ Compiling /statistics/errors_scraping ...
+ ✓ Compiled /statistics/errors_scraping in 1942ms (4335 modules)
+ GET /statistics/errors_scraping 200 in 2393ms
+ ○ Compiling / ...
+ ✓ Compiled / in 988ms (1994 modules)
+ GET / 200 in 2489ms
+ GET / 200 in 2237ms
+ ○ Compiling /settings/scrapping ...
+ ✓ Compiled /settings/scrapping in 3.5s (1004 modules)
+Failed to fetch settings lists: Error [ApolloError]: Response not successful: Received status code 400
+    at new Promise (<anonymous>) {
+  graphQLErrors: [],
+  protocolErrors: [],
+  clientErrors: [],
+  networkError: [Error [ServerError]: Response not successful: Received status code 400] {
+    response: Response {
+      status: 400,
+      statusText: 'Bad Request',
+      headers: Headers {
+        'x-powered-by': 'Express',
+        vary: 'Origin',
+        'access-control-allow-credentials': 'true',
+        'access-control-allow-origin': '*',
+        'cache-control': 'no-store',
+        'content-type': 'application/json; charset=utf-8',
+        'content-length': '9739',
+        etag: 'W/"260b-vsZaTAg3dJUudPyphJaw6nJRNmE"',
+        date: 'Tue, 09 Sep 2025 12:39:07 GMT',
+        connection: 'keep-alive',
+        'keep-alive': 'timeout=5'
+      },
+      body: ReadableStream { locked: true, state: 'closed', supportsBYOB: true },
+      bodyUsed: true,
+      ok: false,
+      redirected: false,
+      type: 'basic',
+      url: 'http://1.231.118.217:11401/graphql'
+    },
+    statusCode: 400,
+    result: { errors: [Array] }
+  },
+  extraInfo: undefined,
+  constructor: [Function: ApolloError],
+  [cause]: [Error [ServerError]: Response not successful: Received status code 400] {
+    response: Response {
+      status: 400,
+      statusText: 'Bad Request',
+      headers: Headers {
+        'x-powered-by': 'Express',
+        vary: 'Origin',
+        'access-control-allow-credentials': 'true',
+        'access-control-allow-origin': '*',
+        'cache-control': 'no-store',
+        'content-type': 'application/json; charset=utf-8',
+        'content-length': '9739',
+        etag: 'W/"260b-vsZaTAg3dJUudPyphJaw6nJRNmE"',
+        date: 'Tue, 09 Sep 2025 12:39:07 GMT',
+        connection: 'keep-alive',
+        'keep-alive': 'timeout=5'
+      },
+      body: ReadableStream { locked: true, state: 'closed', supportsBYOB: true },
+      bodyUsed: true,
+      ok: false,
+      redirected: false,
+      type: 'basic',
+      url: 'http://1.231.118.217:11401/graphql'
+    },
+    statusCode: 400,
+    result: { errors: [Array] }
+  }
+}
+ GET /settings/scrapping 200 in 4412ms
+ ○ Compiling /settings/scrapping/[oid]/list ...
+ ✓ Compiled /settings/scrapping/[oid]/list in 5.9s (1081 modules)
+An error occurred! For more details, see the full error text at https://go.apollo.dev/c/err#%7B%22version%22%3A%223.14.0%22%2C%22message%22%3A78%2C%22args%22%3A%5B%22useQuery%22%2C%22onCompleted%22%2C%22If%20your%20%60onCompleted%60%20callback%20sets%20local%20state%2C%20switch%20to%20use%20derived%20state%20using%20%60data%60%20returned%20from%20the%20hook%20instead.%20Use%20%60useEffect%60%20to%20perform%20side-effects%20as%20a%20result%20of%20updates%20to%20%60data%60.%22%5D%7D
+An error occurred! For more details, see the full error text at https://go.apollo.dev/c/err#%7B%22version%22%3A%223.14.0%22%2C%22message%22%3A78%2C%22args%22%3A%5B%22useQuery%22%2C%22onError%22%2C%22If%20your%20%60onError%60%20callback%20sets%20local%20state%2C%20switch%20to%20use%20derived%20state%20using%20%60data%60%2C%20%60error%60%20or%20%60errors%60%20returned%20from%20the%20hook%20instead.%20Use%20%60useEffect%60%20if%20you%20need%20to%20perform%20side-effects%20as%20a%20result%20of%20updates%20to%20%60data%60%2C%20%60error%60%20or%20%60errors%60.%22%5D%7D
+ GET /settings/scrapping/2/list 200 in 7611ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 3.5s (3073 modules)
+ POST /graphql 404 in 4376ms
+ POST /graphql 404 in 174ms
+ POST /graphql 404 in 252ms
+ ✓ Compiled in 9.5s (2375 modules)
+ ✓ Compiled in 5.8s (2375 modules)
+ ✓ Compiled in 2.2s (2375 modules)
+ ✓ Compiled in 2s (2375 modules)
+ ✓ Compiled in 1956ms (2375 modules)
+ ✓ Compiled in 2.2s (2375 modules)
+ ✓ Compiled in 3.9s (2375 modules)
+ ✓ Compiled in 1939ms (2375 modules)
+ ✓ Compiled in 3.7s (2375 modules)
+ ○ Compiling /settings/scrapping/[oid]/list ...
+ ✓ Compiled /settings/scrapping/[oid]/list in 9s (3166 modules)
+An error occurred! For more details, see the full error text at https://go.apollo.dev/c/err#%7B%22version%22%3A%223.14.0%22%2C%22message%22%3A78%2C%22args%22%3A%5B%22useQuery%22%2C%22onCompleted%22%2C%22If%20your%20%60onCompleted%60%20callback%20sets%20local%20state%2C%20switch%20to%20use%20derived%20state%20using%20%60data%60%20returned%20from%20the%20hook%20instead.%20Use%20%60useEffect%60%20to%20perform%20side-effects%20as%20a%20result%20of%20updates%20to%20%60data%60.%22%5D%7D
+An error occurred! For more details, see the full error text at https://go.apollo.dev/c/err#%7B%22version%22%3A%223.14.0%22%2C%22message%22%3A78%2C%22args%22%3A%5B%22useQuery%22%2C%22onError%22%2C%22If%20your%20%60onError%60%20callback%20sets%20local%20state%2C%20switch%20to%20use%20derived%20state%20using%20%60data%60%2C%20%60error%60%20or%20%60errors%60%20returned%20from%20the%20hook%20instead.%20Use%20%60useEffect%60%20if%20you%20need%20to%20perform%20side-effects%20as%20a%20result%20of%20updates%20to%20%60data%60%2C%20%60error%60%20or%20%60errors%60.%22%5D%7D
+ GET /settings/scrapping/2/list 200 in 11159ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 615ms (808 modules)
+ GET /favicon.ico 200 in 1518ms
+ ○ Compiling /settings/scrapping/[oid]/detail ...
+ ✓ Compiled /settings/scrapping/[oid]/detail in 3.9s (3176 modules)
+ GET /settings/scrapping/2/detail 200 in 5967ms
+ GET /settings/scrapping/2/list 200 in 319ms
+ ✓ Compiled in 3.6s (3173 modules)
+An error occurred! For more details, see the full error text at https://go.apollo.dev/c/err#%7B%22version%22%3A%223.14.0%22%2C%22message%22%3A78%2C%22args%22%3A%5B%22useQuery%22%2C%22onCompleted%22%2C%22If%20your%20%60onCompleted%60%20callback%20sets%20local%20state%2C%20switch%20to%20use%20derived%20state%20using%20%60data%60%20returned%20from%20the%20hook%20instead.%20Use%20%60useEffect%60%20to%20perform%20side-effects%20as%20a%20result%20of%20updates%20to%20%60data%60.%22%5D%7D
+An error occurred! For more details, see the full error text at https://go.apollo.dev/c/err#%7B%22version%22%3A%223.14.0%22%2C%22message%22%3A78%2C%22args%22%3A%5B%22useQuery%22%2C%22onError%22%2C%22If%20your%20%60onError%60%20callback%20sets%20local%20state%2C%20switch%20to%20use%20derived%20state%20using%20%60data%60%2C%20%60error%60%20or%20%60errors%60%20returned%20from%20the%20hook%20instead.%20Use%20%60useEffect%60%20if%20you%20need%20to%20perform%20side-effects%20as%20a%20result%20of%20updates%20to%20%60data%60%2C%20%60error%60%20or%20%60errors%60.%22%5D%7D
+ GET /settings/scrapping/2/list 200 in 3327ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 707ms (813 modules)
+ GET /favicon.ico 200 in 926ms
+ ✓ Compiled in 9.2s (3190 modules)
+ ✓ Compiled in 3.7s (3190 modules)
+ ○ Compiling /settings/scrapping/[oid]/list ...
+ ✓ Compiled /settings/scrapping/[oid]/list in 6.4s (3185 modules)
+An error occurred! For more details, see the full error text at https://go.apollo.dev/c/err#%7B%22version%22%3A%223.14.0%22%2C%22message%22%3A78%2C%22args%22%3A%5B%22useQuery%22%2C%22onCompleted%22%2C%22If%20your%20%60onCompleted%60%20callback%20sets%20local%20state%2C%20switch%20to%20use%20derived%20state%20using%20%60data%60%20returned%20from%20the%20hook%20instead.%20Use%20%60useEffect%60%20to%20perform%20side-effects%20as%20a%20result%20of%20updates%20to%20%60data%60.%22%5D%7D
+An error occurred! For more details, see the full error text at https://go.apollo.dev/c/err#%7B%22version%22%3A%223.14.0%22%2C%22message%22%3A78%2C%22args%22%3A%5B%22useQuery%22%2C%22onError%22%2C%22If%20your%20%60onError%60%20callback%20sets%20local%20state%2C%20switch%20to%20use%20derived%20state%20using%20%60data%60%2C%20%60error%60%20or%20%60errors%60%20returned%20from%20the%20hook%20instead.%20Use%20%60useEffect%60%20if%20you%20need%20to%20perform%20side-effects%20as%20a%20result%20of%20updates%20to%20%60data%60%2C%20%60error%60%20or%20%60errors%60.%22%5D%7D
+ GET /settings/scrapping/2/list 200 in 6719ms
+ GET /favicon.ico 200 in 153ms
+ ✓ Compiled in 1876ms (2377 modules)
+ ✓ Compiled in 1597ms (2377 modules)
+ ✓ Compiled in 2s (2377 modules)
+ ✓ Compiled in 1881ms (2377 modules)
+ ✓ Compiled in 1807ms (2377 modules)
+ ✓ Compiled in 1996ms (2377 modules)
+ ○ Compiling /settings/scrapping/[oid]/detail ...
+ ✓ Compiled /settings/scrapping/[oid]/detail in 591ms (791 modules)
+ GET /settings/scrapping/2/detail 200 in 1183ms
+ ○ Compiling /settings/scrapping/[oid]/list ...
+ ✓ Compiled /settings/scrapping/[oid]/list in 10.3s (3173 modules)
+ GET /settings/scrapping/2/list 200 in 7632ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 2.8s (797 modules)
+ POST /graphql 404 in 3730ms
+An error occurred! For more details, see the full error text at https://go.apollo.dev/c/err#%7B%22version%22%3A%223.14.0%22%2C%22message%22%3A78%2C%22args%22%3A%5B%22useQuery%22%2C%22onCompleted%22%2C%22If%20your%20%60onCompleted%60%20callback%20sets%20local%20state%2C%20switch%20to%20use%20derived%20state%20using%20%60data%60%20returned%20from%20the%20hook%20instead.%20Use%20%60useEffect%60%20to%20perform%20side-effects%20as%20a%20result%20of%20updates%20to%20%60data%60.%22%5D%7D
+An error occurred! For more details, see the full error text at https://go.apollo.dev/c/err#%7B%22version%22%3A%223.14.0%22%2C%22message%22%3A78%2C%22args%22%3A%5B%22useQuery%22%2C%22onError%22%2C%22If%20your%20%60onError%60%20callback%20sets%20local%20state%2C%20switch%20to%20use%20derived%20state%20using%20%60data%60%2C%20%60error%60%20or%20%60errors%60%20returned%20from%20the%20hook%20instead.%20Use%20%60useEffect%60%20if%20you%20need%20to%20perform%20side-effects%20as%20a%20result%20of%20updates%20to%20%60data%60%2C%20%60error%60%20or%20%60errors%60.%22%5D%7D
+ GET /settings/scrapping/2/list 200 in 1842ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 7.4s (808 modules)
+ GET /favicon.ico 200 in 7827ms
+An error occurred! For more details, see the full error text at https://go.apollo.dev/c/err#%7B%22version%22%3A%223.14.0%22%2C%22message%22%3A78%2C%22args%22%3A%5B%22useQuery%22%2C%22onCompleted%22%2C%22If%20your%20%60onCompleted%60%20callback%20sets%20local%20state%2C%20switch%20to%20use%20derived%20state%20using%20%60data%60%20returned%20from%20the%20hook%20instead.%20Use%20%60useEffect%60%20to%20perform%20side-effects%20as%20a%20result%20of%20updates%20to%20%60data%60.%22%5D%7D
+An error occurred! For more details, see the full error text at https://go.apollo.dev/c/err#%7B%22version%22%3A%223.14.0%22%2C%22message%22%3A78%2C%22args%22%3A%5B%22useQuery%22%2C%22onError%22%2C%22If%20your%20%60onError%60%20callback%20sets%20local%20state%2C%20switch%20to%20use%20derived%20state%20using%20%60data%60%2C%20%60error%60%20or%20%60errors%60%20returned%20from%20the%20hook%20instead.%20Use%20%60useEffect%60%20if%20you%20need%20to%20perform%20side-effects%20as%20a%20result%20of%20updates%20to%20%60data%60%2C%20%60error%60%20or%20%60errors%60.%22%5D%7D
+ GET /settings/scrapping/2/list 200 in 1506ms
+ GET /favicon.ico 200 in 46ms
+ ○ Compiling /channels/board/[board] ...
+ ✓ Compiled /channels/board/[board] in 9.7s (1615 modules)
+ GET /channels/board/dev 200 in 10415ms
+ ○ Compiling /channels/board/[board]/[id] ...
+ ✓ Compiled /channels/board/[board]/[id] in 1137ms (1679 modules)
+ GET /channels/board/dev/1 200 in 1685ms
+ GET /channels/board/dev/14 200 in 226ms
+ GET /channels/board/dev/14?mode=edit&format=markdown 200 in 195ms
+ ○ Compiling /mybids/progress ...
+ ✓ Compiled /mybids/progress in 26s (3469 modules)
+ GET /mybids/progress 200 in 29194ms
+ ○ Compiling /notices/[category] ...
+ ✓ Compiled /notices/[category] in 2.6s (1961 modules)
+ GET /notices/%EA%B3%B5%EC%82%AC%EC%A0%90%EA%B2%80?gap=1 200 in 4239ms
+ GET /notices/%EA%B8%B0%ED%83%80?gap=1 200 in 531ms
+ ○ Compiling /settings/scrapping ...
+ ✓ Compiled /settings/scrapping in 4.7s (1004 modules)
+Failed to fetch settings lists: Error [ApolloError]: Response not successful: Received status code 400
+    at new Promise (<anonymous>) {
+  graphQLErrors: [],
+  protocolErrors: [],
+  clientErrors: [],
+  networkError: [Error [ServerError]: Response not successful: Received status code 400] {
+    response: Response {
+      status: 400,
+      statusText: 'Bad Request',
+      headers: Headers {
+        'x-powered-by': 'Express',
+        vary: 'Origin',
+        'access-control-allow-credentials': 'true',
+        'access-control-allow-origin': '*',
+        'cache-control': 'no-store',
+        'content-type': 'application/json; charset=utf-8',
+        'content-length': '9739',
+        etag: 'W/"260b-vsZaTAg3dJUudPyphJaw6nJRNmE"',
+        date: 'Tue, 09 Sep 2025 12:54:05 GMT',
+        connection: 'keep-alive',
+        'keep-alive': 'timeout=5'
+      },
+      body: ReadableStream { locked: true, state: 'closed', supportsBYOB: true },
+      bodyUsed: true,
+      ok: false,
+      redirected: false,
+      type: 'basic',
+      url: 'http://1.231.118.217:11401/graphql'
+    },
+    statusCode: 400,
+    result: { errors: [Array] }
+  },
+  extraInfo: undefined,
+  constructor: [Function: ApolloError],
+  [cause]: [Error [ServerError]: Response not successful: Received status code 400] {
+    response: Response {
+      status: 400,
+      statusText: 'Bad Request',
+      headers: Headers {
+        'x-powered-by': 'Express',
+        vary: 'Origin',
+        'access-control-allow-credentials': 'true',
+        'access-control-allow-origin': '*',
+        'cache-control': 'no-store',
+        'content-type': 'application/json; charset=utf-8',
+        'content-length': '9739',
+        etag: 'W/"260b-vsZaTAg3dJUudPyphJaw6nJRNmE"',
+        date: 'Tue, 09 Sep 2025 12:54:05 GMT',
+        connection: 'keep-alive',
+        'keep-alive': 'timeout=5'
+      },
+      body: ReadableStream { locked: true, state: 'closed', supportsBYOB: true },
+      bodyUsed: true,
+      ok: false,
+      redirected: false,
+      type: 'basic',
+      url: 'http://1.231.118.217:11401/graphql'
+    },
+    statusCode: 400,
+    result: { errors: [Array] }
+  }
+}
+ GET /settings/scrapping 200 in 5698ms
+ ○ Compiling /settings/scrapping/[oid]/list ...
+ ✓ Compiled /settings/scrapping/[oid]/list in 3.6s (1081 modules)
+An error occurred! For more details, see the full error text at https://go.apollo.dev/c/err#%7B%22version%22%3A%223.14.0%22%2C%22message%22%3A78%2C%22args%22%3A%5B%22useQuery%22%2C%22onCompleted%22%2C%22If%20your%20%60onCompleted%60%20callback%20sets%20local%20state%2C%20switch%20to%20use%20derived%20state%20using%20%60data%60%20returned%20from%20the%20hook%20instead.%20Use%20%60useEffect%60%20to%20perform%20side-effects%20as%20a%20result%20of%20updates%20to%20%60data%60.%22%5D%7D
+An error occurred! For more details, see the full error text at https://go.apollo.dev/c/err#%7B%22version%22%3A%223.14.0%22%2C%22message%22%3A78%2C%22args%22%3A%5B%22useQuery%22%2C%22onError%22%2C%22If%20your%20%60onError%60%20callback%20sets%20local%20state%2C%20switch%20to%20use%20derived%20state%20using%20%60data%60%2C%20%60error%60%20or%20%60errors%60%20returned%20from%20the%20hook%20instead.%20Use%20%60useEffect%60%20if%20you%20need%20to%20perform%20side-effects%20as%20a%20result%20of%20updates%20to%20%60data%60%2C%20%60error%60%20or%20%60errors%60.%22%5D%7D
+ GET /settings/scrapping/2/list 200 in 5134ms
+ ✓ Compiled in 4.2s (2380 modules)
+ ✓ Compiled in 87ms
+ ✓ Compiled in 2.6s (2371 modules)
+ ✓ Compiled in 2.5s (2357 modules)
+ ✓ Compiled in 1881ms (2371 modules)
+ ○ Compiling /settings/scrapping/[oid]/list ...
+ ✓ Compiled /settings/scrapping/[oid]/list in 15s (3156 modules)
+ GET /settings/scrapping/2/list 200 in 16637ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 3.9s (807 modules)
+ GET /favicon.ico 200 in 4264ms
+ GET /settings/scrapping/2/list 200 in 1237ms
+ GET /favicon.ico 200 in 62ms
+ ⚠ ./src/lib/apollo.ts
+Attempted import error: 'registerApolloClient' is not exported from '@apollo/experimental-nextjs-app-support/rsc' (imported as 'registerApolloClient').
+
+Import trace for requested module:
+./src/lib/apollo.ts
+./src/app/settings/scrapping/[oid]/list/page.tsx
+ ⚠ ./src/lib/apollo.ts
+Attempted import error: 'registerApolloClient' is not exported from '@apollo/experimental-nextjs-app-support/rsc' (imported as 'registerApolloClient').
+
+Import trace for requested module:
+./src/lib/apollo.ts
+./src/app/settings/scrapping/[oid]/list/page.tsx
+ ○ Compiling /settings/scrapping/[oid]/list ...
+ ⚠ ./src/lib/apollo.ts
+Attempted import error: 'registerApolloClient' is not exported from '@apollo/experimental-nextjs-app-support/rsc' (imported as 'registerApolloClient').
+
+Import trace for requested module:
+./src/lib/apollo.ts
+./src/app/settings/scrapping/[oid]/list/page.tsx
+
+./src/lib/apollo.ts
+Attempted import error: 'registerApolloClient' is not exported from '@apollo/experimental-nextjs-app-support/rsc' (imported as 'registerApolloClient').
+
+Import trace for requested module:
+./src/lib/apollo.ts
+./src/app/settings/scrapping/[oid]/list/page.tsx
+ ⨯ TypeError: (0 , _apollo_experimental_nextjs_app_support_rsc__WEBPACK_IMPORTED_MODULE_0__.registerApolloClient) is not a function
+    at eval (src/lib/apollo.ts:3:44)
+    at (ssr)/./src/lib/apollo.ts (.next/server/app/settings/scrapping/[oid]/list/page.js:399:1)
+    at eval (webpack-internal:///(ssr)/./src/app/settings/scrapping/[oid]/list/page.tsx:8:69)
+    at (ssr)/./src/app/settings/scrapping/[oid]/list/page.tsx (.next/server/app/settings/scrapping/[oid]/list/page.js:234:1)
+  1 | import { ApolloClient, InMemoryCache } from '@apollo/client';
+  2 | import { registerApolloClient } from '@apollo/experimental-nextjs-app-support/rsc';
+> 3 | export var getClient = registerApolloClient(function () {
+    |                                            ^
+  4 |     return new ApolloClient({
+  5 |         cache: new InMemoryCache(),
+  6 |         uri: process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql', {
+  digest: '3983694311'
+}
+ GET /settings/scrapping/2/list 200 in 3988ms
+ ⚠ ./src/lib/apollo.ts
+Attempted import error: 'registerApolloClient' is not exported from '@apollo/experimental-nextjs-app-support/rsc' (imported as 'registerApolloClient').
+
+Import trace for requested module:
+./src/lib/apollo.ts
+./src/app/settings/scrapping/[oid]/list/page.tsx
+
+./src/lib/apollo.ts
+Attempted import error: 'registerApolloClient' is not exported from '@apollo/experimental-nextjs-app-support/rsc' (imported as 'registerApolloClient').
+
+Import trace for requested module:
+./src/lib/apollo.ts
+./src/app/settings/scrapping/[oid]/list/page.tsx
+ ⚠ ./src/lib/apollo.ts
+Attempted import error: 'registerApolloClient' is not exported from '@apollo/experimental-nextjs-app-support/rsc' (imported as 'registerApolloClient').
+
+Import trace for requested module:
+./src/lib/apollo.ts
+./src/app/settings/scrapping/[oid]/list/page.tsx
+
+./src/lib/apollo.ts
+Attempted import error: 'registerApolloClient' is not exported from '@apollo/experimental-nextjs-app-support/rsc' (imported as 'registerApolloClient').
+
+Import trace for requested module:
+./src/lib/apollo.ts
+./src/app/settings/scrapping/[oid]/list/page.tsx
+ GET /favicon.ico 200 in 934ms
+ ⨯ TypeError: (0 , _apollo_experimental_nextjs_app_support_rsc__WEBPACK_IMPORTED_MODULE_0__.registerApolloClient) is not a function
+    at eval (src/lib/apollo.ts:3:44)
+    at (ssr)/./src/lib/apollo.ts (.next/server/app/settings/scrapping/[oid]/list/page.js:399:1)
+    at eval (webpack-internal:///(ssr)/./src/app/settings/scrapping/[oid]/list/page.tsx:8:69)
+    at (ssr)/./src/app/settings/scrapping/[oid]/list/page.tsx (.next/server/app/settings/scrapping/[oid]/list/page.js:234:1)
+  1 | import { ApolloClient, InMemoryCache } from '@apollo/client';
+  2 | import { registerApolloClient } from '@apollo/experimental-nextjs-app-support/rsc';
+> 3 | export var getClient = registerApolloClient(function () {
+    |                                            ^
+  4 |     return new ApolloClient({
+  5 |         cache: new InMemoryCache(),
+  6 |         uri: process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql', {
+  digest: '3983694311'
+}
+ GET /settings/scrapping/2/list 200 in 2485ms
+ GET /favicon.ico 200 in 41ms
+ ⚠ ./src/lib/apollo.ts
+Attempted import error: 'registerApolloClient' is not exported from '@apollo/experimental-nextjs-app-support/rsc' (imported as 'registerApolloClient').
+
+Import trace for requested module:
+./src/lib/apollo.ts
+./src/app/settings/scrapping/[oid]/list/page.tsx
+
+./src/lib/apollo.ts
+Attempted import error: 'registerApolloClient' is not exported from '@apollo/experimental-nextjs-app-support/rsc' (imported as 'registerApolloClient').
+
+Import trace for requested module:
+./src/lib/apollo.ts
+./src/app/settings/scrapping/[oid]/list/page.tsx
+ ⚠ ./src/lib/apollo.ts
+Attempted import error: 'registerApolloClient' is not exported from '@apollo/experimental-nextjs-app-support/rsc' (imported as 'registerApolloClient').
+
+Import trace for requested module:
+./src/lib/apollo.ts
+./src/app/settings/scrapping/[oid]/list/page.tsx
+
+./src/lib/apollo.ts
+Attempted import error: 'registerApolloClient' is not exported from '@apollo/experimental-nextjs-app-support/rsc' (imported as 'registerApolloClient').
+
+Import trace for requested module:
+./src/lib/apollo.ts
+./src/app/settings/scrapping/[oid]/list/page.tsx
+Failed to fetch settings lists: Error [ApolloError]: Response not successful: Received status code 400
+    at new Promise (<anonymous>) {
+  graphQLErrors: [],
+  protocolErrors: [],
+  clientErrors: [],
+  networkError: [Error [ServerError]: Response not successful: Received status code 400] {
+    response: Response {
+      status: 400,
+      statusText: 'Bad Request',
+      headers: Headers {
+        'x-powered-by': 'Express',
+        vary: 'Origin',
+        'access-control-allow-credentials': 'true',
+        'access-control-allow-origin': '*',
+        'cache-control': 'no-store',
+        'content-type': 'application/json; charset=utf-8',
+        'content-length': '9739',
+        etag: 'W/"260b-vsZaTAg3dJUudPyphJaw6nJRNmE"',
+        date: 'Tue, 09 Sep 2025 13:01:26 GMT',
+        connection: 'keep-alive',
+        'keep-alive': 'timeout=5'
+      },
+      body: ReadableStream { locked: true, state: 'closed', supportsBYOB: true },
+      bodyUsed: true,
+      ok: false,
+      redirected: false,
+      type: 'basic',
+      url: 'http://1.231.118.217:11401/graphql'
+    },
+    statusCode: 400,
+    result: { errors: [Array] }
+  },
+  extraInfo: undefined,
+  constructor: [Function: ApolloError],
+  [cause]: [Error [ServerError]: Response not successful: Received status code 400] {
+    response: Response {
+      status: 400,
+      statusText: 'Bad Request',
+      headers: Headers {
+        'x-powered-by': 'Express',
+        vary: 'Origin',
+        'access-control-allow-credentials': 'true',
+        'access-control-allow-origin': '*',
+        'cache-control': 'no-store',
+        'content-type': 'application/json; charset=utf-8',
+        'content-length': '9739',
+        etag: 'W/"260b-vsZaTAg3dJUudPyphJaw6nJRNmE"',
+        date: 'Tue, 09 Sep 2025 13:01:26 GMT',
+        connection: 'keep-alive',
+        'keep-alive': 'timeout=5'
+      },
+      body: ReadableStream { locked: true, state: 'closed', supportsBYOB: true },
+      bodyUsed: true,
+      ok: false,
+      redirected: false,
+      type: 'basic',
+      url: 'http://1.231.118.217:11401/graphql'
+    },
+    statusCode: 400,
+    result: { errors: [Array] }
+  }
+}
+ GET /settings/scrapping 200 in 9910ms
+ ⚠ ./src/lib/apollo.ts
+Attempted import error: 'registerApolloClient' is not exported from '@apollo/experimental-nextjs-app-support/rsc' (imported as 'registerApolloClient').
+
+Import trace for requested module:
+./src/lib/apollo.ts
+./src/app/settings/scrapping/[oid]/list/page.tsx
+ ⚠ ./src/lib/apollo.ts
+Attempted import error: 'registerApolloClient' is not exported from '@apollo/experimental-nextjs-app-support/rsc' (imported as 'registerApolloClient').
+
+Import trace for requested module:
+./src/lib/apollo.ts
+./src/app/settings/scrapping/[oid]/list/page.tsx
+ ⚠ ./src/lib/apollo.ts
+Attempted import error: 'registerApolloClient' is not exported from '@apollo/experimental-nextjs-app-support/rsc' (imported as 'registerApolloClient').
+
+Import trace for requested module:
+./src/lib/apollo.ts
+./src/app/settings/scrapping/[oid]/list/page.tsx
+ GET /login 200 in 7977ms
+ GET / 200 in 17526ms
+ ⚠ ./src/lib/apollo.ts
+Attempted import error: 'registerApolloClient' is not exported from '@apollo/experimental-nextjs-app-support/rsc' (imported as 'registerApolloClient').
+
+Import trace for requested module:
+./src/lib/apollo.ts
+./src/app/settings/scrapping/[oid]/list/page.tsx
+
+./src/lib/apollo.ts
+Attempted import error: 'registerApolloClient' is not exported from '@apollo/experimental-nextjs-app-support/rsc' (imported as 'registerApolloClient').
+
+Import trace for requested module:
+./src/lib/apollo.ts
+./src/app/settings/scrapping/[oid]/list/page.tsx
+ ⨯ TypeError: (0 , _apollo_experimental_nextjs_app_support_rsc__WEBPACK_IMPORTED_MODULE_0__.registerApolloClient) is not a function
+    at eval (src/lib/apollo.ts:3:44)
+    at (ssr)/./src/lib/apollo.ts (.next/server/app/settings/scrapping/[oid]/list/page.js:322:1)
+    at eval (webpack-internal:///(ssr)/./src/app/settings/scrapping/[oid]/list/page.tsx:14:69)
+    at (ssr)/./src/app/settings/scrapping/[oid]/list/page.tsx (.next/server/app/settings/scrapping/[oid]/list/page.js:234:1)
+  1 | import { ApolloClient, InMemoryCache } from '@apollo/client';
+  2 | import { registerApolloClient } from '@apollo/experimental-nextjs-app-support/rsc';
+> 3 | export var getClient = registerApolloClient(function () {
+    |                                            ^
+  4 |     return new ApolloClient({
+  5 |         cache: new InMemoryCache(),
+  6 |         uri: process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql', {
+  digest: '3983694311'
+}
+ GET /settings/scrapping/2/list 200 in 9314ms
+ GET / 200 in 3031ms
+ GET / 200 in 1490ms
+ ✓ Compiled /settings/scrapping/[oid]/list in 8.4s (2380 modules)
+ ○ Compiling /settings/scrapping/[oid]/list ...
+ ✓ Compiled /settings/scrapping/[oid]/list in 3.8s (723 modules)
+ GET /settings/scrapping/2/list 200 in 5444ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 3.9s (740 modules)
+ GET /favicon.ico 200 in 4435ms
+ ○ Compiling / ...
+ ✓ Compiled / in 739ms (1092 modules)
+ GET / 200 in 3917ms
+ ○ Compiling /settings/scrapping ...
+ ✓ Compiled /settings/scrapping in 4.6s (1004 modules)
+Failed to fetch settings lists: Error [ApolloError]: Response not successful: Received status code 400
+    at new Promise (<anonymous>) {
+  graphQLErrors: [],
+  protocolErrors: [],
+  clientErrors: [],
+  networkError: [Error [ServerError]: Response not successful: Received status code 400] {
+    response: Response {
+      status: 400,
+      statusText: 'Bad Request',
+      headers: Headers {
+        'x-powered-by': 'Express',
+        vary: 'Origin',
+        'access-control-allow-credentials': 'true',
+        'access-control-allow-origin': '*',
+        'cache-control': 'no-store',
+        'content-type': 'application/json; charset=utf-8',
+        'content-length': '9739',
+        etag: 'W/"260b-vsZaTAg3dJUudPyphJaw6nJRNmE"',
+        date: 'Tue, 09 Sep 2025 13:06:19 GMT',
+        connection: 'keep-alive',
+        'keep-alive': 'timeout=5'
+      },
+      body: ReadableStream { locked: true, state: 'closed', supportsBYOB: true },
+      bodyUsed: true,
+      ok: false,
+      redirected: false,
+      type: 'basic',
+      url: 'http://1.231.118.217:11401/graphql'
+    },
+    statusCode: 400,
+    result: { errors: [Array] }
+  },
+  extraInfo: undefined,
+  constructor: [Function: ApolloError],
+  [cause]: [Error [ServerError]: Response not successful: Received status code 400] {
+    response: Response {
+      status: 400,
+      statusText: 'Bad Request',
+      headers: Headers {
+        'x-powered-by': 'Express',
+        vary: 'Origin',
+        'access-control-allow-credentials': 'true',
+        'access-control-allow-origin': '*',
+        'cache-control': 'no-store',
+        'content-type': 'application/json; charset=utf-8',
+        'content-length': '9739',
+        etag: 'W/"260b-vsZaTAg3dJUudPyphJaw6nJRNmE"',
+        date: 'Tue, 09 Sep 2025 13:06:19 GMT',
+        connection: 'keep-alive',
+        'keep-alive': 'timeout=5'
+      },
+      body: ReadableStream { locked: true, state: 'closed', supportsBYOB: true },
+      bodyUsed: true,
+      ok: false,
+      redirected: false,
+      type: 'basic',
+      url: 'http://1.231.118.217:11401/graphql'
+    },
+    statusCode: 400,
+    result: { errors: [Array] }
+  }
+}
+ GET /settings/scrapping 200 in 5081ms
+ ○ Compiling / ...
+ ✓ Compiled / in 2.2s (1092 modules)
+ GET / 200 in 5066ms
+ ✓ Compiled in 3.7s (2380 modules)
+ ✓ Compiled in 2.1s (2380 modules)
+ ✓ Compiled in 8.2s (2380 modules)
+ ✓ Compiled in 2s (2380 modules)
+ ✓ Compiled in 4.9s (2380 modules)
+ ✓ Compiled in 2.4s (2380 modules)
+ ✓ Compiled in 1519ms (2380 modules)
+ ✓ Compiled in 1507ms (2380 modules)
+ ○ Compiling /settings/scrapping ...
+ ✓ Compiled /settings/scrapping in 2.5s (1004 modules)
+ GET /settings/scrapping 200 in 4450ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /settings/scrapping/[oid]/list in 4.6s (1021 modules)
+ ✓ Compiled / in 2ms (1031 modules)
+ ✓ Compiled in 11ms (1127 modules)
+ ✓ Compiled in 1ms (1127 modules)
+ GET /favicon.ico 200 in 22122ms
+ ✓ Compiled in 1ms (1127 modules)
+ GET /settings/scrapping/6/list 200 in 20588ms
+ GET /favicon.ico 200 in 4031ms
+ GET / 200 in 20509ms
+ GET /settings/scrapping/6/list 200 in 488ms
+ GET /favicon.ico 200 in 66ms
+ ✓ Compiled in 10.3s (2380 modules)
+ ✓ Compiled in 2.9s (2380 modules)
+ ✓ Compiled in 1545ms (2380 modules)
+ ✓ Compiled in 1442ms (2380 modules)
+ ○ Compiling / ...
+ ✓ Compiled / in 2.3s (1092 modules)
+ GET / 200 in 5030ms
+ GET / 200 in 1791ms
+ GET / 200 in 1542ms
+ GET / 200 in 1531ms
+ GET / 200 in 1488ms
+ GET / 200 in 1476ms
+Failed to fetch notices statistics: Error [ApolloError]: fetch failed
+    at new Promise (<anonymous>) {
+  graphQLErrors: [],
+  protocolErrors: [],
+  clientErrors: [],
+  networkError: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '192.168.224.2',
+        localPort: 36656,
+        remoteAddress: undefined,
+        remotePort: undefined,
+        remoteFamily: undefined,
+        timeout: undefined,
+        bytesWritten: 503,
+        bytesRead: 0
+      }
+    }
+  },
+  extraInfo: undefined,
+  constructor: [Function: ApolloError],
+  [cause]: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '192.168.224.2',
+        localPort: 36656,
+        remoteAddress: undefined,
+        remotePort: undefined,
+        remoteFamily: undefined,
+        timeout: undefined,
+        bytesWritten: 503,
+        bytesRead: 0
+      }
+    }
+  }
+}
+Failed to fetch error scrapings: Error [ApolloError]: fetch failed
+    at new Promise (<anonymous>) {
+  graphQLErrors: [],
+  protocolErrors: [],
+  clientErrors: [],
+  networkError: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '192.168.224.2',
+        localPort: 36666,
+        remoteAddress: undefined,
+        remotePort: undefined,
+        remoteFamily: undefined,
+        timeout: undefined,
+        bytesWritten: 488,
+        bytesRead: 0
+      }
+    }
+  },
+  extraInfo: undefined,
+  constructor: [Function: ApolloError],
+  [cause]: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '192.168.224.2',
+        localPort: 36666,
+        remoteAddress: undefined,
+        remotePort: undefined,
+        remoteFamily: undefined,
+        timeout: undefined,
+        bytesWritten: 488,
+        bytesRead: 0
+      }
+    }
+  }
+}
+ GET / 200 in 488ms
+ ✓ Compiled in 5.9s (2380 modules)
+ ✓ Compiled in 7.5s (2384 modules)
+Failed to fetch notices statistics: Error [ApolloError]: fetch failed
+    at new Promise (<anonymous>) {
+  graphQLErrors: [],
+  protocolErrors: [],
+  clientErrors: [],
+  networkError: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '192.168.224.2',
+        localPort: 36766,
+        remoteAddress: undefined,
+        remotePort: undefined,
+        remoteFamily: undefined,
+        timeout: undefined,
+        bytesWritten: 503,
+        bytesRead: 0
+      }
+    }
+  },
+  extraInfo: undefined,
+  constructor: [Function: ApolloError],
+  [cause]: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '192.168.224.2',
+        localPort: 36766,
+        remoteAddress: undefined,
+        remotePort: undefined,
+        remoteFamily: undefined,
+        timeout: undefined,
+        bytesWritten: 503,
+        bytesRead: 0
+      }
+    }
+  }
+}
+Failed to fetch error scrapings: Error [ApolloError]: fetch failed
+    at new Promise (<anonymous>) {
+  graphQLErrors: [],
+  protocolErrors: [],
+  clientErrors: [],
+  networkError: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '192.168.224.2',
+        localPort: 36770,
+        remoteAddress: undefined,
+        remotePort: undefined,
+        remoteFamily: undefined,
+        timeout: undefined,
+        bytesWritten: 488,
+        bytesRead: 0
+      }
+    }
+  },
+  extraInfo: undefined,
+  constructor: [Function: ApolloError],
+  [cause]: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '192.168.224.2',
+        localPort: 36770,
+        remoteAddress: undefined,
+        remotePort: undefined,
+        remoteFamily: undefined,
+        timeout: undefined,
+        bytesWritten: 488,
+        bytesRead: 0
+      }
+    }
+  }
+}
+ GET / 200 in 417ms
+ ○ Compiling /settings/scrapping/[oid]/list ...
+ ✓ Compiled /settings/scrapping/[oid]/list in 12.6s (790 modules)
+ GET /settings/scrapping/6/list 200 in 14811ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 789ms (807 modules)
+ GET /favicon.ico 200 in 1348ms
+ ○ Compiling / ...
+ ✓ Compiled / in 5.1s (1092 modules)
+Failed to fetch notices statistics: Error [ApolloError]: fetch failed
+    at new Promise (<anonymous>) {
+  graphQLErrors: [],
+  protocolErrors: [],
+  clientErrors: [],
+  networkError: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '192.168.224.2',
+        localPort: 37002,
+        remoteAddress: undefined,
+        remotePort: undefined,
+        remoteFamily: undefined,
+        timeout: undefined,
+        bytesWritten: 503,
+        bytesRead: 0
+      }
+    }
+  },
+  extraInfo: undefined,
+  constructor: [Function: ApolloError],
+  [cause]: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '192.168.224.2',
+        localPort: 37002,
+        remoteAddress: undefined,
+        remotePort: undefined,
+        remoteFamily: undefined,
+        timeout: undefined,
+        bytesWritten: 503,
+        bytesRead: 0
+      }
+    }
+  }
+}
+Failed to fetch error scrapings: Error [ApolloError]: fetch failed
+    at new Promise (<anonymous>) {
+  graphQLErrors: [],
+  protocolErrors: [],
+  clientErrors: [],
+  networkError: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '192.168.224.2',
+        localPort: 37006,
+        remoteAddress: undefined,
+        remotePort: undefined,
+        remoteFamily: undefined,
+        timeout: undefined,
+        bytesWritten: 488,
+        bytesRead: 0
+      }
+    }
+  },
+  extraInfo: undefined,
+  constructor: [Function: ApolloError],
+  [cause]: [TypeError: fetch failed] {
+    [cause]: [Error [SocketError]: other side closed] {
+      code: 'UND_ERR_SOCKET',
+      socket: {
+        localAddress: '192.168.224.2',
+        localPort: 37006,
+        remoteAddress: undefined,
+        remotePort: undefined,
+        remoteFamily: undefined,
+        timeout: undefined,
+        bytesWritten: 488,
+        bytesRead: 0
+      }
+    }
+  }
+}
+ GET / 200 in 9393ms
+ GET / 200 in 2386ms
+ GET / 200 in 2441ms
+ ○ Compiling /settings/scrapping/[oid]/list ...
+ ✓ Compiled /settings/scrapping/[oid]/list in 3.2s (1116 modules)
+ GET /settings/scrapping/6/list 200 in 4793ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 1036ms (1133 modules)
+ GET /favicon.ico 200 in 1534ms
+[?25h

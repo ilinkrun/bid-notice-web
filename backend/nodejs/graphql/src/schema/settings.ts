@@ -1,21 +1,51 @@
 export const settingsTypeDefs = `#graphql
+
+  type SettingsElement {
+    key: String!
+    xpath: String!
+    target: String
+    callback: String
+  }
+
   type SettingsNoticeList {
-    id: String!
+    oid: Int!
     orgName: String!
-    crawlUrl: String!
-    crawlUrlDetail: String
-    isActive: Boolean!
-    lastCrawledAt: String
-    memo: String
+    url: String!
+    iframe: String
+    rowXpath: String
+    paging: String
+    startPage: Int
+    endPage: Int
+    login: String
+    use: Int!
+    orgRegion: String
+    registration: String
+    title: String
+    detailUrl: String
+    postedDate: String
+    postedBy: String
+    companyInCharge: String
+    orgMan: String
+    exceptionRow: String
+    elements: [SettingsElement]
   }
 
   type SettingsNoticeDetail {
-    id: String!
+    oid: Int!
     orgName: String!
-    detailUrl: String!
-    selector: String
-    isActive: Boolean!
-    memo: String
+    title: String
+    bodyHtml: String
+    fileName: String
+    fileUrl: String
+    preview: String
+    noticeDiv: String
+    noticeNum: String
+    orgDept: String
+    orgMan: String
+    orgTel: String
+    use: Int!
+    sampleUrl: String
+    down: String
   }
 
   type SettingsNoticeCategory {
@@ -46,11 +76,13 @@ export const settingsTypeDefs = `#graphql
 
   extend type Query {
     settingsNoticeListAll: [SettingsNoticeList!]!
-    settingsNoticeListOne(orgName: String!): SettingsNoticeList
+    settingsNoticeListOne(oid: Int!): SettingsNoticeList
+    settingListByOid(oid: Int): SettingsNoticeList
     settingsNoticeListByOrg(orgName: String!): [SettingsNoticeList!]!
     
     settingsNoticeDetailAll: [SettingsNoticeDetail!]!
-    settingsNoticeDetailOne(orgName: String!): SettingsNoticeDetail
+    settingsNoticeDetailOne(oid: Int!): SettingsNoticeDetail
+    settingsDetailByOid(oid: Int!): SettingsNoticeDetail
     settingsNoticeDetailByOrg(orgName: String!): [SettingsNoticeDetail!]!
     
     settingsNoticeCategoryAll: [SettingsNoticeCategory!]!
@@ -68,11 +100,12 @@ export const settingsTypeDefs = `#graphql
   extend type Mutation {
     settingsNoticeListCreate(input: SettingsNoticeListInput!): SettingsNoticeList!
     settingsNoticeListUpdate(input: SettingsNoticeListInput!): SettingsNoticeList!
-    settingsNoticeListDelete(id: String!): Boolean
+    settingsNoticeListDelete(oid: Int!): Boolean
     
     settingsNoticeDetailCreate(input: SettingsNoticeDetailInput!): SettingsNoticeDetail!
     settingsNoticeDetailUpdate(input: SettingsNoticeDetailInput!): SettingsNoticeDetail!
-    settingsNoticeDetailDelete(id: String!): Boolean
+    settingsNoticeDetailDelete(oid: Int!): Boolean
+    upsertSettingsDetailByOid(oid: Int!, input: SettingsNoticeDetailInput!): SettingsNoticeDetail!
     
     settingsNoticeCategoryCreate(input: SettingsNoticeCategoryInput!): SettingsNoticeCategory!
     settingsNoticeCategoryUpdate(input: SettingsNoticeCategoryInput!): SettingsNoticeCategory!
@@ -101,22 +134,43 @@ export const settingsTypeDefs = `#graphql
   }
 
   input SettingsNoticeListInput {
-    id: String
+    oid: Int
     orgName: String!
-    crawlUrl: String!
-    crawlUrlDetail: String
-    isActive: Boolean
-    lastCrawledAt: String
-    memo: String
+    url: String!
+    iframe: String
+    rowXpath: String
+    paging: String
+    startPage: Int
+    endPage: Int
+    login: String
+    use: Int
+    orgRegion: String
+    registration: String
+    title: String
+    detailUrl: String
+    postedDate: String
+    postedBy: String
+    companyInCharge: String
+    orgMan: String
+    exceptionRow: String
   }
 
   input SettingsNoticeDetailInput {
-    id: String
+    oid: Int
     orgName: String!
-    detailUrl: String!
-    selector: String
-    isActive: Boolean
-    memo: String
+    title: String
+    bodyHtml: String
+    fileName: String
+    fileUrl: String
+    preview: String
+    noticeDiv: String
+    noticeNum: String
+    orgDept: String
+    orgMan: String
+    orgTel: String
+    use: Int
+    sampleUrl: String
+    down: String
   }
 
   input SettingsNoticeCategoryInput {

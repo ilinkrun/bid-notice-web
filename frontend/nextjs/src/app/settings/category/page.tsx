@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 const GET_SETTINGS_NOTICE_CATEGORYS = gql`
   query GetSettingsCategorys {
-    settingsCategorys {
+    settingsNoticeCategoryAll {
       sn
       category
       keywords
@@ -30,7 +30,7 @@ async function getSettingsCategorys() {
       query: GET_SETTINGS_NOTICE_CATEGORYS,
       fetchPolicy: 'no-cache',
     });
-    return data.settingsCategorys;
+    return data.settingsNoticeCategoryAll;
   } catch (error) {
     console.error('Failed to fetch settings categorys:', error);
     return [];

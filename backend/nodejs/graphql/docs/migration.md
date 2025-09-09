@@ -459,3 +459,263 @@ query BoardsPostsAll($board: String!) {
       },
   ...
 }
+
+
+===
+
+{operationName: "GetSettingsListByOrgName", variables: {orgName: "강화군청"},…}
+operationName
+: 
+"GetSettingsListByOrgName"
+query
+: 
+"query GetSettingsListByOrgName($orgName: String!) {\n  settingsNoticeListOne(orgName: $orgName) {\n    id\n    orgName\n    crawlUrl\n    crawlUrlDetail\n    isActive\n    lastCrawledAt\n    memo\n    __typename\n  }\n}"
+variables
+: 
+{orgName: "강화군청"}
+
+
+http://1.231.118.217:11501/settings/scrapping 페이지는 목록이 잘 로딩되었는데,
+
+http://1.231.118.217:11501/settings/scrapping/2/list, http://1.231.118.217:11501/settings/scrapping/2/detail 목록 스크랩 설정, 상세 스크랩 설정 페이지에서는 오류가 발생해요.
+
+그런데, settings/scrapping/2/list 에서는 settingsNoticeListOne(orgName: $orgName) 을 사용하고, 
+
+
+---
+
+query SettingsNoticeListOne($orgName: String!) {
+  settingsNoticeListOne(orgName: $orgName) {
+    crawlUrl
+    crawlUrlDetail
+    id
+  }
+}
+
+{
+  "orgName": "강화군청"
+}
+
+{
+  "errors": [
+    {
+      "message": "Cannot return null for non-nullable field SettingsNoticeList.crawlUrl.",
+      "locations": [
+        {
+          "line": 3,
+          "column": 5
+        }
+      ],
+      "path": [
+        "settingsNoticeListOne",
+        "crawlUrl"
+      ],
+      "extensions": {
+        "code": "INTERNAL_SERVER_ERROR",
+        "stacktrace": [
+          "Error: Cannot return null for non-nullable field SettingsNoticeList.crawlUrl.",
+          "    at completeValue (/exposed/projects/bid-notice-web/backend/nodejs/graphql/node_modules/graphql/execution/execute.js:613:13)",
+          "    at executeField (/exposed/projects/bid-notice-web/backend/nodejs/graphql/node_modules/graphql/execution/execute.js:508:19)",
+          "    at executeFields (/exposed/projects/bid-notice-web/backend/nodejs/graphql/node_modules/graphql/execution/execute.js:422:22)",
+          "    at completeObjectValue (/exposed/projects/bid-notice-web/backend/nodejs/graphql/node_modules/graphql/execution/execute.js:933:10)",
+          "    at completeValue (/exposed/projects/bid-notice-web/backend/nodejs/graphql/node_modules/graphql/execution/execute.js:654:12)",
+          "    at /exposed/projects/bid-notice-web/backend/nodejs/graphql/node_modules/graphql/execution/execute.js:505:9",
+          "    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)",
+          "    at async Promise.all (index 0)",
+          "    at async execute (/exposed/projects/bid-notice-web/backend/nodejs/graphql/node_modules/@apollo/server/src/requestPipeline.ts:550:31)",
+          "    at async processGraphQLRequest (/exposed/projects/bid-notice-web/backend/nodejs/graphql/node_modules/@apollo/server/src/requestPipeline.ts:436:26)"
+        ]
+      }
+    }
+  ],
+  "data": {
+    "settingsNoticeListOne": null
+  }
+}
+
+====
+
+{
+  "errors": [
+    {
+      "message": "Cannot return null for non-nullable field SettingsNoticeList.crawlUrl.",
+      "locations": [
+        {
+          "line": 3,
+          "column": 5
+        }
+      ],
+      "path": [
+        "settingsNoticeListOne",
+        "crawlUrl"
+      ],
+      "extensions": {
+        "code": "INTERNAL_SERVER_ERROR",
+        "stacktrace": [
+          "Error: Cannot return null for non-nullable field SettingsNoticeList.crawlUrl.",
+          "    at completeValue (/exposed/projects/bid-notice-web/backend/nodejs/graphql/node_modules/graphql/execution/execute.js:613:13)",
+          "    at executeField (/exposed/projects/bid-notice-web/backend/nodejs/graphql/node_modules/graphql/execution/execute.js:508:19)",
+          "    at executeFields (/exposed/projects/bid-notice-web/backend/nodejs/graphql/node_modules/graphql/execution/execute.js:422:22)",
+          "    at completeObjectValue (/exposed/projects/bid-notice-web/backend/nodejs/graphql/node_modules/graphql/execution/execute.js:933:10)",
+          "    at completeValue (/exposed/projects/bid-notice-web/backend/nodejs/graphql/node_modules/graphql/execution/execute.js:654:12)",
+          "    at /exposed/projects/bid-notice-web/backend/nodejs/graphql/node_modules/graphql/execution/execute.js:505:9",
+          "    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)",
+          "    at async Promise.all (index 0)",
+          "    at async execute (/exposed/projects/bid-notice-web/backend/nodejs/graphql/node_modules/@apollo/server/src/requestPipeline.ts:550:31)",
+          "    at async processGraphQLRequest (/exposed/projects/bid-notice-web/backend/nodejs/graphql/node_modules/@apollo/server/src/requestPipeline.ts:436:26)"
+        ]
+      }
+    }
+  ],
+  "data": {
+    "settingsNoticeListOne": null
+  }
+}
+
+===
+
+query SettingsNoticeDetailAll {
+  settingsNoticeDetailAll {
+    detailUrl
+    id
+  }
+}
+
+
+{
+  "errors": [
+    {
+      "message": "Cannot return null for non-nullable field SettingsNoticeDetail.detailUrl.",
+      "locations": [
+        {
+          "line": 3,
+          "column": 5
+        }
+      ],
+      "path": [
+        "settingsNoticeDetailAll",
+        0,
+        "detailUrl"
+      ],
+      "extensions": {
+        "code": "INTERNAL_SERVER_ERROR",
+        "stacktrace": [
+          "Error: Cannot return null for non-nullable field SettingsNoticeDetail.detailUrl.",
+          "    at completeValue (/exposed/projects/bid-notice-web/backend/nodejs/graphql/node_modules/graphql/execution/execute.js:613:13)",
+          "    at executeField (/exposed/projects/bid-notice-web/backend/nodejs/graphql/node_modules/graphql/execution/execute.js:508:19)",
+          "    at executeFields (/exposed/projects/bid-notice-web/backend/nodejs/graphql/node_modules/graphql/execution/execute.js:422:22)",
+          "    at completeObjectValue (/exposed/projects/bid-notice-web/backend/nodejs/graphql/node_modules/graphql/execution/execute.js:933:10)",
+          "    at completeValue (/exposed/projects/bid-notice-web/backend/nodejs/graphql/node_modules/graphql/execution/execute.js:654:12)",
+          "    at completeValue (/exposed/projects/bid-notice-web/backend/nodejs/graphql/node_modules/graphql/execution/execute.js:603:23)",
+          "    at /exposed/projects/bid-notice-web/backend/nodejs/graphql/node_modules/graphql/execution/execute.js:715:25",
+          "    at Function.from (<anonymous>)",
+          "    at completeListValue (/exposed/projects/bid-notice-web/backend/nodejs/graphql/node_modules/graphql/execution/execute.js:695:34)",
+          "    at completeValue (/exposed/projects/bid-notice-web/backend/nodejs/graphql/node_modules/graphql/execution/execute.js:626:12)"
+        ]
+      }
+    }
+  ],
+  "data": null
+}
+
+
+===
+
+- http://1.231.118.217:11501/settings/scrapping 페이지는 목록이 잘 로딩는데,
+
+http://1.231.118.217:11501/settings/scrapping/2/list, http://1.231.118.217:11501/settings/scrapping/2/detail 목록 스크랩 설정, 상세 스크랩 설정 페이지에서는 오류가 발생해요.
+
+그런데, settings/scrapping/2/list 에서 settingsNoticeListOne(orgName: $orgName) 을 사용하고 있네요.
+
+settingsNoticeListOne, settingsNoticeDetailOne의 매개변수는 oid 로 해주세요.
+
+---
+
+python backend는 아래의 파일, 함수들을 참고해주세요.
+
+- /exposed/projects/bid-notice-web/backend/python/src/server/server_bid.py
+
+@app.get("/settings_notice_list_by_oid/{oid}")
+@app.post("/settings_notice_detail_by_oid/{oid}")
+
+
+/exposed/projects/bid-notice-web/backend/python/src/mysql/mysql_settings.py
+
+find_settings_notice_list_by_oid
+upsert_settings_notice_list_by_oid
+
+find_settings_notice_detail_by_oid
+upsert_settings_notice_detail_by_oid
+
+---
+'설정 > 스크랩 설정' 페이지(http://1.231.118.217:11501/settings/scrapping, http://1.231.118.217:11501/settings/scrapping/2/list, http://1.231.118.217:11501/settings/scrapping/2/detail)에 대한 graphql들은 모두 데이터를 반환하는데, 페이지들은 데이터가 비어있거나, Response not successful: Received status code 400 오류가 발생해요.
+
+
+query SettingsNoticeListAll {
+  settingsNoticeListAll {
+    orgName
+  }
+}
+
+query SettingsNoticeListOne($oid: Int!) {
+  settingsNoticeListOne(oid: $oid) {
+    detailUrl
+    orgName
+  }
+}
+
+query SettingsNoticeListOne($oid: Int!) {
+  settingsNoticeDetailOne(oid: $oid) {
+    orgName
+  }
+}
+
+
+
+- http://1.231.118.217:11501/settings/scrapping, http://1.231.118.217:11501/settings/scrapping/2/list 페이지는 목록이 잘 로딩는데,
+
+http://1.231.118.217:11501/settings/scrapping/2/detail 페이지는 'Response not successful: Received status code 400' 에러가 떠요.
+
+원본 페이지를 그대로 사용하고, graphql 쿼리 부분만 수정하여야 합니다. 아예 대상의 현재 page.tsx를 삭제하고, 원본을 복사한 후, 수정작업을 하는 건 어떤가요?
+
+- 원본: /exposed/projects/bid-notice-web/_backups/frontend/src/app/settings/scrapping/[oid]/list/page.tsx
+
+- 대상: /exposed/projects/bid-notice-web/frontend/nextjs/src/app/settings/scrapping/[oid]/list/page.tsx
+
+
+
+
+- http://1.231.118.217:11501/settings/scrapping, http://1.231.118.217:11501/settings/scrapping/2/list 페이지는 목록이 잘 로딩는데,
+
+http://1.231.118.217:11501/settings/scrapping/2/detail 페이지(scrapping/[oid]/detail/page.tsx)는 'Response not successful: Received status code 400' 에러가 떠요.
+
+
+아래 두 파일을 참고해서 frontend/nextjs/src/app/settings/scrapping/[oid]/detail/page.tsx 를 수정해주세요. 그리고 /exposed/projects/bid-notice-web/backend/nodejs/graphql/src 에 있는 graphql 파일들도 수정해주세요.
+
+- /exposed/projects/bid-notice-web/_backups/frontend/src_0/app/settings/scrapping/[oid]/detail/page.tsx
+
+- /exposed/projects/bid-notice-web/_backups/frontend/src_0/app/api/graphql/resolvers/settingsDetail.ts
+
+
+---
+
+cd /exposed/projects/bid-notice-web/backend/nodejs/graphql
+npm run dev
+
+cd /exposed/projects/bid-notice-web/frontend/nextjs
+npm run dev
+
+====
+
+http://1.231.118.217:11501/statistics/notice?type=orgName 의 표는 제대로 나타나는데, '차트'를 클릭하면 비어있어요
+
+'statistics/notice' 의 url parameter를 type만이 아니라 아래의 변수들도 표시해주세요. 선택에 따라 url이 변경되도록 하고요.
+- gap: default='14' (최근 14일)
+- mode: 'table', 'chart' (표, 차트)
+
+mode의 디폴트값은 table로 해주세요.
+
+http://1.231.118.217:11501/statistics/notice 페이지
+http://1.231.118.217:11501/statistics/notice?type=category&gap=14&mode=table
+
+notice?type=orgName

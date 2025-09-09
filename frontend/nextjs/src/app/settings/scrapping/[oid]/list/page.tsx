@@ -45,7 +45,7 @@ const GET_SETTINGS_LIST = gql`
         target
         callback
       }
-      region
+      orgRegion
       registration
       use
       companyInCharge
@@ -62,7 +62,7 @@ const UPDATE_SETTINGS_LIST = gql`
       oid
       orgName
       detailUrl
-      region
+      orgRegion
       registration
       use
     }
@@ -122,17 +122,24 @@ export default function ScrappingListSettingsPage() {
   // 목록 스크랩 설정 쿼리
   const { loading, error, data } = useQuery(GET_SETTINGS_LIST, {
     client: getClient(),
-    variables: { oid },
-    onCompleted: (data) => {
+    variables: { oid }
+  });
+
+  // Handle data completion
+  useEffect(() => {
+    if (data) {
       console.log('GET_SETTINGS_LIST 완료:', data);
       finishLoading();
-    },
-    onError: (error) => {
+    }
+  }, [data, finishLoading]);
+
+  // Handle errors
+  useEffect(() => {
+    if (error) {
       console.error('GET_SETTINGS_LIST 에러:', error);
       finishLoading();
     }
-  });
-
+  }, [error, finishLoading]);
 
   // 데이터 로드 시 편집 데이터 초기화
   useEffect(() => {
@@ -146,7 +153,7 @@ export default function ScrappingListSettingsPage() {
         endPage: settings.endPage?.toString() || '',
         iframe: settings.iframe || '',
         rowXpath: settings.rowXpath || '',
-        orgRegion: settings.region || '',
+        orgRegion: settings.orgRegion || '',
         use: settings.use?.toString() || '',
         orgMan: settings.orgMan || '',
         companyInCharge: settings.companyInCharge || '',
@@ -161,13 +168,7 @@ export default function ScrappingListSettingsPage() {
 
   // GraphQL 뮤테이션
   const [updateSettingsList] = useMutation(UPDATE_SETTINGS_LIST, {
-    client: getClient(),
-    onCompleted: (data) => {
-      console.log('저장 완료:', data);
-    },
-    onError: (error) => {
-      console.error('저장 에러:', error);
-    }
+    client: getClient()
   });
 
   const handleEditMode = () => {
@@ -335,7 +336,7 @@ export default function ScrappingListSettingsPage() {
     <ScrappingSettingsLayout 
       orgName={listSettings?.orgName || `OID: ${oid}`} 
       isActive={listSettings?.use} 
-      region={listSettings?.region}
+      region={listSettings?.orgRegion}
     >
       <Card>
         <CardHeader>

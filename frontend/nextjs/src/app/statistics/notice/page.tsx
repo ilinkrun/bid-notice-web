@@ -51,6 +51,10 @@ export default async function NoticeStatisticsPage({ searchParams }: PageProps) 
 
   // 유효하지 않은 gap 값 처리
   const validGap = isNaN(gap) || gap < 1 ? 14 : gap;
+
+  // mode 파라미터 처리
+  const modeParam = typeof params?.mode === 'string' ? params.mode : 'table';
+  const validMode = (modeParam === 'chart' || modeParam === 'table') ? modeParam as 'table' | 'chart' : 'table';
   
   const noticesStatistics = await getNoticesStatistics(validGap);
 
@@ -62,7 +66,8 @@ export default async function NoticeStatisticsPage({ searchParams }: PageProps) 
           <ApolloWrapper>
             <NoticeStatisticsTable 
               initialData={noticesStatistics} 
-              defaultGap={validGap.toString()} 
+              defaultGap={validGap.toString()}
+              defaultViewType={validMode}
             />
           </ApolloWrapper>
         </div>

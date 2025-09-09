@@ -99,7 +99,10 @@ export function NoticeStatisticsTable({
     const typeParam = searchParams.get('type');
     return typeParam ? (urlParamToType[typeParam] || defaultType) : defaultType;
   });
-  const [viewType, setViewType] = useState<'table' | 'chart'>(defaultViewType);
+  const [viewType, setViewType] = useState<'table' | 'chart'>(() => {
+    const modeParam = searchParams.get('mode');
+    return (modeParam === 'chart' || modeParam === 'table') ? modeParam : defaultViewType;
+  });
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [orgStatistics, setOrgStatistics] = useState<any[]>([]);
@@ -113,6 +116,9 @@ export function NoticeStatisticsTable({
   };
 
   const handleViewTypeChange = (value: 'table' | 'chart') => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('mode', value);
+    navigate(`?${params.toString()}`);
     setViewType(value);
   };
 
@@ -121,6 +127,24 @@ export function NoticeStatisticsTable({
 
   const regionStatistics = useMemo(() => 
     processNoticeStatistics.region(initialData), [initialData]);
+
+  // URL 파라미터 변경 감지 및 상태 동기화
+  useEffect(() => {
+    const typeParam = searchParams.get('type');
+    const modeParam = searchParams.get('mode');
+    
+    // 타입 동기화
+    const newType = typeParam ? (urlParamToType[typeParam] || 'category') : 'category';
+    if (newType !== statisticsType) {
+      setStatisticsType(newType);
+    }
+    
+    // 모드 동기화  
+    const newMode = (modeParam === 'chart' || modeParam === 'table') ? modeParam : 'table';
+    if (newMode !== viewType) {
+      setViewType(newMode);
+    }
+  }, [searchParams]);
 
   // 기관별 통계 데이터 로드
   useEffect(() => {
@@ -500,10 +524,20 @@ export function NoticeStatisticsTable({
         </div>
       ) : (
         <div className="overflow-hidden">
-          <NoticeStatisticsChart 
-            data={statisticsType === 'category' ? statistics as CategoryChartData[] : statistics as RegionChartData[]}
-            type={statisticsType as 'category' | 'region'}
-          />
+          {statisticsType === 'organization' ? (
+            <div className="flex items-center justify-center h-96 text-muted-foreground">
+              <div className="text-center">
+                <p className="text-lg mb-2">기관별 통계 차트</p>
+                <p className="text-sm">기관별 데이터는 차트 형태로 제공되지 않습니다.</p>
+                <p className="text-sm">표 형태로 데이터를 확인해주세요.</p>
+              </div>
+            </div>
+          ) : (
+            <NoticeStatisticsChart 
+              data={statisticsType === 'category' ? statistics as CategoryChartData[] : statistics as RegionChartData[]}
+              type={statisticsType as 'category' | 'region'}
+            />
+          )}
         </div>
       )}
     </div>

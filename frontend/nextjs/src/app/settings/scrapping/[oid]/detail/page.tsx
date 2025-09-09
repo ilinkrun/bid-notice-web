@@ -60,7 +60,7 @@ const GET_SETTINGS_LIST_BRIEF = gql`
 
 // GraphQL 뮤테이션 정의
 const UPDATE_SETTINGS_DETAIL = gql`
-  mutation UpsertSettingsDetailByOid($oid: Int!, $input: SettingsDetailInput!) {
+  mutation UpsertSettingsDetailByOid($oid: Int!, $input: SettingsNoticeDetailInput!) {
     upsertSettingsDetailByOid(oid: $oid, input: $input) {
       oid
       orgName
@@ -124,14 +124,9 @@ export default function ScrappingDetailSettingsPage() {
   // 상세 스크랩 설정 쿼리
   const { loading: loadingDetail, error: errorDetail, data: dataDetail } = useQuery(GET_SETTINGS_DETAIL, {
     client: getClient(),
-    variables: { oid },
-    onCompleted: (data) => {
-      console.log('GET_SETTINGS_DETAIL 완료:', data);
-    },
-    onError: (error) => {
-      console.error('GET_SETTINGS_DETAIL 에러:', error);
-    }
+    variables: { oid }
   });
+
 
   // 기본 정보 쿼리 (활성 상태, 지역 정보)
   const { loading: loadingList, data: dataList } = useQuery(GET_SETTINGS_LIST_BRIEF, {
@@ -174,13 +169,7 @@ export default function ScrappingDetailSettingsPage() {
 
   // GraphQL 뮤테이션
   const [updateSettingsDetail] = useMutation(UPDATE_SETTINGS_DETAIL, {
-    client: getClient(),
-    onCompleted: (data) => {
-      console.log('저장 완료:', data);
-    },
-    onError: (error) => {
-      console.error('저장 에러:', error);
-    }
+    client: getClient()
   });
 
   const handleEditMode = () => {

@@ -47,8 +47,8 @@ const MDEditor = dynamic(
 
 // GraphQL 쿼리
 const CREATE_POST = `
-  mutation CreatePost($board: String!, $input: CreatePostInput!) {
-    createPost(board: $board, input: $input) {
+  mutation CreatePost($board: String!, $input: BoardPostInput!) {
+    boardsPostCreate(board: $board, input: $input) {
       id
       title
       content
@@ -134,8 +134,8 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
   const [error, setError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  // board 값을 board_${board} 형식으로 변환
-  const channelBoard = `board_${board}`;
+  // board 값이 이미 board_ 접두사를 포함하는지 확인
+  const channelBoard = board.startsWith('board_') ? board : `board_${board}`;
 
   // URL 파라미터에 따라 초기 설정
   useEffect(() => {
@@ -214,7 +214,7 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
         throw new Error(errorMessage);
       }
 
-      if (!result.data?.createPost) {
+      if (!result.data?.boardsPostCreate) {
         throw new Error('게시글 작성에 실패했습니다.');
       }
 

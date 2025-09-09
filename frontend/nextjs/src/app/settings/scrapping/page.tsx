@@ -11,14 +11,15 @@ export const metadata: Metadata = {
 
 const GET_SETTINGS_NOTICE_LISTS = gql`
   query GetSettingsLists {
-    settingsLists {
+    settingsNoticeListAll {
       oid
       orgName
+      url
       detailUrl
-      region
-      registration
       use
+      orgRegion
       companyInCharge
+      orgMan
     }
   }
 `;
@@ -30,7 +31,7 @@ async function getSettingsLists() {
       query: GET_SETTINGS_NOTICE_LISTS,
       fetchPolicy: 'no-cache',
     });
-    return data.settingsLists;
+    return data.settingsNoticeListAll;
   } catch (error) {
     console.error('Failed to fetch settings lists:', error);
     return [];
