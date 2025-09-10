@@ -627,11 +627,15 @@ export default function BidTable({ bids, currentStatus }) {
                     <div className="flex items-center gap-2">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span
+                          <a
+                            href={bid.detailUrl || '#'}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="text-sm font-medium text-gray-900 hover:text-blue-600 truncate cursor-pointer"
+                            onClick={(e) => e.stopPropagation()}
                           >
                             {bid.title}
-                          </span>
+                          </a>
                         </div>
                       </div>
                     </div>

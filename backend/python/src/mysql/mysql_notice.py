@@ -490,7 +490,7 @@ def find_notice_by_nid(
 
 
 def find_my_bids(fields=[
-    "mid", "nid", "status", "title", "started_at", "ended_at", "detail", "memo"
+    "mid", "nid", "status", "title", "detail_url", "started_at", "ended_at", "detail", "memo"
 ],
         addStr=""):
   from mysql.mysql_settings import find_settings_notice_list
@@ -515,7 +515,7 @@ def find_my_bids(fields=[
 
 def find_my_bids_by_status(status,
                            fields=[
-                               "mid", "nid", "status", "title", "started_at",
+                               "mid", "nid", "status", "title", "detail_url", "started_at",
                                "ended_at", "detail", "memo"
                            ],
                            addStr=""):
@@ -524,7 +524,7 @@ def find_my_bids_by_status(status,
   return dicts
 
 
-def find_my_bid_by_nid(nid, fields=["mid", "nid", "status", "title", "started_at", "ended_at", "detail", "memo"]):
+def find_my_bid_by_nid(nid, fields=["mid", "nid", "status", "title", "detail_url", "started_at", "ended_at", "detail", "memo"]):
   """
   특정 nid로 입찰 정보를 조회하는 함수
   

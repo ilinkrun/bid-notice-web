@@ -5,8 +5,8 @@ import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHt
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import cors from 'cors';
 import http from 'http';
-import { typeDefs } from './schema/index.js';
-import { resolvers } from './resolvers/index.js';
+import { typeDefs } from './schema/index';
+import { resolvers } from './resolvers/index';
 
 interface MyContext {
   token?: string;

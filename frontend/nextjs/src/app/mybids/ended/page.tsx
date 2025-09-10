@@ -1,6 +1,6 @@
 import { gql } from '@apollo/client';
 import { getClient } from '@/lib/api/graphqlClient';
-import BidTable from '@/components/bids/BidTable';
+import MybidTable from '@/components/mybids/MybidTable';
 import ApolloWrapper from '@/components/providers/ApolloWrapper';
 import UnifiedDataLoadingWrapper from '@/components/shared/UnifiedDataLoadingWrapper';
 import '../../themes.css';
@@ -18,6 +18,7 @@ const GET_COMPLETED_BIDS = gql`
       orgName
       postedAt
       detail
+      detailUrl
       category
       region
     }
@@ -33,13 +34,13 @@ async function getCompletedBids() {
       fetchPolicy: 'no-cache',
       errorPolicy: 'all'
     });
-    
+
     // status가 '포기', '낙찰', '패찰' 중 하나인 것만 필터링
     const completedStatuses = ['포기', '낙찰', '패찰'];
-    const completedBids = result.data?.mybidsAll?.filter(bid => 
+    const completedBids = result.data?.mybidsAll?.filter(bid =>
       completedStatuses.includes(bid.status)
     ) || [];
-    
+
     return completedBids;
   } catch (error) {
     console.error('Failed to fetch completed bids:', error);
@@ -54,7 +55,7 @@ export default async function EndedPage() {
     <div className="theme-default">
       <ApolloWrapper>
         <UnifiedDataLoadingWrapper data={bids}>
-          <BidTable bids={bids} currentStatus="ended" />
+          <MybidTable bids={bids} currentStatus="ended" />
         </UnifiedDataLoadingWrapper>
       </ApolloWrapper>
     </div>

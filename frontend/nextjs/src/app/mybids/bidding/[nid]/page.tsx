@@ -1,6 +1,6 @@
 import { gql } from '@apollo/client';
 import { getClient } from '@/lib/api/graphqlClient';
-import BidDetailView from '@/components/bids/BidDetailView';
+import BidDetailView from '@/components/mybids/MybidDetailView';
 import ApolloWrapper from '@/components/providers/ApolloWrapper';
 import { notFound } from 'next/navigation';
 import '../../../themes.css';

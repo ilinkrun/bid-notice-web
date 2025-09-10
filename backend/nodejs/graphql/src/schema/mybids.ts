@@ -10,6 +10,7 @@ export const mybidsTypeDefs = `#graphql
     orgName: String!
     postedAt: String!
     detail: String
+    detailUrl: String
     category: String
     region: String
   }
@@ -38,6 +39,7 @@ export const mybidsTypeDefs = `#graphql
     orgName: String!
     postedAt: String!
     detail: String
+    detailUrl: String
     category: String
     region: String
   }

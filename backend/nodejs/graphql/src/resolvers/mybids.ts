@@ -11,6 +11,7 @@ interface BidData {
   org_name: string;
   posted_date: string;
   detail: string;
+  detail_url: string;
   category?: string;
   org_region?: string;
 }
@@ -31,6 +32,7 @@ export const mybidsResolvers = {
           orgName: bd.org_name,
           postedAt: bd.posted_date,
           detail: bd.detail || "",
+          detailUrl: bd.detail_url || "",
           category: bd.category || "",
           region: bd.org_region || "",
         }));
@@ -54,6 +56,7 @@ export const mybidsResolvers = {
           orgName: bd.org_name,
           postedAt: bd.posted_date,
           detail: bd.detail || "",
+          detailUrl: bd.detail_url || "",
           category: bd.category || "",
           region: bd.org_region || "",
         }));
@@ -78,6 +81,7 @@ export const mybidsResolvers = {
           orgName: bd.org_name,
           postedAt: bd.posted_date,
           detail: bd.detail || "",
+          detailUrl: bd.detail_url || "",
           category: bd.category || "",
           region: bd.org_region || "",
         };

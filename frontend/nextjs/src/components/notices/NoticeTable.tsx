@@ -472,15 +472,14 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
       });
 
       if (data?.updateNoticeCategory?.success) {
-        alert(data.updateNoticeCategory.message || '유형이 변경되었습니다.');
         // 성공 후 모달 닫기 및 선택 초기화
         setIsCategoryEditModalOpen(false);
         setSelectedNids([]);
         
-        // 페이지 새로고침하여 변경된 데이터 반영
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
+        // 변경된 카테고리 페이지로 이동
+        const currentSearchParams = new URLSearchParams(window.location.search);
+        const newUrl = `/notices/${encodeURIComponent(localCategory)}?${currentSearchParams.toString()}`;
+        navigate(newUrl);
       } else {
         throw new Error(data?.updateNoticeCategory?.message || '유형 변경에 실패했습니다.');
       }
@@ -519,10 +518,10 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
         setIsExcludeModalOpen(false);
         setSelectedNids([]);
         
-        // 페이지 새로고침하여 변경된 데이터 반영
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
+        // 제외 페이지로 이동
+        const currentSearchParams = new URLSearchParams(window.location.search);
+        const newUrl = `/notices/${encodeURIComponent('제외')}?${currentSearchParams.toString()}`;
+        navigate(newUrl);
       } else {
         throw new Error(data?.excludeNotices?.message || '제외 처리에 실패했습니다.');
       }

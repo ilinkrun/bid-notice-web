@@ -696,10 +696,21 @@ def notice_to_progress(nid):
 
   mysql.upsert("notice_files", downs, inType="dicts")
 
+  # Get notice info including detail_url from notice_list
+  notice_info = mysql.find("notice_list", ["title", "detail_url"], f"WHERE nid = {nid}")
+  if notice_info:
+    title = notice_info[0][0]
+    detail_url = notice_info[0][1] or ""
+  else:
+    title = data.get("title", f"Notice {nid}")
+    detail_url = ""
+  
   # upsert_my_bid_by_nid(nid)
+  # !! nid가 있는 경우 update, nid가 없는 경우 insert
   mysql.upsert("my_bids", [{
     "nid": nid, 
-    "title": data["title"],
+    "title": title,
+    "detail_url": detail_url,
     'status': "진행"
   }], inType="dicts")
   mysql.close()

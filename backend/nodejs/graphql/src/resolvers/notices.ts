@@ -26,7 +26,7 @@ interface StatisticsData {
 
 export const noticesResolvers = {
   Query: {
-    noticesAll: async (_: unknown, { gap }: { gap?: number }) => {
+    notices: async (_: unknown, { gap }: { gap?: number }) => {
       try {
         const response = await apiClient.get('/notice_list', { params: { gap: gap || 15 } });
         return response.data.map((notice: NoticeData) => ({
@@ -102,7 +102,7 @@ export const noticesResolvers = {
       }
     },
 
-    noticesSearch: async (_: unknown, { keywords, nots, minPoint, addWhere }: {
+    searchNotices: async (_: unknown, { keywords, nots, minPoint, addWhere }: {
       keywords: string; nots: string; minPoint: number; addWhere?: string
     }) => {
       try {
@@ -130,7 +130,7 @@ export const noticesResolvers = {
       }
     },
 
-    noticesOne: async (_: unknown, { orgName, field }: { orgName: string; field?: string }) => {
+    lastNotice: async (_: unknown, { orgName, field }: { orgName: string; field?: string }) => {
       try {
         const response = await apiClient.get(`/last_notice/${orgName}`, {
           params: { field: field || 'title' }
@@ -144,7 +144,7 @@ export const noticesResolvers = {
   },
 
   Mutation: {
-    noticesUpsert: async (_: unknown, { data }: { data: unknown[] }) => {
+    upsertNotice: async (_: unknown, { data }: { data: unknown[] }) => {
       try {
         const response = await apiClient.post('/notice_list', data);
         return response.data;
@@ -154,7 +154,7 @@ export const noticesResolvers = {
       }
     },
 
-    noticesUpdateToProgress: async (_: unknown, { nids }: { nids: number[] }) => {
+    noticeToProgress: async (_: unknown, { nids }: { nids: number[] }) => {
       try {
         const response = await apiClient.post('/notice_to_progress', { nids });
         return {
@@ -170,9 +170,9 @@ export const noticesResolvers = {
       }
     },
 
-    noticesUpdateCategory: async (_: unknown, { nids, category }: { nids: number[]; category: string }) => {
+    updateNoticeCategory: async (_: unknown, { nids, category }: { nids: number[]; category: string }) => {
       try {
-        const response = await mysqlApiClient.post('/update_notice_category', { 
+        const response = await apiClient.post('/update_notice_category', { 
           nids: nids, 
           category 
         });
@@ -189,7 +189,7 @@ export const noticesResolvers = {
       }
     },
 
-    noticesExclude: async (_: unknown, { nids }: { nids: number[] }) => {
+    excludeNotices: async (_: unknown, { nids }: { nids: number[] }) => {
       try {
         const response = await apiClient.post('/exclude_notices', { 
           nids: nids
@@ -207,7 +207,7 @@ export const noticesResolvers = {
       }
     },
 
-    noticesRestore: async (_: unknown, { nids }: { nids: number[] }) => {
+    restoreNotices: async (_: unknown, { nids }: { nids: number[] }) => {
       try {
         const response = await apiClient.post('/restore_notices', { 
           nids: nids

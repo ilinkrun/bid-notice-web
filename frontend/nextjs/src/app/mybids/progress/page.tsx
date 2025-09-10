@@ -1,6 +1,6 @@
 import { gql } from '@apollo/client';
 import { getClient } from '@/lib/api/graphqlClient';
-import BidTable from '@/components/bids/BidTable';
+import MybidTable from '@/components/mybids/MybidTable';
 import ApolloWrapper from '@/components/providers/ApolloWrapper';
 import UnifiedDataLoadingWrapper from '@/components/shared/UnifiedDataLoadingWrapper';
 import '../../themes.css';
@@ -18,6 +18,7 @@ const GET_PROGRESS_BIDS = gql`
       orgName
       postedAt
       detail
+      detailUrl
       category
       region
     }
@@ -47,7 +48,7 @@ export default async function BidProgressPage() {
     <div className="theme-etc">
       <ApolloWrapper>
         <UnifiedDataLoadingWrapper data={bids}>
-          <BidTable bids={bids} currentStatus="progress" />
+          <MybidTable bids={bids} currentStatus="progress" />
         </UnifiedDataLoadingWrapper>
       </ApolloWrapper>
     </div>
