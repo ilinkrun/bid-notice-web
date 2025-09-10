@@ -3,6 +3,12 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
   },
+  // Server external packages
+  serverExternalPackages: [],
+  // Request body size limit (App Router uses route handler config)
+  experimental: {
+    optimizeCss: false,
+  },
   // reactStrictMode: true,
   typescript: {
     // 빌드 시 타입 에러를 무시합니다
@@ -16,10 +22,6 @@ const nextConfig = {
   onDemandEntries: {
     maxInactiveAge: 25 * 1000,
     pagesBufferLength: 2,
-  },
-  // 추가 설정
-  experimental: {
-    optimizeCss: false,
   },
   // Next.js 로고 비활성화
   devIndicators: false,

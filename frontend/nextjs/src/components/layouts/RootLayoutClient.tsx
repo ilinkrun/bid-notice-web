@@ -10,6 +10,7 @@ import { Suspense } from 'react';
 import Loading from '@/app/loading';
 import { UnifiedLoadingProvider } from '@/components/providers/UnifiedLoadingProvider';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { PageGuard } from '@/components/auth/PageGuard';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -34,7 +35,9 @@ export function RootLayoutClient({ children }: RootLayoutClientProps) {
                 <div className="fixed inset-0 top-14 bg-black/25 backdrop-blur-sm z-40 md:hidden" />
               )}
               <Suspense fallback={<Loading />}>
-                {children}
+                <PageGuard>
+                  {children}
+                </PageGuard>
               </Suspense>
             </main>
             <div className="h-4"></div>

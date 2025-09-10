@@ -169,6 +169,22 @@ export const permissionsResolvers = {
 
     checkPageAccess: async (_: unknown, { path, token }: { path: string; token?: string }) => {
       try {
+        // 정적 파일과 업로드 파일은 항상 접근 허용
+        const staticPaths = ['/uploads/', '/images/', '/_next/', '/api/', '/favicon'];
+        const isStaticPath = staticPaths.some(staticPath => path.startsWith(staticPath)) ||
+                            path.includes('.png') || path.includes('.jpg') || path.includes('.jpeg') ||
+                            path.includes('.gif') || path.includes('.svg') || path.includes('.ico') ||
+                            path.includes('.pdf') || path.includes('.xlsx') || path.includes('.docx');
+        
+        if (isStaticPath) {
+          return {
+            hasAccess: true,
+            role: 'guest',
+            message: '정적 파일 접근이 허용되었습니다.',
+            redirectTo: null
+          };
+        }
+        
         let userRole = 'guest';
         
         if (token) {

@@ -5,6 +5,7 @@ import { use } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
 import { useUnifiedLoading } from '@/components/providers/UnifiedLoadingProvider';
+import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,6 +25,7 @@ import {
 
 import dynamic from 'next/dynamic';
 import { marked } from 'marked';
+import { smartUpload } from '@/utils/chunkedUpload';
 
 // MDEditor CSS 임포트
 import '@uiw/react-md-editor/markdown-editor.css';
@@ -77,40 +79,50 @@ const convertMarkdownToHtml = (markdown: string): string => {
   }
 };
 
-// 파일 업로드 헬퍼 함수
-const uploadFile = async (file: File, setIsUploading: (loading: boolean) => void, editingMarkdown: string, setEditingMarkdown: (value: string) => void) => {
+// 파일 업로드 헬퍼 함수 (청크 업로드 사용)
+const uploadFile = async (file: File, setIsUploading: (loading: boolean) => void, editingMarkdown: string, setEditingMarkdown: (value: string) => void, isAuthenticated?: boolean, setUploadProgress?: (progress: number) => void) => {
   setIsUploading(true);
   try {
-    const formData = new FormData();
-    formData.append('file', file);
+    console.log('🚀 스마트 업로드 시작:', file.name, file.size, file.type);
     
-    const response = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData,
+    // 인증 상태 확인 (선택사항)
+    if (isAuthenticated === false) {
+      console.warn('사용자가 로그인하지 않았습니다');
+    }
+    
+    const result = await smartUpload(file, {
+      onProgress: (progress) => {
+        console.log(`업로드 진행률: ${Math.round(progress)}%`);
+        if (setUploadProgress) {
+          setUploadProgress(progress);
+        }
+      },
+      maxSingleUploadSize: 500 * 1024 // 500KB 이상은 청크 업로드
     });
     
-    if (response.ok) {
-      const result = await response.json();
-      
-      // 이미지 파일인 경우 이미지 마크다운, 그 외는 링크 마크다운
-      let fileMarkdown;
-      if (file.type.startsWith('image/')) {
-        fileMarkdown = `![${result.filename}](${result.url})`;
-      } else {
-        fileMarkdown = `[${result.filename}](${result.url})`;
-      }
-      
-      const newValue = `${editingMarkdown}\n\n${fileMarkdown}`;
-      setEditingMarkdown(newValue);
+    console.log('✅ 업로드 성공:', result);
+    
+    // 이미지 파일인 경우 이미지 마크다운, 그 외는 링크 마크다운
+    let fileMarkdown;
+    if (file.type.startsWith('image/')) {
+      fileMarkdown = `![${result.filename}](${result.url})`;
     } else {
-      const error = await response.json();
-      alert(`파일 업로드 실패: ${error.error}`);
+      fileMarkdown = `[${result.filename}](${result.url})`;
     }
+    
+    const newValue = `${editingMarkdown}\n\n${fileMarkdown}`;
+    setEditingMarkdown(newValue);
+    
+    alert(`파일 업로드 완료: ${result.filename}`);
+    
   } catch (error) {
     console.error('파일 업로드 오류:', error);
-    alert('파일 업로드 중 오류가 발생했습니다.');
+    alert(`파일 업로드 중 오류가 발생했습니다: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
   } finally {
     setIsUploading(false);
+    if (setUploadProgress) {
+      setUploadProgress(0);
+    }
   }
 };
 
@@ -118,6 +130,7 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
   const { board } = use(params);
   const { navigate } = useUnifiedNavigation();
   const { startLoading, finishLoading, setCustomMessage } = useUnifiedLoading();
+  const { isAuthenticated, user } = useAuth();
   const searchParams = useSearchParams();
   const formatParam = searchParams.get('format'); // 'format' 파라미터 확인
   
@@ -133,6 +146,7 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
   const [editorMode, setEditorMode] = useState<'html' | 'markdown'>('markdown'); // 기본값 markdown
   const [error, setError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
 
   // board 값이 이미 board_ 접두사를 포함하는지 확인
   const channelBoard = board.startsWith('board_') ? board : `board_${board}`;
@@ -332,9 +346,19 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
                     마크다운 문법을 사용하여 작성하세요. 파일을 드래그 앤 드롭하거나 클립보드에서 붙여넣기할 수 있습니다.
                   </p>
                   {isUploading && (
-                    <div className="flex items-center gap-2 text-sm text-blue-600">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                      파일을 업로드하는 중...
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-sm text-blue-600">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                        파일을 업로드하는 중... {uploadProgress > 0 ? `${Math.round(uploadProgress)}%` : ''}
+                      </div>
+                      {uploadProgress > 0 && (
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${uploadProgress}%` }}
+                          ></div>
+                        </div>
+                      )}
                     </div>
                   )}
                   {typeof window !== 'undefined' ? (
@@ -346,7 +370,7 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
                           onChange={async (e) => {
                             const files = Array.from(e.target.files || []);
                             for (const file of files) {
-                              await uploadFile(file, setIsUploading, editingMarkdown, setEditingMarkdown);
+                              await uploadFile(file, setIsUploading, editingMarkdown, setEditingMarkdown, isAuthenticated, setUploadProgress);
                             }
                           }}
                           style={{ display: 'none' }}
@@ -366,7 +390,7 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
                           const files = Array.from(event.dataTransfer?.files || []);
                           
                           for (const file of files) {
-                            await uploadFile(file, setIsUploading, editingMarkdown, setEditingMarkdown);
+                            await uploadFile(file, setIsUploading, editingMarkdown, setEditingMarkdown, isAuthenticated, setUploadProgress);
                           }
                         }}
                         onDragOver={(event) => event.preventDefault()}

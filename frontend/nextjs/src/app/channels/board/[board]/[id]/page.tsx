@@ -472,10 +472,10 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
         throw new Error(result.errors[0].message);
       }
 
-      console.log('📝 result.data?.updatePost:', result.data?.updatePost);
+      console.log('📝 result.data?.boardsPostUpdate:', result.data?.boardsPostUpdate);
       
-      if (!result.data?.updatePost) {
-        console.error('❌ updatePost 데이터가 없음');
+      if (!result.data?.boardsPostUpdate) {
+        console.error('❌ boardsPostUpdate 데이터가 없음');
         throw new Error('게시글 수정에 실패했습니다.');
       }
 

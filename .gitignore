@@ -23,6 +23,8 @@ logs/
 # private
 _*/
 database/
+*.png
+*.mp4
 
 # zip, tar
 *.zip

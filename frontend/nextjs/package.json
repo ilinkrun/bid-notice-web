@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev -p 11501",
-    "start": "next start -p 11501",
+    "dev": "NODE_OPTIONS='--max-http-header-size=65536 --max-old-space-size=4096' BODY_SIZE_LIMIT=100mb next dev -p 11501",
+    "start": "NODE_OPTIONS='--max-http-header-size=65536 --max-old-space-size=4096' next start -p 11501",
     "build": "next build",
     "scrape:test": "tsx src/lib/scraper/test/gangnam.ts"
   },
@@ -37,6 +37,7 @@
     "critters": "^0.0.25",
     "date-fns": "^3.6.0",
     "dayjs": "^1.11.10",
+    "formidable": "^3.5.4",
     "graphql": "^16.10.0",
     "lucide-react": "^0.477.0",
     "marked": "^16.2.1",

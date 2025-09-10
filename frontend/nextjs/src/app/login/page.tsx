@@ -302,7 +302,7 @@ export default function LoginPage() {
                       id="email"
                       type="email"
                       required
-                      className="pl-10"
+                      className="pl-10 text-black"
                       placeholder="이메일을 입력하세요"
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
@@ -320,7 +320,7 @@ export default function LoginPage() {
                         id="name"
                         type="text"
                         required
-                        className="pl-10"
+                        className="pl-10 text-black"
                         placeholder="이름을 입력하세요"
                         value={formData.name}
                         onChange={(e) => handleInputChange('name', e.target.value)}
@@ -338,7 +338,7 @@ export default function LoginPage() {
                       <Input
                         id="department"
                         type="text"
-                        className="pl-10"
+                        className="pl-10 text-black"
                         placeholder="부서를 입력하세요 (선택사항)"
                         value={formData.department}
                         onChange={(e) => handleInputChange('department', e.target.value)}
@@ -357,7 +357,7 @@ export default function LoginPage() {
                         id="password"
                         type={showPassword ? 'text' : 'password'}
                         required
-                        className="pl-10 pr-10"
+                        className="pl-10 pr-10 text-black"
                         placeholder="비밀번호를 입력하세요"
                         value={formData.password}
                         onChange={(e) => handleInputChange('password', e.target.value)}
@@ -387,7 +387,7 @@ export default function LoginPage() {
                         id="confirmPassword"
                         type={showConfirmPassword ? 'text' : 'password'}
                         required
-                        className="pl-10 pr-10"
+                        className="pl-10 pr-10 text-black"
                         placeholder="비밀번호를 다시 입력하세요"
                         value={formData.confirmPassword}
                         onChange={(e) => handleInputChange('confirmPassword', e.target.value)}

@@ -9,6 +9,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useMutation } from '@apollo/client';
 import { gql } from '@apollo/client';
 import { getClient } from '@/lib/api/graphqlClient';
+import { usePermissions } from '@/hooks/usePermissions';
+import { PermissionBoundary } from '@/components/auth/PermissionBoundary';
 import {
   Settings,
   ListTodo,
@@ -487,6 +489,7 @@ interface HeaderProps {
 
 export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
   const { isAuthenticated } = useAuth();
+  const { hasRole } = usePermissions();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -496,11 +499,28 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
             <span className="font-bold pl-3">ILE</span>
           </Link>
           <nav className="flex items-center gap-1 ml-12">
+            {/* 공고 목록 - 모든 역할 접근 가능 */}
             <DropdownMenu label="공고 목록" icon={Star} items={notices} align="left" />
-            <DropdownMenu label="입찰 관리" icon={Cog} items={bids} align="center" />
-            <DropdownMenu label="통계" icon={BarChart2} items={statistics} align="center" />
-            <DropdownMenu label="게시판" icon={MessageSquare} items={channels} align="center" />
-            <DropdownMenu label="설정" icon={Settings} items={settings} align="right" />
+            
+            {/* 입찰 관리 - 로그인한 사용자만 */}
+            <PermissionBoundary roles={['user', 'manager', 'admin']} showMessage={false}>
+              <DropdownMenu label="입찰 관리" icon={Cog} items={bids} align="center" />
+            </PermissionBoundary>
+            
+            {/* 통계 - viewer 이상 */}
+            <PermissionBoundary roles={['viewer', 'user', 'manager', 'admin']} showMessage={false}>
+              <DropdownMenu label="통계" icon={BarChart2} items={statistics} align="center" />
+            </PermissionBoundary>
+            
+            {/* 게시판 - user 이상 */}
+            <PermissionBoundary roles={['user', 'manager', 'admin']} showMessage={false}>
+              <DropdownMenu label="게시판" icon={MessageSquare} items={channels} align="center" />
+            </PermissionBoundary>
+            
+            {/* 설정 - manager 이상 */}
+            <PermissionBoundary roles={['manager', 'admin']} showMessage={false}>
+              <DropdownMenu label="설정" icon={Settings} items={settings} align="right" />
+            </PermissionBoundary>
           </nav>
         </div>
 
@@ -549,11 +569,28 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
             )}
             
             <div className="flex flex-col divide-y bg-white">
+              {/* 공고 목록 - 모든 역할 접근 가능 */}
               <DropdownMenu label="공고 목록" icon={Star} items={notices} isMobile setIsMobileMenuOpen={setIsMobileMenuOpen} />
-              <DropdownMenu label="입찰 관리" icon={Cog} items={bids} isMobile setIsMobileMenuOpen={setIsMobileMenuOpen} />
-              <DropdownMenu label="통계" icon={BarChart2} items={statistics} isMobile setIsMobileMenuOpen={setIsMobileMenuOpen} />
-              <DropdownMenu label="게시판" icon={MessageSquare} items={channels} isMobile setIsMobileMenuOpen={setIsMobileMenuOpen} />
-              <DropdownMenu label="설정" icon={Settings} items={settings} isMobile setIsMobileMenuOpen={setIsMobileMenuOpen} />
+              
+              {/* 입찰 관리 - 로그인한 사용자만 */}
+              <PermissionBoundary roles={['user', 'manager', 'admin']} showMessage={false}>
+                <DropdownMenu label="입찰 관리" icon={Cog} items={bids} isMobile setIsMobileMenuOpen={setIsMobileMenuOpen} />
+              </PermissionBoundary>
+              
+              {/* 통계 - viewer 이상 */}
+              <PermissionBoundary roles={['viewer', 'user', 'manager', 'admin']} showMessage={false}>
+                <DropdownMenu label="통계" icon={BarChart2} items={statistics} isMobile setIsMobileMenuOpen={setIsMobileMenuOpen} />
+              </PermissionBoundary>
+              
+              {/* 게시판 - user 이상 */}
+              <PermissionBoundary roles={['user', 'manager', 'admin']} showMessage={false}>
+                <DropdownMenu label="게시판" icon={MessageSquare} items={channels} isMobile setIsMobileMenuOpen={setIsMobileMenuOpen} />
+              </PermissionBoundary>
+              
+              {/* 설정 - manager 이상 */}
+              <PermissionBoundary roles={['manager', 'admin']} showMessage={false}>
+                <DropdownMenu label="설정" icon={Settings} items={settings} isMobile setIsMobileMenuOpen={setIsMobileMenuOpen} />
+              </PermissionBoundary>
               
               {/* 모바일 로그인 링크 (비로그인 상태일 때만) */}
               {!isAuthenticated && (
