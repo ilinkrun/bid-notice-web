@@ -5,6 +5,10 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
+import { useAuth } from '@/contexts/AuthContext';
+import { useMutation } from '@apollo/client';
+import { gql } from '@apollo/client';
+import { getClient } from '@/lib/api/graphqlClient';
 import {
   Settings,
   ListTodo,
@@ -30,8 +34,19 @@ import {
   Clock,
   Target,
   Award,
+  LogOut,
+  UserCircle,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+
+const LOGOUT_MUTATION = gql`
+  mutation Logout($token: String!) {
+    logout(token: $token) {
+      success
+      message
+    }
+  }
+`;
 
 const notices = [
   {
@@ -277,13 +292,201 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ label, icon: Icon, items, a
   );
 };
 
+// 사용자 아바타 컴포넌트
+interface UserAvatarProps {
+  user: {
+    name: string;
+    email: string;
+    role: string;
+    department?: string;
+    avatar?: string;
+  };
+  size?: 'sm' | 'md';
+}
+
+const UserAvatar: React.FC<UserAvatarProps> = ({ user, size = 'sm' }) => {
+  const initials = user.name
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+
+  const sizeClasses = size === 'sm' ? 'h-8 w-8 text-xs' : 'h-10 w-10 text-sm';
+
+  // 아바타 이미지가 있으면 이미지 사용, 없으면 이니셜 사용
+  if (user.avatar) {
+    return (
+      <div className={cn("rounded-full overflow-hidden", sizeClasses)}>
+        <img 
+          src={user.avatar} 
+          alt={`${user.name}의 아바타`}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            // 이미지 로드 실패 시 이니셜로 대체
+            const target = e.target as HTMLImageElement;
+            target.style.display = 'none';
+            const parent = target.parentElement;
+            if (parent) {
+              parent.innerHTML = `
+                <div class="w-full h-full bg-primary text-primary-foreground flex items-center justify-center font-medium rounded-full">
+                  ${initials}
+                </div>
+              `;
+            }
+          }}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className={cn(
+      "rounded-full bg-primary text-primary-foreground flex items-center justify-center font-medium",
+      sizeClasses
+    )}>
+      {initials}
+    </div>
+  );
+};
+
+// 사용자 드롭다운 메뉴 컴포넌트
+const UserDropdown: React.FC = () => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [isLoggingOut, setIsLoggingOut] = React.useState(false);
+  const menuRef = React.useRef<HTMLDivElement>(null);
+  const { user, logout, token } = useAuth();
+  const { navigate } = useUnifiedNavigation();
+
+  const [logoutMutation] = useMutation(LOGOUT_MUTATION, { 
+    client: getClient(),
+    onCompleted: (data) => {
+      if (data.logout.success) {
+        logout();
+        navigate('/login');
+      }
+    },
+    onError: (error) => {
+      console.error('Logout error:', error);
+      // 에러가 발생해도 클라이언트 측에서는 로그아웃 처리
+      logout();
+      navigate('/login');
+    }
+  });
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleLogout = async () => {
+    if (!token) return;
+    
+    setIsLoggingOut(true);
+    try {
+      await logoutMutation({ variables: { token } });
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setIsLoggingOut(false);
+      setIsOpen(false);
+    }
+  };
+
+  const handleUserInfo = () => {
+    setIsOpen(false);
+    navigate('/profile');
+  };
+
+  if (!user) return null;
+
+  return (
+    <div className="relative" ref={menuRef}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={cn(
+          "flex items-center gap-2 p-1 rounded-full transition-colors",
+          isOpen ? "bg-accent" : "hover:bg-accent/50"
+        )}
+      >
+        <UserAvatar user={user} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute right-0 top-full mt-2 w-64 p-2 border bg-popover shadow-lg rounded-md">
+          {/* 사용자 정보 */}
+          <div className="px-3 py-2 border-b mb-2">
+            <div className="flex items-center gap-3">
+              <UserAvatar user={user} size="md" />
+              <div className="flex-1 min-w-0">
+                <p className="font-medium truncate">{user.name}</p>
+                <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+                {user.department && (
+                  <p className="text-xs text-muted-foreground truncate">{user.department}</p>
+                )}
+                <div className="flex items-center gap-1 mt-1">
+                  <span className={cn(
+                    "text-xs px-2 py-0.5 rounded-full font-medium",
+                    user.role === 'admin' 
+                      ? "bg-red-100 text-red-800"
+                      : user.role === 'manager'
+                      ? "bg-blue-100 text-blue-800" 
+                      : user.role === 'viewer'
+                      ? "bg-gray-100 text-gray-800"
+                      : "bg-green-100 text-green-800"
+                  )}>
+                    {user.role === 'admin' 
+                      ? '관리자' 
+                      : user.role === 'manager' 
+                      ? '매니저'
+                      : user.role === 'viewer'
+                      ? '조회자'
+                      : '사용자'
+                    }
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 메뉴 항목들 */}
+          <div className="space-y-1">
+            <button
+              onClick={handleUserInfo}
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-left hover:bg-accent rounded-md transition-colors"
+            >
+              <UserCircle className="h-4 w-4" />
+              <span>사용자 정보</span>
+            </button>
+            
+            <button
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-left hover:bg-accent rounded-md transition-colors disabled:opacity-50"
+            >
+              <LogOut className="h-4 w-4" />
+              <span>{isLoggingOut ? '로그아웃 중...' : '로그아웃'}</span>
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 interface HeaderProps {
   isMobileMenuOpen: boolean;
   setIsMobileMenuOpen: (open: boolean) => void;
 }
 
 export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
-  const pathname = usePathname();
+  const { isAuthenticated } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -306,13 +509,20 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
             <span className="font-bold">ILE</span>
           </Link>
           <div className="flex items-center">
-            <Link
-              href="/login"
-              className="flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary mr-4"
-            >
-              <User className="h-4 w-4" />
-              <span>로그인</span>
-            </Link>
+            {/* 로그인 상태에 따른 조건부 렌더링 */}
+            {isAuthenticated ? (
+              <div className="mr-4">
+                <UserDropdown />
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className="flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary mr-4"
+              >
+                <User className="h-4 w-4" />
+                <span>로그인</span>
+              </Link>
+            )}
             <button
               className="md:hidden"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -331,12 +541,33 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
       {isMobileMenuOpen && (
         <div className="fixed inset-0 top-14 bg-white z-50 md:hidden border-t">
           <nav className="container py-4 bg-white">
+            {/* 모바일 사용자 정보 (로그인 상태일 때만) */}
+            {isAuthenticated && (
+              <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+                <UserDropdown />
+              </div>
+            )}
+            
             <div className="flex flex-col divide-y bg-white">
               <DropdownMenu label="공고 목록" icon={Star} items={notices} isMobile setIsMobileMenuOpen={setIsMobileMenuOpen} />
               <DropdownMenu label="입찰 관리" icon={Cog} items={bids} isMobile setIsMobileMenuOpen={setIsMobileMenuOpen} />
               <DropdownMenu label="통계" icon={BarChart2} items={statistics} isMobile setIsMobileMenuOpen={setIsMobileMenuOpen} />
               <DropdownMenu label="게시판" icon={MessageSquare} items={channels} isMobile setIsMobileMenuOpen={setIsMobileMenuOpen} />
               <DropdownMenu label="설정" icon={Settings} items={settings} isMobile setIsMobileMenuOpen={setIsMobileMenuOpen} />
+              
+              {/* 모바일 로그인 링크 (비로그인 상태일 때만) */}
+              {!isAuthenticated && (
+                <div className="py-2 bg-white">
+                  <Link
+                    href="/login"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-2 px-4 py-2 transition-colors hover:bg-gray-100 w-full"
+                  >
+                    <User className="h-4 w-4" />
+                    <span>로그인</span>
+                  </Link>
+                </div>
+              )}
             </div>
           </nav>
         </div>

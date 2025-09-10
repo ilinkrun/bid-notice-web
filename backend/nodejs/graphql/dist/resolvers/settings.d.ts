@@ -133,6 +133,25 @@ export declare const settingsResolvers: {
             sampleUrl: any;
             down: any;
         } | null>;
+        settingsDetailByOid: (_: unknown, { oid }: {
+            oid: number;
+        }) => Promise<{
+            oid: any;
+            orgName: any;
+            title: any;
+            bodyHtml: any;
+            fileName: any;
+            fileUrl: any;
+            preview: any;
+            noticeDiv: any;
+            noticeNum: any;
+            orgDept: any;
+            orgMan: any;
+            orgTel: any;
+            use: any;
+            sampleUrl: any;
+            down: any;
+        } | null>;
         settingsNoticeDetailByOrg: (_: unknown, { orgName }: {
             orgName: string;
         }) => Promise<any>;
@@ -258,6 +277,26 @@ export declare const settingsResolvers: {
         settingsNoticeDetailDelete: (_: unknown, { oid }: {
             oid: number;
         }) => Promise<boolean>;
+        upsertSettingsDetailByOid: (_: unknown, { oid, input }: {
+            oid: number;
+            input: SettingsNoticeDetailInput;
+        }) => Promise<{
+            oid: any;
+            orgName: any;
+            title: any;
+            bodyHtml: any;
+            fileName: any;
+            fileUrl: any;
+            preview: any;
+            noticeDiv: any;
+            noticeNum: any;
+            orgDept: any;
+            orgMan: any;
+            orgTel: any;
+            use: any;
+            sampleUrl: any;
+            down: any;
+        }>;
         settingsNoticeCategoryCreate: (_: unknown, { input }: {
             input: SettingsNoticeCategoryInput;
         }) => Promise<{

@@ -6,6 +6,7 @@ import { mybidsResolvers } from './mybids';
 import { boardsResolvers } from './boards';
 import { spidersResolvers } from './spiders';
 import { databaseResolvers } from './database';
+import { authResolvers } from './auth';
 
 export const resolvers = [
   baseResolvers,
@@ -16,4 +17,5 @@ export const resolvers = [
   boardsResolvers,
   spidersResolvers,
   databaseResolvers,
+  authResolvers,
 ];

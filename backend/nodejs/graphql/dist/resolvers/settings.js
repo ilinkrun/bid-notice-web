@@ -180,6 +180,33 @@ export const settingsResolvers = {
                 return null;
             }
         },
+        settingsDetailByOid: async (_, { oid }) => {
+            try {
+                const response = await apiClient.get(`/settings_notice_detail_by_oid/${oid}`);
+                const setting = response.data;
+                return {
+                    oid: setting.oid,
+                    orgName: setting.org_name,
+                    title: setting.title || '',
+                    bodyHtml: setting.body_html || '',
+                    fileName: setting.file_name || '',
+                    fileUrl: setting.file_url || '',
+                    preview: setting.preview || '',
+                    noticeDiv: setting.notice_div || '',
+                    noticeNum: setting.notice_num || '',
+                    orgDept: setting.org_dept || '',
+                    orgMan: setting.org_man || '',
+                    orgTel: setting.org_tel || '',
+                    use: setting.use,
+                    sampleUrl: setting.sample_url || '',
+                    down: setting.down || ''
+                };
+            }
+            catch (error) {
+                console.error('Error fetching settings detail by oid:', error);
+                return null;
+            }
+        },
         settingsNoticeDetailByOrg: async (_, { orgName }) => {
             try {
                 const response = await apiClient.get(`/settings_notice_detail/org/${orgName}`);
@@ -543,6 +570,47 @@ export const settingsResolvers = {
             catch (error) {
                 console.error('Error deleting notice detail settings:', error);
                 throw new Error('Failed to delete notice detail settings');
+            }
+        },
+        upsertSettingsDetailByOid: async (_, { oid, input }) => {
+            try {
+                const response = await apiClient.post(`/settings_notice_detail_by_oid/${oid}`, {
+                    org_name: input.orgName,
+                    title: input.title || '',
+                    body_html: input.bodyHtml || '',
+                    file_name: input.fileName || '',
+                    file_url: input.fileUrl || '',
+                    preview: input.preview || '',
+                    notice_div: input.noticeDiv || '',
+                    notice_num: input.noticeNum || '',
+                    org_dept: input.orgDept || '',
+                    org_man: input.orgMan || '',
+                    org_tel: input.orgTel || '',
+                    use: input.use !== undefined ? input.use : 1,
+                    sample_url: input.sampleUrl || '',
+                    down: input.down || ''
+                });
+                return {
+                    oid: response.data.oid,
+                    orgName: response.data.org_name,
+                    title: response.data.title || '',
+                    bodyHtml: response.data.body_html || '',
+                    fileName: response.data.file_name || '',
+                    fileUrl: response.data.file_url || '',
+                    preview: response.data.preview || '',
+                    noticeDiv: response.data.notice_div || '',
+                    noticeNum: response.data.notice_num || '',
+                    orgDept: response.data.org_dept || '',
+                    orgMan: response.data.org_man || '',
+                    orgTel: response.data.org_tel || '',
+                    use: response.data.use,
+                    sampleUrl: response.data.sample_url || '',
+                    down: response.data.down || ''
+                };
+            }
+            catch (error) {
+                console.error('Error upserting settings detail by oid:', error);
+                throw new Error('Failed to upsert settings detail');
             }
         },
         // Settings Notice Category Mutations

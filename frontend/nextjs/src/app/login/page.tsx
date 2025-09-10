@@ -1,191 +1,495 @@
 'use client';
 
-import { LogIn } from 'lucide-react';
-import { useState, FormEvent } from 'react';
-import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useMutation } from '@apollo/client';
+import { gql } from '@apollo/client';
+import { getClient } from '@/lib/api/graphqlClient';
+import { useAuth } from '@/contexts/AuthContext';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Eye, EyeOff, Mail, Lock, User, UserPlus, Key } from 'lucide-react';
+
+const LOGIN_MUTATION = gql`
+  mutation Login($email: String!, $password: String!) {
+    login(email: $email, password: $password) {
+      user {
+        id
+        email
+        name
+        role
+        department
+        avatar
+        isActive
+        createdAt
+        lastLoginAt
+      }
+      token
+      message
+      success
+    }
+  }
+`;
+
+const REGISTER_MUTATION = gql`
+  mutation Register($input: RegisterInput!) {
+    register(input: $input) {
+      user {
+        id
+        email
+        name
+        role
+        department
+        avatar
+        isActive
+        createdAt
+      }
+      message
+      success
+    }
+  }
+`;
+
+const REQUEST_PASSWORD_RESET_MUTATION = gql`
+  mutation RequestPasswordReset($email: String!) {
+    requestPasswordReset(email: $email) {
+      token
+      message
+      success
+    }
+  }
+`;
+
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  department: string;
+  isActive: boolean;
+  createdAt: string;
+  lastLoginAt?: string;
+}
 
 export default function LoginPage() {
-  const { navigate } = useUnifiedNavigation();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [mode, setMode] = useState<'login' | 'register' | 'forgot'>('login');
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    name: '',
+    department: '',
+    confirmPassword: ''
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  
+  const router = useRouter();
+  const { login: authLogin } = useAuth();
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const [login] = useMutation(LOGIN_MUTATION, { client: getClient() });
+  const [register] = useMutation(REGISTER_MUTATION, { client: getClient() });
+  const [requestPasswordReset] = useMutation(REQUEST_PASSWORD_RESET_MUTATION, { client: getClient() });
+
+  // 로그인 상태 확인
+  useEffect(() => {
+    const token = localStorage.getItem('auth-token');
+    if (token) {
+      router.push('/');
+    }
+  }, [router]);
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const showAlert = (type: 'success' | 'error', message: string) => {
+    setAlert({ type, message });
+    setTimeout(() => setAlert(null), 5000);
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      // TODO: 실제 로그인 API 호출 구현
-      console.log('로그인 시도:', { email, password });
-      
-      // 임시로 2초 후 홈으로 리다이렉트
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      navigate('/');
+      const { data } = await login({
+        variables: {
+          email: formData.email,
+          password: formData.password
+        }
+      });
+
+      if (data.login.success) {
+        // AuthContext를 통한 로그인 처리
+        authLogin(data.login.user, data.login.token);
+        
+        if (rememberMe) {
+          localStorage.setItem('remember-email', formData.email);
+        } else {
+          localStorage.removeItem('remember-email');
+        }
+
+        showAlert('success', data.login.message);
+        
+        // 홈페이지로 리다이렉트
+        setTimeout(() => {
+          router.push('/');
+        }, 1000);
+      } else {
+        showAlert('error', data.login.message);
+      }
     } catch (error) {
-      console.error('로그인 실패:', error);
-      alert('로그인에 실패했습니다. 다시 시도해주세요.');
+      console.error('Login error:', error);
+      showAlert('error', '로그인 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  return (
-    <div className="container mx-auto px-4 py-8  theme-default">
-      <div className="bg-indigo-50 border-l-4 border-indigo-400 p-4 mb-6">
-        <div className="flex">
-          <div className="ml-3">
-            <p className="text-sm text-indigo-700">
-              현재 로그인 페이지는 개발 중입니다. 다음과 같은 기능이 제공될 예정입니다:
-            </p>
-            <ul className="mt-3 list-disc list-inside text-sm text-indigo-700">
-              <li>이메일/비밀번호 로그인</li>
-              <li>소셜 로그인 (Google, Kakao, Naver)</li>
-              <li>비밀번호 찾기/회원가입/자동 로그인인</li>
-              <li>사용자 권한별 페이지 접근/기능 제한</li>
-            </ul>
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    if (formData.password !== formData.confirmPassword) {
+      showAlert('error', '비밀번호가 일치하지 않습니다.');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const { data } = await register({
+        variables: {
+          input: {
+            email: formData.email,
+            password: formData.password,
+            name: formData.name,
+            department: formData.department
+          }
+        }
+      });
+
+      if (data.register.success) {
+        showAlert('success', data.register.message);
+        // 회원가입 성공 시 로그인 모드로 전환
+        setTimeout(() => {
+          setMode('login');
+          setFormData(prev => ({ ...prev, password: '', confirmPassword: '' }));
+        }, 2000);
+      } else {
+        showAlert('error', data.register.message);
+      }
+    } catch (error) {
+      console.error('Register error:', error);
+      showAlert('error', '회원가입 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const { data } = await requestPasswordReset({
+        variables: {
+          email: formData.email
+        }
+      });
+
+      if (data.requestPasswordReset.success) {
+        showAlert('success', data.requestPasswordReset.message);
+      } else {
+        showAlert('error', data.requestPasswordReset.message);
+      }
+    } catch (error) {
+      console.error('Password reset error:', error);
+      showAlert('error', '비밀번호 재설정 요청 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 이메일 기억하기 불러오기
+  useEffect(() => {
+    const rememberedEmail = localStorage.getItem('remember-email');
+    if (rememberedEmail) {
+      setFormData(prev => ({ ...prev, email: rememberedEmail }));
+      setRememberMe(true);
+    }
+  }, []);
+
+  const renderTestCredentials = () => (
+    <Card className="mb-4">
+      <CardHeader>
+        <CardTitle className="text-sm text-muted-foreground">테스트 계정</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        <div className="text-xs space-y-1">
+          <div className="flex justify-between">
+            <span className="font-medium">관리자:</span>
+            <span className="text-muted-foreground">admin@ilmaceng.com / admin123</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium">일반사용자:</span>
+            <span className="text-muted-foreground">user@ilmaceng.com / user123</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium">매니저:</span>
+            <span className="text-muted-foreground">manager@ilmaceng.com / manager123</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium">조회자:</span>
+            <span className="text-muted-foreground">viewer@ilmaceng.com / viewer123</span>
           </div>
         </div>
-      </div>
+      </CardContent>
+    </Card>
+  );
 
-      <div className="bg-white shadow-md p-6 max-w-md mx-auto">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900">로그인</h2>
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-6">
+        {/* 로고 및 제목 */}
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-900">ILMAC BID</h1>
+          <h2 className="mt-6 text-2xl font-semibold text-gray-900">
+            {mode === 'login' ? '로그인' : mode === 'register' ? '회원가입' : '비밀번호 찾기'}
+          </h2>
           <p className="mt-2 text-sm text-gray-600">
-            서비스를 이용하기 위해 로그인해주세요.
+            {mode === 'login' 
+              ? '계정에 로그인하세요' 
+              : mode === 'register' 
+              ? '새 계정을 만드세요'
+              : '비밀번호를 재설정합니다'
+            }
           </p>
         </div>
 
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          {/* 이메일 입력 */}
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
-            >
-              이메일
-            </label>
-            <div className="mt-1">
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="example@example.com"
-              />
-            </div>
-          </div>
+        {/* 테스트 계정 정보 (로그인 모드일 때만) */}
+        {mode === 'login' && renderTestCredentials()}
 
-          {/* 비밀번호 입력 */}
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
-            >
-              비밀번호
-            </label>
-            <div className="mt-1">
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="••••••••"
-              />
-            </div>
-          </div>
+        {/* 알림 */}
+        {alert && (
+          <Alert className={alert.type === 'success' ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
+            <AlertDescription className={alert.type === 'success' ? 'text-green-800' : 'text-red-800'}>
+              {alert.message}
+            </AlertDescription>
+          </Alert>
+        )}
 
-          {/* 로그인 버튼 */}
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className={`w-full flex justify-center items-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
-                isLoading ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
-              {isLoading ? (
+        {/* 로그인 폼 */}
+        <Card>
+          <CardContent className="pt-6">
+            <form onSubmit={mode === 'login' ? handleLogin : mode === 'register' ? handleRegister : handleForgotPassword}>
+              <div className="space-y-4">
+                {/* 이메일 */}
+                <div>
+                  <Label htmlFor="email">이메일</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="email"
+                      type="email"
+                      required
+                      className="pl-10"
+                      placeholder="이메일을 입력하세요"
+                      value={formData.email}
+                      onChange={(e) => handleInputChange('email', e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {/* 이름 (회원가입 시에만) */}
+                {mode === 'register' && (
+                  <div>
+                    <Label htmlFor="name">이름</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Input
+                        id="name"
+                        type="text"
+                        required
+                        className="pl-10"
+                        placeholder="이름을 입력하세요"
+                        value={formData.name}
+                        onChange={(e) => handleInputChange('name', e.target.value)}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* 부서 (회원가입 시에만) */}
+                {mode === 'register' && (
+                  <div>
+                    <Label htmlFor="department">부서</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Input
+                        id="department"
+                        type="text"
+                        className="pl-10"
+                        placeholder="부서를 입력하세요 (선택사항)"
+                        value={formData.department}
+                        onChange={(e) => handleInputChange('department', e.target.value)}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* 비밀번호 (비밀번호 찾기 제외) */}
+                {mode !== 'forgot' && (
+                  <div>
+                    <Label htmlFor="password">비밀번호</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Input
+                        id="password"
+                        type={showPassword ? 'text' : 'password'}
+                        required
+                        className="pl-10 pr-10"
+                        placeholder="비밀번호를 입력하세요"
+                        value={formData.password}
+                        onChange={(e) => handleInputChange('password', e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4 text-gray-400" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-gray-400" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* 비밀번호 확인 (회원가입 시에만) */}
+                {mode === 'register' && (
+                  <div>
+                    <Label htmlFor="confirmPassword">비밀번호 확인</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Input
+                        id="confirmPassword"
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        required
+                        className="pl-10 pr-10"
+                        placeholder="비밀번호를 다시 입력하세요"
+                        value={formData.confirmPassword}
+                        onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff className="h-4 w-4 text-gray-400" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-gray-400" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* 자동 로그인 (로그인 시에만) */}
+                {mode === 'login' && (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="rememberMe" 
+                      checked={rememberMe}
+                      onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                    />
+                    <Label 
+                      htmlFor="rememberMe" 
+                      className="text-sm font-normal cursor-pointer"
+                    >
+                      이메일 기억하기
+                    </Label>
+                  </div>
+                )}
+
+                {/* 제출 버튼 */}
+                <Button 
+                  type="submit" 
+                  className="w-full"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <span>처리중...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      {mode === 'login' ? (
+                        <Lock className="h-4 w-4" />
+                      ) : mode === 'register' ? (
+                        <UserPlus className="h-4 w-4" />
+                      ) : (
+                        <Key className="h-4 w-4" />
+                      )}
+                      <span>
+                        {mode === 'login' ? '로그인' : mode === 'register' ? '회원가입' : '재설정 요청'}
+                      </span>
+                    </div>
+                  )}
+                </Button>
+              </div>
+            </form>
+
+            {/* 모드 전환 링크 */}
+            <div className="mt-6 text-center space-y-2">
+              {mode === 'login' ? (
                 <>
-                  <LogIn className="h-4 w-4 animate-spin" />
-                  로그인 중...
+                  <div>
+                    <button
+                      type="button"
+                      className="text-sm text-blue-600 hover:text-blue-500"
+                      onClick={() => setMode('register')}
+                    >
+                      계정이 없으신가요? 회원가입
+                    </button>
+                  </div>
+                  <div>
+                    <button
+                      type="button"
+                      className="text-sm text-blue-600 hover:text-blue-500"
+                      onClick={() => setMode('forgot')}
+                    >
+                      비밀번호를 잊으셨나요?
+                    </button>
+                  </div>
                 </>
               ) : (
-                '로그인'
+                <div>
+                  <button
+                    type="button"
+                    className="text-sm text-blue-600 hover:text-blue-500"
+                    onClick={() => setMode('login')}
+                  >
+                    이미 계정이 있으신가요? 로그인
+                  </button>
+                </div>
               )}
-            </button>
-          </div>
-
-          {/* 소셜 로그인 */}
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">
-                  소셜 계정으로 로그인
-                </span>
-              </div>
             </div>
-
-            <div className="mt-6 grid grid-cols-3 gap-3">
-              {/* 구글 로그인 */}
-              <button
-                type="button"
-                disabled
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 opacity-50 cursor-not-allowed"
-              >
-                <span className="sr-only">구글 로그인</span>
-                <svg
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z" />
-                </svg>
-              </button>
-
-              {/* 카카오 로그인 */}
-              <button
-                type="button"
-                disabled
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 opacity-50 cursor-not-allowed"
-              >
-                <span className="sr-only">카카오 로그인</span>
-                <svg
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M12,3c-5.523,0-10,3.582-10,8c0,2.947,1.932,5.526,4.84,6.91L5.84,21.772C5.667,22.127,6.016,22.5,6.391,22.5c0.129,0,0.258-0.043,0.363-0.13l4.72-3.191c0.174,0.011,0.349,0.021,0.526,0.021c5.523,0,10-3.582,10-8S17.523,3,12,3z" />
-                </svg>
-              </button>
-
-              {/* 네이버 로그인 */}
-              <button
-                type="button"
-                disabled
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 opacity-50 cursor-not-allowed"
-              >
-                <span className="sr-only">네이버 로그인</span>
-                <svg
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M16.273,12.845L7.376,0H0v24h7.726V11.155L16.624,24H24V0h-7.727V12.845z" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </form>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

@@ -82,6 +82,7 @@ export const settingsTypeDefs = `#graphql
     
     settingsNoticeDetailAll: [SettingsNoticeDetail!]!
     settingsNoticeDetailOne(oid: Int!): SettingsNoticeDetail
+    settingsDetailByOid(oid: Int!): SettingsNoticeDetail
     settingsNoticeDetailByOrg(orgName: String!): [SettingsNoticeDetail!]!
     
     settingsNoticeCategoryAll: [SettingsNoticeCategory!]!
@@ -104,6 +105,7 @@ export const settingsTypeDefs = `#graphql
     settingsNoticeDetailCreate(input: SettingsNoticeDetailInput!): SettingsNoticeDetail!
     settingsNoticeDetailUpdate(input: SettingsNoticeDetailInput!): SettingsNoticeDetail!
     settingsNoticeDetailDelete(oid: Int!): Boolean
+    upsertSettingsDetailByOid(oid: Int!, input: SettingsNoticeDetailInput!): SettingsNoticeDetail!
     
     settingsNoticeCategoryCreate(input: SettingsNoticeCategoryInput!): SettingsNoticeCategory!
     settingsNoticeCategoryUpdate(input: SettingsNoticeCategoryInput!): SettingsNoticeCategory!
