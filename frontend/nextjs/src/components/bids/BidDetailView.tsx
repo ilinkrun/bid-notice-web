@@ -19,18 +19,18 @@ import {
 } from 'lucide-react';
 
 interface Bid {
-  mid: string;
-  nid: string;
+  mid: number;
+  nid: number;
   title: string;
   status: string;
-  started_at: string;
-  ended_at: string;
+  startedAt?: string;
+  endedAt?: string;
   memo?: string;
   orgName: string;
   postedAt: string;
-  detail: string;
-  category: string;
-  region: string;
+  detail?: string;
+  category?: string;
+  region?: string;
 }
 
 interface BidDetailViewProps {
@@ -233,11 +233,11 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1">
                   <span className="text-sm text-gray-500">입찰 개시 시간</span>
-                  <span className="font-medium">{bid.started_at || '정보 없음'}</span>
+                  <span className="font-medium">{bid.startedAt || '정보 없음'}</span>
                 </div>
                 <div className="flex flex-col gap-1">
                   <span className="text-sm text-gray-500">입찰 종료 시간</span>
-                  <span className="font-medium">{bid.ended_at || '정보 없음'}</span>
+                  <span className="font-medium">{bid.endedAt || '정보 없음'}</span>
                 </div>
                 <div className="flex flex-col gap-1">
                   <span className="text-sm text-gray-500">입찰 종류</span>

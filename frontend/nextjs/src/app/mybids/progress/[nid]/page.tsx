@@ -6,14 +6,14 @@ import { notFound } from 'next/navigation';
 import '../../../themes.css';
 
 const GET_BID_DETAIL = gql`
-  query GetBidDetail($nid: Int!) {
-    bidByNid(nid: $nid) {
+  query GetMyBidDetail($nid: Int!) {
+    mybidsOne(nid: $nid) {
       mid
       nid
       title
       status
-      started_at
-      ended_at
+      startedAt
+      endedAt
       memo
       orgName
       postedAt
@@ -33,7 +33,7 @@ async function getBidDetail(nid: string) {
       fetchPolicy: 'no-cache',
       errorPolicy: 'all'
     });
-    return result.data?.bidByNid || null;
+    return result.data?.mybidsOne || null;
   } catch (error) {
     console.error('Failed to fetch bid detail:', error);
     return null;

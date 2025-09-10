@@ -7,6 +7,7 @@ import { boardsResolvers } from './boards';
 import { spidersResolvers } from './spiders';
 import { databaseResolvers } from './database';
 import { authResolvers } from './auth';
+import { permissionsResolvers } from './permissions';
 export const resolvers = [
     baseResolvers,
     noticesResolvers,
@@ -17,5 +18,6 @@ export const resolvers = [
     spidersResolvers,
     databaseResolvers,
     authResolvers,
+    permissionsResolvers,
 ];
 //# sourceMappingURL=index.js.map

@@ -28,6 +28,9 @@ export declare const mybidsResolvers: {
         mybidUpdate: (_: unknown, { input }: {
             input: any;
         }) => Promise<any>;
+        mybidUpsert: (_: unknown, { input }: {
+            input: any;
+        }) => Promise<any>;
         mybidDelete: (_: unknown, { mid }: {
             mid: number;
         }) => Promise<boolean>;

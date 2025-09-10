@@ -126,7 +126,7 @@ export default function BidTable({ bids, currentStatus }) {
       // 1. UI 상태 즉시 업데이트
       // 2. URL 업데이트 준비
       const newSearchParams = new URLSearchParams(window.location.search);
-      const newUrl = `/bids/${encodeURIComponent(value)}?${newSearchParams.toString()}`;
+      const newUrl = `/mybids/${encodeURIComponent(value)}?${newSearchParams.toString()}`;
       
       // 3. URL 히스토리 업데이트 (페이지 새로고침 없이)
       navigate(newUrl);
@@ -606,7 +606,7 @@ export default function BidTable({ bids, currentStatus }) {
                   key={bid.mid}
                   className="cursor-pointer hover:bg-gray-50"
                   onClick={() => {
-                    window.location.href = `/bids/${localStatus}/${bid.nid}`;
+                    window.location.href = `/mybids/${localStatus}/${bid.nid}`;
                   }}
                 >
                   <TableCell className="w-[40px]">

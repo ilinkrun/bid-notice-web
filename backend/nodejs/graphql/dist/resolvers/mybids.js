@@ -75,7 +75,6 @@ export const mybidsResolvers = {
     Mutation: {
         mybidCreate: async (_, { input }) => {
             try {
-                // TODO: Implement bid creation API call
                 const response = await apiClient.post('/my_bids', input);
                 return response.data;
             }
@@ -86,13 +85,22 @@ export const mybidsResolvers = {
         },
         mybidUpdate: async (_, { input }) => {
             try {
-                // TODO: Implement bid update API call
                 const response = await apiClient.put(`/my_bids/${input.mid}`, input);
                 return response.data;
             }
             catch (error) {
                 console.error('Error updating bid:', error);
                 throw new Error('Failed to update bid');
+            }
+        },
+        mybidUpsert: async (_, { input }) => {
+            try {
+                const response = await apiClient.post('/my_bids/upsert', input);
+                return response.data;
+            }
+            catch (error) {
+                console.error('Error upserting bid:', error);
+                throw new Error('Failed to upsert bid');
             }
         },
         mybidDelete: async (_, { mid }) => {

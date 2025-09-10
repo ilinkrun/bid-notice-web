@@ -1,4 +1,4 @@
-import { apiClient } from '@/lib/api/backendClient';
+import { apiClient } from '../lib/api/backendClient';
 
 interface BidData {
   mid: string;
@@ -91,7 +91,6 @@ export const mybidsResolvers = {
   Mutation: {
     mybidCreate: async (_: unknown, { input }: { input: any }) => {
       try {
-        // TODO: Implement bid creation API call
         const response = await apiClient.post('/my_bids', input);
         return response.data;
       } catch (error) {
@@ -102,12 +101,21 @@ export const mybidsResolvers = {
 
     mybidUpdate: async (_: unknown, { input }: { input: any }) => {
       try {
-        // TODO: Implement bid update API call
         const response = await apiClient.put(`/my_bids/${input.mid}`, input);
         return response.data;
       } catch (error) {
         console.error('Error updating bid:', error);
         throw new Error('Failed to update bid');
+      }
+    },
+
+    mybidUpsert: async (_: unknown, { input }: { input: any }) => {
+      try {
+        const response = await apiClient.post('/my_bids/upsert', input);
+        return response.data;
+      } catch (error) {
+        console.error('Error upserting bid:', error);
+        throw new Error('Failed to upsert bid');
       }
     },
 

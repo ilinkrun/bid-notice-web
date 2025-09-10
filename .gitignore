@@ -2,6 +2,7 @@
 ## nodejs
 node_modules/
 .next/
+dist/
 
 ## python
 .venv/
