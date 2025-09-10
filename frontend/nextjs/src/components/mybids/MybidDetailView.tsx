@@ -15,8 +15,22 @@ import {
   CheckSquare,
   Building,
   Calendar,
-  User
+  User,
+  Loader2
 } from 'lucide-react';
+import { useMutation, gql } from '@apollo/client';
+import { useRouter } from 'next/navigation';
+
+const UPDATE_MYBID = gql`
+  mutation UpdateMyBid($input: MyBidUpdateInput!) {
+    mybidUpdate(input: $input) {
+      success
+      message
+      nid
+      status
+    }
+  }
+`;
 
 interface Bid {
   mid: number;
@@ -38,6 +52,9 @@ interface BidDetailViewProps {
 }
 
 export default function BidDetailView({ bid }: BidDetailViewProps) {
+  const router = useRouter();
+  const [updateMyBid, { loading }] = useMutation(UPDATE_MYBID);
+  
   const [selectedStatus, setSelectedStatus] = useState('');
   const [bidAmount, setBidAmount] = useState('');
   const [memo, setMemo] = useState('');
@@ -156,16 +173,56 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
     }
   };
 
-  const handleStatusChange = () => {
-    // TODO: Implement status change logic
-    console.log('Status change:', {
-      selectedStatus,
-      bidAmount,
-      memo,
-      createProject,
-      pm,
-      giveupReason
-    });
+  const handleStatusChange = async () => {
+    if (!selectedStatus) {
+      alert('단계를 선택해주세요.');
+      return;
+    }
+
+    try {
+      // detail 객체 구성
+      const detail: Record<string, string> = {};
+      
+      switch (selectedStatus) {
+        case '응찰':
+          if (bidAmount) detail['응찰가'] = bidAmount;
+          break;
+        case '낙찰':
+          if (createProject) detail['프로젝트 생성'] = 'true';
+          if (pm) detail['PM'] = pm;
+          break;
+        case '포기':
+          if (giveupReason) detail['포기 이유'] = giveupReason;
+          break;
+      }
+
+      const { data } = await updateMyBid({
+        variables: {
+          input: {
+            nid: bid.nid,
+            status: selectedStatus,
+            memo: memo || null,
+            detail: Object.keys(detail).length > 0 ? JSON.stringify(detail) : null
+          }
+        }
+      });
+
+      if (data?.mybidUpdate?.success) {
+        if (selectedStatus === '응찰') {
+          // 응찰 성공 시 alert 없이 즉시 /mybids/bidding/[nid] 페이지로 이동
+          router.push(`/mybids/bidding/${bid.nid}`);
+        } else {
+          alert(`단계가 '${selectedStatus}'로 변경되었습니다.`);
+          // 페이지 새로고침하여 변경된 정보 반영
+          router.refresh();
+        }
+      } else {
+        throw new Error(data?.mybidUpdate?.message || '단계 변경에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('단계 변경 중 오류 발생:', error);
+      alert('단계 변경 중 오류가 발생했습니다.');
+    }
   };
 
   return (
@@ -381,8 +438,15 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
 
             {selectedStatus && (
               <div className="flex justify-end pt-4">
-                <Button onClick={handleStatusChange}>
-                  단계 변경
+                <Button onClick={handleStatusChange} disabled={loading}>
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      처리 중...
+                    </>
+                  ) : (
+                    '단계 변경'
+                  )}
                 </Button>
               </div>
             )}

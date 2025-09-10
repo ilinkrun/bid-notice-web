@@ -105,6 +105,13 @@ class RestoreNoticesRequest(BaseModel):
   nids: List[int]
 
 
+class UpdateMyBidRequest(BaseModel):
+  nid: int
+  status: str
+  memo: Optional[str] = None
+  detail: Optional[Dict] = None
+
+
 class NasPathSetting(BaseModel):
   name: str
   area: str
@@ -681,6 +688,87 @@ def get_bid_by_nid(nid: str):
     raise he
   except Exception as e:
     raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.put("/my_bids/{nid}")
+def update_mybid_endpoint(nid: int, request: UpdateMyBidRequest):
+  """
+  특정 nid의 입찰 정보를 업데이트합니다.
+  """
+  try:
+    mysql = Mysql()
+    
+    # 기존 입찰 정보 확인 (memo, detail 포함)
+    existing_bid = mysql.find("my_bids", ["mid", "memo", "detail"], f"WHERE nid = {nid}")
+    if not existing_bid:
+      mysql.close()
+      raise HTTPException(status_code=404, detail=f"입찰 정보를 찾을 수 없습니다: {nid}")
+    
+    existing_memo = existing_bid[0][1]
+    existing_detail = existing_bid[0][2]
+    
+    # 업데이트할 데이터 준비
+    update_data = {
+      "status": request.status
+    }
+    
+    # 기존 memo 파싱
+    try:
+      if existing_memo and existing_memo.strip():
+        memo_dict = json.loads(existing_memo)
+      else:
+        memo_dict = {}
+    except:
+      memo_dict = {}
+    
+    # 기존 detail 파싱
+    try:
+      if existing_detail and existing_detail.strip():
+        detail_dict = json.loads(existing_detail)
+      else:
+        detail_dict = {}
+    except:
+      detail_dict = {}
+    
+    # 메모 처리 - 항상 memo 딕셔너리를 업데이트
+    if request.memo is not None:
+      if request.memo.strip():
+        memo_dict[request.status] = request.memo
+      # 빈 메모라도 해당 상태의 키는 업데이트
+      else:
+        memo_dict[request.status] = ""
+    update_data["memo"] = json.dumps(memo_dict, ensure_ascii=False)
+    
+    # detail이 있는 경우 status 키로 저장
+    if request.detail is not None:
+      detail_dict[request.status] = request.detail
+      update_data["detail"] = json.dumps(detail_dict, ensure_ascii=False)
+    
+    # 직접 SQL 작성으로 한글 처리 문제 해결
+    set_clauses = []
+    for key, value in update_data.items():
+      if isinstance(value, str):
+        # 문자열은 따옴표로 감싸고 이스케이프 처리
+        escaped_value = value.replace("'", "\\'").replace('"', '\\"')
+        set_clauses.append(f"`{key}` = '{escaped_value}'")
+      else:
+        set_clauses.append(f"`{key}` = {value}")
+    
+    sql = f"UPDATE my_bids SET {', '.join(set_clauses)} WHERE nid = {nid}"
+    mysql.exec(sql)
+    mysql.close()
+    
+    return {
+      "success": True,
+      "message": f"입찰 정보가 성공적으로 업데이트되었습니다: {nid}",
+      "nid": nid,
+      "status": request.status
+    }
+    
+  except HTTPException as he:
+    raise he
+  except Exception as e:
+    raise HTTPException(status_code=500, detail=f"입찰 정보 업데이트 중 오류가 발생했습니다: {str(e)}")
 
 
 # ** logs, errors

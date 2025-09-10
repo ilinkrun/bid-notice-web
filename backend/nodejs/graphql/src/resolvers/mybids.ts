@@ -103,9 +103,27 @@ export const mybidsResolvers = {
       }
     },
 
-    mybidUpdate: async (_: unknown, { input }: { input: any }) => {
+    mybidUpdate: async (_: unknown, { input }: { input: { nid: number; status: string; memo?: string; detail?: string } }) => {
       try {
-        const response = await apiClient.put(`/my_bids/${input.mid}`, input);
+        const requestData: any = {
+          nid: input.nid,
+          status: input.status
+        };
+        
+        if (input.memo) {
+          requestData.memo = input.memo;
+        }
+        
+        if (input.detail) {
+          try {
+            requestData.detail = JSON.parse(input.detail);
+          } catch (e) {
+            console.error('Failed to parse detail JSON:', e);
+            requestData.detail = null;
+          }
+        }
+        
+        const response = await apiClient.put(`/my_bids/${input.nid}`, requestData);
         return response.data;
       } catch (error) {
         console.error('Error updating bid:', error);

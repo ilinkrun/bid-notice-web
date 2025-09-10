@@ -23,9 +23,16 @@ export const mybidsTypeDefs = `#graphql
 
   extend type Mutation {
     mybidCreate(input: MyBidInput!): MyBid
-    mybidUpdate(input: MyBidInput!): MyBid
+    mybidUpdate(input: MyBidUpdateInput!): UpdateResult
     mybidUpsert(input: MyBidInput!): MyBid
     mybidDelete(mid: Int!): Boolean
+  }
+
+  type UpdateResult {
+    success: Boolean!
+    message: String!
+    nid: Int
+    status: String
   }
 
   input MyBidInput {
@@ -42,5 +49,12 @@ export const mybidsTypeDefs = `#graphql
     detailUrl: String
     category: String
     region: String
+  }
+
+  input MyBidUpdateInput {
+    nid: Int!
+    status: String!
+    memo: String
+    detail: String
   }
 `;
