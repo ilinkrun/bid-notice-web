@@ -707,12 +707,23 @@ def notice_to_progress(nid):
   
   # upsert_my_bid_by_nid(nid)
   # !! nid가 있는 경우 update, nid가 없는 경우 insert
-  mysql.upsert("my_bids", [{
-    "nid": nid, 
-    "title": title,
-    "detail_url": detail_url,
-    'status': "진행"
-  }], inType="dicts")
+  existing_bid = mysql.find("my_bids", ["mid"], f"WHERE nid = {nid}")
+  
+  if existing_bid:
+    # nid가 있는 경우 update
+    mysql.update("my_bids", {
+      "title": title,
+      "detail_url": detail_url,
+      "status": "진행"
+    }, f"WHERE nid = {nid}")
+  else:
+    # nid가 없는 경우 insert
+    mysql.insert("my_bids", [{
+      "nid": nid, 
+      "title": title,
+      "detail_url": detail_url,
+      "status": "진행"
+    }], inType="dicts")
   mysql.close()
 
   return 

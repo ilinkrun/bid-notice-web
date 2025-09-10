@@ -413,10 +413,11 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
       });
 
       if (data?.noticeToProgress?.success) {
-        alert(data.noticeToProgress.message || '입찰 진행이 설정되었습니다.');
         // 처리 후 선택 초기화
         setSelectedNids([]);
         setIsBidProcessModalOpen(false);
+        // /mybids/progress 페이지로 이동
+        navigate('/mybids/progress');
       } else {
         throw new Error(data?.noticeToProgress?.message || '입찰 진행 처리에 실패했습니다.');
       }
@@ -668,7 +669,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
             >
               <Plus className="h-4 w-4" />
             </Button>
-          ) : (
+          ) : currentCategory !== '무관' && (
             <Button 
               onClick={handleExclude} 
               variant="outline" 
@@ -686,7 +687,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
           >
             <Edit3 className="h-4 w-4" />
           </Button>
-          {currentCategory !== '무관' && (
+          {currentCategory !== '무관' && currentCategory !== '제외' && (
             <Button 
               onClick={handleBidProcess} 
               variant="outline" 
