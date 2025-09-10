@@ -7,6 +7,7 @@ import { boardsTypeDefs } from './boards';
 import { spidersTypeDefs } from './spiders';
 import { databaseTypeDefs } from './database';
 import { authTypeDefs } from './auth';
+import { permissionsTypeDefs } from './permissions';
 
 const baseTypeDefs = gql`
   type Query {
@@ -28,4 +29,5 @@ export const typeDefs = [
   spidersTypeDefs,
   databaseTypeDefs,
   authTypeDefs,
+  permissionsTypeDefs,
 ];

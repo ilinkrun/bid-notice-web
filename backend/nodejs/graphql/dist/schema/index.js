@@ -7,6 +7,7 @@ import { boardsTypeDefs } from './boards';
 import { spidersTypeDefs } from './spiders';
 import { databaseTypeDefs } from './database';
 import { authTypeDefs } from './auth';
+import { permissionsTypeDefs } from './permissions';
 const baseTypeDefs = gql `
   type Query {
     health: String
@@ -26,5 +27,6 @@ export const typeDefs = [
     spidersTypeDefs,
     databaseTypeDefs,
     authTypeDefs,
+    permissionsTypeDefs,
 ];
 //# sourceMappingURL=index.js.map
