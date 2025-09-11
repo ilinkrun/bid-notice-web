@@ -15,10 +15,25 @@ export const mybidsTypeDefs = `#graphql
     region: String
   }
 
+  type NoticeFile {
+    file_name: String!
+    file_url: String!
+    down_folder: String
+    source: String!
+  }
+
+  type NoticeFilesResponse {
+    success: Boolean!
+    nid: Int!
+    files: [NoticeFile!]!
+    total_count: Int!
+  }
+
   extend type Query {
     mybidsAll: [MyBid!]!
     mybidsByStatus(status: String!): [MyBid!]!
     mybidsOne(nid: Int!): MyBid
+    noticeFiles(nid: Int!): NoticeFilesResponse
   }
 
   extend type Mutation {

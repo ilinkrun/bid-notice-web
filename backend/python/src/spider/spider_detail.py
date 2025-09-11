@@ -709,12 +709,31 @@ def notice_to_progress(nid):
   # !! nid가 있는 경우 update, nid가 없는 경우 insert
   existing_bid = mysql.find("my_bids", ["mid"], f"WHERE nid = {nid}")
   
+  # 기본 detail과 memo 구조
+  # !! 기본값을 db or json에 저장하고 불러오도록 수정 필요
+  default_detail = {
+    "공고": { "입찰 개시 시간": "정보 없음", "입찰 종료 시간": "정보 없음", "입찰 종류": "전자입찰","제출 서류": "입찰서, 사업계획서", "입찰 보증금": "추정가격의 5%", "개찰 방식": "공개경쟁입찰" },
+    "응찰": {"응찰가": 0, "장소": "", "시간": ""}, 
+    "낙찰": {"프로젝트명": "", "PM": ""}, 
+    "패찰": {"패찰 사유": ""}, 
+    "포기": {"포기 사유": ""}
+  }
+  default_memo = {
+    "공고": "",
+    "응찰": "", 
+    "낙찰": "", 
+    "패찰": "", 
+    "포기": ""
+  }
+  
   if existing_bid:
     # nid가 있는 경우 update
     mysql.update("my_bids", {
       "title": title,
       "detail_url": detail_url,
-      "status": "진행"
+      "status": "진행",
+      "detail": json.dumps(default_detail, ensure_ascii=False),
+      "memo": json.dumps(default_memo, ensure_ascii=False)
     }, f"WHERE nid = {nid}")
   else:
     # nid가 없는 경우 insert
@@ -722,7 +741,9 @@ def notice_to_progress(nid):
       "nid": nid, 
       "title": title,
       "detail_url": detail_url,
-      "status": "진행"
+      "status": "진행",
+      "detail": json.dumps(default_detail, ensure_ascii=False),
+      "memo": json.dumps(default_memo, ensure_ascii=False)
     }], inType="dicts")
   mysql.close()
 

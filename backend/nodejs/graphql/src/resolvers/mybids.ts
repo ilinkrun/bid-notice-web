@@ -1,4 +1,4 @@
-import { apiClient } from '../lib/api/backendClient';
+import { apiClient, mysqlApiClient } from '../lib/api/backendClient';
 
 interface BidData {
   mid: string;
@@ -88,6 +88,21 @@ export const mybidsResolvers = {
       } catch (error) {
         console.error('Error fetching bid by nid:', error);
         return null;
+      }
+    },
+
+    noticeFiles: async (_: unknown, { nid }: { nid: number }) => {
+      try {
+        const response = await apiClient.get(`/notice_files/${nid}`);
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching notice files:', error);
+        return {
+          success: false,
+          nid: nid,
+          files: [],
+          total_count: 0
+        };
       }
     },
   },

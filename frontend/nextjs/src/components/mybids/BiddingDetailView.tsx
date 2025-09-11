@@ -59,9 +59,7 @@ export default function BiddingDetailView({ bid }: BiddingDetailViewProps) {
   
   const [selectedStatus, setSelectedStatus] = useState('');
   const [memo, setMemo] = useState('');
-  const [createProject, setCreateProject] = useState(false);
-  const [pm, setPm] = useState('');
-  const [giveupReason, setGiveupReason] = useState('');
+  const [dynamicFields, setDynamicFields] = useState<Record<string, any>>({});
 
   // 응찰을 제외한 상태 옵션들
   const statusOptions = [
@@ -70,7 +68,43 @@ export default function BiddingDetailView({ bid }: BiddingDetailViewProps) {
     { value: '포기', label: '포기' }
   ];
 
-  // detail이 JSON 문자열인 경우 파싱
+  // 기존 데이터 파싱
+  const parseDetailData = () => {
+    try {
+      return bid.detail ? JSON.parse(bid.detail) : {};
+    } catch (e) {
+      console.error('Failed to parse detail:', e);
+      return {};
+    }
+  };
+
+  const parseMemoData = () => {
+    try {
+      return bid.memo ? JSON.parse(bid.memo) : {};
+    } catch (e) {
+      console.error('Failed to parse memo:', e);
+      return {};
+    }
+  };
+
+  const detailData = parseDetailData();
+  const memoData = parseMemoData();
+
+  // 선택된 상태가 변경될 때 기존 데이터로 폼 필드 초기화
+  const loadStatusData = (status: string) => {
+    const statusDetail = detailData[status] || {};
+    const statusMemo = memoData[status] || '';
+    
+    setMemo(statusMemo);
+    setDynamicFields(statusDetail);
+  };
+
+  // 동적 필드 값 업데이트
+  const updateDynamicField = (key: string, value: any) => {
+    setDynamicFields(prev => ({ ...prev, [key]: value }));
+  };
+
+  // detail이 JSON 문자열인 경우 파싱 (호환성을 위해 유지)
   let parsedDetail = {};
   if (bid.detail) {
     try {
@@ -83,81 +117,48 @@ export default function BiddingDetailView({ bid }: BiddingDetailViewProps) {
   const renderDynamicFields = () => {
     if (!selectedStatus) return null;
 
-    switch (selectedStatus) {
-      case '낙찰':
-        return (
-          <div className="grid gap-4 mt-4 p-4 bg-gray-50 rounded-lg">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="createProject"
-                checked={createProject}
-                onCheckedChange={(checked) => setCreateProject(checked === true)}
-              />
-              <Label htmlFor="createProject">프로젝트 생성</Label>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="pm">PM</Label>
+    // 현재 상태에 대한 detail 데이터
+    const statusDetail = detailData[selectedStatus] || {};
+    
+    return (
+      <div className="grid gap-4 mt-4 p-4 bg-gray-50 rounded-lg">
+        {/* 동적으로 detail 필드들 생성 */}
+        {Object.entries(statusDetail).map(([key, value]) => (
+          <div key={key} className="grid gap-2">
+            <Label htmlFor={`field-${key}`}>{key}</Label>
+            {key.includes('체크') || key.includes('생성') ? (
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id={`field-${key}`}
+                  checked={dynamicFields[key] === 'true' || dynamicFields[key] === true}
+                  onCheckedChange={(checked) => updateDynamicField(key, checked ? 'true' : 'false')}
+                />
+                <Label htmlFor={`field-${key}`}>{key}</Label>
+              </div>
+            ) : (
               <Input
-                id="pm"
-                value={pm}
-                onChange={(e) => setPm(e.target.value)}
-                placeholder="PM을 입력하세요"
+                id={`field-${key}`}
+                value={dynamicFields[key] || ''}
+                onChange={(e) => updateDynamicField(key, e.target.value)}
+                placeholder={`${key}을(를) 입력하세요`}
               />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="memo">메모</Label>
-              <Textarea
-                id="memo"
-                value={memo}
-                onChange={(e) => setMemo(e.target.value)}
-                placeholder="메모를 입력하세요"
-                rows={3}
-              />
-            </div>
+            )}
           </div>
-        );
-      case '패찰':
-        return (
-          <div className="grid gap-4 mt-4 p-4 bg-gray-50 rounded-lg">
-            <div className="grid gap-2">
-              <Label htmlFor="memo">메모</Label>
-              <Textarea
-                id="memo"
-                value={memo}
-                onChange={(e) => setMemo(e.target.value)}
-                placeholder="메모를 입력하세요"
-                rows={3}
-              />
-            </div>
-          </div>
-        );
-      case '포기':
-        return (
-          <div className="grid gap-4 mt-4 p-4 bg-gray-50 rounded-lg">
-            <div className="grid gap-2">
-              <Label htmlFor="giveupReason">포기 이유</Label>
-              <Input
-                id="giveupReason"
-                value={giveupReason}
-                onChange={(e) => setGiveupReason(e.target.value)}
-                placeholder="포기 이유를 입력하세요"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="memo">메모</Label>
-              <Textarea
-                id="memo"
-                value={memo}
-                onChange={(e) => setMemo(e.target.value)}
-                placeholder="메모를 입력하세요"
-                rows={3}
-              />
-            </div>
-          </div>
-        );
-      default:
-        return null;
-    }
+        ))}
+        
+        {/* 메모 필드 */}
+        <div className="grid gap-2">
+          <Label htmlFor="memo">메모</Label>
+          <Textarea
+            id="memo"
+            value={memo}
+            onChange={(e) => setMemo(e.target.value)}
+            placeholder="메모를 입력하세요"
+            rows={3}
+          />
+        </div>
+      </div>
+    );
   };
 
   const handleStatusChange = async () => {
@@ -167,26 +168,13 @@ export default function BiddingDetailView({ bid }: BiddingDetailViewProps) {
     }
 
     try {
-      // detail 객체 구성
-      const detail: Record<string, string> = {};
-      
-      switch (selectedStatus) {
-        case '낙찰':
-          if (createProject) detail['프로젝트 생성'] = 'true';
-          if (pm) detail['PM'] = pm;
-          break;
-        case '포기':
-          if (giveupReason) detail['포기 이유'] = giveupReason;
-          break;
-      }
-
       const { data } = await updateMyBid({
         variables: {
           input: {
             nid: bid.nid,
             status: selectedStatus,
             memo: memo || null,
-            detail: Object.keys(detail).length > 0 ? JSON.stringify(detail) : null
+            detail: Object.keys(dynamicFields).length > 0 ? JSON.stringify(dynamicFields) : null
           }
         }
       });
@@ -321,7 +309,10 @@ export default function BiddingDetailView({ bid }: BiddingDetailViewProps) {
                   <Checkbox
                     id={`status-${option.value}`}
                     checked={selectedStatus === option.value}
-                    onCheckedChange={() => setSelectedStatus(option.value)}
+                    onCheckedChange={() => {
+                      setSelectedStatus(option.value);
+                      loadStatusData(option.value);
+                    }}
                   />
                   <Label htmlFor={`status-${option.value}`}>{option.label}</Label>
                 </div>

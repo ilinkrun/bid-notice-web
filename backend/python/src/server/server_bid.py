@@ -771,6 +771,85 @@ def update_mybid_endpoint(nid: int, request: UpdateMyBidRequest):
     raise HTTPException(status_code=500, detail=f"입찰 정보 업데이트 중 오류가 발생했습니다: {str(e)}")
 
 
+# ** notice files
+# ------------------------------------------------------------
+
+@app.get("/notice_files/{nid}")
+def get_notice_files(nid: int):
+  """
+  특정 nid에 대한 notice_details와 notice_files 데이터를 조합하여 반환합니다.
+  """
+  try:
+    mysql = Mysql()
+    
+    # notice_details에서 file_name과 file_url 가져오기 ('|-'로 분리)
+    details_data = mysql.find(TABLE_DETAILS, ["file_name", "file_url"], f"WHERE nid = {nid}")
+    
+    notice_details_files = []
+    if details_data:
+      for row in details_data:
+        file_names = row[0].split('|-') if row[0] else []
+        file_urls = row[1].split('|-') if row[1] else []
+        
+        # file_name과 file_url을 매칭
+        for i, file_name in enumerate(file_names):
+          if file_name.strip():  # 빈 파일명 제외
+            file_url = file_urls[i] if i < len(file_urls) else ""
+            notice_details_files.append({
+              "file_name": file_name.strip(),
+              "file_url": file_url.strip(),
+              "down_folder": "",  # notice_details에는 down_folder 정보 없음
+              "source": "notice_details"
+            })
+    
+    # notice_files에서 데이터 가져오기
+    files_data = mysql.find(TABLE_FILES, ["file_name", "file_url", "down_folder"], f"WHERE nid = {nid}")
+    
+    notice_files_list = []
+    if files_data:
+      for row in files_data:
+        notice_files_list.append({
+          "file_name": row[0] if row[0] else "",
+          "file_url": row[1] if row[1] else "",
+          "down_folder": row[2] if row[2] else "",
+          "source": "notice_files"
+        })
+    
+    mysql.close()
+    
+    # notice_details와 notice_files 데이터 결합
+    # notice_files 데이터가 우선하되, notice_details에만 있는 파일도 포함
+    combined_files = []
+    
+    # notice_files의 파일명으로 매핑 생성
+    files_by_name = {f["file_name"]: f for f in notice_files_list}
+    
+    # notice_details의 모든 파일을 순회
+    for detail_file in notice_details_files:
+      if detail_file["file_name"] in files_by_name:
+        # notice_files에 있는 경우 notice_files 데이터 사용
+        combined_files.append(files_by_name[detail_file["file_name"]])
+        # 중복 방지를 위해 제거
+        del files_by_name[detail_file["file_name"]]
+      else:
+        # notice_details에만 있는 경우
+        combined_files.append(detail_file)
+    
+    # notice_files에만 있는 파일들 추가
+    combined_files.extend(files_by_name.values())
+    
+    return {
+      "success": True,
+      "nid": nid,
+      "files": combined_files,
+      "total_count": len(combined_files)
+    }
+    
+  except Exception as e:
+    print(f"Error in get_notice_files: {str(e)}")
+    raise HTTPException(status_code=500, detail=f"파일 정보 조회 중 오류가 발생했습니다: {str(e)}")
+
+
 # ** logs, errors
 # ------------------------------------------------------------
 
