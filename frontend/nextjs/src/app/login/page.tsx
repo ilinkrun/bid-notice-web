@@ -237,20 +237,12 @@ export default function LoginPage() {
       <CardContent className="space-y-2">
         <div className="text-xs space-y-1">
           <div className="flex justify-between">
-            <span className="font-medium">관리자:</span>
-            <span className="text-muted-foreground">admin@ilmaceng.com / admin123</span>
+            <span className="font-medium">문정일:</span>
+            <span className="text-muted-foreground">ceo@ilmaceng.com / birthday(****)</span>
           </div>
           <div className="flex justify-between">
-            <span className="font-medium">일반사용자:</span>
-            <span className="text-muted-foreground">user@ilmaceng.com / user123</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-medium">매니저:</span>
-            <span className="text-muted-foreground">manager@ilmaceng.com / manager123</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-medium">조회자:</span>
-            <span className="text-muted-foreground">viewer@ilmaceng.com / viewer123</span>
+            <span className="font-medium">운영자:</span>
+            <span className="text-muted-foreground">bid1@ilmaceng.com / bid1</span>
           </div>
         </div>
       </CardContent>

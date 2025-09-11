@@ -35,6 +35,7 @@ import {
   Eye,
   Hash
 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   Tabs, 
   TabsContent,
@@ -47,13 +48,81 @@ import dynamic from 'next/dynamic';
 import { marked } from 'marked';
 import TurndownService from 'turndown';
 
-// MDEditor CSS 임포트
-import '@uiw/react-md-editor/markdown-editor.css';
-import '@uiw/react-markdown-preview/markdown.css';
+// MDEditor CSS 임포트 (에러 처리 및 대체 방법)
+const loadMDEditorCSS = () => {
+  try {
+    // 먼저 기본 CSS 로드 시도
+    require('@uiw/react-md-editor/markdown-editor.css');
+    require('@uiw/react-markdown-preview/markdown.css');
+    return true;
+  } catch (error) {
+    console.warn('MDEditor CSS loading failed, trying alternative method:', error);
+    
+    // 대체 방법: 동적으로 CSS 링크 추가
+    try {
+      if (typeof document !== 'undefined') {
+        const cssLinks = [
+          'https://unpkg.com/@uiw/react-md-editor/markdown-editor.css',
+          'https://unpkg.com/@uiw/react-markdown-preview/markdown.css'
+        ];
+        
+        cssLinks.forEach(href => {
+          if (!document.querySelector(`link[href="${href}"]`)) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = href;
+            document.head.appendChild(link);
+          }
+        });
+        return true;
+      }
+    } catch (fallbackError) {
+      console.error('Fallback CSS loading also failed:', fallbackError);
+    }
+    
+    return false;
+  }
+};
 
-// MDEditor 동적 임포트 (SSR 방지)
+// CSS 로드 시도
+loadMDEditorCSS();
+
+// MDEditor 동적 임포트 (SSR 방지, 타임아웃 처리 포함)
 const MDEditor = dynamic(
-  () => import('@uiw/react-md-editor'),
+  () => {
+    // 타임아웃 Promise 생성 (5초)
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => {
+        reject(new Error('MDEditor 로딩 타임아웃'));
+      }, 5000);
+    });
+
+    // MDEditor import Promise 생성
+    const importPromise = import('@uiw/react-md-editor');
+
+    // Promise.race로 타임아웃 처리
+    return Promise.race([importPromise, timeoutPromise])
+      .catch((error) => {
+        console.error('MDEditor import failed:', error);
+        // 로딩 실패 시 기본 텍스트 에리어 반환
+        return {
+          default: ({ value, onChange, ...props }: any) => (
+            <div className="space-y-2">
+              <div className="text-sm text-amber-600 bg-amber-50 p-2 rounded border">
+                ⚠️ 마크다운 에디터를 불러올 수 없어 기본 텍스트 에디터를 사용합니다.
+              </div>
+              <textarea
+                value={value || ''}
+                onChange={(e) => onChange?.(e.target.value)}
+                className="w-full min-h-[400px] p-3 border rounded font-mono text-sm resize-y"
+                placeholder="마크다운을 입력하세요..."
+                {...props}
+              />
+            </div>
+          )
+        };
+      });
+  },
   { 
     ssr: false,
     loading: () => (
@@ -61,6 +130,7 @@ const MDEditor = dynamic(
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
           <p className="text-sm text-gray-600">마크다운 에디터를 불러오는 중...</p>
+          <p className="text-xs text-gray-500 mt-2">5초 이상 걸리면 기본 에디터를 사용합니다.</p>
         </div>
       </div>
     )
@@ -90,7 +160,7 @@ const GET_POST = `
       markdown_source
       format
       writer
-      password
+      email
       created_at
       updated_at
       is_visible
@@ -107,7 +177,7 @@ const UPDATE_POST = `
       markdown_source
       format
       writer
-      password
+      email
       created_at
       updated_at
       is_visible
@@ -123,7 +193,7 @@ const DELETE_POST = `
       content
       format
       writer
-      password
+      email
       created_at
       updated_at
       is_visible
@@ -138,6 +208,12 @@ const textareaClass = "text-gray-800 focus:placeholder:text-transparent focus:bo
 // 마크다운을 HTML로 변환하는 함수
 const convertMarkdownToHtml = (markdown: string): string => {
   try {
+    // 줄바꿈이 HTML에서도 반영되도록 breaks 옵션을 true로 설정
+    marked.setOptions({
+      breaks: true, // 줄바꿈을 <br>로 변환
+      gfm: true, // GitHub Flavored Markdown 사용
+    });
+    
     const result = marked(markdown || '');
     return typeof result === 'string' ? result : markdown || '';
   } catch (error) {
@@ -205,6 +281,7 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
   const { board, id } = use(params);
   const { navigate } = useUnifiedNavigation();
   const { startLoading, finishLoading, setCustomMessage } = useUnifiedLoading();
+  const { user } = useAuth();
   const searchParams = useSearchParams();
   const mode = searchParams.get('mode'); // 'edit' 모드 확인
   const formatParam = searchParams.get('format'); // 'format' 파라미터 확인
@@ -213,9 +290,7 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
   const [originalMarkdownSource, setOriginalMarkdownSource] = useState<string>(''); // 원본 마크다운 저장
   const [editingMarkdown, setEditingMarkdown] = useState<string>(''); // 편집 중인 마크다운
   const [isEditMode, setIsEditMode] = useState(mode === 'edit');
-  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
-  const [passwordInput, setPasswordInput] = useState('');
-  const [passwordError, setPasswordError] = useState('');
+  // 이메일 기반 인증으로 변경되어 비밀번호 관련 상태 제거
   const [actionType, setActionType] = useState<'edit' | 'delete' | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isSourceMode, setIsSourceMode] = useState(false);
@@ -255,8 +330,8 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
         
         if (result.data && result.data.boardsPostsOne) {
           const postData = result.data.boardsPostsOne;
-          if (postData.password === null || postData.password === undefined) {
-            postData.password = '';
+          if (postData.email === null || postData.email === undefined) {
+            postData.email = '';
           }
           
           console.log('📝 Loading post data:');
@@ -345,9 +420,7 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
     if (!post) return;
     
     setActionType('edit');
-    setPasswordError('');
-    setPasswordInput('');
-    setIsPasswordDialogOpen(true);
+    handlePermissionCheck();
   };
 
   // 삭제 버튼 클릭
@@ -355,33 +428,28 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
     if (!post) return;
     
     setActionType('delete');
-    setPasswordError('');
-    setPasswordInput('');
-    setIsPasswordDialogOpen(true);
+    handlePermissionCheck();
   };
 
-  // 비밀번호 확인
-  const handlePasswordCheck = () => {
+  // 이메일 기반 권한 확인
+  const handlePermissionCheck = () => {
     if (!post) {
       console.error('선택된 게시글이 없습니다.');
       return;
     }
     
-    const passwordExists = post.password !== undefined && post.password !== null;
-    console.log('비밀번호 확인 시도:', {
-      입력비밀번호: passwordInput ? '입력됨' : '입력안됨',
-      원본비밀번호: passwordExists ? '존재함' : '없음',
+    // 작성자 이메일과 현재 사용자 이메일 비교
+    const postEmail = post.email?.trim().toLowerCase();
+    const userEmail = user?.email?.trim().toLowerCase();
+    
+    console.log('수정/삭제 권한 확인:', {
+      postEmail,
+      userEmail,
+      액션: actionType
     });
     
-    const inputPwd = String(passwordInput || '').trim();
-    const originalPwd = String(post.password || '').trim();
-    const isMatch = inputPwd === originalPwd;
-    
-    if (isMatch) {
-      setIsPasswordDialogOpen(false);
-      setPasswordInput('');
-      setPasswordError('');
-      
+    // 로그인한 사용자의 이메일과 게시글 작성자 이메일이 일치하는지 확인
+    if (userEmail && postEmail && userEmail === postEmail) {
       if (actionType === 'edit') {
         // URL에 mode=edit&format=markdown 파라미터 추가 (기본 마크다운 모드)
         navigate(`/channels/board/${board}/${id}?mode=edit&format=markdown`);
@@ -389,7 +457,7 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
         setIsDeleteDialogOpen(true);
       }
     } else {
-      setPasswordError('비밀번호가 일치하지 않습니다.');
+      alert('작성자만 수정/삭제할 수 있습니다.');
     }
   };
 
@@ -440,12 +508,12 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
         markdown_source: markdownSourceToSave,
         format: formatToSave,
         writer: post.writer.trim(),
-        password: post.password
+        email: user?.email || post.email
       };
 
       console.log('🚀 Frontend sending updateData:', updateData);
 
-      if (!updateData.id || !updateData.title || !updateData.writer || !updateData.password) {
+      if (!updateData.id || !updateData.title || !updateData.writer || !updateData.email) {
         throw new Error('필수 입력값이 누락되었습니다.');
       }
 
@@ -518,7 +586,7 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
             board: channelBoard,
             input: {
               id: post.id,
-              password: post.password || '',
+              email: user?.email || post.email || '',
             },
           },
         }),
@@ -616,7 +684,7 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
                 </div>
               )}
             </div>
-            {!isEditMode && (
+            {!isEditMode && post && (
               <div className="flex space-x-2">
                 <Button variant="outline" onClick={handleEditClick}>
                   <Edit className="mr-2 h-4 w-4" />
@@ -858,46 +926,6 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
         </CardContent>
       </Card>
 
-      {/* 비밀번호 확인 다이얼로그 */}
-      <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>비밀번호 확인</DialogTitle>
-            <DialogDescription>
-              게시글 {actionType === 'edit' ? '수정' : '삭제'}을 위해 비밀번호를 입력해주세요.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              handlePasswordCheck();
-            }}>
-              <Input
-                type="password"
-                placeholder="비밀번호"
-                value={passwordInput}
-                onChange={(e) => setPasswordInput(e.target.value)}
-                className={passwordError ? `border-red-500 ${inputClass}` : inputClass}
-                autoFocus
-              />
-              {passwordError && (
-                <p className="text-red-500 text-sm mt-1">{passwordError}</p>
-              )}
-              <div className="flex justify-end space-x-2 mt-4">
-                <Button 
-                  type="button"
-                  variant="outline" 
-                  onClick={() => setIsPasswordDialogOpen(false)}>
-                  취소
-                </Button>
-                <Button type="submit">
-                  확인
-                </Button>
-              </div>
-            </form>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* 삭제 확인 다이얼로그 */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>

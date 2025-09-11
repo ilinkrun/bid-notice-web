@@ -27,13 +27,81 @@ import dynamic from 'next/dynamic';
 import { marked } from 'marked';
 import { smartUpload } from '@/utils/chunkedUpload';
 
-// MDEditor CSS 임포트
-import '@uiw/react-md-editor/markdown-editor.css';
-import '@uiw/react-markdown-preview/markdown.css';
+// MDEditor CSS 임포트 (에러 처리 및 대체 방법)
+const loadMDEditorCSS = () => {
+  try {
+    // 먼저 기본 CSS 로드 시도
+    require('@uiw/react-md-editor/markdown-editor.css');
+    require('@uiw/react-markdown-preview/markdown.css');
+    return true;
+  } catch (error) {
+    console.warn('MDEditor CSS loading failed, trying alternative method:', error);
+    
+    // 대체 방법: 동적으로 CSS 링크 추가
+    try {
+      if (typeof document !== 'undefined') {
+        const cssLinks = [
+          'https://unpkg.com/@uiw/react-md-editor/markdown-editor.css',
+          'https://unpkg.com/@uiw/react-markdown-preview/markdown.css'
+        ];
+        
+        cssLinks.forEach(href => {
+          if (!document.querySelector(`link[href="${href}"]`)) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = href;
+            document.head.appendChild(link);
+          }
+        });
+        return true;
+      }
+    } catch (fallbackError) {
+      console.error('Fallback CSS loading also failed:', fallbackError);
+    }
+    
+    return false;
+  }
+};
 
-// MDEditor 동적 임포트 (SSR 방지)
+// CSS 로드 시도
+loadMDEditorCSS();
+
+// MDEditor 동적 임포트 (SSR 방지, 타임아웃 처리 포함)
 const MDEditor = dynamic(
-  () => import('@uiw/react-md-editor'),
+  () => {
+    // 타임아웃 Promise 생성 (5초)
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => {
+        reject(new Error('MDEditor 로딩 타임아웃'));
+      }, 5000);
+    });
+
+    // MDEditor import Promise 생성
+    const importPromise = import('@uiw/react-md-editor');
+
+    // Promise.race로 타임아웃 처리
+    return Promise.race([importPromise, timeoutPromise])
+      .catch((error) => {
+        console.error('MDEditor import failed:', error);
+        // 로딩 실패 시 기본 텍스트 에리어 반환
+        return {
+          default: ({ value, onChange, ...props }: any) => (
+            <div className="space-y-2">
+              <div className="text-sm text-amber-600 bg-amber-50 p-2 rounded border">
+                ⚠️ 마크다운 에디터를 불러올 수 없어 기본 텍스트 에디터를 사용합니다.
+              </div>
+              <textarea
+                value={value || ''}
+                onChange={(e) => onChange?.(e.target.value)}
+                className="w-full min-h-[400px] p-3 border rounded font-mono text-sm resize-y"
+                placeholder="마크다운을 입력하세요..."
+                {...props}
+              />
+            </div>
+          )
+        };
+      });
+  },
   { 
     ssr: false,
     loading: () => (
@@ -41,6 +109,7 @@ const MDEditor = dynamic(
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
           <p className="text-sm text-gray-600">마크다운 에디터를 불러오는 중...</p>
+          <p className="text-xs text-gray-500 mt-2">5초 이상 걸리면 기본 에디터를 사용합니다.</p>
         </div>
       </div>
     )
@@ -57,7 +126,7 @@ const CREATE_POST = `
       markdown_source
       format
       writer
-      password
+      email
       created_at
       updated_at
       is_visible
@@ -71,6 +140,12 @@ const inputClass = "text-gray-800 focus:placeholder:text-transparent focus:borde
 // 마크다운을 HTML로 변환하는 함수
 const convertMarkdownToHtml = (markdown: string): string => {
   try {
+    // 줄바꿈이 HTML에서도 반영되도록 breaks 옵션을 true로 설정
+    marked.setOptions({
+      breaks: true, // 줄바꿈을 <br>로 변환
+      gfm: true, // GitHub Flavored Markdown 사용
+    });
+    
     const result = marked(markdown || '');
     return typeof result === 'string' ? result : markdown || '';
   } catch (error) {
@@ -113,7 +188,7 @@ const uploadFile = async (file: File, setIsUploading: (loading: boolean) => void
     const newValue = `${editingMarkdown}\n\n${fileMarkdown}`;
     setEditingMarkdown(newValue);
     
-    alert(`파일 업로드 완료: ${result.filename}`);
+    console.log(`✅ 파일 업로드 완료: ${result.filename}`);
     
   } catch (error) {
     console.error('파일 업로드 오류:', error);
@@ -140,7 +215,7 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
     markdown_source: '',
     format: 'markdown', // 기본값 markdown
     writer: '',
-    password: '',
+    email: '',
   });
   const [editingMarkdown, setEditingMarkdown] = useState<string>(''); // 편집 중인 마크다운
   const [editorMode, setEditorMode] = useState<'html' | 'markdown'>('markdown'); // 기본값 markdown
@@ -159,10 +234,26 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
     }
   }, [formatParam]);
 
+  // 로그인된 사용자의 이름과 이메일을 자동 입력
+  useEffect(() => {
+    if (user) {
+      setNewPost(prev => ({ 
+        ...prev, 
+        writer: user.name || '',
+        email: user.email || ''
+      }));
+    }
+  }, [user]);
+
   // 게시글 생성
   const handleCreatePost = async () => {
-    if (!newPost.title || !editingMarkdown || !newPost.writer || !newPost.password) {
-      alert('모든 필드를 입력해주세요.');
+    if (!newPost.title || !editingMarkdown) {
+      alert('제목과 내용을 입력해주세요.');
+      return;
+    }
+
+    if (!user?.email) {
+      alert('로그인이 필요합니다.');
       return;
     }
 
@@ -195,13 +286,13 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
         content: contentToSave,
         markdown_source: markdownSourceToSave,
         format: formatToSave,
-        writer: newPost.writer.trim(),
-        password: newPost.password,
+        writer: user.name || user.email,
+        email: user.email,
       };
 
       console.log('🚀 Frontend sending createData:', createData);
 
-      if (!createData.title || !createData.writer || !createData.password) {
+      if (!createData.title || !createData.writer || !createData.email) {
         throw new Error('필수 입력값이 누락되었습니다.');
       }
 
@@ -224,7 +315,20 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
       
       if (result.errors) {
         console.error('Create errors:', result.errors);
+        console.error('Full error details:', JSON.stringify(result.errors, null, 2));
+        
+        // 각 오류의 세부 정보 출력
+        result.errors.forEach((error, index) => {
+          console.error(`Error ${index + 1}:`, {
+            message: error.message,
+            locations: error.locations,
+            path: error.path,
+            extensions: error.extensions
+          });
+        });
+        
         const errorMessage = result.errors[0]?.message || '게시글 작성에 실패했습니다.';
+        console.error('Error message:', errorMessage);
         throw new Error(errorMessage);
       }
 
@@ -286,22 +390,6 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
                   placeholder="제목을 입력하세요"
                 />
               </h1>
-              <div className="flex space-x-4 mb-4">
-                <Input
-                  value={newPost.writer}
-                  onChange={(e) => setNewPost({ ...newPost, writer: e.target.value })}
-                  className={inputClass}
-                  placeholder="작성자"
-                />
-                <Input
-                  type="password"
-                  value={newPost.password}
-                  onChange={(e) => setNewPost({ ...newPost, password: e.target.value })}
-                  className={inputClass}
-                  placeholder="비밀번호 (4자리 숫자)"
-                  maxLength={4}
-                />
-              </div>
             </div>
 
             <div className="min-h-[300px] mb-4">

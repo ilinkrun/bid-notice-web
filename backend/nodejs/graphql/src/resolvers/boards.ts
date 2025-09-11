@@ -15,7 +15,7 @@ interface PostInput {
   markdown_source?: string;
   format?: string;
   writer: string;
-  password: string;
+  email: string;
   is_visible?: number | boolean;
 }
 
@@ -133,7 +133,7 @@ export const boardsResolvers = {
           markdown_source: input.markdown_source || null,
           format: input.format || 'text',
           writer: input.writer,
-          password: input.password,
+          email: input.email,
         });
         
         console.log('게시글 생성 응답:', response.data);
@@ -191,7 +191,7 @@ export const boardsResolvers = {
           markdown_source: input.markdown_source,
           format: input.format,
           writer: input.writer,
-          password: input.password,
+          email: input.email,
         });
         console.log('게시글 수정 응답:', response.data);
         
@@ -219,7 +219,7 @@ export const boardsResolvers = {
         console.log(`게시글 삭제 요청: ${board}, ${input.id}`);
         // API 호출 (is_visible을 0으로 변경)
         const response = await boardApiClient.put<any>(`/posts/${board}/${input.id}`, {
-          password: input.password,
+          email: input.email,
           is_visible: 0,
         });
         // API 응답이 { success: true } 형태인 경우

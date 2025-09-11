@@ -6,7 +6,7 @@ export const boardsTypeDefs = `#graphql
     markdown_source: String
     format: String
     writer: String
-    password: String
+    email: String
     created_at: String
     updated_at: String
     is_visible: Boolean
@@ -37,7 +37,7 @@ export const boardsTypeDefs = `#graphql
     markdown_source: String
     format: String!
     writer: String!
-    password: String!
+    email: String!
     is_visible: Boolean
   }
 
@@ -53,7 +53,7 @@ export const boardsTypeDefs = `#graphql
 
   input BoardPostDeleteInput {
     id: Int!
-    password: String!
+    email: String!
   }
 
   input BoardCommentDeleteInput {
