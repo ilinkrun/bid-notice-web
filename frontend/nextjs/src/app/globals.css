@@ -453,3 +453,7 @@
 .compact-markdown-preview blockquote {
   margin: 0.25rem 0 !important;
 }
+
+/* MDEditor CSS imports */
+@import url('https://unpkg.com/@uiw/react-md-editor@4.0.8/markdown-editor.css');
+@import url('https://unpkg.com/@uiw/react-markdown-preview@5.1.5/markdown.css');

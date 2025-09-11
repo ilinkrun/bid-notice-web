@@ -48,81 +48,11 @@ import dynamic from 'next/dynamic';
 import { marked } from 'marked';
 import TurndownService from 'turndown';
 
-// MDEditor CSS 임포트 (에러 처리 및 대체 방법)
-const loadMDEditorCSS = () => {
-  try {
-    // 먼저 기본 CSS 로드 시도
-    require('@uiw/react-md-editor/markdown-editor.css');
-    require('@uiw/react-markdown-preview/markdown.css');
-    return true;
-  } catch (error) {
-    console.warn('MDEditor CSS loading failed, trying alternative method:', error);
-    
-    // 대체 방법: 동적으로 CSS 링크 추가
-    try {
-      if (typeof document !== 'undefined') {
-        const cssLinks = [
-          'https://unpkg.com/@uiw/react-md-editor/markdown-editor.css',
-          'https://unpkg.com/@uiw/react-markdown-preview/markdown.css'
-        ];
-        
-        cssLinks.forEach(href => {
-          if (!document.querySelector(`link[href="${href}"]`)) {
-            const link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.href = href;
-            document.head.appendChild(link);
-          }
-        });
-        return true;
-      }
-    } catch (fallbackError) {
-      console.error('Fallback CSS loading also failed:', fallbackError);
-    }
-    
-    return false;
-  }
-};
+// MDEditor CSS는 globals.css에서 @import로 로드됨
 
-// CSS 로드 시도
-loadMDEditorCSS();
-
-// MDEditor 동적 임포트 (SSR 방지, 타임아웃 처리 포함)
+// MDEditor 동적 임포트 (간단한 버전)
 const MDEditor = dynamic(
-  () => {
-    // 타임아웃 Promise 생성 (5초)
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => {
-        reject(new Error('MDEditor 로딩 타임아웃'));
-      }, 5000);
-    });
-
-    // MDEditor import Promise 생성
-    const importPromise = import('@uiw/react-md-editor');
-
-    // Promise.race로 타임아웃 처리
-    return Promise.race([importPromise, timeoutPromise])
-      .catch((error) => {
-        console.error('MDEditor import failed:', error);
-        // 로딩 실패 시 기본 텍스트 에리어 반환
-        return {
-          default: ({ value, onChange, ...props }: any) => (
-            <div className="space-y-2">
-              <div className="text-sm text-amber-600 bg-amber-50 p-2 rounded border">
-                ⚠️ 마크다운 에디터를 불러올 수 없어 기본 텍스트 에디터를 사용합니다.
-              </div>
-              <textarea
-                value={value || ''}
-                onChange={(e) => onChange?.(e.target.value)}
-                className="w-full min-h-[400px] p-3 border rounded font-mono text-sm resize-y"
-                placeholder="마크다운을 입력하세요..."
-                {...props}
-              />
-            </div>
-          )
-        };
-      });
-  },
+  () => import('@uiw/react-md-editor'),
   { 
     ssr: false,
     loading: () => (
@@ -130,7 +60,6 @@ const MDEditor = dynamic(
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
           <p className="text-sm text-gray-600">마크다운 에디터를 불러오는 중...</p>
-          <p className="text-xs text-gray-500 mt-2">5초 이상 걸리면 기본 에디터를 사용합니다.</p>
         </div>
       </div>
     )
@@ -684,7 +613,7 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
                 </div>
               )}
             </div>
-            {!isEditMode && post && (
+            {!isEditMode && post && user && user.email === post.email && (
               <div className="flex space-x-2">
                 <Button variant="outline" onClick={handleEditClick}>
                   <Edit className="mr-2 h-4 w-4" />
