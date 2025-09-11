@@ -389,14 +389,14 @@ def create_comment(data: dict):
   mysql = Mysql()
   try:
     # 필수 필드 검사
-    required_fields = ['board', 'post_id', 'content', 'writer', 'password']
+    required_fields = ['board', 'post_id', 'content', 'writer', 'email']
     for field in required_fields:
       if field not in data:
         raise ValueError(f"필수 필드가 누락되었습니다: {field}")
 
-    # 비밀번호 유효성 검사
-    if not (data['password'].isdigit() and len(data['password']) == 4):
-      raise ValueError("비밀번호는 4자리 숫자여야 합니다.")
+    # 이메일 형식 간단 검증
+    if '@' not in data['email']:
+      raise ValueError("올바른 이메일 형식이 아닙니다.")
 
     # 기본값 설정 및 데이터 정제
     insert_data = {
@@ -404,7 +404,7 @@ def create_comment(data: dict):
         'post_id': int(data['post_id']),
         'content': data['content'],
         'writer': data['writer'],
-        'password': data['password'],
+        'email': data['email'],
         'is_visible': 1 if data.get('is_visible', True) else 0
     }
 
@@ -469,7 +469,7 @@ def get_comments(board: str,
     # 페이지네이션 적용하여 댓글 조회
     offset = (page - 1) * per_page
     fields = [
-        "id", "board", "post_id", "content", "writer", "created_at",
+        "id", "board", "post_id", "content", "writer", "email", "created_at",
         "updated_at", "is_visible"
     ]
     fields_str = ", ".join(fields)
@@ -507,8 +507,8 @@ def get_comment(comment_id: int):
   mysql = Mysql()
   try:
     fields = [
-        "id", "board", "post_id", "content", "writer", "password",
-        "created_at", "updated_at", "is_visible"
+        "id", "board", "post_id", "content", "writer", "email", "created_at",
+        "updated_at", "is_visible"
     ]
     fields_str = ", ".join(fields)
 
@@ -533,9 +533,9 @@ def get_comment(comment_id: int):
     mysql.close()
 
 
-def update_comment(comment_id: int, data: dict, password: str):
+def update_comment(comment_id: int, data: dict, email: str):
   """
-  댓글을 수정합니다. 비밀번호가 일치하는 경우에만 수정이 가능합니다.
+  댓글을 수정합니다. 이메일이 일치하는 경우에만 수정이 가능합니다.
 
   Args:
       comment_id (int): 댓글 ID
@@ -544,7 +544,7 @@ def update_comment(comment_id: int, data: dict, password: str):
               'content': str,      # 선택: 댓글 내용
               'is_visible': bool   # 선택: 댓글 노출 여부
           }
-      password (str): 댓글 비밀번호
+      email (str): 댓글 작성자 이메일
 
   Returns:
       bool: 수정 성공 여부
@@ -554,28 +554,28 @@ def update_comment(comment_id: int, data: dict, password: str):
   """
   mysql = Mysql()
   try:
-    # 비밀번호 확인
-    if not password:
-      raise ValueError("비밀번호를 입력해주세요.")
+    # 이메일 확인
+    if not email:
+      raise ValueError("이메일을 입력해주세요.")
 
-    stored_password = mysql.find("comments_board",
-                                 fields=["password"],
-                                 addStr=f"WHERE id = {comment_id}")
+    stored_email = mysql.find("comments_board",
+                              fields=["email"],
+                              addStr=f"WHERE id = {comment_id}")
     print(
-        f"댓글 수정 비밀번호 검증 - ID: {comment_id}, 입력: '{password}', 저장된: '{stored_password[0][0] if stored_password else None}'")
+        f"댓글 수정 이메일 검증 - ID: {comment_id}, 입력: '{email}', 저장된: '{stored_email[0][0] if stored_email else None}'")
 
-    if not stored_password:
+    if not stored_email:
       print(f"댓글 ID {comment_id}를 찾을 수 없습니다.")
       return False
 
-    stored_pwd = str(stored_password[0][0]).strip()
-    input_pwd = str(password).strip()
+    stored_mail = str(stored_email[0][0]).strip()
+    input_mail = str(email).strip()
 
-    if stored_pwd != input_pwd:
-      print(f"비밀번호 불일치: 저장된='{stored_pwd}' (길이:{len(stored_pwd)}), 입력='{input_pwd}' (길이:{len(input_pwd)})")
+    if stored_mail != input_mail:
+      print(f"이메일 불일치: 저장된='{stored_mail}', 입력='{input_mail}'")
       return False
 
-    print(f"비밀번호 일치 확인됨")
+    print(f"이메일 일치 확인됨")
 
     # 수정할 데이터 구성
     update_data = {}
@@ -596,37 +596,37 @@ def update_comment(comment_id: int, data: dict, password: str):
     mysql.close()
 
 
-def delete_comment(comment_id: int, password: str):
+def delete_comment(comment_id: int, email: str):
   """
-  댓글을 삭제합니다. 비밀번호가 일치하는 경우에만 삭제가 가능합니다.
+  댓글을 삭제합니다. 이메일이 일치하는 경우에만 삭제가 가능합니다.
 
   Args:
       comment_id (int): 댓글 ID
-      password (str): 댓글 비밀번호
+      email (str): 댓글 작성자 이메일
 
   Returns:
       bool: 삭제 성공 여부
   """
   mysql = Mysql()
   try:
-    # 비밀번호 확인
-    stored_password = mysql.find("comments_board",
-                                 fields=["password"],
-                                 addStr=f"WHERE id = {comment_id}")
-    print(f"댓글 삭제 비밀번호 검증 - ID: {comment_id}, 입력: '{password}', 저장된: '{stored_password[0][0] if stored_password else None}'")
+    # 이메일 확인
+    stored_email = mysql.find("comments_board",
+                              fields=["email"],
+                              addStr=f"WHERE id = {comment_id}")
+    print(f"댓글 삭제 이메일 검증 - ID: {comment_id}, 입력: '{email}', 저장된: '{stored_email[0][0] if stored_email else None}'")
 
-    if not stored_password:
+    if not stored_email:
       print(f"댓글 ID {comment_id}를 찾을 수 없습니다.")
       return False
 
-    stored_pwd = str(stored_password[0][0]).strip()
-    input_pwd = str(password).strip()
+    stored_mail = str(stored_email[0][0]).strip()
+    input_mail = str(email).strip()
 
-    if stored_pwd != input_pwd:
-      print(f"비밀번호 불일치: 저장된='{stored_pwd}' (길이:{len(stored_pwd)}), 입력='{input_pwd}' (길이:{len(input_pwd)})")
+    if stored_mail != input_mail:
+      print(f"이메일 불일치: 저장된='{stored_mail}', 입력='{input_mail}'")
       return False
 
-    print(f"비밀번호 일치 확인됨")
+    print(f"이메일 일치 확인됨")
 
     mysql.delete("comments_board", f"id = {comment_id}")
     return True
@@ -792,13 +792,13 @@ def get_comment_endpoint(comment_id: int):
 def update_comment_endpoint(comment_id: int, update_data: Dict[str, Any]):
   """댓글을 수정합니다."""
   try:
-    password = update_data.pop("password", None)
-    if not password:
-      raise HTTPException(status_code=400, detail="비밀번호가 필요합니다.")
+    email = update_data.pop("email", None)
+    if not email:
+      raise HTTPException(status_code=400, detail="이메일이 필요합니다.")
 
-    success = update_comment(comment_id, update_data, password)
+    success = update_comment(comment_id, update_data, email)
     if not success:
-      raise HTTPException(status_code=401, detail="비밀번호가 일치하지 않습니다.")
+      raise HTTPException(status_code=401, detail="작성자만 수정할 수 있습니다.")
     return {"success": True}
   except ValueError as e:
     raise HTTPException(status_code=400, detail=str(e))
@@ -810,13 +810,13 @@ def update_comment_endpoint(comment_id: int, update_data: Dict[str, Any]):
 def delete_comment_endpoint(comment_id: int, delete_data: Dict[str, str]):
   """댓글을 삭제합니다."""
   try:
-    password = delete_data.get("password")
-    if not password:
-      raise HTTPException(status_code=400, detail="비밀번호가 필요합니다.")
+    email = delete_data.get("email")
+    if not email:
+      raise HTTPException(status_code=400, detail="이메일이 필요합니다.")
 
-    success = delete_comment(comment_id, password)
+    success = delete_comment(comment_id, email)
     if not success:
-      raise HTTPException(status_code=401, detail="비밀번호가 일치하지 않습니다.")
+      raise HTTPException(status_code=401, detail="작성자만 삭제할 수 있습니다.")
     return {"success": True}
   except Exception as e:
     raise HTTPException(status_code=500, detail=str(e))

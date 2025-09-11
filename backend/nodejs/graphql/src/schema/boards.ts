@@ -18,6 +18,7 @@ export const boardsTypeDefs = `#graphql
     post_id: Int!
     content: String!
     writer: String!
+    email: String
     created_at: String
     updated_at: String
     is_visible: Boolean
@@ -47,7 +48,7 @@ export const boardsTypeDefs = `#graphql
     post_id: Int!
     content: String!
     writer: String!
-    password: String!
+    email: String!
     is_visible: Boolean
   }
 
@@ -58,7 +59,7 @@ export const boardsTypeDefs = `#graphql
 
   input BoardCommentDeleteInput {
     id: Int!
-    password: String!
+    email: String!
   }
 
   extend type Query {

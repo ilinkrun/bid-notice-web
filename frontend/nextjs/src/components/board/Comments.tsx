@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { MessageCircle, Edit, Trash2, Send } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Comment {
   id: number;
@@ -14,6 +13,7 @@ interface Comment {
   post_id: number;
   content: string;
   writer: string;
+  email: string;
   created_at: string;
   updated_at: string;
   is_visible: boolean;
@@ -35,7 +35,7 @@ interface CommentsProps {
 // GraphQL 쿼리들
 const GET_COMMENTS = `
   query GetComments($board: String!, $post_id: Int!, $page: Int, $per_page: Int) {
-    comments(board: $board, post_id: $post_id, page: $page, per_page: $per_page) {
+    boardsCommentsAll(board: $board, post_id: $post_id, page: $page, per_page: $per_page) {
       total_count
       page
       per_page
@@ -45,6 +45,7 @@ const GET_COMMENTS = `
         post_id
         content
         writer
+        email
         created_at
         updated_at
         is_visible
@@ -54,13 +55,14 @@ const GET_COMMENTS = `
 `;
 
 const CREATE_COMMENT = `
-  mutation CreateComment($input: CreateCommentInput!) {
-    createComment(input: $input) {
+  mutation CreateComment($input: BoardCommentInput!) {
+    boardsCommentCreate(input: $input) {
       id
       board
       post_id
       content
       writer
+      email
       created_at
       updated_at
       is_visible
@@ -69,13 +71,14 @@ const CREATE_COMMENT = `
 `;
 
 const UPDATE_COMMENT = `
-  mutation UpdateComment($input: UpdateCommentInput!) {
-    updateComment(input: $input) {
+  mutation UpdateComment($input: BoardCommentInput!) {
+    boardsCommentUpdate(input: $input) {
       id
       board
       post_id
       content
       writer
+      email
       created_at
       updated_at
       is_visible
@@ -84,14 +87,15 @@ const UPDATE_COMMENT = `
 `;
 
 const DELETE_COMMENT = `
-  mutation DeleteComment($input: DeleteCommentInput!) {
-    deleteComment(input: $input) {
+  mutation DeleteComment($input: BoardCommentDeleteInput!) {
+    boardsCommentDelete(input: $input) {
       id
     }
   }
 `;
 
 export default function Comments({ board, postId, onCommentCountChange }: CommentsProps) {
+  const { user } = useAuth();
   const [comments, setComments] = useState<Comment[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -100,16 +104,13 @@ export default function Comments({ board, postId, onCommentCountChange }: Commen
   const [newComment, setNewComment] = useState({
     content: '',
     writer: '',
-    password: ''
+    email: ''
   });
   const [isWriting, setIsWriting] = useState(false);
   
   // 댓글 수정/삭제 관련 상태
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
   const [editContent, setEditContent] = useState('');
-  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
-  const [passwordInput, setPasswordInput] = useState('');
-  const [passwordError, setPasswordError] = useState('');
   const [actionType, setActionType] = useState<'edit' | 'delete' | null>(null);
   const [targetCommentId, setTargetCommentId] = useState<number | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -140,7 +141,7 @@ export default function Comments({ board, postId, onCommentCountChange }: Commen
         throw new Error(result.errors[0].message);
       }
       
-      const commentsData: CommentsResponse = result.data.comments;
+      const commentsData: CommentsResponse = result.data.boardsCommentsAll;
       setComments(commentsData.comments);
       setTotalCount(commentsData.total_count);
       onCommentCountChange?.(commentsData.total_count);
@@ -157,13 +158,13 @@ export default function Comments({ board, postId, onCommentCountChange }: Commen
 
   // 댓글 작성
   const handleCreateComment = async () => {
-    if (!newComment.content || !newComment.writer || !newComment.password) {
-      alert('모든 필드를 입력해주세요.');
+    if (!user) {
+      alert('로그인이 필요합니다.');
       return;
     }
 
-    if (newComment.password.length !== 4 || !/^\d{4}$/.test(newComment.password)) {
-      alert('비밀번호는 4자리 숫자여야 합니다.');
+    if (!newComment.content) {
+      alert('댓글 내용을 입력해주세요.');
       return;
     }
 
@@ -174,8 +175,8 @@ export default function Comments({ board, postId, onCommentCountChange }: Commen
         board,
         post_id: postId,
         content: newComment.content,
-        writer: newComment.writer,
-        password: newComment.password,
+        writer: user.name,
+        email: user.email,
         is_visible: true
       });
       
@@ -186,8 +187,8 @@ export default function Comments({ board, postId, onCommentCountChange }: Commen
             board,
             post_id: postId,
             content: newComment.content,
-            writer: newComment.writer,
-            password: newComment.password,
+            writer: user.name,
+            email: user.email,
             is_visible: true
           }
         }
@@ -213,11 +214,11 @@ export default function Comments({ board, postId, onCommentCountChange }: Commen
         throw new Error(result.errors[0].message);
       }
       
-      if (!result.data?.createComment) {
+      if (!result.data?.boardsCommentCreate) {
         throw new Error('댓글 작성 응답 데이터가 없습니다.');
       }
       
-      console.log('댓글 작성 성공:', result.data.createComment);
+      console.log('댓글 작성 성공:', result.data.boardsCommentCreate);
       
       // 댓글 목록 새로고침
       await fetchComments();
@@ -226,7 +227,7 @@ export default function Comments({ board, postId, onCommentCountChange }: Commen
       setNewComment({
         content: '',
         writer: '',
-        password: ''
+        email: ''
       });
       setIsWriting(false);
     } catch (error) {
@@ -238,75 +239,64 @@ export default function Comments({ board, postId, onCommentCountChange }: Commen
     }
   };
 
-  // 비밀번호 확인 후 액션 실행
-  const handlePasswordSubmit = async () => {
-    if (!passwordInput || !targetCommentId) return;
+  // 이메일 기반 권한 확인 후 수정 실행
+  const handleUpdateComment = async (commentId: number, content: string) => {
+    if (!user) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
 
     try {
-      if (actionType === 'edit') {
-        console.log('댓글 수정 요청:', {
-          targetCommentId,
-          editContent,
-          passwordInput
-        });
-        
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            query: UPDATE_COMMENT,
-            variables: {
-              input: {
-                id: targetCommentId,
-                content: editContent,
-                password: passwordInput,
-                is_visible: true
-              }
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: UPDATE_COMMENT,
+          variables: {
+            input: {
+              id: commentId,
+              board,
+              post_id: postId,
+              content: content,
+              writer: user.name,
+              email: user.email,
+              is_visible: true
             }
-          })
-        });
-        
-        const result = await response.json();
-        console.log('댓글 수정 GraphQL 응답:', result);
-        
-        if (result.errors) {
-          console.error('댓글 수정 GraphQL 오류:', result.errors);
-          const errorMessage = result.errors[0]?.message || '비밀번호가 일치하지 않습니다.';
-          setPasswordError(errorMessage);
-          return;
-        }
-        
-        if (!result.data?.updateComment) {
-          console.error('댓글 수정 응답 데이터 없음:', result);
-          setPasswordError('댓글 수정에 실패했습니다.');
-          return;
-        }
-        
-        console.log('댓글 수정 성공');
-        await fetchComments();
-        setEditingCommentId(null);
-        
-      } else if (actionType === 'delete') {
-        setIsPasswordDialogOpen(false);
-        setIsDeleteDialogOpen(true);
-        return; // 삭제 확인 다이얼로그를 표시하고 여기서 멈춤
+          }
+        })
+      });
+      
+      const result = await response.json();
+      console.log('댓글 수정 GraphQL 응답:', result);
+      
+      if (result.errors) {
+        console.error('댓글 수정 GraphQL 오류:', result.errors);
+        const errorMessage = result.errors[0]?.message || '작성자만 수정할 수 있습니다.';
+        alert(errorMessage);
+        return;
       }
       
-      // 성공 시 다이얼로그 닫기
-      setIsPasswordDialogOpen(false);
-      setPasswordInput('');
-      setPasswordError('');
+      if (!result.data?.boardsCommentUpdate) {
+        console.error('댓글 수정 응답 데이터 없음:', result);
+        alert('댓글 수정에 실패했습니다.');
+        return;
+      }
+      
+      console.log('댓글 수정 성공');
+      await fetchComments();
+      setEditingCommentId(null);
+      
     } catch (error) {
-      console.error('액션 실행 오류:', error);
-      setPasswordError('작업에 실패했습니다.');
+      console.error('댓글 수정 오류:', error);
+      alert('댓글 수정에 실패했습니다.');
     }
   };
 
   // 댓글 삭제 확인
   const handleDeleteConfirm = async () => {
-    if (!targetCommentId || !passwordInput) return;
+    if (!targetCommentId || !user) return;
 
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}`, {
@@ -319,7 +309,7 @@ export default function Comments({ board, postId, onCommentCountChange }: Commen
           variables: {
             input: {
               id: targetCommentId,
-              password: passwordInput
+              email: user.email
             }
           }
         })
@@ -328,13 +318,18 @@ export default function Comments({ board, postId, onCommentCountChange }: Commen
       const result = await response.json();
       
       if (result.errors) {
-        alert('비밀번호가 일치하지 않습니다.');
+        const errorMessage = result.errors[0]?.message || '작성자만 삭제할 수 있습니다.';
+        alert(errorMessage);
+        return;
+      }
+      
+      if (!result.data?.boardsCommentDelete) {
+        alert('댓글 삭제에 실패했습니다.');
         return;
       }
       
       await fetchComments();
       setIsDeleteDialogOpen(false);
-      setPasswordInput('');
     } catch (error) {
       console.error('댓글 삭제 오류:', error);
       alert('댓글 삭제에 실패했습니다.');
@@ -343,21 +338,36 @@ export default function Comments({ board, postId, onCommentCountChange }: Commen
 
   // 수정 버튼 클릭
   const handleEditClick = (comment: Comment) => {
-    setTargetCommentId(comment.id);
+    if (!user) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+    
+    // 작성자 이메일 확인
+    if (user.email !== comment.email) {
+      alert('작성자만 수정할 수 있습니다.');
+      return;
+    }
+    
+    setEditingCommentId(comment.id);
     setEditContent(comment.content);
-    setActionType('edit');
-    setPasswordInput('');
-    setPasswordError('');
-    setIsPasswordDialogOpen(true);
   };
 
   // 삭제 버튼 클릭
-  const handleDeleteClick = (commentId: number) => {
-    setTargetCommentId(commentId);
-    setActionType('delete');
-    setPasswordInput('');
-    setPasswordError('');
-    setIsPasswordDialogOpen(true);
+  const handleDeleteClick = (comment: Comment) => {
+    if (!user) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+    
+    // 작성자 이메일 확인
+    if (user.email !== comment.email) {
+      alert('작성자만 삭제할 수 있습니다.');
+      return;
+    }
+    
+    setTargetCommentId(comment.id);
+    setIsDeleteDialogOpen(true);
   };
 
   // 날짜 포맷팅
@@ -381,7 +391,13 @@ export default function Comments({ board, postId, onCommentCountChange }: Commen
         </div>
         {!isWriting && (
           <Button 
-            onClick={() => setIsWriting(true)}
+            onClick={() => {
+              if (!user) {
+                alert('댓글 작성을 위해 로그인해주세요.');
+                return;
+              }
+              setIsWriting(true);
+            }}
             size="sm"
             className="flex items-center gap-2"
           >
@@ -392,35 +408,15 @@ export default function Comments({ board, postId, onCommentCountChange }: Commen
       </div>
 
       {/* 댓글 작성 폼 */}
-      {isWriting && (
+      {isWriting && user && (
         <div className="border rounded-lg p-4 bg-gray-50">
           <form onSubmit={(e) => {
             e.preventDefault();
             handleCreateComment();
           }}>
             <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                placeholder="작성자"
-                value={newComment.writer}
-                onChange={(e) => setNewComment({ ...newComment, writer: e.target.value })}
-                className="text-gray-800 focus:placeholder:text-transparent focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-200"
-                autoComplete="off"
-              />
-              <Input
-                type="password"
-                placeholder="비밀번호 (4자리 숫자)"
-                value={newComment.password}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/[^0-9]/g, '');
-                  if (value.length <= 4) {
-                    setNewComment({ ...newComment, password: value });
-                  }
-                }}
-                maxLength={4}
-                className="text-gray-800 focus:placeholder:text-transparent focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-200"
-                autoComplete="off"
-              />
+            <div className="mb-2">
+              <span className="text-sm text-gray-600">작성자: {user.name} ({user.email})</span>
             </div>
             <Textarea
               placeholder="댓글을 입력하세요"
@@ -434,7 +430,7 @@ export default function Comments({ board, postId, onCommentCountChange }: Commen
                 variant="outline" 
                 onClick={() => {
                   setIsWriting(false);
-                  setNewComment({ content: '', writer: '', password: '' });
+                  setNewComment({ content: '', writer: '', email: '' });
                 }}
               >
                 취소
@@ -469,22 +465,28 @@ export default function Comments({ board, postId, onCommentCountChange }: Commen
                   </span>
                 </div>
                 <div className="flex gap-1">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => handleEditClick(comment)}
-                    className="h-7 w-7 p-0"
-                  >
-                    <Edit className="h-3 w-3" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => handleDeleteClick(comment.id)}
-                    className="h-7 w-7 p-0 text-red-600 hover:text-red-800"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
+                  {user && user.email === comment.email && (
+                    <>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleEditClick(comment)}
+                        className="h-8 px-2 text-xs text-gray-600 hover:text-gray-800"
+                        title="수정"
+                      >
+                        수정
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleDeleteClick(comment)}
+                        className="h-8 px-2 text-xs text-red-600 hover:text-red-800"
+                        title="삭제"
+                      >
+                        삭제
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
               {editingCommentId === comment.id ? (
@@ -502,7 +504,10 @@ export default function Comments({ board, postId, onCommentCountChange }: Commen
                     >
                       취소
                     </Button>
-                    <Button size="sm">
+                    <Button 
+                      size="sm"
+                      onClick={() => handleUpdateComment(comment.id, editContent)}
+                    >
                       저장
                     </Button>
                   </div>
@@ -515,60 +520,6 @@ export default function Comments({ board, postId, onCommentCountChange }: Commen
         )}
       </div>
 
-      {/* 비밀번호 확인 다이얼로그 */}
-      <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>비밀번호 확인</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            {actionType === 'edit' && (
-              <div>
-                <label className="text-sm font-medium mb-2 block">수정할 내용</label>
-                <Textarea
-                  value={editContent}
-                  onChange={(e) => setEditContent(e.target.value)}
-                  rows={3}
-                />
-              </div>
-            )}
-            <div>
-              <Input
-                type="password"
-                placeholder="비밀번호 (4자리 숫자)"
-                value={passwordInput}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/[^0-9]/g, '');
-                  if (value.length <= 4) {
-                    setPasswordInput(value);
-                  }
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handlePasswordSubmit();
-                  }
-                }}
-                maxLength={4}
-                className="text-gray-800 focus:placeholder:text-transparent focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-200"
-                autoComplete="off"
-                autoFocus
-              />
-              {passwordError && (
-                <p className="text-red-500 text-sm mt-1">{passwordError}</p>
-              )}
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsPasswordDialogOpen(false)}>
-              취소
-            </Button>
-            <Button onClick={handlePasswordSubmit}>
-              확인
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* 삭제 확인 다이얼로그 */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>

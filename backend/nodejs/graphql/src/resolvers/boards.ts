@@ -25,7 +25,7 @@ interface CommentInput {
   post_id: number;
   content: string;
   writer: string;
-  password: string;
+  email: string;
   is_visible?: boolean;
 }
 
@@ -241,7 +241,7 @@ export const boardsResolvers = {
           post_id: input.post_id,
           content: input.content,
           writer: input.writer,
-          password: input.password,
+          email: input.email,
           is_visible: input.is_visible !== false
         });
         
@@ -305,7 +305,7 @@ export const boardsResolvers = {
         // API 호출
         const response = await boardApiClient.put<any>(`/comments/${input.id}`, {
           content: input.content,
-          password: input.password,
+          email: input.email,
           is_visible: input.is_visible
         });
         console.log('댓글 수정 응답:', response.data);
@@ -339,7 +339,7 @@ export const boardsResolvers = {
         });
         
         if (error?.response?.status === 401) {
-          throw new Error('비밀번호가 일치하지 않습니다.');
+          throw new Error('작성자만 수정할 수 있습니다.');
         }
         
         if (error instanceof Error) {
@@ -365,7 +365,7 @@ export const boardsResolvers = {
         
         // API 호출
         const response = await boardApiClient.delete<any>(`/comments/${input.id}`, {
-          data: { password: input.password }
+          data: { email: input.email }
         });
         
         console.log('댓글 삭제 응답:', response.data);
@@ -398,7 +398,7 @@ export const boardsResolvers = {
         });
         
         if (error?.response?.status === 401) {
-          throw new Error('비밀번호가 일치하지 않습니다.');
+          throw new Error('작성자만 수정할 수 있습니다.');
         }
         
         if (error instanceof Error) {
