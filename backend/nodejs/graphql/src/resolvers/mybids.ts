@@ -105,6 +105,29 @@ export const mybidsResolvers = {
         };
       }
     },
+
+    noticeDetails: async (_: unknown, { nid }: { nid: number }) => {
+      try {
+        const response = await apiClient.get(`/notice_details/${nid}`);
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching notice details:', error);
+        return {
+          success: false,
+          nid: nid,
+          details: {
+            title: "",
+            notice_num: "",
+            org_dept: "",
+            org_tel: "",
+            body_html: "",
+            detail_url: "",
+            category: ""
+          },
+          message: "공고 상세정보를 불러올 수 없습니다."
+        };
+      }
+    },
   },
 
   Mutation: {
@@ -164,6 +187,20 @@ export const mybidsResolvers = {
       } catch (error) {
         console.error('Error deleting bid:', error);
         throw new Error('Failed to delete bid');
+      }
+    },
+
+    noticeDetailsUpdate: async (_: unknown, { nid, input }: { nid: number; input: any }) => {
+      try {
+        const response = await apiClient.put(`/notice_details/${nid}`, input);
+        return response.data;
+      } catch (error) {
+        console.error('Error updating notice details:', error);
+        return {
+          success: false,
+          message: "공고 상세정보 업데이트에 실패했습니다.",
+          nid: nid
+        };
       }
     },
   },

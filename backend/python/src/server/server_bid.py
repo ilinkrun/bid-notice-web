@@ -799,7 +799,8 @@ def get_notice_files(nid: int):
               "file_name": file_name.strip(),
               "file_url": file_url.strip(),
               "down_folder": "",  # notice_details에는 down_folder 정보 없음
-              "source": "notice_details"
+              "source": "notice_details",
+              "order": i + 1  # notice_details에서의 순번
             })
     
     # notice_files에서 데이터 가져오기
@@ -824,19 +825,26 @@ def get_notice_files(nid: int):
     # notice_files의 파일명으로 매핑 생성
     files_by_name = {f["file_name"]: f for f in notice_files_list}
     
-    # notice_details의 모든 파일을 순회
+    # notice_details 파일명으로 순번 매핑 생성
+    order_by_name = {f["file_name"]: f["order"] for f in notice_details_files}
+    
+    # notice_details의 모든 파일을 순회 (순번 유지)
     for detail_file in notice_details_files:
       if detail_file["file_name"] in files_by_name:
-        # notice_files에 있는 경우 notice_files 데이터 사용
-        combined_files.append(files_by_name[detail_file["file_name"]])
+        # notice_files에 있는 경우 notice_files 데이터 사용하되 순번은 유지
+        notice_file = files_by_name[detail_file["file_name"]]
+        notice_file["order"] = detail_file["order"]
+        combined_files.append(notice_file)
         # 중복 방지를 위해 제거
         del files_by_name[detail_file["file_name"]]
       else:
         # notice_details에만 있는 경우
         combined_files.append(detail_file)
     
-    # notice_files에만 있는 파일들 추가
-    combined_files.extend(files_by_name.values())
+    # notice_files에만 있는 파일들 추가 (순번 없음)
+    for remaining_file in files_by_name.values():
+      remaining_file["order"] = 0  # 순번 정보 없음
+      combined_files.append(remaining_file)
     
     return {
       "success": True,
@@ -848,6 +856,118 @@ def get_notice_files(nid: int):
   except Exception as e:
     print(f"Error in get_notice_files: {str(e)}")
     raise HTTPException(status_code=500, detail=f"파일 정보 조회 중 오류가 발생했습니다: {str(e)}")
+
+
+@app.get("/notice_details/{nid}")
+def get_notice_details(nid: int):
+  """
+  특정 nid에 대한 notice_details 데이터를 반환합니다.
+  """
+  try:
+    mysql = Mysql()
+    
+    # notice_details에서 필요한 필드들 가져오기
+    fields = [
+      "title", "notice_num", "org_dept", "org_tel", 
+      "body_html", "detail_url", "category"
+    ]
+    
+    details_data = mysql.find(TABLE_DETAILS, fields, f"WHERE nid = {nid}")
+    
+    if not details_data:
+      return {
+        "success": False,
+        "nid": nid,
+        "message": "공고 상세정보를 찾을 수 없습니다.",
+        "details": {}
+      }
+    
+    # 첫 번째 레코드 사용 (nid는 unique해야 함)
+    row = details_data[0]
+    details = {
+      "title": row[0] if row[0] else "",
+      "notice_num": row[1] if row[1] else "",
+      "org_dept": row[2] if row[2] else "",
+      "org_tel": row[3] if row[3] else "",
+      "body_html": row[4] if row[4] else "",
+      "detail_url": row[5] if row[5] else "",
+      "category": row[6] if row[6] else ""
+    }
+    
+    mysql.close()
+    
+    return {
+      "success": True,
+      "nid": nid,
+      "details": details
+    }
+    
+  except Exception as e:
+    print(f"Error in get_notice_details: {str(e)}")
+    raise HTTPException(status_code=500, detail=f"공고 상세정보 조회 중 오류가 발생했습니다: {str(e)}")
+
+
+@app.put("/notice_details/{nid}")
+def update_notice_details(nid: int, details: dict):
+  """
+  특정 nid에 대한 notice_details 데이터를 업데이트합니다.
+  """
+  try:
+    mysql = Mysql()
+    
+    # 업데이트할 필드 준비
+    allowed_fields = ["title", "notice_num", "org_dept", "org_tel", "body_html", "detail_url", "category"]
+    set_clauses = []
+    
+    for key, value in details.items():
+      if key in allowed_fields and value is not None:
+        if isinstance(value, str):
+          # 문자열은 따옴표로 감싸고 이스케이프 처리
+          escaped_value = value.replace("'", "\\'").replace('"', '\\"')
+          set_clauses.append(f"`{key}` = '{escaped_value}'")
+        else:
+          set_clauses.append(f"`{key}` = {value}")
+    
+    if not set_clauses:
+      return {
+        "success": False,
+        "message": "업데이트할 데이터가 없습니다."
+      }
+    
+    # 기존 레코드 확인
+    existing = mysql.find(TABLE_DETAILS, ["nid"], f"WHERE nid = {nid}")
+    
+    if existing:
+      # 업데이트
+      sql = f"UPDATE {TABLE_DETAILS} SET {', '.join(set_clauses)} WHERE nid = {nid}"
+      mysql.exec(sql)
+    else:
+      # 삽입 (nid가 없는 경우)
+      fields = ["nid"] + [key for key in details.keys() if key in allowed_fields]
+      values = [str(nid)]
+      for key in details.keys():
+        if key in allowed_fields:
+          value = details[key]
+          if isinstance(value, str):
+            escaped_value = value.replace("'", "\\'").replace('"', '\\"')
+            values.append(f"'{escaped_value}'")
+          else:
+            values.append(str(value))
+      
+      sql = f"INSERT INTO {TABLE_DETAILS} ({', '.join(fields)}) VALUES ({', '.join(values)})"
+      mysql.exec(sql)
+    
+    mysql.close()
+    
+    return {
+      "success": True,
+      "message": "공고 상세정보가 성공적으로 업데이트되었습니다.",
+      "nid": nid
+    }
+    
+  except Exception as e:
+    print(f"Error in update_notice_details: {str(e)}")
+    raise HTTPException(status_code=500, detail=f"공고 상세정보 업데이트 중 오류가 발생했습니다: {str(e)}")
 
 
 # ** logs, errors
