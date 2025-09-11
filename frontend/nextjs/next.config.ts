@@ -46,12 +46,6 @@ const nextConfig = {
       };
     }
 
-    // CSS 로딩 최적화
-    config.module.rules.push({
-      test: /\.css$/,
-      use: ['style-loader', 'css-loader'],
-    });
-
     return config;
   },
 }
