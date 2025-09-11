@@ -573,8 +573,6 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
 
   return (
     <div className="container mx-auto px-4 py-6 space-y-6">
-      <h1 className="text-2xl font-bold">{bid.title}</h1>
-      
       {/* 입찰 정보 */}
       <Card>
         <CardHeader>

@@ -511,14 +511,6 @@ export default function BidTable({ bids, currentStatus }) {
             ))}
           </div>
         )}
-        <Button
-          variant="outline"
-          onClick={handleStatusChangeModal}
-          className="bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200 h-10 w-10 flex items-center justify-center"
-          title="입찰 단계 변경"
-        >
-          <Edit3 className="h-4 w-4 text-gray-500" />
-        </Button>
         </div>
 
       </div>
@@ -529,20 +521,6 @@ export default function BidTable({ bids, currentStatus }) {
         <Table className="w-full min-w-[800px]">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[40px] [background:var(--table-header-bg)_!important] text-white">
-                <Checkbox
-                  checked={selectedBids.length === bids.length}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      setSelectedBids(bids.map(bid => parseInt(bid.mid)));
-                    } else {
-                      setSelectedBids([]);
-                    }
-                  }}
-                  aria-label="모든 항목 선택"
-                  className="!w-4 !h-4 !min-w-4 !min-h-4 !max-w-4 !max-h-4 !bg-white !border-white hover:!bg-white focus:!bg-white data-[state=checked]:!bg-white data-[state=unchecked]:!bg-white data-[state=checked]:!text-[var(--table-header-bg)]"
-                />
-              </TableHead>
               <TableHead className="w-[100px] [background:var(--table-header-bg)_!important] text-white">
                 <button
                   className="flex items-center gap-2 text-white"
@@ -598,7 +576,7 @@ export default function BidTable({ bids, currentStatus }) {
           <TableBody>
             {paginatedBids.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={localStatus === 'ended' ? 7 : 6} className="h-[300px]" />
+                <TableCell colSpan={localStatus === 'ended' ? 6 : 5} className="h-[300px]" />
               </TableRow>
             ) : (
               paginatedBids.map((bid) => (
@@ -609,14 +587,6 @@ export default function BidTable({ bids, currentStatus }) {
                     window.location.href = `/mybids/${localStatus}/${bid.nid}`;
                   }}
                 >
-                  <TableCell className="w-[40px]">
-                    <Checkbox
-                      checked={selectedBids.includes(bid.mid)}
-                      onCheckedChange={() => toggleCheckbox(bid.mid)}
-                      onClick={(e) => e.stopPropagation()}
-                      aria-label={`${bid.title} 선택`}
-                    />
-                  </TableCell>
                   <TableCell className="w-[100px] whitespace-nowrap">
                     {bid.category}
                   </TableCell>

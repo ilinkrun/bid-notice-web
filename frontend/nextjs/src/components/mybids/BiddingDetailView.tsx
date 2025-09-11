@@ -196,16 +196,13 @@ export default function BiddingDetailView({ bid }: BiddingDetailViewProps) {
     <div className="container mx-auto px-4 py-6 space-y-6">
       {/* 헤더 */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold mb-2">{bid.title}</h1>
-          <div className="flex items-center gap-4">
-            <span className={`px-2 py-1 rounded text-sm font-medium ${
-              bid.status === '응찰' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-            }`}>
-              {bid.status}
-            </span>
-            <span className="text-sm text-gray-600">입찰 ID: {bid.nid}</span>
-          </div>
+        <div className="flex items-center gap-4">
+          <span className={`px-2 py-1 rounded text-sm font-medium ${
+            bid.status === '응찰' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+          }`}>
+            {bid.status}
+          </span>
+          <span className="text-sm text-gray-600">입찰 ID: {bid.nid}</span>
         </div>
         <Button variant="outline">
           <FileText className="w-4 h-4 mr-2" />
