@@ -125,6 +125,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
   const [selectedDownloads, setSelectedDownloads] = useState<Set<string>>(new Set());
   const [isEditingNoticeDetails, setIsEditingNoticeDetails] = useState(false);
   const [noticeDetailsFields, setNoticeDetailsFields] = useState<Record<string, any>>({});
+  const [progressMemo, setProgressMemo] = useState('');
 
   // 파일 뷰어 함수
   const openFileViewer = (fileName: string, fileUrl: string) => {
@@ -373,10 +374,38 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
   const detailData = parseDetailData();
   const memoData = parseMemoData();
 
-  // 컴포넌트 마운트 시 공고 데이터 로드
+  // 진행 메모 텍스트만 추출하는 헬퍼 함수
+  const extractProgressMemo = () => {
+    let progressMemoData = memoData['진행'] || '';
+    
+    // 만약 progressMemoData가 JSON 객체라면 텍스트만 추출
+    if (typeof progressMemoData === 'object') {
+      progressMemoData = progressMemoData['진행'] || '';
+    }
+    
+    // 만약 JSON 문자열이라면 파싱해서 텍스트만 추출
+    if (typeof progressMemoData === 'string' && progressMemoData.startsWith('{')) {
+      try {
+        const parsed = JSON.parse(progressMemoData);
+        progressMemoData = parsed['진행'] || progressMemoData;
+      } catch (e) {
+        // JSON 파싱 실패시 원본 문자열 사용
+        console.log('Failed to parse memo as JSON, using as text:', progressMemoData);
+      }
+    }
+    
+    return progressMemoData;
+  };
+
+  // 컴포넌트 마운트 시 입찰 데이터 로드
   React.useEffect(() => {
-    const noticeDetail = detailData['공고'] || {};
-    setNoticeFields(noticeDetail);
+    const bidDetail = detailData['입찰'] || {};
+    setNoticeFields(bidDetail);
+  }, []);
+
+  // 컴포넌트 마운트 시 진행 메모 로드
+  React.useEffect(() => {
+    setProgressMemo(extractProgressMemo());
   }, []);
 
   // 파일 데이터가 로드되면 다운로드 체크박스 초기화
@@ -419,29 +448,48 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
     setNoticeFields(prev => ({ ...prev, [key]: value }));
   };
 
-  // 공고 정보 저장
+  // 입찰 정보 저장
   const saveNoticeFields = async () => {
     try {
-      const { data } = await updateMyBid({
+      // 두 번의 API 호출로 분리: 먼저 입찰 detail 저장, 그다음 진행 memo 저장
+      
+      // 1. 입찰 상세정보 저장 (detail 필드를 '입찰' 상태로 저장)
+      const { data: detailResult } = await updateMyBid({
         variables: {
           input: {
             nid: bid.nid,
-            status: '공고',
+            status: '입찰', // detail을 '입찰' 상태로 저장
             memo: null,
-            detail: JSON.stringify(noticeFields)
+            detail: JSON.stringify(noticeFields) // noticeFields 자체를 저장
           }
         }
       });
 
-      if (data?.mybidUpdate?.success) {
-        setIsEditingNotice(false);
-        router.refresh();
-      } else {
-        throw new Error(data?.mybidUpdate?.message || '공고 정보 저장에 실패했습니다.');
+      if (!detailResult?.mybidUpdate?.success) {
+        throw new Error(detailResult?.mybidUpdate?.message || '입찰 정보 저장에 실패했습니다.');
       }
+
+      // 2. 진행 메모 저장 (memo 필드를 '진행' 상태로 저장)
+      const { data: memoResult } = await updateMyBid({
+        variables: {
+          input: {
+            nid: bid.nid,
+            status: '진행', // memo를 '진행' 상태로 저장
+            memo: progressMemo,
+            detail: null
+          }
+        }
+      });
+
+      if (!memoResult?.mybidUpdate?.success) {
+        throw new Error(memoResult?.mybidUpdate?.message || '메모 저장에 실패했습니다.');
+      }
+
+      setIsEditingNotice(false);
+      router.refresh();
     } catch (error) {
-      console.error('공고 정보 저장 중 오류 발생:', error);
-      alert('공고 정보 저장 중 오류가 발생했습니다.');
+      console.error('입찰 정보 저장 중 오류 발생:', error);
+      alert('입찰 정보 저장 중 오류가 발생했습니다.');
     }
   };
 
@@ -795,6 +843,27 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                   </div>
                 ))}
               </div>
+              
+              {/* 메모 필드 추가 */}
+              <div className="border-t pt-4 mt-4">
+                <div className="flex flex-col gap-1">
+                  <span className="text-sm text-gray-500">메모</span>
+                  {isEditingNotice ? (
+                    <Textarea
+                      value={progressMemo}
+                      onChange={(e) => setProgressMemo(e.target.value)}
+                      placeholder="메모를 입력하세요"
+                      rows={3}
+                      className="font-medium"
+                    />
+                  ) : (
+                    <div className="font-medium p-3 bg-gray-50 rounded border min-h-[80px]">
+                      {progressMemo || '메모가 없습니다.'}
+                    </div>
+                  )}
+                </div>
+              </div>
+              
               {isEditingNotice && (
                 <div className="flex justify-end gap-2 pt-2 border-t">
                   <Button
@@ -803,8 +872,9 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                     onClick={() => {
                       setIsEditingNotice(false);
                       // 원래 데이터로 복원
-                      const noticeDetail = detailData['공고'] || {};
-                      setNoticeFields(noticeDetail);
+                      const bidDetail = detailData['입찰'] || {};
+                      setNoticeFields(bidDetail);
+                      setProgressMemo(extractProgressMemo());
                     }}
                   >
                     취소
