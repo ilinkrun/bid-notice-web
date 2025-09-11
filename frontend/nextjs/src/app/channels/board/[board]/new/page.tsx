@@ -25,6 +25,12 @@ import {
 
 import dynamic from 'next/dynamic';
 import { marked } from 'marked';
+import remarkGfm from 'remark-gfm';
+import remarkBreaks from 'remark-breaks';
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import remarkRehype from 'remark-rehype';
+import rehypeStringify from 'rehype-stringify';
 import { smartUpload } from '@/utils/chunkedUpload';
 
 // MDEditor CSS는 globals.css에서 @import로 로드됨
