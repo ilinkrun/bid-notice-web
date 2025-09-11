@@ -29,9 +29,24 @@ import { smartUpload } from '@/utils/chunkedUpload';
 
 // MDEditor CSS는 globals.css에서 @import로 로드됨
 
-// MDEditor 동적 임포트 (간단한 버전)
+// MDEditor 동적 임포트 - 오류 처리 개선
 const MDEditor = dynamic(
-  () => import('@uiw/react-md-editor'),
+  () => import('@uiw/react-md-editor').catch((error) => {
+    console.error('MDEditor import failed:', error);
+    // import 실패시 fallback component 반환
+    return Promise.resolve(() => (
+      <div className="flex items-center justify-center h-96 border rounded bg-red-50">
+        <div className="text-center">
+          <p className="text-red-600 mb-2">❌ 마크다운 에디터를 불러올 수 없습니다</p>
+          <p className="text-sm text-gray-600">페이지를 새로고침하거나 관리자에게 문의해주세요.</p>
+          <details className="mt-2 text-xs text-gray-500">
+            <summary>오류 세부정보</summary>
+            <pre>{error.message}</pre>
+          </details>
+        </div>
+      </div>
+    ));
+  }),
   { 
     ssr: false,
     loading: () => (

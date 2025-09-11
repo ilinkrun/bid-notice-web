@@ -3059,3 +3059,78 @@ An error occurred! For more details, see the full error text at https://go.apoll
 An error occurred! For more details, see the full error text at https://go.apollo.dev/c/err#%7B%22version%22%3A%223.14.0%22%2C%22message%22%3A78%2C%22args%22%3A%5B%22useQuery%22%2C%22onCompleted%22%2C%22If%20your%20%60onCompleted%60%20callback%20sets%20local%20state%2C%20switch%20to%20use%20derived%20state%20using%20%60data%60%20returned%20from%20the%20hook%20instead.%20Use%20%60useEffect%60%20to%20perform%20side-effects%20as%20a%20result%20of%20updates%20to%20%60data%60.%22%5D%7D
 An error occurred! For more details, see the full error text at https://go.apollo.dev/c/err#%7B%22version%22%3A%223.14.0%22%2C%22message%22%3A78%2C%22args%22%3A%5B%22useQuery%22%2C%22onCompleted%22%2C%22If%20your%20%60onCompleted%60%20callback%20sets%20local%20state%2C%20switch%20to%20use%20derived%20state%20using%20%60data%60%20returned%20from%20the%20hook%20instead.%20Use%20%60useEffect%60%20to%20perform%20side-effects%20as%20a%20result%20of%20updates%20to%20%60data%60.%22%5D%7D
  GET / 200 in 5470ms
+ ✓ Compiled in 2.2s (686 modules)
+ ✓ Compiled in 1180ms (686 modules)
+ ✓ Compiled in 1082ms (686 modules)
+ ✓ Compiled in 1001ms (686 modules)
+[Error: ENOENT: no such file or directory, stat '/exposed/projects/bid-notice-web/frontend/nextjs/.next/cache/webpack/client-development/1.pack.gz'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: '/exposed/projects/bid-notice-web/frontend/nextjs/.next/cache/webpack/client-development/1.pack.gz'
+}
+ ⨯ unhandledRejection: [Error: ENOENT: no such file or directory, stat '/exposed/projects/bid-notice-web/frontend/nextjs/.next/cache/webpack/client-development/1.pack.gz'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: '/exposed/projects/bid-notice-web/frontend/nextjs/.next/cache/webpack/client-development/1.pack.gz'
+}
+ ⨯ unhandledRejection:  [Error: ENOENT: no such file or directory, stat '/exposed/projects/bid-notice-web/frontend/nextjs/.next/cache/webpack/client-development/1.pack.gz'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: '/exposed/projects/bid-notice-web/frontend/nextjs/.next/cache/webpack/client-development/1.pack.gz'
+}
+[Error: ENOENT: no such file or directory, stat '/exposed/projects/bid-notice-web/frontend/nextjs/.next/cache/webpack/client-development/3.pack.gz'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: '/exposed/projects/bid-notice-web/frontend/nextjs/.next/cache/webpack/client-development/3.pack.gz'
+}
+ ⨯ unhandledRejection: [Error: ENOENT: no such file or directory, stat '/exposed/projects/bid-notice-web/frontend/nextjs/.next/cache/webpack/client-development/3.pack.gz'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: '/exposed/projects/bid-notice-web/frontend/nextjs/.next/cache/webpack/client-development/3.pack.gz'
+}
+ ⨯ unhandledRejection:  [Error: ENOENT: no such file or directory, stat '/exposed/projects/bid-notice-web/frontend/nextjs/.next/cache/webpack/client-development/3.pack.gz'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: '/exposed/projects/bid-notice-web/frontend/nextjs/.next/cache/webpack/client-development/3.pack.gz'
+}
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, stat '/exposed/projects/bid-notice-web/frontend/nextjs/.next/cache/webpack/client-development/1.pack.gz'
+   Reload env: .env.local
+ ⨯ Module not found: Error: Can't resolve 'next-flight-client-entry-loader' in '/exposed/projects/bid-notice-web/frontend/nextjs'
+ ⨯ Module not found: Error: Can't resolve 'next-flight-client-entry-loader' in '/exposed/projects/bid-notice-web/frontend/nextjs'
+ ⚠ Found a change in next.config.js. Restarting the server to apply the changes...
+node:internal/modules/cjs/loader:1386
+  throw err;
+  ^
+
+Error: Cannot find module '/exposed/projects/bid-notice-web/frontend/nextjs/node_modules/next/dist/server/lib/start-server.js'
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1383:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1025:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1030:22)
+    at Function._load (node:internal/modules/cjs/loader:1192:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v22.19.0
+[?25h
+
+> ts-nextjs-shadcn@0.1.0 dev
+> next dev -p 11501
+
+   ▲ Next.js 15.5.3
+   - Local:        http://localhost:11501
+   - Network:      http://172.27.0.2:11501
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 4.3s

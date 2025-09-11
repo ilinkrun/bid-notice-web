@@ -457,3 +457,12 @@
 /* MDEditor CSS imports - Use local files instead of CDN for better stability */
 @import '@uiw/react-md-editor/markdown-editor.css';
 @import '@uiw/react-markdown-preview/markdown.css';
+
+/* MDEditor 추가 스타일 - 로딩 및 오류 상태 개선 */
+.w-md-editor {
+  background-color: var(--background);
+}
+
+.w-md-editor-text-textarea, .w-md-editor-text-input, .w-md-editor-text {
+  color: var(--foreground) !important;
+}
