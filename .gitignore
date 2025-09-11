@@ -26,6 +26,8 @@ _*/
 database/
 *.png
 *.mp4
+uploads/
+images/
 
 # zip, tar
 *.zip

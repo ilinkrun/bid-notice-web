@@ -146,42 +146,42 @@ const convertMarkdownToHtml = (markdown: string): string => {
   }
 };
 
-// 파일 업로드 헬퍼 함수
+// 파일 업로드 헬퍼 함수 (청크 업로드 지원)
 const uploadFile = async (file: File, setIsUploading: (loading: boolean) => void, editingMarkdown: string, setEditingMarkdown: (value: string) => void, setPost: any, post: any) => {
   setIsUploading(true);
   try {
-    const formData = new FormData();
-    formData.append('file', file);
+    // 스마트 업로드 사용 (작은 파일은 일반 업로드, 큰 파일은 청크 업로드)
+    const { smartUpload } = await import('@/utils/chunkedUpload');
     
-    const response = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData,
+    const result = await smartUpload(file, {
+      onProgress: (progress) => {
+        console.log(`업로드 진행률: ${Math.round(progress)}%`);
+      },
+      maxSingleUploadSize: 500 * 1024 // 500KB 이상은 청크 업로드
     });
     
-    if (response.ok) {
-      const result = await response.json();
-      
-      // 이미지 파일인 경우 이미지 마크다운, 그 외는 링크 마크다운
-      let fileMarkdown;
-      if (file.type.startsWith('image/')) {
-        fileMarkdown = `![${result.filename}](${result.url})`;
-      } else {
-        fileMarkdown = `[${result.filename}](${result.url})`;
-      }
-      
-      const newValue = `${editingMarkdown}\n\n${fileMarkdown}`;
-      setEditingMarkdown(newValue);
-      setPost({ 
-        ...post, 
-        format: 'markdown'
-      });
+    // 이미지 파일인 경우 이미지 마크다운, 그 외는 링크 마크다운
+    let fileMarkdown;
+    if (file.type.startsWith('image/')) {
+      fileMarkdown = `![${result.filename}](${result.url})`;
     } else {
-      const error = await response.json();
-      alert(`파일 업로드 실패: ${error.error}`);
+      fileMarkdown = `[${result.filename}](${result.url})`;
     }
+    
+    const newValue = `${editingMarkdown}\n\n${fileMarkdown}`;
+    setEditingMarkdown(newValue);
+    setPost({ 
+      ...post, 
+      format: 'markdown'
+    });
+    
   } catch (error) {
     console.error('파일 업로드 오류:', error);
-    alert('파일 업로드 중 오류가 발생했습니다.');
+    if (error instanceof Error) {
+      alert(`파일 업로드 실패: ${error.message}`);
+    } else {
+      alert('파일 업로드 중 오류가 발생했습니다.');
+    }
   } finally {
     setIsUploading(false);
   }

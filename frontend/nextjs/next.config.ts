@@ -1,5 +1,3 @@
-import type { NextConfig } from "next";
-
 const nextConfig = {
   // reactStrictMode: true,
   typescript: {
@@ -9,6 +7,17 @@ const nextConfig = {
   eslint: {
     // ESLint 에러도 무시하려면 (선택사항)
     ignoreDuringBuilds: true,
+  },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '100mb',
+    },
+  },
+  // API 라우트의 요청 크기 제한 설정
+  api: {
+    bodyParser: {
+      sizeLimit: '100mb',
+    },
   },
 }
 
