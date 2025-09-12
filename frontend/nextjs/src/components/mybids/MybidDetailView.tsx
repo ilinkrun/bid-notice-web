@@ -20,7 +20,9 @@ import {
   Loader2,
   Plus,
   Download,
-  ExternalLink
+  ExternalLink,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { useMutation, useQuery, gql } from '@apollo/client';
 import { useRouter } from 'next/navigation';
@@ -126,6 +128,15 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
   const [isEditingNoticeDetails, setIsEditingNoticeDetails] = useState(false);
   const [noticeDetailsFields, setNoticeDetailsFields] = useState<Record<string, any>>({});
   const [progressMemo, setProgressMemo] = useState('');
+  
+  // 섹션 접힘/펼침 상태
+  const [isInfoExpanded, setIsInfoExpanded] = useState(true);
+  const [isDocumentExpanded, setIsDocumentExpanded] = useState(true);
+  const [isStageExpanded, setIsStageExpanded] = useState(true);
+  
+  // 탭 상태
+  const [infoActiveTab, setInfoActiveTab] = useState('notice');
+  const [documentActiveTab, setDocumentActiveTab] = useState('files');
 
   // 파일 뷰어 함수
   const openFileViewer = (fileName: string, fileUrl: string) => {
@@ -623,322 +634,390 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
     <div className="container mx-auto px-4 py-6 space-y-6">
       {/* 입찰 정보 */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Info className="w-5 h-5" />
-            입찰 정보
+        <CardHeader 
+          className="cursor-pointer hover:bg-gray-50 transition-colors"
+          onClick={() => setIsInfoExpanded(!isInfoExpanded)}
+        >
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Info className="w-5 h-5" />
+              입찰 정보
+            </div>
+            {isInfoExpanded ? (
+              <ChevronUp className="w-5 h-5" />
+            ) : (
+              <ChevronDown className="w-5 h-5" />
+            )}
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          {/* 공고 상세정보 */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <FileText className="w-4 h-4" />
-                <h3 className="font-semibold">공고 상세정보</h3>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  if (isEditingNoticeDetails) {
-                    saveNoticeDetailsFields();
-                  } else {
-                    setIsEditingNoticeDetails(true);
-                  }
-                }}
-                disabled={updatingDetails || detailsLoading}
+        {isInfoExpanded && (
+          <CardContent className="space-y-6">
+            {/* 탭 버튼 */}
+            <div className="flex border-b">
+              <button
+                className={`px-4 py-2 font-medium text-sm flex items-center gap-2 ${
+                  infoActiveTab === 'notice'
+                    ? 'text-blue-600 border-b-2 border-blue-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+                onClick={() => setInfoActiveTab('notice')}
               >
-                {updatingDetails ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  isEditingNoticeDetails ? '저장' : '편집'
-                )}
-              </Button>
+                <FileText className="w-4 h-4" />
+                공고 상세정보
+              </button>
+              <button
+                className={`px-4 py-2 font-medium text-sm flex items-center gap-2 ${
+                  infoActiveTab === 'bid'
+                    ? 'text-blue-600 border-b-2 border-blue-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+                onClick={() => setInfoActiveTab('bid')}
+              >
+                <Clock className="w-4 h-4" />
+                입찰 상세정보
+              </button>
             </div>
-            <div className="border rounded-lg p-4 space-y-3">
-              {detailsLoading ? (
-                <div className="flex items-center justify-center py-4">
-                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                  <span>공고 상세정보를 불러오는 중...</span>
+            
+            {/* 공고 상세정보 탭 */}
+            {infoActiveTab === 'notice' && (
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      if (isEditingNoticeDetails) {
+                        saveNoticeDetailsFields();
+                      } else {
+                        setIsEditingNoticeDetails(true);
+                      }
+                    }}
+                    disabled={updatingDetails || detailsLoading}
+                  >
+                    {updatingDetails ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      isEditingNoticeDetails ? '저장' : '편집'
+                    )}
+                  </Button>
                 </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-sm text-gray-500">공고명</span>
-                    {isEditingNoticeDetails ? (
-                      <Input
-                        value={noticeDetailsFields.title || ''}
-                        onChange={(e) => updateNoticeDetailsField('title', e.target.value)}
-                        placeholder="공고명을 입력하세요"
-                        className="font-medium"
-                      />
-                    ) : (
-                      <span className="font-medium">{noticeDetailsFields.title || bid.title || '-'}</span>
-                    )}
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <span className="text-sm text-gray-500">공고번호</span>
-                    {isEditingNoticeDetails ? (
-                      <Input
-                        value={noticeDetailsFields.notice_num || ''}
-                        onChange={(e) => updateNoticeDetailsField('notice_num', e.target.value)}
-                        placeholder="공고번호를 입력하세요"
-                        className="font-medium"
-                      />
-                    ) : (
-                      <span className="font-medium">{noticeDetailsFields.notice_num || '-'}</span>
-                    )}
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <span className="text-sm text-gray-500">담당부서</span>
-                    {isEditingNoticeDetails ? (
-                      <Input
-                        value={noticeDetailsFields.org_dept || ''}
-                        onChange={(e) => updateNoticeDetailsField('org_dept', e.target.value)}
-                        placeholder="담당부서를 입력하세요"
-                        className="font-medium"
-                      />
-                    ) : (
-                      <span className="font-medium">{noticeDetailsFields.org_dept || bid.orgName || '-'}</span>
-                    )}
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <span className="text-sm text-gray-500">담당전화</span>
-                    {isEditingNoticeDetails ? (
-                      <Input
-                        value={noticeDetailsFields.org_tel || ''}
-                        onChange={(e) => updateNoticeDetailsField('org_tel', e.target.value)}
-                        placeholder="담당전화를 입력하세요"
-                        className="font-medium"
-                      />
-                    ) : (
-                      <span className="font-medium">{noticeDetailsFields.org_tel || '-'}</span>
-                    )}
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <span className="text-sm text-gray-500">업무구분</span>
-                    {isEditingNoticeDetails ? (
-                      <Input
-                        value={noticeDetailsFields.category || ''}
-                        onChange={(e) => updateNoticeDetailsField('category', e.target.value)}
-                        placeholder="업무구분을 입력하세요"
-                        className="font-medium"
-                      />
-                    ) : (
-                      <span className="font-medium">{noticeDetailsFields.category || bid.category || '-'}</span>
-                    )}
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <span className="text-sm text-gray-500">상세페이지</span>
-                    {isEditingNoticeDetails ? (
-                      <Input
-                        value={noticeDetailsFields.detail_url || ''}
-                        onChange={(e) => updateNoticeDetailsField('detail_url', e.target.value)}
-                        placeholder="상세페이지 URL을 입력하세요"
-                        className="font-medium"
-                      />
-                    ) : (
-                      <div className="font-medium">
-                        {noticeDetailsFields.detail_url ? (
-                          <a
-                            href={noticeDetailsFields.detail_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 hover:underline"
-                          >
-                            상세페이지 링크
-                          </a>
+                <div className="border rounded-lg p-4 space-y-3">
+                  {detailsLoading ? (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                      <span>공고 상세정보를 불러오는 중...</span>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-sm text-gray-500">공고명</span>
+                        {isEditingNoticeDetails ? (
+                          <Input
+                            value={noticeDetailsFields.title || ''}
+                            onChange={(e) => updateNoticeDetailsField('title', e.target.value)}
+                            placeholder="공고명을 입력하세요"
+                            className="font-medium"
+                          />
                         ) : (
-                          <span>-</span>
+                          <span className="font-medium">{noticeDetailsFields.title || bid.title || '-'}</span>
                         )}
                       </div>
-                    )}
-                  </div>
-                  {(noticeDetailsFields.body_html || isEditingNoticeDetails) && (
-                    <div className="col-span-1 md:col-span-2 flex flex-col gap-1">
-                      <span className="text-sm text-gray-500">공고본문</span>
-                      {isEditingNoticeDetails ? (
-                        <Textarea
-                          value={noticeDetailsFields.body_html || ''}
-                          onChange={(e) => updateNoticeDetailsField('body_html', e.target.value)}
-                          placeholder="공고본문을 입력하세요"
-                          rows={4}
-                          className="font-medium"
-                        />
-                      ) : (
-                        <div className="font-medium max-h-32 overflow-y-auto text-sm bg-gray-50 p-3 rounded">
-                          {noticeDetailsFields.body_html ? (
-                            <div dangerouslySetInnerHTML={{ __html: noticeDetailsFields.body_html }} />
+                      <div className="flex flex-col gap-1">
+                        <span className="text-sm text-gray-500">공고번호</span>
+                        {isEditingNoticeDetails ? (
+                          <Input
+                            value={noticeDetailsFields.notice_num || ''}
+                            onChange={(e) => updateNoticeDetailsField('notice_num', e.target.value)}
+                            placeholder="공고번호를 입력하세요"
+                            className="font-medium"
+                          />
+                        ) : (
+                          <span className="font-medium">{noticeDetailsFields.notice_num || '-'}</span>
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-sm text-gray-500">담당부서</span>
+                        {isEditingNoticeDetails ? (
+                          <Input
+                            value={noticeDetailsFields.org_dept || ''}
+                            onChange={(e) => updateNoticeDetailsField('org_dept', e.target.value)}
+                            placeholder="담당부서를 입력하세요"
+                            className="font-medium"
+                          />
+                        ) : (
+                          <span className="font-medium">{noticeDetailsFields.org_dept || bid.orgName || '-'}</span>
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-sm text-gray-500">담당전화</span>
+                        {isEditingNoticeDetails ? (
+                          <Input
+                            value={noticeDetailsFields.org_tel || ''}
+                            onChange={(e) => updateNoticeDetailsField('org_tel', e.target.value)}
+                            placeholder="담당전화를 입력하세요"
+                            className="font-medium"
+                          />
+                        ) : (
+                          <span className="font-medium">{noticeDetailsFields.org_tel || '-'}</span>
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-sm text-gray-500">업무구분</span>
+                        {isEditingNoticeDetails ? (
+                          <Input
+                            value={noticeDetailsFields.category || ''}
+                            onChange={(e) => updateNoticeDetailsField('category', e.target.value)}
+                            placeholder="업무구분을 입력하세요"
+                            className="font-medium"
+                          />
+                        ) : (
+                          <span className="font-medium">{noticeDetailsFields.category || bid.category || '-'}</span>
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-sm text-gray-500">상세페이지</span>
+                        {isEditingNoticeDetails ? (
+                          <Input
+                            value={noticeDetailsFields.detail_url || ''}
+                            onChange={(e) => updateNoticeDetailsField('detail_url', e.target.value)}
+                            placeholder="상세페이지 URL을 입력하세요"
+                            className="font-medium"
+                          />
+                        ) : (
+                          <div className="font-medium">
+                            {noticeDetailsFields.detail_url ? (
+                              <a
+                                href={noticeDetailsFields.detail_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:text-blue-800 hover:underline"
+                              >
+                                상세페이지 링크
+                              </a>
+                            ) : (
+                              <span>-</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      {(noticeDetailsFields.body_html || isEditingNoticeDetails) && (
+                        <div className="col-span-1 md:col-span-2 flex flex-col gap-1">
+                          <span className="text-sm text-gray-500">공고본문</span>
+                          {isEditingNoticeDetails ? (
+                            <Textarea
+                              value={noticeDetailsFields.body_html || ''}
+                              onChange={(e) => updateNoticeDetailsField('body_html', e.target.value)}
+                              placeholder="공고본문을 입력하세요"
+                              rows={4}
+                              className="font-medium"
+                            />
                           ) : (
-                            <span>-</span>
+                            <div className="font-medium max-h-32 overflow-y-auto text-sm bg-gray-50 p-3 rounded">
+                              {noticeDetailsFields.body_html ? (
+                                <div dangerouslySetInnerHTML={{ __html: noticeDetailsFields.body_html }} />
+                              ) : (
+                                <span>-</span>
+                              )}
+                            </div>
                           )}
                         </div>
                       )}
                     </div>
                   )}
-                </div>
-              )}
-              {isEditingNoticeDetails && (
-                <div className="flex justify-end gap-2 pt-2 border-t">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setIsEditingNoticeDetails(false);
-                      // 원래 데이터로 복원
-                      if (noticeDetailsData?.noticeDetails?.details) {
-                        setNoticeDetailsFields(noticeDetailsData.noticeDetails.details);
-                      }
-                    }}
-                  >
-                    취소
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* 입찰 상세정보 */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4" />
-                <h3 className="font-semibold">입찰 상세정보</h3>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  if (isEditingNotice) {
-                    saveNoticeFields();
-                  } else {
-                    setIsEditingNotice(true);
-                  }
-                }}
-                disabled={loading}
-              >
-                {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  isEditingNotice ? '저장' : '편집'
-                )}
-              </Button>
-            </div>
-            <div className="border rounded-lg p-4 space-y-3">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {Object.entries(noticeFields).map(([key, value]) => (
-                  <div key={key} className="flex flex-col gap-1">
-                    <span className="text-sm text-gray-500">{key}</span>
-                    {isEditingNotice ? (
-                      <Input
-                        value={noticeFields[key] || ''}
-                        onChange={(e) => updateNoticeField(key, e.target.value)}
-                        placeholder={`${key}을(를) 입력하세요`}
-                        className="font-medium"
-                      />
-                    ) : (
-                      <span className="font-medium">{value || '정보 없음'}</span>
-                    )}
-                  </div>
-                ))}
-              </div>
-              
-              {/* 메모 필드 추가 */}
-              <div className="border-t pt-4 mt-4">
-                <div className="flex flex-col gap-1">
-                  <span className="text-sm text-gray-500">메모</span>
-                  {isEditingNotice ? (
-                    <Textarea
-                      value={progressMemo}
-                      onChange={(e) => setProgressMemo(e.target.value)}
-                      placeholder="메모를 입력하세요"
-                      rows={3}
-                      className="font-medium"
-                    />
-                  ) : (
-                    <div className="font-medium p-3 bg-gray-50 rounded border min-h-[80px]">
-                      {progressMemo || '메모가 없습니다.'}
+                  {isEditingNoticeDetails && (
+                    <div className="flex justify-end gap-2 pt-2 border-t">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setIsEditingNoticeDetails(false);
+                          // 원래 데이터로 복원
+                          if (noticeDetailsData?.noticeDetails?.details) {
+                            setNoticeDetailsFields(noticeDetailsData.noticeDetails.details);
+                          }
+                        }}
+                      >
+                        취소
+                      </Button>
                     </div>
                   )}
                 </div>
               </div>
-              
-              {isEditingNotice && (
-                <div className="flex justify-end gap-2 pt-2 border-t">
+            )}
+
+            {/* 입찰 상세정보 탭 */}
+            {infoActiveTab === 'bid' && (
+              <div>
+                <div className="flex items-center justify-between mb-4">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      setIsEditingNotice(false);
-                      // 원래 데이터로 복원
-                      const bidDetail = detailData['입찰'] || {};
-                      setNoticeFields(bidDetail);
-                      setProgressMemo(extractProgressMemo());
+                      if (isEditingNotice) {
+                        saveNoticeFields();
+                      } else {
+                        setIsEditingNotice(true);
+                      }
                     }}
+                    disabled={loading}
                   >
-                    취소
+                    {loading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      isEditingNotice ? '저장' : '편집'
+                    )}
                   </Button>
                 </div>
-              )}
-            </div>
-          </div>
-        </CardContent>
+                <div className="border rounded-lg p-4 space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {Object.entries(noticeFields).map(([key, value]) => (
+                      <div key={key} className="flex flex-col gap-1">
+                        <span className="text-sm text-gray-500">{key}</span>
+                        {isEditingNotice ? (
+                          <Input
+                            value={noticeFields[key] || ''}
+                            onChange={(e) => updateNoticeField(key, e.target.value)}
+                            placeholder={`${key}을(를) 입력하세요`}
+                            className="font-medium"
+                          />
+                        ) : (
+                          <span className="font-medium">{value || '정보 없음'}</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* 메모 필드 추가 */}
+                  <div className="border-t pt-4 mt-4">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-sm text-gray-500">메모</span>
+                      {isEditingNotice ? (
+                        <Textarea
+                          value={progressMemo}
+                          onChange={(e) => setProgressMemo(e.target.value)}
+                          placeholder="메모를 입력하세요"
+                          rows={3}
+                          className="font-medium"
+                        />
+                      ) : (
+                        <div className="font-medium p-3 bg-gray-50 rounded border min-h-[80px]">
+                          {progressMemo || '메모가 없습니다.'}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {isEditingNotice && (
+                    <div className="flex justify-end gap-2 pt-2 border-t">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setIsEditingNotice(false);
+                          // 원래 데이터로 복원
+                          const bidDetail = detailData['입찰'] || {};
+                          setNoticeFields(bidDetail);
+                          setProgressMemo(extractProgressMemo());
+                        }}
+                      >
+                        취소
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        )}
       </Card>
 
       {/* 입찰 문서 */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5" />
-            입찰 문서
+        <CardHeader 
+          className="cursor-pointer hover:bg-gray-50 transition-colors"
+          onClick={() => setIsDocumentExpanded(!isDocumentExpanded)}
+        >
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <FileText className="w-5 h-5" />
+              입찰 문서
+            </div>
+            {isDocumentExpanded ? (
+              <ChevronUp className="w-5 h-5" />
+            ) : (
+              <ChevronDown className="w-5 h-5" />
+            )}
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          {/* 공고 문서 */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
+        {isDocumentExpanded && (
+          <CardContent className="space-y-6">
+            {/* 탭 버튼 */}
+            <div className="flex border-b">
+              <button
+                className={`px-4 py-2 font-medium text-sm flex items-center gap-2 ${
+                  documentActiveTab === 'files'
+                    ? 'text-blue-600 border-b-2 border-blue-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+                onClick={() => setDocumentActiveTab('files')}
+              >
                 <FileText className="w-4 h-4" />
-                <h3 className="font-semibold">공고 문서</h3>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsEditingFiles(!isEditingFiles)}
-                >
-                  {isEditingFiles ? '저장' : '편집'}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    // TODO: 추가 기능 구현
-                    alert('파일 추가 기능 구현 예정');
-                  }}
-                >
-                  <Plus className="w-4 h-4 mr-1" />
-                  추가
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    // TODO: 선택된 파일들 다운로드 기능 구현
-                    if (selectedDownloads.size > 0) {
-                      alert(`${selectedDownloads.size}개 파일 다운로드 기능 구현 예정`);
-                    } else {
-                      alert('다운로드할 파일을 선택해주세요.');
-                    }
-                  }}
-                  disabled={selectedDownloads.size === 0}
-                >
-                  <Download className="w-4 h-4 mr-1" />
-                  다운
-                </Button>
-              </div>
+                공고 문서
+              </button>
+              <button
+                className={`px-4 py-2 font-medium text-sm flex items-center gap-2 ${
+                  documentActiveTab === 'write'
+                    ? 'text-blue-600 border-b-2 border-blue-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+                onClick={() => setDocumentActiveTab('write')}
+              >
+                <Edit3 className="w-4 h-4" />
+                문서 작성
+              </button>
             </div>
+            
+            {/* 공고 문서 탭 */}
+            {documentActiveTab === 'files' && (
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsEditingFiles(!isEditingFiles)}
+                    >
+                      {isEditingFiles ? '저장' : '편집'}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        // TODO: 추가 기능 구현
+                        alert('파일 추가 기능 구현 예정');
+                      }}
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      추가
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        // TODO: 선택된 파일들 다운로드 기능 구현
+                        if (selectedDownloads.size > 0) {
+                          alert(`${selectedDownloads.size}개 파일 다운로드 기능 구현 예정`);
+                        } else {
+                          alert('다운로드할 파일을 선택해주세요.');
+                        }
+                      }}
+                      disabled={selectedDownloads.size === 0}
+                    >
+                      <Download className="w-4 h-4 mr-1" />
+                      다운
+                    </Button>
+                  </div>
+                </div>
             <div className="border rounded-lg p-4 space-y-3">
               {filesLoading ? (
                 <div className="flex items-center justify-center py-8">
@@ -1061,16 +1140,14 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                   공고 문서가 없습니다.
                 </div>
               )}
-            </div>
-          </div>
+                </div>
+              </div>
+            )}
 
-          {/* 문서 작성 */}
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <Edit3 className="w-4 h-4" />
-              <h3 className="font-semibold">문서 작성</h3>
-            </div>
-            <div className="border rounded-lg p-4 space-y-4">
+            {/* 문서 작성 탭 */}
+            {documentActiveTab === 'write' && (
+              <div>
+                <div className="border rounded-lg p-4 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Button variant="outline" className="h-20 flex flex-col gap-2">
                   <FileText className="w-6 h-6" />
@@ -1092,20 +1169,33 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
               <div className="text-sm text-gray-500">
                 입찰 마감일까지 모든 필수 서류를 제출해야 합니다.
               </div>
-            </div>
-          </div>
-        </CardContent>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        )}
       </Card>
 
       {/* 단계 변경 */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CheckSquare className="w-5 h-5" />
-            단계 변경
+        <CardHeader 
+          className="cursor-pointer hover:bg-gray-50 transition-colors"
+          onClick={() => setIsStageExpanded(!isStageExpanded)}
+        >
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CheckSquare className="w-5 h-5" />
+              단계 변경
+            </div>
+            {isStageExpanded ? (
+              <ChevronUp className="w-5 h-5" />
+            ) : (
+              <ChevronDown className="w-5 h-5" />
+            )}
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        {isStageExpanded && (
+          <CardContent>
           <div className="space-y-4">
             <div className="flex flex-wrap gap-4">
               {statusOptions.map((option) => (
@@ -1140,7 +1230,8 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
               </div>
             )}
           </div>
-        </CardContent>
+          </CardContent>
+        )}
       </Card>
     </div>
   );

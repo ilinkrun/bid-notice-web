@@ -67,7 +67,7 @@ const notices = [
     icon: BookmarkPlus,
   },
   {
-    title: '관련없음',
+    title: '무관',
     href: '/notices/무관?gap=1',
     icon: Bookmark,
   },
@@ -80,19 +80,19 @@ const notices = [
 
 const bids = [
   {
-    title: '진행(응찰전)',
+    title: '진행',
     href: '/mybids/progress',
-    description: '입찰 준비중인 공고 목록',
+    description: '응찰 준비중인 입찰 목록',
     icon: Clock,
   },
   {
-    title: '응찰(응찰후 종료전)',
+    title: '응찰',
     href: '/mybids/bidding',
-    description: '응찰 완료된 공고 목록',
+    description: '응찰한 공고(종료전) 목록',
     icon: Target,
   },
   {
-    title: '종료(낙찰/패찰/포기)',
+    title: '종료',
     href: '/mybids/ended',
     description: '낙찰/패찰/포기된 공고 목록',
     icon: CheckCircle,
@@ -128,13 +128,13 @@ const statistics = [
 
 const channels = [
   {
-    title: '공지 및 건의(개발)',
+    title: '개발 관련 게시판',
     href: '/channels/board/board_dev',
     description: '개발 관련 공지, 개선.수정 건의 및 요구사항',
     icon: Code,
   },
   {
-    title: '공지 및 건의(운영)',
+    title: '운영 관련 게시판',
     href: '/channels/board/board_op',
     description: '운영(업무) 관련 공지, 기능 반영 및 요구 사항',
     icon: MessageSquare,
@@ -320,8 +320,8 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ user, size = 'sm' }) => {
   if (user.avatar) {
     return (
       <div className={cn("rounded-full overflow-hidden", sizeClasses)}>
-        <img 
-          src={user.avatar} 
+        <img
+          src={user.avatar}
           alt={`${user.name}의 아바타`}
           className="w-full h-full object-cover"
           onError={(e) => {
@@ -360,7 +360,7 @@ const UserDropdown: React.FC = () => {
   const { user, logout, token } = useAuth();
   const { navigate } = useUnifiedNavigation();
 
-  const [logoutMutation] = useMutation(LOGOUT_MUTATION, { 
+  const [logoutMutation] = useMutation(LOGOUT_MUTATION, {
     client: getClient(),
     onCompleted: (data) => {
       if (data.logout.success) {
@@ -389,7 +389,7 @@ const UserDropdown: React.FC = () => {
 
   const handleLogout = async () => {
     if (!token) return;
-    
+
     setIsLoggingOut(true);
     try {
       await logoutMutation({ variables: { token } });
@@ -435,21 +435,21 @@ const UserDropdown: React.FC = () => {
                 <div className="flex items-center gap-1 mt-1">
                   <span className={cn(
                     "text-xs px-2 py-0.5 rounded-full font-medium",
-                    user.role === 'admin' 
+                    user.role === 'admin'
                       ? "bg-red-100 text-red-800"
                       : user.role === 'manager'
-                      ? "bg-blue-100 text-blue-800" 
-                      : user.role === 'viewer'
-                      ? "bg-gray-100 text-gray-800"
-                      : "bg-green-100 text-green-800"
+                        ? "bg-blue-100 text-blue-800"
+                        : user.role === 'viewer'
+                          ? "bg-gray-100 text-gray-800"
+                          : "bg-green-100 text-green-800"
                   )}>
-                    {user.role === 'admin' 
-                      ? '관리자' 
-                      : user.role === 'manager' 
-                      ? '매니저'
-                      : user.role === 'viewer'
-                      ? '조회자'
-                      : '사용자'
+                    {user.role === 'admin'
+                      ? '관리자'
+                      : user.role === 'manager'
+                        ? '매니저'
+                        : user.role === 'viewer'
+                          ? '조회자'
+                          : '사용자'
                     }
                   </span>
                 </div>
@@ -466,7 +466,7 @@ const UserDropdown: React.FC = () => {
               <UserCircle className="h-4 w-4" />
               <span>사용자 정보</span>
             </button>
-            
+
             <button
               onClick={handleLogout}
               disabled={isLoggingOut}
@@ -500,23 +500,23 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
           </Link>
           <nav className="flex items-center gap-1 ml-12">
             {/* 공고 목록 - 모든 역할 접근 가능 */}
-            <DropdownMenu label="공고 목록" icon={Star} items={notices} align="left" />
-            
+            <DropdownMenu label="공고" icon={Star} items={notices} align="left" />
+
             {/* 입찰 관리 - 로그인한 사용자만 */}
             <PermissionBoundary roles={['user', 'manager', 'admin']} showMessage={false}>
-              <DropdownMenu label="입찰 관리" icon={Cog} items={bids} align="center" />
+              <DropdownMenu label="입찰" icon={Cog} items={bids} align="center" />
             </PermissionBoundary>
-            
+
             {/* 통계 - viewer 이상 */}
             <PermissionBoundary roles={['viewer', 'user', 'manager', 'admin']} showMessage={false}>
               <DropdownMenu label="통계" icon={BarChart2} items={statistics} align="center" />
             </PermissionBoundary>
-            
-            {/* 게시판 - user 이상 */}
+
+            {/* 채널 - user 이상 */}
             <PermissionBoundary roles={['user', 'manager', 'admin']} showMessage={false}>
-              <DropdownMenu label="게시판" icon={MessageSquare} items={channels} align="center" />
+              <DropdownMenu label="채널" icon={MessageSquare} items={channels} align="center" />
             </PermissionBoundary>
-            
+
             {/* 설정 - manager 이상 */}
             <PermissionBoundary roles={['manager', 'admin']} showMessage={false}>
               <DropdownMenu label="설정" icon={Settings} items={settings} align="right" />
@@ -567,31 +567,31 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
                 <UserDropdown />
               </div>
             )}
-            
+
             <div className="flex flex-col divide-y bg-white">
               {/* 공고 목록 - 모든 역할 접근 가능 */}
               <DropdownMenu label="공고 목록" icon={Star} items={notices} isMobile setIsMobileMenuOpen={setIsMobileMenuOpen} />
-              
+
               {/* 입찰 관리 - 로그인한 사용자만 */}
               <PermissionBoundary roles={['user', 'manager', 'admin']} showMessage={false}>
                 <DropdownMenu label="입찰 관리" icon={Cog} items={bids} isMobile setIsMobileMenuOpen={setIsMobileMenuOpen} />
               </PermissionBoundary>
-              
+
               {/* 통계 - viewer 이상 */}
               <PermissionBoundary roles={['viewer', 'user', 'manager', 'admin']} showMessage={false}>
                 <DropdownMenu label="통계" icon={BarChart2} items={statistics} isMobile setIsMobileMenuOpen={setIsMobileMenuOpen} />
               </PermissionBoundary>
-              
+
               {/* 게시판 - user 이상 */}
               <PermissionBoundary roles={['user', 'manager', 'admin']} showMessage={false}>
                 <DropdownMenu label="게시판" icon={MessageSquare} items={channels} isMobile setIsMobileMenuOpen={setIsMobileMenuOpen} />
               </PermissionBoundary>
-              
+
               {/* 설정 - manager 이상 */}
               <PermissionBoundary roles={['manager', 'admin']} showMessage={false}>
                 <DropdownMenu label="설정" icon={Settings} items={settings} isMobile setIsMobileMenuOpen={setIsMobileMenuOpen} />
               </PermissionBoundary>
-              
+
               {/* 모바일 로그인 링크 (비로그인 상태일 때만) */}
               {!isAuthenticated && (
                 <div className="py-2 bg-white">
