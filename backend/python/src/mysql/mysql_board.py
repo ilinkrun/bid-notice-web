@@ -12,9 +12,10 @@ CREATE TABLE board_dev (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL COMMENT '글 제목',
     content TEXT NOT NULL COMMENT '글 내용',
+    markdown_source TEXT COMMENT '마크다운 원본 소스',
     format ENUM('text', 'markdown', 'html') NOT NULL DEFAULT 'text' COMMENT '내용 형식',
     writer VARCHAR(50) NOT NULL COMMENT '글쓴이 이름',
-    password CHAR(4) NOT NULL COMMENT '숫자 4자리 비밀번호',
+    email VARCHAR(255) NOT NULL COMMENT '작성자 이메일',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 날짜/시간',
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 날짜/시간',
     is_visible BOOLEAN NOT NULL DEFAULT TRUE COMMENT '글 노출 여부',
@@ -22,6 +23,7 @@ CREATE TABLE board_dev (
     -- 인덱스 추가
     INDEX idx_created_at (created_at),
     INDEX idx_writer (writer),
+    INDEX idx_email (email),
     INDEX idx_is_visible (is_visible)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='개발 채널 게시판';
 
@@ -40,8 +42,9 @@ def create_post(data: dict, table_name: str = 'board_dev'):
               'title': str,        # 필수: 글 title
               'content': str,      # 필수: 글 내용
               'writer': str,       # 필수: 글쓴이 이름
-              'password': str,     # 필수: 숫자 4자리 비밀번호
+              'email': str,        # 필수: 작성자 이메일
               'format': str,       # 선택: 내용 형식 ('text', 'markdown', 'html'). 기본값 'text'
+              'markdown_source': str, # 선택: 마크다운 원본 소스
               'is_visible': bool   # 선택: 글 노출 여부. 기본값 True
           }
       table_name (str, optional): 테이블명. 기본값 'board_dev'
@@ -55,28 +58,33 @@ def create_post(data: dict, table_name: str = 'board_dev'):
   mysql = Mysql()
   try:
     # 필수 필드 검사
-    required_fields = ['title', 'content', 'writer', 'password']
+    required_fields = ['title', 'content', 'writer', 'email']
     for field in required_fields:
       if field not in data:
         raise ValueError(f"필수 필드가 누락되었습니다: {field}")
 
-    # 비밀번호 유효성 검사
-    if not (data['password'].isdigit() and len(data['password']) == 4):
-      raise ValueError("비밀번호는 4자리 숫자여야 합니다.")
+    # 이메일 유효성 검사 (기본적인 형식 검사)
+    import re
+    email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if not re.match(email_pattern, data['email']):
+      raise ValueError("유효하지 않은 이메일 형식입니다.")
 
     # 기본값 설정 및 데이터 정제
     insert_data = {
         'title': data['title'],
         'content': data['content'],
         'writer': data['writer'],
-        'password': data['password'],
+        'email': data['email'],
         'format': data.get('format', 'text'),
         'is_visible': 1 if data.get('is_visible', True) else 0
     }
     
-    # 마크다운 원본이 제공된 경우 추가
+    # 마크다운 원본 소스 추가
     if 'markdown_source' in data:
-        insert_data['markdown_source'] = data['markdown_source']
+      print(f"Backend received markdown_source: {data['markdown_source']}")
+      insert_data['markdown_source'] = data['markdown_source']
+    else:
+      print("Backend did not receive markdown_source field")
 
     # format 유효성 검사
     if insert_data['format'] not in ['text', 'markdown', 'html']:
@@ -104,15 +112,15 @@ def get_post(post_id: int, table_name: str = 'board_dev'):
   try:
     result = mysql.find(table_name,
                         fields=[
-                            "id", "title", "content", "markdown_source", "password", "format",
-                            "writer", "created_at", "updated_at", "is_visible"
+                            "id", "title", "content", "markdown_source", "format",
+                            "writer", "email", "created_at", "updated_at", "is_visible"
                         ],
                         addStr=f"WHERE id = {post_id}")
     if not result:
       return None
 
     fields = [
-        "id", "title", "content", "markdown_source", "password", "format", "writer", "created_at",
+        "id", "title", "content", "markdown_source", "format", "writer", "email", "created_at",
         "updated_at", "is_visible"
     ]
     return dict_from_tuple(fields, result[0])
@@ -122,10 +130,10 @@ def get_post(post_id: int, table_name: str = 'board_dev'):
 
 def update_post(post_id: int,
                 data: dict,
-                password: str,
+                email: str,
                 table_name: str = 'board_dev'):
   """
-  게시글을 수정합니다. 비밀번호가 일치하는 경우에만 수정이 가능합니다.
+  게시글을 수정합니다. 이메일이 일치하는 경우에만 수정이 가능합니다.
 
   Args:
       post_id (int): 게시글 ID
@@ -136,7 +144,7 @@ def update_post(post_id: int,
               'format': str,       # 선택: 내용 형식 ('text', 'markdown', 'html')
               'is_visible': bool   # 선택: 글 노출 여부
           }
-      password (str): 게시글 비밀번호
+      email (str): 작성자 이메일
       table_name (str, optional): 테이블명. 기본값 'board_dev'
 
   Returns:
@@ -147,14 +155,14 @@ def update_post(post_id: int,
   """
   mysql = Mysql()
   try:
-    # 비밀번호 확인
-    if not password:
-      raise ValueError("비밀번호를 입력해주세요.")
+    # 이메일 확인
+    if not email:
+      raise ValueError("이메일을 입력해주세요.")
 
-    stored_password = mysql.find(table_name,
-                                 fields=["password"],
-                                 addStr=f"WHERE id = {post_id}")
-    if not stored_password or stored_password[0][0] != password:
+    stored_email = mysql.find(table_name,
+                              fields=["email"],
+                              addStr=f"WHERE id = {post_id}")
+    if not stored_email or stored_email[0][0] != email:
       return False
 
     # 수정할 데이터 구성
@@ -190,25 +198,25 @@ def update_post(post_id: int,
     mysql.close()
 
 
-def delete_post(post_id: int, password: str, table_name: str = 'board_dev'):
+def delete_post(post_id: int, email: str, table_name: str = 'board_dev'):
   """
-  게시글을 삭제합니다. 비밀번호가 일치하는 경우에만 삭제가 가능합니다.
+  게시글을 삭제합니다. 이메일이 일치하는 경우에만 삭제가 가능합니다.
 
   Args:
       post_id (int): 게시글 ID
-      password (str): 게시글 비밀번호
+      email (str): 작성자 이메일
       table_name (str, optional): 테이블명. 기본값 'board_dev'
 
   Returns:
-      bool: 삭제 성공 여부
+      bool: 삭제 성곴 여부
   """
   mysql = Mysql()
   try:
-    # 비밀번호 확인
-    stored_password = mysql.find(table_name,
-                                 fields=["password"],
-                                 addStr=f"WHERE id = {post_id}")
-    if not stored_password or stored_password[0][0] != password:
+    # 이메일 확인
+    stored_email = mysql.find(table_name,
+                              fields=["email"],
+                              addStr=f"WHERE id = {post_id}")
+    if not stored_email or stored_email[0][0] != email:
       return False
 
     mysql.delete(table_name, f"id = {post_id}")
@@ -245,7 +253,7 @@ def list_posts(page: int = 1,
     # 페이지네이션 적용하여 게시글 조회
     offset = (page - 1) * per_page
     fields = [
-        "id", "title", "writer", "created_at", "updated_at", "is_visible"
+        "id", "title", "writer", "email", "created_at", "updated_at", "is_visible"
     ]
     result = mysql.find(
         table_name,
