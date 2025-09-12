@@ -51,10 +51,16 @@ export async function POST(request: NextRequest) {
       await mkdir(uploadDir, { recursive: true });
     }
 
-    // 파일명 생성 (타임스탬프 + 랜덤 문자열)
-    const timestamp = Date.now();
-    const randomString = Math.random().toString(36).substring(2, 8);
-    const fileName = `${timestamp}-${randomString}.${fileExtension}`;
+    // 파일명 생성 (기존 파일명 유지하되 중복시 번호 추가)
+    const originalName = file.name.substring(0, file.name.lastIndexOf('.'));
+    let fileName = file.name;
+    let counter = 1;
+    
+    while (existsSync(join(uploadDir, fileName))) {
+      fileName = `${originalName}(${counter}).${fileExtension}`;
+      counter++;
+    }
+    
     const filePath = join(uploadDir, fileName);
 
     // 파일 저장
