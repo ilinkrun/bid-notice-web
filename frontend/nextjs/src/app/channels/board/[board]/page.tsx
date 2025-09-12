@@ -95,7 +95,6 @@ const GET_POST = `
       content
       format
       writer
-      password
       created_at
       updated_at
       is_visible
@@ -111,7 +110,6 @@ const CREATE_POST = `
       content
       format
       writer
-      password
       created_at
       updated_at
       is_visible
@@ -127,7 +125,6 @@ const UPDATE_POST = `
       content
       format
       writer
-      password
       created_at
       updated_at
       is_visible
@@ -143,7 +140,6 @@ const DELETE_POST = `
       content
       format
       writer
-      password
       created_at
       updated_at
       is_visible
@@ -168,9 +164,6 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
   
   const [searchTerm, setSearchTerm] = useState('');
   const [isEditMode, setIsEditMode] = useState(false);
-  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
-  const [passwordInput, setPasswordInput] = useState('');
-  const [passwordError, setPasswordError] = useState('');
   const [actionType, setActionType] = useState<any>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -180,7 +173,6 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
     markdown_source: null,
     format: 'text',
     writer: '',
-    password: '',
   });
   const [isSourceMode, setIsSourceMode] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -309,20 +301,13 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
       // 전체 응답 로깅
       console.log('API 응답:', JSON.stringify(result, null, 2));
       
-      // 데이터가 있는지 확인하고 password 값이 존재하는지 확인
-      if (result.data && result.data.post) {
-        const postData = result.data.post;
+      // 데이터가 있는지 확인
+      if (result.data && result.data.boardsPostsOne) {
+        const postData = result.data.boardsPostsOne;
         console.log('게시글 상세 정보:', {
           id: postData.id,
-          title: postData.title,
-          password: typeof postData.password === 'string' ? '비밀번호 있음' : '비밀번호 없음',
-          passwordType: typeof postData.password
+          title: postData.title
         });
-        
-        // 비밀번호가 null이면 빈 문자열로 설정
-        if (postData.password === null || postData.password === undefined) {
-          postData.password = '';
-        }
         
         setSelectedPost(postData);
         setActiveTab('detail');
@@ -341,90 +326,25 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
   const handleEditToggle = () => {
     if (!selectedPost) return;
     
-    // 수정 전 선택된 게시글 정보 확인
     console.log('수정 시도: 게시글 정보', {
-      id: selectedPost.id,
-      password: selectedPost.password ? '존재함' : '없음',
-      passwordType: typeof selectedPost.password
+      id: selectedPost.id
     });
     
-    setActionType('edit');
-    setPasswordError(''); // 비밀번호 오류 메시지 초기화
-    setPasswordInput(''); // 비밀번호 입력 초기화
-    setIsPasswordDialogOpen(true);
+    setIsEditMode(true);
+    setIsSourceMode(true);
   };
 
-  // 비밀번호 확인
-  const handlePasswordCheck = () => {
-    if (!selectedPost) {
-      console.error('선택된 게시글이 없습니다.');
-      return;
-    }
-    
-    // 비밀번호 정보 로깅 (실제 운영 환경에서는 제거 필요)
-    const passwordExists = selectedPost.password !== undefined && selectedPost.password !== null;
-    console.log('비밀번호 확인 시도:', {
-      입력비밀번호: passwordInput ? '입력됨' : '입력안됨',
-      원본비밀번호: passwordExists ? '존재함' : '없음', 
-      입력비밀번호길이: passwordInput.length,
-      원본비밀번호길이: passwordExists ? String(selectedPost.password).length : 0,
-      원본비밀번호타입: typeof selectedPost.password
-    });
-    
-    // 문자열로 변환 및 공백 제거 후 비교
-    const inputPwd = String(passwordInput || '').trim();
-    const originalPwd = String(selectedPost.password || '').trim();
-    
-    // 직접 비교 수행
-    const isMatch = inputPwd === originalPwd;
-    console.log(`비밀번호 일치여부: ${isMatch}`);
-    
-    if (isMatch) {
-      setIsPasswordDialogOpen(false);
-      setPasswordInput('');
-      setPasswordError('');
-      
-      if (actionType === 'edit') {
-        setIsEditMode(true);
-        setIsSourceMode(true);
-        console.log('수정 모드로 전환 성공');
-      } else if (actionType === 'delete') {
-        setIsDeleteDialogOpen(true);
-        console.log('삭제 확인 다이얼로그 오픈');
-      }
-    } else {
-      setPasswordError('비밀번호가 일치하지 않습니다.');
-      console.error('비밀번호 불일치', { 
-        입력길이: inputPwd.length, 
-        원본길이: originalPwd.length
-      });
-    }
-  };
 
-  // Enter 키로 비밀번호 확인을 처리하는 함수
-  const handlePasswordKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      console.log('Enter 키 감지: 비밀번호 확인 실행');
-      handlePasswordCheck();
-    }
-  };
 
   // 삭제 클릭
   const handleDeleteClick = () => {
     if (!selectedPost) return;
     
-    // 삭제 전 선택된 게시글 정보 확인
     console.log('삭제 시도: 게시글 정보', {
-      id: selectedPost.id,
-      password: selectedPost.password ? '존재함' : '없음',
-      passwordType: typeof selectedPost.password
+      id: selectedPost.id
     });
     
-    setActionType('delete');
-    setPasswordError(''); // 비밀번호 오류 메시지 초기화
-    setPasswordInput(''); // 비밀번호 입력 초기화
-    setIsPasswordDialogOpen(true);
+    setIsDeleteDialogOpen(true);
   };
 
   // 삭제 확인
@@ -436,11 +356,9 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
       startLoading();
       setError(null);
       
-      // 삭제를 위한 요청 데이터 로깅
       console.log('삭제 요청 데이터:', {
         boardName: channelBoard,
-        postId: selectedPost.id,
-        hasPassword: !!selectedPost.password
+        postId: selectedPost.id
       });
       
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}`, {
@@ -453,8 +371,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
           variables: {
             board: channelBoard,
             input: {
-              id: selectedPost.id,
-              password: selectedPost.password || '',
+              id: selectedPost.id
             },
           },
         }),
@@ -520,11 +437,10 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
         markdown_source: selectedPost.markdown_source || null,
         format: selectedPost.format || 'text',
         writer: selectedPost.writer.trim(),
-        password: selectedPost.password
       };
 
       // 데이터 유효성 검사
-      if (!updateData.id || !updateData.title || !updateData.writer || !updateData.password) {
+      if (!updateData.id || !updateData.title || !updateData.writer) {
         throw new Error('필수 입력값이 누락되었습니다.');
       }
 
@@ -581,7 +497,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
 
   // 게시글 생성
   const handleCreatePost = async () => {
-    if (!newPost.title || !newPost.content || !newPost.writer || !newPost.password) {
+    if (!newPost.title || !newPost.content || !newPost.writer) {
       alert('모든 필드를 입력해주세요.');
       return;
     }
@@ -642,7 +558,6 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
         markdown_source: null,
         format: 'text',
         writer: '',
-        password: '',
       });
       
       // 글쓰기 모달 닫기
@@ -851,19 +766,6 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
     }
   };
 
-  // 비밀번호 다이얼로그 상태 관리 함수
-  const handlePasswordDialogChange = (open: boolean) => {
-    if (!open) {
-      console.log('비밀번호 다이얼로그 닫기');
-      setIsPasswordDialogOpen(false);
-      // 다이얼로그가 닫힐 때 상태 초기화
-      setPasswordInput('');
-      setPasswordError('');
-    } else if (open) {
-      console.log('비밀번호 다이얼로그 열기');
-      setIsPasswordDialogOpen(true);
-    }
-  };
 
   return (
     <div className="w-full">
@@ -1216,19 +1118,6 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                             className={inputClass}
                           />
                         </div>
-                        <div>
-                          <label htmlFor="password" className="block text-sm font-medium mb-1">
-                            비밀번호
-                          </label>
-                          <Input
-                            id="password"
-                            type="password"
-                            value={newPost.password}
-                            onChange={(e) => setNewPost({ ...newPost, password: e.target.value })}
-                            placeholder="비밀번호를 입력하세요"
-                            className={inputClass}
-                          />
-                        </div>
                       </div>
                     </div>
 
@@ -1354,48 +1243,6 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
         </CardContent>
       </Card>
 
-      {/* 비밀번호 확인 다이얼로그 */}
-      <Dialog open={isPasswordDialogOpen} onOpenChange={handlePasswordDialogChange}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>비밀번호 확인</DialogTitle>
-            <DialogDescription>
-              게시글 {actionType === 'edit' ? '수정' : '삭제'}을 위해 비밀번호를 입력해주세요.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              handlePasswordCheck();
-            }}>
-              <Input
-                type="password"
-                placeholder="비밀번호"
-                value={passwordInput}
-                onChange={(e) => setPasswordInput(e.target.value)}
-                onKeyDown={handlePasswordKeyDown}
-                className={passwordError ? `border-red-500 ${inputClass}` : inputClass}
-                autoFocus
-              />
-              {passwordError && (
-                <p className="text-red-500 text-sm mt-1">{passwordError}</p>
-              )}
-              <div className="flex justify-end space-x-2 mt-4">
-                <Button 
-                  type="button"
-                  variant="outline" 
-                  onClick={() => handlePasswordDialogChange(false)}>
-                  취소
-                </Button>
-                <Button 
-                  type="submit">
-                  확인
-                </Button>
-              </div>
-            </form>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* 삭제 확인 다이얼로그 */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
@@ -1444,16 +1291,6 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                   />
                 </div>
                 
-                <div>
-                  <label className="block text-sm font-medium mb-1">비밀번호</label>
-                  <Input
-                    type="password"
-                    value={newPost.password}
-                    onChange={(e) => setNewPost({ ...newPost, password: e.target.value })}
-                    placeholder="비밀번호를 입력하세요"
-                    className={inputClass}
-                  />
-                </div>
                 
                 <div>
                   <div className="flex justify-between items-center mb-1">

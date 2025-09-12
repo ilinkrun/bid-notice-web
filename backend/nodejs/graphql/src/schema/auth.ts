@@ -33,21 +33,11 @@ export const authTypeDefs = `#graphql
   }
 
   extend type Mutation {
-    login(email: String!, password: String!): AuthPayload
+    login(email: String!): AuthPayload
     logout(token: String!): AuthPayload
-    register(input: RegisterInput!): AuthPayload
-    requestPasswordReset(email: String!): AuthPayload
-    resetPassword(token: String!, newPassword: String!): AuthPayload
     updateUserProfile(token: String!, input: UpdateUserInput!): AuthPayload
-    updateUserPassword(token: String!, currentPassword: String!, newPassword: String!): AuthPayload
   }
 
-  input RegisterInput {
-    email: String!
-    password: String!
-    name: String!
-    department: String
-  }
 
   input UpdateUserInput {
     name: String
