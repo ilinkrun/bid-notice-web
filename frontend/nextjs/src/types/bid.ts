@@ -9,6 +9,7 @@ export interface Bid {
   orgName: string;
   postedAt: string;
   detail: string;
+  detailUrl: string;
   category?: string;
   region?: string;
 }

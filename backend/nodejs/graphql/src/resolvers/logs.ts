@@ -1,4 +1,4 @@
-import { apiClient } from '@/lib/api/backendClient';
+import { apiClient } from '../lib/api/backendClient.js';
 
 export interface LogScrapingInput {
   orgName?: string;

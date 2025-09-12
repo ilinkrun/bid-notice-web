@@ -1,13 +1,13 @@
 import { gql } from 'graphql-tag';
-import { noticesTypeDefs } from './notices';
-import { settingsTypeDefs } from './settings';
-import { logsTypeDefs } from './logs';
-import { mybidsTypeDefs } from './mybids';
-import { boardsTypeDefs } from './boards';
-import { spidersTypeDefs } from './spiders';
-import { databaseTypeDefs } from './database';
-import { authTypeDefs } from './auth';
-import { permissionsTypeDefs } from './permissions';
+import { noticesTypeDefs } from './notices.js';
+import { settingsTypeDefs } from './settings.js';
+import { logsTypeDefs } from './logs.js';
+import { mybidsTypeDefs } from './mybids.js';
+import { boardsTypeDefs } from './boards.js';
+import { spidersTypeDefs } from './spiders.js';
+import { databaseTypeDefs } from './database.js';
+import { authTypeDefs } from './auth.js';
+import { permissionsTypeDefs } from './permissions.js';
 
 const baseTypeDefs = gql`
   type Query {

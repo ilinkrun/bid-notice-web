@@ -1,13 +1,13 @@
-import { baseResolvers } from './base';
-import { noticesResolvers } from './notices';
-import { settingsResolvers } from './settings';
-import { logsResolvers } from './logs';
-import { mybidsResolvers } from './mybids';
-import { boardsResolvers } from './boards';
-import { spidersResolvers } from './spiders';
-import { databaseResolvers } from './database';
-import { authResolvers } from './auth';
-import { permissionsResolvers } from './permissions';
+import { baseResolvers } from './base.js';
+import { noticesResolvers } from './notices.js';
+import { settingsResolvers } from './settings.js';
+import { logsResolvers } from './logs.js';
+import { mybidsResolvers } from './mybids.js';
+import { boardsResolvers } from './boards.js';
+import { spidersResolvers } from './spiders.js';
+import { databaseResolvers } from './database.js';
+import { authResolvers } from './auth.js';
+import { permissionsResolvers } from './permissions.js';
 
 export const resolvers = [
   baseResolvers,

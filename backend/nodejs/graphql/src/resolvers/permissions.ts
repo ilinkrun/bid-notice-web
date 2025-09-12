@@ -6,7 +6,7 @@ const PERMISSIONS_FILE = path.join(DATABASE_PATH, 'permissions.json');
 const USERS_FILE = path.join(DATABASE_PATH, 'users.json');
 const SESSIONS_FILE = path.join(DATABASE_PATH, 'sessions.json');
 
-interface Permission {
+export interface Permission {
   id: string;
   role: string;
   name: string;
@@ -21,7 +21,7 @@ interface Permission {
   };
 }
 
-interface User {
+export interface User {
   id: string;
   email: string;
   password: string;
@@ -34,7 +34,7 @@ interface User {
   lastLoginAt?: string;
 }
 
-interface Session {
+export interface Session {
   id: string;
   userId: string;
   token: string;
@@ -42,7 +42,7 @@ interface Session {
   createdAt: string;
 }
 
-interface PermissionInput {
+export interface PermissionInput {
   allowedPages: string[];
   deniedPages: string[];
   permissions: {

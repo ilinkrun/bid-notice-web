@@ -84,7 +84,7 @@ export function ErrorScrapingChart({ initialData }: ErrorScrapingChartProps) {
     datasets: [
       {
         label: '오류 발생 기관 수',
-        data: Object.values(groupedErrors).map(orgSet => orgSet.size),
+        data: (Object.values(groupedErrors) as Set<string>[]).map(orgSet => orgSet.size),
         backgroundColor: '#ef4444',
         borderColor: '#dc2626',
         borderWidth: 1,

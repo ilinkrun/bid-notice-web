@@ -1,4 +1,4 @@
-import { boardApiClient } from '@/lib/api/backendClient';
+import { boardApiClient } from '../lib/api/backendClient.js';
 
 // Temporary in-memory storage for markdown_source data
 // TODO: This should be replaced with proper database storage

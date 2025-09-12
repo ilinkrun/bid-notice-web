@@ -1,7 +1,7 @@
-import { apiClient } from '@/lib/api/backendClient';
+import { apiClient } from '../lib/api/backendClient.js';
 
 // Settings Notice List
-interface SettingsNoticeListData {
+export interface SettingsNoticeListData {
   oid: number;
   org_name: string;
   url: string;
@@ -23,7 +23,7 @@ interface SettingsNoticeListData {
   exception_row: string;
 }
 
-interface SettingsNoticeListInput {
+export interface SettingsNoticeListInput {
   oid?: number;
   orgName: string;
   url: string;
@@ -46,7 +46,7 @@ interface SettingsNoticeListInput {
 }
 
 // Settings Notice Detail
-interface SettingsNoticeDetailData {
+export interface SettingsNoticeDetailData {
   oid: number;
   org_name: string;
   title: string;
@@ -64,7 +64,7 @@ interface SettingsNoticeDetailData {
   down: string;
 }
 
-interface SettingsNoticeDetailInput {
+export interface SettingsNoticeDetailInput {
   oid?: number;
   orgName: string;
   title?: string;
@@ -83,7 +83,7 @@ interface SettingsNoticeDetailInput {
 }
 
 // Settings Notice Category
-interface SettingsNoticeCategoryData {
+export interface SettingsNoticeCategoryData {
   sn: number;
   keywords: string;
   nots: string;
@@ -93,7 +93,7 @@ interface SettingsNoticeCategoryData {
   memo?: string;
 }
 
-interface SettingsNoticeCategoryInput {
+export interface SettingsNoticeCategoryInput {
   sn?: number;
   keywords: string;
   nots: string;
@@ -104,7 +104,7 @@ interface SettingsNoticeCategoryInput {
 }
 
 // Settings NAS Path
-interface SettingsNasPathData {
+export interface SettingsNasPathData {
   id: number;
   name: string;
   area: string;
@@ -113,7 +113,7 @@ interface SettingsNasPathData {
   remark?: string;
 }
 
-interface SettingsNasPathInput {
+export interface SettingsNasPathInput {
   id?: string;
   pathName: string;
   pathValue: string;
@@ -122,7 +122,7 @@ interface SettingsNasPathInput {
 }
 
 // Settings App Default
-interface SettingsAppDefaultData {
+export interface SettingsAppDefaultData {
   id: string;
   setting_key: string;
   setting_value: string;
@@ -130,7 +130,7 @@ interface SettingsAppDefaultData {
   category?: string;
 }
 
-interface SettingsAppDefaultInput {
+export interface SettingsAppDefaultInput {
   id?: string;
   settingKey: string;
   settingValue: string;
@@ -138,7 +138,7 @@ interface SettingsAppDefaultInput {
   category?: string;
 }
 
-interface NoticeSearchResult {
+export interface NoticeSearchResult {
   nid?: number;
   title: string;
   org_name: string;

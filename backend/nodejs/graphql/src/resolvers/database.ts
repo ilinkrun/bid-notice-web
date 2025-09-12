@@ -1,4 +1,4 @@
-import { mysqlApiClient } from '@/lib/api/backendClient';
+import { mysqlApiClient } from '../lib/api/backendClient.js';
 
 export const databaseResolvers = {
   Query: {
