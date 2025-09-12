@@ -8,7 +8,7 @@ const getMarkdownStoreKey = (board: string, postId: number): string => {
   return `${board}:${postId}`;
 };
 
-interface PostInput {
+export interface PostInput {
   id?: number;
   title: string;
   content: string;
@@ -19,7 +19,7 @@ interface PostInput {
   is_visible?: number | boolean;
 }
 
-interface CommentInput {
+export interface CommentInput {
   id?: number;
   board: string;
   post_id: number;
@@ -29,12 +29,12 @@ interface CommentInput {
   is_visible?: boolean;
 }
 
-interface ApiResponse<T = unknown> {
+export interface ApiResponse<T = unknown> {
   data: T;
   success?: boolean;
 }
 
-interface ErrorWithResponse {
+export interface ErrorWithResponse {
   message?: string;
   response?: {
     data?: unknown;

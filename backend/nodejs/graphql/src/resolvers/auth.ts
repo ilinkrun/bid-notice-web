@@ -7,7 +7,7 @@ const USERS_FILE = path.join(DATABASE_PATH, 'users.json');
 const SESSIONS_FILE = path.join(DATABASE_PATH, 'sessions.json');
 const AVATAR_DIR = '/exposed/projects/bid-notice-web/frontend/nextjs/public/images/avatars';
 
-interface User {
+export interface User {
   id: string;
   email: string;
   password: string;
@@ -20,7 +20,7 @@ interface User {
   lastLoginAt?: string;
 }
 
-interface Session {
+export interface Session {
   id: string;
   userId: string;
   token: string;
@@ -28,14 +28,14 @@ interface Session {
   createdAt: string;
 }
 
-interface RegisterInput {
+export interface RegisterInput {
   email: string;
   password: string;
   name: string;
   department?: string;
 }
 
-interface UpdateUserInput {
+export interface UpdateUserInput {
   name?: string;
   department?: string;
 }

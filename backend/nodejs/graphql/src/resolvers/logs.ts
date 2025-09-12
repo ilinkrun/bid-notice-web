@@ -1,6 +1,6 @@
 import { apiClient } from '@/lib/api/backendClient';
 
-interface LogScrapingInput {
+export interface LogScrapingInput {
   orgName?: string;
   errorCode?: string;
   errorMessage?: string;
