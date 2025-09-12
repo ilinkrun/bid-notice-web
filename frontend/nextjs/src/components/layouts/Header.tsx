@@ -129,19 +129,19 @@ const statistics = [
 const channels = [
   {
     title: '공지 및 건의(개발)',
-    href: '/channels/board/dev',
+    href: '/channels/board/board_dev',
     description: '개발 관련 공지, 개선.수정 건의 및 요구사항',
     icon: Code,
   },
   {
     title: '공지 및 건의(운영)',
-    href: '/channels/board/op',
+    href: '/channels/board/board_op',
     description: '운영(업무) 관련 공지, 기능 반영 및 요구 사항',
     icon: MessageSquare,
   },
   {
     title: '매뉴얼',
-    href: '/channels/board/manual',
+    href: '/channels/board/board_manual',
     description: '사이트 운영 지침 및 사용 설명서',
     icon: BookOpen,
   },
