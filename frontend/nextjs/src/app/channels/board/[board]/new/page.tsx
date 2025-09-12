@@ -23,48 +23,13 @@ import {
   Hash
 } from 'lucide-react';
 
-import dynamic from 'next/dynamic';
 import { marked } from 'marked';
+import MDEditor from '@uiw/react-md-editor';
 import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
-import { unified } from 'unified';
-import remarkParse from 'remark-parse';
-import remarkRehype from 'remark-rehype';
-import rehypeStringify from 'rehype-stringify';
 import { smartUpload } from '@/utils/chunkedUpload';
 
 // MDEditor CSS는 globals.css에서 @import로 로드됨
-
-// MDEditor 동적 임포트 - 오류 처리 개선
-const MDEditor = dynamic(
-  () => import('@uiw/react-md-editor').catch((error) => {
-    console.error('MDEditor import failed:', error);
-    // import 실패시 fallback component 반환
-    return Promise.resolve(() => (
-      <div className="flex items-center justify-center h-96 border rounded bg-red-50">
-        <div className="text-center">
-          <p className="text-red-600 mb-2">❌ 마크다운 에디터를 불러올 수 없습니다</p>
-          <p className="text-sm text-gray-600">페이지를 새로고침하거나 관리자에게 문의해주세요.</p>
-          <details className="mt-2 text-xs text-gray-500">
-            <summary>오류 세부정보</summary>
-            <pre>{error.message}</pre>
-          </details>
-        </div>
-      </div>
-    ));
-  }),
-  { 
-    ssr: false,
-    loading: () => (
-      <div className="flex items-center justify-center h-96 border rounded">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
-          <p className="text-sm text-gray-600">마크다운 에디터를 불러오는 중...</p>
-        </div>
-      </div>
-    )
-  }
-);
 
 // GraphQL 쿼리
 const CREATE_POST = `
@@ -399,60 +364,57 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
                       )}
                     </div>
                   )}
-                  {typeof window !== 'undefined' ? (
-                    <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <input
-                          type="file"
-                          multiple
-                          onChange={async (e) => {
-                            const files = Array.from(e.target.files || []);
-                            for (const file of files) {
-                              await uploadFile(file, setIsUploading, editingMarkdown, setEditingMarkdown, isAuthenticated, setUploadProgress);
-                            }
-                          }}
-                          style={{ display: 'none' }}
-                          id="file-upload-new"
-                        />
-                        <label 
-                          htmlFor="file-upload-new" 
-                          className="inline-flex items-center px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer"
-                        >
-                          📎 파일 업로드
-                        </label>
-                        <span className="text-xs text-gray-500">또는 파일을 드래그해서 놓으세요</span>
-                      </div>
-                      <div
-                        onDrop={async (event) => {
-                          event.preventDefault();
-                          const files = Array.from(event.dataTransfer?.files || []);
-                          
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <input
+                        type="file"
+                        multiple
+                        onChange={async (e) => {
+                          const files = Array.from(e.target.files || []);
                           for (const file of files) {
                             await uploadFile(file, setIsUploading, editingMarkdown, setEditingMarkdown, isAuthenticated, setUploadProgress);
                           }
                         }}
-                        onDragOver={(event) => event.preventDefault()}
-                        onDragEnter={(event) => event.preventDefault()}
-                        onDragLeave={(event) => event.preventDefault()}
+                        style={{ display: 'none' }}
+                        id="file-upload-new"
+                      />
+                      <label 
+                        htmlFor="file-upload-new" 
+                        className="inline-flex items-center px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer"
                       >
-                        <MDEditor
-                          value={editingMarkdown || ''}
-                          onChange={(value) => {
-                            const newMarkdown = value || '';
-                            setEditingMarkdown(newMarkdown);
-                            console.log('✏️ Markdown content updated:', newMarkdown);
-                          }}
-                          data-color-mode="light"
-                          height={400}
-                          preview="live"
-                        />
-                      </div>
+                        📎 파일 업로드
+                      </label>
+                      <span className="text-xs text-gray-500">또는 파일을 드래그해서 놓으세요</span>
                     </div>
-                  ) : (
-                    <div className="flex items-center justify-center h-96 border rounded">
-                      <p className="text-sm text-gray-600">에디터를 초기화하는 중...</p>
+                    <div
+                      onDrop={async (event) => {
+                        event.preventDefault();
+                        const files = Array.from(event.dataTransfer?.files || []);
+                        
+                        for (const file of files) {
+                          await uploadFile(file, setIsUploading, editingMarkdown, setEditingMarkdown, isAuthenticated, setUploadProgress);
+                        }
+                      }}
+                      onDragOver={(event) => event.preventDefault()}
+                      onDragEnter={(event) => event.preventDefault()}
+                      onDragLeave={(event) => event.preventDefault()}
+                    >
+                      <MDEditor
+                        value={editingMarkdown || ''}
+                        onChange={(value) => {
+                          const newMarkdown = value || '';
+                          setEditingMarkdown(newMarkdown);
+                          console.log('✏️ Markdown content updated:', newMarkdown);
+                        }}
+                        data-color-mode="light"
+                        height={400}
+                        preview="live"
+                        previewOptions={{
+                          remarkPlugins: [remarkBreaks, remarkGfm]
+                        }}
+                      />
                     </div>
-                  )}
+                  </div>
                 </div>
               </div>
             </div>
