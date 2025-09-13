@@ -151,26 +151,36 @@ const convertMarkdownToHtml = (markdown: string): string => {
   }
 };
 
-// 파일 업로드 헬퍼 함수 (청크 업로드 지원)
+// 파일 업로드 헬퍼 함수 (단순 업로드)
 const uploadFile = async (file: File, setIsUploading: (loading: boolean) => void, editingMarkdown: string, setEditingMarkdown: (value: string) => void, setPost: any, post: any) => {
   setIsUploading(true);
   try {
-    // 스마트 업로드 사용 (작은 파일은 일반 업로드, 큰 파일은 청크 업로드)
-    const { smartUpload } = await import('@/utils/chunkedUpload');
+    console.log('🚀 파일 업로드 시작:', file.name, file.size, file.type);
     
-    const result = await smartUpload(file, {
-      onProgress: (progress) => {
-        console.log(`업로드 진행률: ${Math.round(progress)}%`);
-      },
-      maxSingleUploadSize: 500 * 1024 // 500KB 이상은 청크 업로드
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
     });
     
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`업로드 실패: ${errorText}`);
+    }
+    
+    const result = await response.json();
+    
+    console.log('✅ 업로드 성공:', result);
+    
     // 이미지 파일인 경우 이미지 마크다운, 그 외는 링크 마크다운
+    // URL에 공백이 있을 때는 <> 괄호로 감싸서 처리
     let fileMarkdown;
     if (file.type.startsWith('image/')) {
-      fileMarkdown = `![${result.filename}](${result.url})`;
+      fileMarkdown = `![${result.filename || file.name}](<${result.url}>)`;
     } else {
-      fileMarkdown = `[${result.filename}](${result.url})`;
+      fileMarkdown = `[${result.filename || file.name}](<${result.url}>)`;
     }
     
     const newValue = `${editingMarkdown}\n\n${fileMarkdown}`;

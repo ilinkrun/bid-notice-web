@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { smartUpload } from '@/utils/chunkedUpload';
 
 export default function TestUpload() {
   const [file, setFile] = useState<File | null>(null);
@@ -32,15 +31,25 @@ export default function TestUpload() {
         sizeMB: Math.round(file.size / 1024 / 1024 * 100) / 100
       });
 
-      const uploadResult = await smartUpload(file, {
-        onProgress: (progressPercent) => {
-          setProgress(progressPercent);
-          setResult(`업로드 중... ${Math.round(progressPercent)}%`);
-        },
-        maxSingleUploadSize: 500 * 1024 // 500KB
+      const formData = new FormData();
+      formData.append('file', file);
+
+      setProgress(50);
+      setResult('업로드 중... 50%');
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
       });
 
-      setResult(`업로드 성공: ${uploadResult.url} (${uploadResult.filename})`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`업로드 실패: ${errorText}`);
+      }
+
+      const uploadResult = await response.json();
+
+      setResult(`업로드 성공: ${uploadResult.url} (${uploadResult.filename || file.name})`);
       setProgress(100);
       
     } catch (error) {
@@ -67,9 +76,6 @@ export default function TestUpload() {
         {file && (
           <div className="text-sm text-gray-600">
             선택된 파일: {file.name} ({Math.round(file.size / 1024 / 1024 * 100) / 100}MB)
-            {file.size > 500 * 1024 && (
-              <span className="text-blue-600 ml-2">(청크 업로드 사용됨)</span>
-            )}
           </div>
         )}
         

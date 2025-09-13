@@ -27,7 +27,6 @@ import { marked } from 'marked';
 import MDEditor from '@uiw/react-md-editor';
 import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
-import { smartUpload } from '@/utils/chunkedUpload';
 
 // MDEditor CSS는 globals.css에서 @import로 로드됨
 
@@ -69,41 +68,51 @@ const convertMarkdownToHtml = (markdown: string): string => {
   }
 };
 
-// 파일 업로드 헬퍼 함수 (청크 업로드 사용)
+// 파일 업로드 헬퍼 함수 (단순 업로드)
 const uploadFile = async (file: File, setIsUploading: (loading: boolean) => void, editingMarkdown: string, setEditingMarkdown: (value: string) => void, isAuthenticated?: boolean, setUploadProgress?: (progress: number) => void) => {
   setIsUploading(true);
   try {
-    console.log('🚀 스마트 업로드 시작:', file.name, file.size, file.type);
+    console.log('🚀 파일 업로드 시작:', file.name, file.size, file.type);
     
     // 인증 상태 확인 (선택사항)
     if (isAuthenticated === false) {
       console.warn('사용자가 로그인하지 않았습니다');
     }
     
-    const result = await smartUpload(file, {
-      onProgress: (progress) => {
-        console.log(`업로드 진행률: ${Math.round(progress)}%`);
-        if (setUploadProgress) {
-          setUploadProgress(progress);
-        }
-      },
-      maxSingleUploadSize: 500 * 1024 // 500KB 이상은 청크 업로드
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    if (setUploadProgress) {
+      setUploadProgress(50); // 중간 진행률 표시
+    }
+    
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
     });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`업로드 실패: ${errorText}`);
+    }
+    
+    const result = await response.json();
     
     console.log('✅ 업로드 성공:', result);
     
     // 이미지 파일인 경우 이미지 마크다운, 그 외는 링크 마크다운
+    // URL에 공백이 있을 때는 <> 괄호로 감싸서 처리
     let fileMarkdown;
     if (file.type.startsWith('image/')) {
-      fileMarkdown = `![${result.filename}](${result.url})`;
+      fileMarkdown = `![${result.filename || file.name}](<${result.url}>)`;
     } else {
-      fileMarkdown = `[${result.filename}](${result.url})`;
+      fileMarkdown = `[${result.filename || file.name}](<${result.url}>)`;
     }
     
     const newValue = `${editingMarkdown}\n\n${fileMarkdown}`;
     setEditingMarkdown(newValue);
     
-    console.log(`✅ 파일 업로드 완료: ${result.filename}`);
+    console.log(`✅ 파일 업로드 완료: ${result.filename || file.name}`);
     
   } catch (error) {
     console.error('파일 업로드 오류:', error);
@@ -111,7 +120,8 @@ const uploadFile = async (file: File, setIsUploading: (loading: boolean) => void
   } finally {
     setIsUploading(false);
     if (setUploadProgress) {
-      setUploadProgress(0);
+      setUploadProgress(100);
+      setTimeout(() => setUploadProgress(0), 1000);
     }
   }
 };
