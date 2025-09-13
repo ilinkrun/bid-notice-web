@@ -100,14 +100,15 @@ export const usePermissions = (): UsePermissionsReturn => {
     {
       variables: { token },
       client: getClient(),
-      skip: !isAuthenticated || !token,
-      onCompleted: (data) => {
-        if (data.getUserPermissions) {
-          setUserPermissions(data.getUserPermissions);
-        }
-      }
+      skip: !isAuthenticated || !token
     }
   );
+
+  useEffect(() => {
+    if (userPermData?.getUserPermissions) {
+      setUserPermissions(userPermData.getUserPermissions);
+    }
+  }, [userPermData]);
 
   // 모든 권한 조회
   const { data: allPermData, loading: allPermLoading, error: allPermError } = useQuery(

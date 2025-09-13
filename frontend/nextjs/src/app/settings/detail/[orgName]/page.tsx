@@ -68,14 +68,20 @@ export default function SettingDetailOrgPage({ params }: PageProps) {
     variables: { orgName: orgName },
     skip: !orgName || isCreateMode,
     fetchPolicy: 'cache-first', // 캐시 정책 추가
-    errorPolicy: 'all', // 에러가 있어도 부분 데이터 표시
-    onCompleted: (data) => {
-      console.log('GET_SETTING_DETAIL 완료:', data);
-    },
-    onError: (error) => {
-      console.error('GET_SETTING_DETAIL 에러:', error);
-    }
+    errorPolicy: 'all' // 에러가 있어도 부분 데이터 표시
   });
+
+  useEffect(() => {
+    if (dataDetail) {
+      console.log('GET_SETTING_DETAIL 완료:', dataDetail);
+    }
+  }, [dataDetail]);
+
+  useEffect(() => {
+    if (errorDetail) {
+      console.error('GET_SETTING_DETAIL 에러:', errorDetail);
+    }
+  }, [errorDetail]);
 
   // GraphQL 쿼리 완료 또는 데이터 없음 시에만 로딩 해제 (Create Mode가 아닐 때만)
   useEffect(() => {

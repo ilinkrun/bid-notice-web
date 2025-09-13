@@ -27,14 +27,20 @@ export default function SettingsDetailPage() {
 
   // 설정 상세 목록 쿼리
   const { loading: loadingDetails, error: errorDetails, data: dataDetails } = useQuery(GET_SETTINGS_NOTICE_DETAILS, {
-    client: getClient(),
-    onCompleted: (data) => {
-      console.log('GET_SETTINGS_NOTICE_DETAILS 완료:', data);
-    },
-    onError: (error) => {
-      console.error('GET_SETTINGS_NOTICE_DETAILS 에러:', error);
-    }
+    client: getClient()
   });
+
+  useEffect(() => {
+    if (dataDetails) {
+      console.log('GET_SETTINGS_NOTICE_DETAILS 완료:', dataDetails);
+    }
+  }, [dataDetails]);
+
+  useEffect(() => {
+    if (errorDetails) {
+      console.error('GET_SETTINGS_NOTICE_DETAILS 에러:', errorDetails);
+    }
+  }, [errorDetails]);
 
   // GraphQL 쿼리 완료 또는 데이터 없음 시에만 로딩 해제
   useEffect(() => {

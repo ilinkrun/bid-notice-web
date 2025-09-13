@@ -59,23 +59,29 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [validateToken] = useLazyQuery(VALIDATE_TOKEN_QUERY, {
-    client: getClient(),
-    onCompleted: (data) => {
-      if (data.validateToken.success && data.validateToken.user) {
-        setUser(data.validateToken.user);
+  const [validateToken, { data: validateData, error: validateError }] = useLazyQuery(VALIDATE_TOKEN_QUERY, {
+    client: getClient()
+  });
+
+  useEffect(() => {
+    if (validateData) {
+      if (validateData.validateToken.success && validateData.validateToken.user) {
+        setUser(validateData.validateToken.user);
       } else {
         // 토큰이 유효하지 않으면 로그아웃 처리
         handleLogout();
       }
       setIsLoading(false);
-    },
-    onError: (error) => {
-      console.error('Token validation error:', error);
+    }
+  }, [validateData]);
+
+  useEffect(() => {
+    if (validateError) {
+      console.error('Token validation error:', validateError);
       handleLogout();
       setIsLoading(false);
     }
-  });
+  }, [validateError]);
 
   // 로그아웃 처리
   const handleLogout = () => {

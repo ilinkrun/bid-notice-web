@@ -360,21 +360,27 @@ const UserDropdown: React.FC = () => {
   const { user, logout, token } = useAuth();
   const { navigate } = useUnifiedNavigation();
 
-  const [logoutMutation] = useMutation(LOGOUT_MUTATION, {
-    client: getClient(),
-    onCompleted: (data) => {
-      if (data.logout.success) {
+  const [logoutMutation, { data: logoutData, error: logoutError }] = useMutation(LOGOUT_MUTATION, {
+    client: getClient()
+  });
+
+  React.useEffect(() => {
+    if (logoutData) {
+      if (logoutData.logout.success) {
         logout();
         navigate('/login');
       }
-    },
-    onError: (error) => {
-      console.error('Logout error:', error);
+    }
+  }, [logoutData, logout, navigate]);
+
+  React.useEffect(() => {
+    if (logoutError) {
+      console.error('Logout error:', logoutError);
       // 에러가 발생해도 클라이언트 측에서는 로그아웃 처리
       logout();
       navigate('/login');
     }
-  });
+  }, [logoutError, logout, navigate]);
 
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -496,7 +502,7 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
       <div className="container flex h-14 items-center">
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="flex items-center space-x-2">
-            <span className="font-bold pl-3">ILE</span>
+            <span className="font-bold pl-3">IBW</span>
           </Link>
           <nav className="flex items-center gap-1 ml-12">
             {/* 공고 목록 - 모든 역할 접근 가능 */}

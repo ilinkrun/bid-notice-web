@@ -78,14 +78,20 @@ export default function SettingsListOrgPage({ params }: PageProps) {
     variables: { orgName: orgName },
     skip: !orgName || isCreateMode,
     fetchPolicy: 'cache-first',
-    errorPolicy: 'all',
-    onCompleted: (data) => {
-      console.log('GET_SETTING_LIST 완료:', data);
-    },
-    onError: (error) => {
-      console.error('GET_SETTING_LIST 에러:', error);
-    }
+    errorPolicy: 'all'
   });
+
+  useEffect(() => {
+    if (dataList) {
+      console.log('GET_SETTING_LIST 완료:', dataList);
+    }
+  }, [dataList]);
+
+  useEffect(() => {
+    if (errorList) {
+      console.error('GET_SETTING_LIST 에러:', errorList);
+    }
+  }, [errorList]);
 
   // GraphQL 쿼리 완료 또는 데이터 없음 시에만 로딩 해제 (Create Mode가 아닐 때만)
   useEffect(() => {

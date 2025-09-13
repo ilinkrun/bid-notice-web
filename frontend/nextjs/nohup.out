@@ -3759,3 +3759,13 @@ An error occurred! For more details, see the full error text at https://go.apoll
 
  ✓ Starting...
 [Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id]
+
+> ts-nextjs-shadcn@0.1.0 start
+> next start -p 11501
+
+   ▲ Next.js 15.5.3
+   - Local:        http://localhost:11501
+   - Network:      http://192.168.144.2:11501
+
+ ✓ Starting...
+[Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id]

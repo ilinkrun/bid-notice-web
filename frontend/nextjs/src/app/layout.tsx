@@ -4,8 +4,8 @@ import './themes.css';
 import { RootLayoutClient } from '@/components/layouts/RootLayoutClient';
 
 export const metadata: Metadata = {
-  title: 'ILE - 입찰공고 관리 시스템',
-  description: '입찰공고 관리 시스템',
+  title: 'IBW - ilmac|link 입찰 관리 웹앱',
+  description: '일맥|링크 입찰 관리 웹앱',
 };
 
 export default function RootLayout({
@@ -15,9 +15,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
-      <RootLayoutClient>
-        {children}
-      </RootLayoutClient>
+      <body>
+        <RootLayoutClient>
+          {children}
+        </RootLayoutClient>
+      </body>
     </html>
   );
 }

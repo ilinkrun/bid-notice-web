@@ -22,7 +22,7 @@ export function RootLayoutClient({ children }: RootLayoutClientProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <body className={cn(inter.className, 'min-h-screen flex flex-col bg-blue-100')}>
+    <div className={cn(inter.className, 'min-h-screen flex flex-col bg-blue-100')}>
       <ApolloWrapper>
         <AuthProvider>
           <UnifiedLoadingProvider>
@@ -45,6 +45,6 @@ export function RootLayoutClient({ children }: RootLayoutClientProps) {
         </AuthProvider>
       </ApolloWrapper>
       <Footer />
-    </body>
+    </div>
   );
 } 
