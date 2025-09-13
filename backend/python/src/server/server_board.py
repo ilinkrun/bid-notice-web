@@ -113,7 +113,9 @@ def create_post(data: dict, table_name: str = 'board_dev'):
         'writer': data['writer'],
         'email': data['email'],
         'format': data.get('format', 'text'),
-        'is_visible': 1 if data.get('is_visible', True) else 0
+        'is_visible': 1 if data.get('is_visible', True) else 0,
+        'is_notice': 1 if data.get('is_notice', False) else 0,
+        'is_private': 1 if data.get('is_private', False) else 0
     }
     
     # 마크다운 원본 소스 추가
@@ -174,7 +176,7 @@ def get_post(post_id: int, table_name: str = 'board_dev'):
   try:
     fields = [
         "id", "title", "content", "markdown_source", "format", "writer", "email", "created_at",
-        "updated_at", "is_visible"
+        "updated_at", "is_visible", "is_notice", "is_private"
     ]
     # fields = ["id", "title", "content", "format", "writer", "password", "created_at", "updated_at", "is_visible"]
     fields_str = ", ".join(fields)
@@ -265,6 +267,14 @@ def update_post(post_id: int,
     if 'is_visible' in data:
       update_data['is_visible'] = 1 if data['is_visible'] else 0
 
+    # 공지 여부 업데이트
+    if 'is_notice' in data:
+      update_data['is_notice'] = 1 if data['is_notice'] else 0
+
+    # 비공개 여부 업데이트
+    if 'is_private' in data:
+      update_data['is_private'] = 1 if data['is_private'] else 0
+
     if update_data:
       mysql.update(table_name, update_data, f"id = {post_id}")
       return True
@@ -303,7 +313,8 @@ def delete_post(post_id: int, email: str, table_name: str = 'board_dev'):
 def list_posts(page: int = 1,
                per_page: int = 20,
                only_visible: bool = True,
-               table_name: str = 'board_dev'):
+               table_name: str = 'board_dev',
+               user_email: str = None):
   """
   게시글 목록을 조회합니다.
 
@@ -319,7 +330,17 @@ def list_posts(page: int = 1,
   mysql = Mysql()
   try:
     # 조건 구성
-    where_clause = "WHERE is_visible = 1" if only_visible else ""
+    conditions = []
+    if only_visible:
+      conditions.append("is_visible = 1")
+    
+    # 비공개 게시글 필터링: 작성자 본인이거나 비공개가 아닌 경우만 보여줌
+    if user_email:
+      conditions.append(f"(is_private = 0 OR email = '{user_email}')")
+    else:
+      conditions.append("is_private = 0")
+    
+    where_clause = "WHERE " + " AND ".join(conditions) if conditions else ""
 
     # 전체 게시글 수 조회 수정
     count_sql = f"SELECT COUNT(*) FROM {table_name} {where_clause}"
@@ -329,11 +350,11 @@ def list_posts(page: int = 1,
     offset = (page - 1) * per_page
     fields = [
         "id", "title", "writer", "email", "created_at", "updated_at",
-        "is_visible"
+        "is_visible", "is_notice", "is_private"
     ]
     fields_str = ", ".join(fields)
 
-    list_sql = f"SELECT {fields_str} FROM {table_name} {where_clause} ORDER BY created_at DESC LIMIT {per_page} OFFSET {offset}"
+    list_sql = f"SELECT {fields_str} FROM {table_name} {where_clause} ORDER BY is_notice DESC, created_at DESC LIMIT {per_page} OFFSET {offset}"
     result = mysql.fetch(list_sql)
 
     # 결과를 딕셔너리 리스트로 변환
@@ -723,10 +744,11 @@ def list_posts_endpoint(table_name: str,
                         page: int = Query(1, description="페이지 번호"),
                         per_page: int = Query(20, description="페이지당 게시글 수"),
                         only_visible: bool = Query(True,
-                                                   description="노출된 게시글만 표시")):
+                                                   description="노출된 게시글만 표시"),
+                        user_email: str = Query(None, description="사용자 이메일")):
   """게시글 목록을 조회합니다."""
   try:
-    total_count, posts = list_posts(page, per_page, only_visible, table_name)
+    total_count, posts = list_posts(page, per_page, only_visible, table_name, user_email)
     return {
         "total_count": total_count,
         "page": page,

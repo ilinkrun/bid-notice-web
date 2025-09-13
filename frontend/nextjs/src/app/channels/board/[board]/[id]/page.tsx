@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { 
   Dialog,
   DialogContent,
@@ -93,6 +94,8 @@ const GET_POST = `
       created_at
       updated_at
       is_visible
+      is_notice
+      is_private
     }
   }
 `;
@@ -110,6 +113,8 @@ const UPDATE_POST = `
       created_at
       updated_at
       is_visible
+      is_notice
+      is_private
     }
   }
 `;
@@ -447,7 +452,9 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
         markdown_source: markdownSourceToSave,
         format: formatToSave,
         writer: post.writer.trim(),
-        email: user?.email || post.email
+        email: user?.email || post.email,
+        is_notice: post.is_notice || false,
+        is_private: post.is_private || false
       };
 
       console.log('🚀 Frontend sending updateData:', updateData);
@@ -613,6 +620,36 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
                   post.title
                 )}
               </h1>
+              {isEditMode && (
+                <div className="flex gap-4 mt-2">
+                  {user?.role === 'admin' && (
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="notice-edit"
+                        checked={post.is_notice || false}
+                        onCheckedChange={(checked) => 
+                          setPost({ ...post, is_notice: checked })
+                        }
+                      />
+                      <label htmlFor="notice-edit" className="text-sm font-medium">
+                        공지글
+                      </label>
+                    </div>
+                  )}
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="private-edit"
+                      checked={post.is_private || false}
+                      onCheckedChange={(checked) => 
+                        setPost({ ...post, is_private: checked })
+                      }
+                    />
+                    <label htmlFor="private-edit" className="text-sm font-medium">
+                      비공개글
+                    </label>
+                  </div>
+                </div>
+              )}
               {!isEditMode && (
                 <div className="flex space-x-4 text-sm text-muted-foreground">
                   <span>작성자: {post.writer}</span>

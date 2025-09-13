@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { use } from 'react';
 import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
 import { useUnifiedLoading } from '@/components/providers/UnifiedLoadingProvider';
+import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from "@/components/ui/card";
 import { 
   Table, 
@@ -56,6 +57,7 @@ import {
   FileText,
   Hash
 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 
 import Comments from '@/components/board/Comments';
 
@@ -75,14 +77,17 @@ const ReactMarkdown = dynamic(
 
 // GraphQL 쿼리
 const GET_POSTS = `
-  query GetPosts($board: String!) {
-    boardsPostsAll(board: $board) {
+  query GetPosts($board: String!, $user_email: String) {
+    boardsPostsAll(board: $board, user_email: $user_email) {
       id
       title
       writer
+      email
       created_at
       updated_at
       is_visible
+      is_notice
+      is_private
     }
   }
 `;
@@ -98,6 +103,8 @@ const GET_POST = `
       created_at
       updated_at
       is_visible
+      is_notice
+      is_private
     }
   }
 `;
@@ -113,6 +120,8 @@ const CREATE_POST = `
       created_at
       updated_at
       is_visible
+      is_notice
+      is_private
     }
   }
 `;
@@ -128,6 +137,8 @@ const UPDATE_POST = `
       created_at
       updated_at
       is_visible
+      is_notice
+      is_private
     }
   }
 `;
@@ -155,6 +166,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
   const { board } = use(params);
   const { navigate } = useUnifiedNavigation();
   const { startLoading, finishLoading, setCustomMessage } = useUnifiedLoading();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('list');
   const [posts, setPosts] = useState<any[]>([]);
   const [selectedPost, setSelectedPost] = useState<any>(null);
@@ -173,6 +185,8 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
     markdown_source: null,
     format: 'text',
     writer: '',
+    is_notice: false,
+    is_private: false,
   });
   const [isSourceMode, setIsSourceMode] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -202,6 +216,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
           query: GET_POSTS,
           variables: {
             board: channelBoard,
+            user_email: user?.email || null,
           },
         }, null, 2));
         
@@ -215,6 +230,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
             query: GET_POSTS,
             variables: {
               board: channelBoard,
+              user_email: user?.email || null,
             },
           }),
         });
@@ -394,6 +410,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
           query: GET_POSTS,
           variables: {
             board: channelBoard,
+            user_email: user?.email || null,
           },
         }),
       });
@@ -437,6 +454,8 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
         markdown_source: selectedPost.markdown_source || null,
         format: selectedPost.format || 'text',
         writer: selectedPost.writer.trim(),
+        is_notice: selectedPost.is_notice || false,
+        is_private: selectedPost.is_private || false,
       };
 
       // 데이터 유효성 검사
@@ -542,6 +561,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
           query: GET_POSTS,
           variables: {
             board: channelBoard,
+            user_email: user?.email || null,
           },
         }),
       });
@@ -558,6 +578,8 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
         markdown_source: null,
         format: 'text',
         writer: '',
+        is_notice: false,
+        is_private: false,
       });
       
       // 글쓰기 모달 닫기
@@ -607,11 +629,14 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
     };
   }, []);
 
-  // 검색 필터링
-  const filteredPosts = posts.filter(post => 
-    post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    post.writer.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // 검색 필터링 (비공개 게시글 필터링은 백엔드에서 처리됨)
+  const filteredPosts = posts.filter(post => {
+    // 기본 검색 필터
+    const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         post.writer.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    return matchesSearch;
+  });
 
   // 날짜 포맷팅
   const formatDate = (dateString: string) => {
@@ -834,7 +859,11 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                         onClick={() => navigate(`/channels/board/${board}/${post.id}`)}
                       >
                         <TableCell>{post.id}</TableCell>
-                        <TableCell className="max-w-[400px] truncate">{post.title}</TableCell>
+                        <TableCell className="max-w-[400px] truncate">
+                          {post.is_notice && <span className="text-red-600 font-semibold">[공지] </span>}
+                          {post.is_private && <span className="text-gray-600 font-semibold">[비공개] </span>}
+                          {post.title}
+                        </TableCell>
                         <TableCell>{post.writer}</TableCell>
                         <TableCell>{formatDate(post.created_at)}</TableCell>
                       </TableRow>
@@ -872,13 +901,47 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                       <div className="border-b pb-4 mb-4">
                         <h2 className="text-2xl font-bold mb-2">
                           {isEditMode ? (
-                            <Input
-                              value={selectedPost.title}
-                              onChange={(e) => setSelectedPost({ ...selectedPost, title: e.target.value })}
-                              className={`text-2xl font-bold ${inputClass}`}
-                            />
+                            <div>
+                              <Input
+                                value={selectedPost.title}
+                                onChange={(e) => setSelectedPost({ ...selectedPost, title: e.target.value })}
+                                className={`text-2xl font-bold ${inputClass}`}
+                              />
+                              {/* 공지글/비공개글 체크박스 */}
+                              <div className="flex gap-4 mt-2">
+                                {user?.role === 'admin' && (
+                                  <div className="flex items-center space-x-2">
+                                    <Checkbox
+                                      id="notice-edit"
+                                      checked={selectedPost.is_notice}
+                                      onCheckedChange={(checked) => 
+                                        setSelectedPost({ ...selectedPost, is_notice: checked })
+                                      }
+                                    />
+                                    <label htmlFor="notice-edit" className="text-sm font-medium">
+                                      공지글
+                                    </label>
+                                  </div>
+                                )}
+                                <div className="flex items-center space-x-2">
+                                  <Checkbox
+                                    id="private-edit"
+                                    checked={selectedPost.is_private}
+                                    onCheckedChange={(checked) => 
+                                      setSelectedPost({ ...selectedPost, is_private: checked })
+                                    }
+                                  />
+                                  <label htmlFor="private-edit" className="text-sm font-medium">
+                                    비공개글
+                                  </label>
+                                </div>
+                              </div>
+                            </div>
                           ) : (
-                            selectedPost.title
+                            <div>
+                              {selectedPost.is_notice && <span className="text-red-600 font-semibold">[공지] </span>}
+                              {selectedPost.title}
+                            </div>
                           )}
                         </h2>
                         <div className="flex justify-between text-sm text-muted-foreground">

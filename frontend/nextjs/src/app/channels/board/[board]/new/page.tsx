@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { 
   ArrowLeft
 } from 'lucide-react';
@@ -44,6 +45,8 @@ const CREATE_POST = `
       created_at
       updated_at
       is_visible
+      is_notice
+      is_private
     }
   }
 `;
@@ -141,6 +144,8 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
     format: 'markdown', // 기본값 markdown
     writer: '',
     email: '',
+    is_notice: false,
+    is_private: false,
   });
   const [editingMarkdown, setEditingMarkdown] = useState<string>(''); // 편집 중인 마크다운
   const [editorMode, setEditorMode] = useState<'html' | 'markdown'>('markdown'); // 기본값 markdown
@@ -213,6 +218,8 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
         format: formatToSave,
         writer: user.name || user.email,
         email: user.email,
+        is_notice: newPost.is_notice || false,
+        is_private: newPost.is_private || false,
       };
 
       console.log('🚀 Frontend sending createData:', createData);
@@ -315,6 +322,36 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
                   placeholder="제목을 입력하세요"
                 />
               </h1>
+              
+              {/* 공지글/비공개글 체크박스 */}
+              <div className="flex gap-4 mt-2">
+                {user?.role === 'admin' && (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="notice"
+                      checked={newPost.is_notice}
+                      onCheckedChange={(checked) => 
+                        setNewPost({ ...newPost, is_notice: checked })
+                      }
+                    />
+                    <label htmlFor="notice" className="text-sm font-medium">
+                      공지글
+                    </label>
+                  </div>
+                )}
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="private"
+                    checked={newPost.is_private}
+                    onCheckedChange={(checked) => 
+                      setNewPost({ ...newPost, is_private: checked })
+                    }
+                  />
+                  <label htmlFor="private" className="text-sm font-medium">
+                    비공개글
+                  </label>
+                </div>
+              </div>
             </div>
 
             <div className="min-h-[300px] mb-4">

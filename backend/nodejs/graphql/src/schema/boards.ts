@@ -10,6 +10,8 @@ export const boardsTypeDefs = `#graphql
     created_at: String
     updated_at: String
     is_visible: Boolean
+    is_notice: Boolean
+    is_private: Boolean
   }
 
   type BoardComment {
@@ -40,6 +42,8 @@ export const boardsTypeDefs = `#graphql
     writer: String!
     email: String!
     is_visible: Boolean
+    is_notice: Boolean
+    is_private: Boolean
   }
 
   input BoardCommentInput {
@@ -63,7 +67,7 @@ export const boardsTypeDefs = `#graphql
   }
 
   extend type Query {
-    boardsPostsAll(board: String!): [BoardPost!]!
+    boardsPostsAll(board: String!, user_email: String): [BoardPost!]!
     boardsPostsOne(id: Int!, board: String!): BoardPost
     boardsCommentsAll(board: String!, post_id: Int!, page: Int, per_page: Int): BoardCommentsResponse!
     boardsCommentsOne(id: Int!): BoardComment

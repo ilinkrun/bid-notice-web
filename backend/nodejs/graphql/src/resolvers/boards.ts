@@ -17,6 +17,8 @@ export interface PostInput {
   writer: string;
   email: string;
   is_visible?: number | boolean;
+  is_notice?: boolean;
+  is_private?: boolean;
 }
 
 export interface CommentInput {
@@ -49,11 +51,16 @@ export interface ErrorWithResponse {
 
 export const boardsResolvers = {
   Query: {
-    boardsPostsAll: async (_: unknown, { board }: { board: string }) => {
+    boardsPostsAll: async (_: unknown, { board, user_email }: { board: string, user_email?: string }) => {
       try {
         console.log(`게시판 목록 조회 요청: ${board}`);
         // API 호출
-        const response = await boardApiClient.get(`/posts/${board}/`);
+        const params = new URLSearchParams();
+        if (user_email) {
+          params.append('user_email', user_email);
+        }
+        const url = `/posts/${board}/${params.toString() ? '?' + params.toString() : ''}`;
+        const response = await boardApiClient.get(url);
         return response.data.posts;
       } catch (error) {
         console.error('게시판 목록 조회 오류:', error);
@@ -134,6 +141,8 @@ export const boardsResolvers = {
           format: input.format || 'text',
           writer: input.writer,
           email: input.email,
+          is_notice: input.is_notice || false,
+          is_private: input.is_private || false,
         });
         
         console.log('게시글 생성 응답:', response.data);
@@ -192,6 +201,8 @@ export const boardsResolvers = {
           format: input.format,
           writer: input.writer,
           email: input.email,
+          is_notice: input.is_notice || false,
+          is_private: input.is_private || false,
         });
         console.log('게시글 수정 응답:', response.data);
         
