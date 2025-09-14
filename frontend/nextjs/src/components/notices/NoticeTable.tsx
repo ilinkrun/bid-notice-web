@@ -165,7 +165,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
   // 공고 목록이 변경될 때 기관명 URL들을 미리 로드
   useEffect(() => {
     const loadOrgUrls = async () => {
-      const uniqueOrgNames = [...new Set(notices.map(notice => notice.기관명))];
+      const uniqueOrgNames = Array.from(new Set(notices.map(notice => notice.기관명).filter(Boolean))) as string[];
       console.log('All notices:', notices.slice(0, 3)); // 처음 3개 확인
       console.log('Unique org names:', uniqueOrgNames);
       console.log('Current orgUrls state:', orgUrls);

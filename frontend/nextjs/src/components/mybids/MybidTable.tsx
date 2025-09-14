@@ -120,7 +120,7 @@ export default function BidTable({ bids, currentStatus }) {
   // 입찰 목록이 변경될 때 기관명 URL들을 미리 로드
   useEffect(() => {
     const loadOrgUrls = async () => {
-      const uniqueOrgNames = [...new Set(bids.map(bid => bid.orgName))];
+      const uniqueOrgNames = Array.from(new Set(bids.map(bid => bid.orgName).filter(Boolean))) as string[];
       const urlCache: { [orgName: string]: string | null } = {};
       
       console.log('Loading URLs for organizations:', uniqueOrgNames);

@@ -20,6 +20,7 @@ __pycache__/
 ## log
 logs/
 *.out
+*.log
 
 # private
 _*/
