@@ -15,11 +15,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
-      <body>
-        <RootLayoutClient>
-          {children}
-        </RootLayoutClient>
-      </body>
+      <RootLayoutClient>
+        {children}
+      </RootLayoutClient>
     </html>
   );
 }

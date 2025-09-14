@@ -74,6 +74,74 @@ export default function BidTable({ bids, currentStatus }) {
   const [createProject, setCreateProject] = useState(false);
   const [pm, setPm] = useState('');
   const [giveupReason, setGiveupReason] = useState('');
+
+  // 기관명 URL 조회 및 생성 함수
+  const getOrganizationUrl = async (orgName: string): Promise<string | null> => {
+    try {
+      // GraphQL 쿼리로 기관 URL 가져오기
+      const response = await fetch('/api/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: `
+            query SettingsNoticeListByOrg($orgName: String!) {
+              settingsNoticeListByOrg(orgName: $orgName) {
+                oid
+                orgName
+                url
+              }
+            }
+          `,
+          variables: { orgName }
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.data?.settingsNoticeListByOrg?.length > 0) {
+        const orgSettings = result.data.settingsNoticeListByOrg[0];
+        if (orgSettings.url) {
+          // URL에 ${i}가 포함된 경우 1로 치환하여 1페이지로 설정
+          return orgSettings.url.replace(/\$\{i\}/g, '1');
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('기관 정보 조회 중 오류 발생:', error);
+      return null;
+    }
+  };
+
+  // 기관명별 URL 캐시
+  const [orgUrls, setOrgUrls] = useState<{ [orgName: string]: string | null }>({});
+
+  // 입찰 목록이 변경될 때 기관명 URL들을 미리 로드
+  useEffect(() => {
+    const loadOrgUrls = async () => {
+      const uniqueOrgNames = [...new Set(bids.map(bid => bid.orgName))];
+      const urlCache: { [orgName: string]: string | null } = {};
+      
+      console.log('Loading URLs for organizations:', uniqueOrgNames);
+      
+      for (const orgName of uniqueOrgNames) {
+        if (orgUrls[orgName] === undefined) { // undefined인 경우에만 로드
+          console.log('Loading URL for:', orgName);
+          urlCache[orgName] = await getOrganizationUrl(orgName);
+        }
+      }
+      
+      if (Object.keys(urlCache).length > 0) {
+        console.log('Setting URLs:', urlCache);
+        setOrgUrls(prev => ({ ...prev, ...urlCache }));
+      }
+    };
+
+    if (bids.length > 0) {
+      loadOrgUrls();
+    }
+  }, [bids]); // orgUrls는 의존성에서 제외하여 무한루프 방지
   
   // 종료 페이지에서 사용할 상태별 필터링
   const [endedStatusFilters, setEndedStatusFilters] = useState({
@@ -591,7 +659,23 @@ export default function BidTable({ bids, currentStatus }) {
                     {bid.category}
                   </TableCell>
                   <TableCell className="w-[120px] whitespace-nowrap">
-                    {bid.orgName}
+                    {orgUrls[bid.orgName] ? (
+                      <a
+                        href={orgUrls[bid.orgName]!}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm font-medium text-gray-600 hover:text-blue-600 hover:underline cursor-pointer"
+                        style={{ color: '#1f2937' }}
+                        onClick={(e) => e.stopPropagation()}
+                        title="기관 게시판 페이지로 이동"
+                      >
+                        {bid.orgName}
+                      </a>
+                    ) : (
+                      <span className="text-sm font-medium text-gray-600" style={{ color: '#1f2937' }}>
+                        {bid.orgName}
+                      </span>
+                    )}
                   </TableCell>
                   <TableCell className="w-auto max-w-0">
                     <div className="flex items-center gap-2">

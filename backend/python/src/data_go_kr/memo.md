@@ -5,6 +5,32 @@ https://www.data.go.kr/data/15129394/openapi.do#/API 목록/getBidPblancListInfo
 python, mysql 기반으로 구현하려고 하는데 database는 mysql이 아닌 postgresql이 더 나을까요?
 
 
+---
+
+service key /exposed/projects/bid-notice-web/backend/python/src/data_go_kr/.env 를 사용해서 getBidPblancListInfoServc에 대한 테스트 request를 하고, 결과를 보여주세요. 
+
+```sh
+cd /exposed/projects/bid-notice-web/backend/python
+uv run src/data_go_kr/test_bid_api.py
+```
+
+====
+
+API 활용신청
+
+https://www.data.go.kr/iim/api/selectDevAcountRequestForm.do?publicDataDetailPk=uddi:53bc9153-fb7f-4c75-8a7c-cf013fe00d5a_202410251427
+
+2	입찰공고목록 정보에 대한 용역조회	검색조건에 등록일시, 입찰공고번호, 변경일시를 입력하여 나라장터의 입찰공고번호, 공고명, 발주기관, 수요기관, 계약체결방법명 등 용역부분의 입찰공고정보를 조회함
+
+12	나라장터검색조건에 의한 입찰공고용역조회	검색조건에 공고게시일시, 개찰일시 범위, 공고기관, 수요기관, 참조번호 등을 입력하여 나라장터의 입찰공고번호, 공고명, 발주기관, 수요기관, 계약체결방법명 등 용역부분의 입찰공고정보를 조회함	1000
+
+
+
+End Point	https://apis.data.go.kr/1230000/ad/BidPublicInfoService
+
+ac695b9d02ae20acdc1a519bb20c8f632fcb571ce66c41b35cb36b1e6889ad82
+
+
 ====
 Parameters
 OpenAPI 실행 준비

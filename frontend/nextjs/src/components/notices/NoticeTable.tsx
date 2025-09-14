@@ -57,6 +57,7 @@ const RESTORE_NOTICES = gql`
   }
 `;
 
+
 type SortField = '제목' | '기관명' | '작성일' | '지역' | '등록' | 'category' | 'region' | 'registration';
 type SortOrder = 'asc' | 'desc';
 
@@ -118,6 +119,90 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
   const [excludeLoading, setExcludeLoading] = useState(false);
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
   const [restoreLoading, setRestoreLoading] = useState(false);
+
+  // 기관명 URL 조회 및 생성 함수
+  const getOrganizationUrl = async (orgName: string): Promise<string | null> => {
+    try {
+      // GraphQL 쿼리로 기관 URL 가져오기
+      const response = await fetch('/api/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: `
+            query SettingsNoticeListByOrg($orgName: String!) {
+              settingsNoticeListByOrg(orgName: $orgName) {
+                oid
+                orgName
+                url
+              }
+            }
+          `,
+          variables: { orgName }
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.data?.settingsNoticeListByOrg?.length > 0) {
+        const orgSettings = result.data.settingsNoticeListByOrg[0];
+        if (orgSettings.url) {
+          // URL에 ${i}가 포함된 경우 1로 치환하여 1페이지로 설정
+          return orgSettings.url.replace(/\$\{i\}/g, '1');
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('기관 정보 조회 중 오류 발생:', error);
+      return null;
+    }
+  };
+
+  // 기관명별 URL 캐시
+  const [orgUrls, setOrgUrls] = useState<{ [orgName: string]: string | null }>({});
+
+  // 공고 목록이 변경될 때 기관명 URL들을 미리 로드
+  useEffect(() => {
+    const loadOrgUrls = async () => {
+      const uniqueOrgNames = [...new Set(notices.map(notice => notice.기관명))];
+      console.log('All notices:', notices.slice(0, 3)); // 처음 3개 확인
+      console.log('Unique org names:', uniqueOrgNames);
+      console.log('Current orgUrls state:', orgUrls);
+      
+      const urlCache: { [orgName: string]: string | null } = {};
+      
+      for (const orgName of uniqueOrgNames) {
+        if (orgUrls[orgName] === undefined) { // undefined인 경우에만 로드
+          console.log('Loading URL for org:', orgName);
+          try {
+            const url = await getOrganizationUrl(orgName);
+            console.log(`URL result for ${orgName}:`, url);
+            urlCache[orgName] = url;
+          } catch (error) {
+            console.error(`Error loading URL for ${orgName}:`, error);
+            urlCache[orgName] = null;
+          }
+        } else {
+          console.log(`URL already exists for ${orgName}:`, orgUrls[orgName]);
+        }
+      }
+      
+      if (Object.keys(urlCache).length > 0) {
+        console.log('Setting URLs to state:', urlCache);
+        setOrgUrls(prev => {
+          const newState = { ...prev, ...urlCache };
+          console.log('New orgUrls state:', newState);
+          return newState;
+        });
+      }
+    };
+
+    if (notices.length > 0) {
+      console.log('Starting URL loading process...');
+      loadOrgUrls().catch(console.error);
+    }
+  }, [notices]); // orgUrls는 의존성에서 제외하여 무한루프 방지
 
   // currentCategory 변경시 localCategory 동기화
   useEffect(() => {
@@ -819,7 +904,36 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
                     {notice.작성일}
                   </TableCell>
                   <TableCell className="w-[120px] whitespace-nowrap">
-                    {notice.기관명}
+                    {(() => {
+                      const orgUrl = orgUrls[notice.기관명];
+                      console.log(`Rendering org: ${notice.기관명}, URL: ${orgUrl}, type: ${typeof orgUrl}`);
+                      
+                      if (orgUrl) {
+                        return (
+                          <a
+                            href={orgUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm font-medium text-gray-600 hover:text-blue-600 hover:underline cursor-pointer"
+                            style={{ color: '#1f2937' }}
+                            onClick={(e) => e.stopPropagation()}
+                            title="기관 게시판 페이지로 이동"
+                          >
+                            {notice.기관명}
+                          </a>
+                        );
+                      } else {
+                        return (
+                          <span 
+                            className="text-sm font-medium text-gray-600" 
+                            style={{ color: '#1f2937' }}
+                            title={`URL not found for ${notice.기관명}`}
+                          >
+                            {notice.기관명}
+                          </span>
+                        );
+                      }
+                    })()}
                   </TableCell>
                   <TableCell className="w-[80px] whitespace-nowrap">
                     {notice.지역}

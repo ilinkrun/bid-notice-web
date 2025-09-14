@@ -247,8 +247,21 @@ export const settingsResolvers = {
 
     settingsNoticeListByOrg: async (_: unknown, { orgName }: { orgName: string }) => {
       try {
-        const response = await apiClient.get(`/settings_notice_list/org/${orgName}`);
-        return response.data.map((setting: SettingsNoticeListData) => ({
+        console.log(`Fetching settings for organization: ${orgName}`);
+        const response = await apiClient.get(`/settings_notice_list_by_org_name/${orgName}`);
+        
+        console.log('Raw response from Python backend:', response.data);
+        
+        // Handle the response structure from the Python endpoint
+        if (response.data.error) {
+          console.error('Python backend returned error:', response.data.error);
+          return [];
+        }
+
+        // If response.data is a single object (not an array), wrap it in an array
+        const dataArray = Array.isArray(response.data) ? response.data : [response.data];
+        
+        return dataArray.map((setting: SettingsNoticeListData) => ({
           oid: setting.oid,
           orgName: setting.org_name,
           url: setting.url,

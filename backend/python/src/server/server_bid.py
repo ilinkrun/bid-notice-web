@@ -222,7 +222,7 @@ def get_settings_notice_list():
     raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/settings_notice_list/{org_name}")
+@app.get("/settings_notice_list_by_org_name/{org_name}")
 def get_settings_notice_list_by_org_name(org_name: str):
   """
   특정 기관의 스크래핑 설정을 반환합니다.
