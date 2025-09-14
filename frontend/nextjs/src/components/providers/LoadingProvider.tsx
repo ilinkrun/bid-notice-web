@@ -34,9 +34,9 @@ function LoadingOverlay() {
 
   return (
     <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center">
-      <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center gap-3">
+      <div className="bg-card p-6 rounded-lg shadow-lg flex flex-col items-center gap-3">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
-        <p className="text-base font-medium text-gray-700">
+        <p className="text-base font-medium text-card-foreground">
           {isDataLoading ? '데이터를 불러오는 중입니다...' : '페이지를 불러오는 중입니다...'}
         </p>
       </div>

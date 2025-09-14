@@ -118,7 +118,7 @@ export function SettingsEditModal({ orgName, onClose }: SettingsEditModalProps) 
           <DialogHeader>
             <DialogTitle>스크랩 설정 수정</DialogTitle>
           </DialogHeader>
-          <div className="text-red-500">
+          <div className="text-destructive">
             <p>데이터를 불러오는 중 오류가 발생했습니다.</p>
             <p>{error.message}</p>
           </div>
@@ -145,7 +145,7 @@ export function SettingsEditModal({ orgName, onClose }: SettingsEditModalProps) 
                 value={editedSetting.orgName}
                 onChange={(e) => handleChange('orgName', e.target.value)}
                 required
-                className="h-8 text-sm text-gray-800"
+                className="h-8 text-sm text-foreground"
               />
             </div>
             <div className="space-y-1">
@@ -154,7 +154,7 @@ export function SettingsEditModal({ orgName, onClose }: SettingsEditModalProps) 
                 id="지역"
                 value={editedSetting.region || ''}
                 onChange={(e) => handleChange('region', e.target.value)}
-                className="h-8 text-sm text-gray-800"
+                className="h-8 text-sm text-foreground"
               />
             </div>
             <div className="space-y-1">
@@ -164,7 +164,7 @@ export function SettingsEditModal({ orgName, onClose }: SettingsEditModalProps) 
                 type="number"
                 value={editedSetting.startPage || 1}
                 onChange={(e) => handleChange('startPage', parseInt(e.target.value))}
-                className="h-8 text-sm text-gray-800"
+                className="h-8 text-sm text-foreground"
               />
             </div>
             <div className="space-y-1">
@@ -174,7 +174,7 @@ export function SettingsEditModal({ orgName, onClose }: SettingsEditModalProps) 
                 type="number"
                 value={editedSetting.endPage || 1}
                 onChange={(e) => handleChange('endPage', parseInt(e.target.value))}
-                className="h-8 text-sm text-gray-800"
+                className="h-8 text-sm text-foreground"
               />
             </div>
             <div className="flex justify-start">
@@ -208,7 +208,7 @@ export function SettingsEditModal({ orgName, onClose }: SettingsEditModalProps) 
               id="url"
               value={editedSetting.detailUrl || ''}
               onChange={(e) => handleChange('detailUrl', e.target.value)}
-              className="text-gray-800"
+              className="text-foreground"
             />
           </div>
           <div className="space-y-2">
@@ -217,7 +217,7 @@ export function SettingsEditModal({ orgName, onClose }: SettingsEditModalProps) 
               id="rowXpath"
               value={editedSetting.rowXpath || ''}
               onChange={(e) => handleChange('rowXpath', e.target.value)}
-              className="text-gray-800"
+              className="text-foreground"
             />
           </div>
 
@@ -228,7 +228,7 @@ export function SettingsEditModal({ orgName, onClose }: SettingsEditModalProps) 
               id="paging"
               value={editedSetting.paging || ''}
               onChange={(e) => handleChange('paging', e.target.value)}
-              className="text-gray-800"
+              className="text-foreground"
             />
           </div>
 
@@ -252,21 +252,21 @@ export function SettingsEditModal({ orgName, onClose }: SettingsEditModalProps) 
                       <Input
                         value={element.xpath}
                         onChange={(e) => handleElementChange(index, 'xpath', e.target.value)}
-                        className="text-gray-800"
+                        className="text-foreground"
                       />
                     </TableCell>
                     <TableCell className="w-[200px]">
                       <Input
                         value={element.target || ''}
                         onChange={(e) => handleElementChange(index, 'target', e.target.value)}
-                        className="text-gray-800"
+                        className="text-foreground"
                       />
                     </TableCell>
                     <TableCell className="w-[800px]">
                       <Input
                         value={element.callback || ''}
                         onChange={(e) => handleElementChange(index, 'callback', e.target.value)}
-                        className="text-gray-800"
+                        className="text-foreground"
                       />
                     </TableCell>
                   </TableRow>

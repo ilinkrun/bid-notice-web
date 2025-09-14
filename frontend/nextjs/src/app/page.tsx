@@ -7,6 +7,7 @@ import { AlertCircle } from 'lucide-react';
 import { getClient } from '@/lib/api/graphqlClient';
 import ApolloWrapper from '@/components/providers/ApolloWrapper';
 import UnifiedDataLoadingWrapper from '@/components/shared/UnifiedDataLoadingWrapper';
+import { PageContainer } from '@/components/shared/PageContainer';
 
 const GET_NOTICES_STATISTICS = gql`
   query GetNoticesStatistics($gap: Int!) {
@@ -123,8 +124,9 @@ export default async function Home() {
   const processedStatistics = data?.noticesStatistics ? processNoticeStatistics(data.noticesStatistics) : [];
 
   return (
-    <div className="container mx-auto p-4 space-y-6 theme-default">
-      <ApolloWrapper>
+    <PageContainer>
+      <div className="p-4 space-y-6">
+        <ApolloWrapper>
         <UnifiedDataLoadingWrapper data={data}>
         {/* 최근 스크랩 에러 */}
         <Card className="m-1 rounded-none">
@@ -183,7 +185,8 @@ export default async function Home() {
         </div>
 
         </UnifiedDataLoadingWrapper>
-      </ApolloWrapper>
-    </div>
+        </ApolloWrapper>
+      </div>
+    </PageContainer>
   );
 }

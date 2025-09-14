@@ -71,9 +71,9 @@ export function UnifiedLoadingProvider({ children }: UnifiedLoadingProviderProps
     }}>
       {isLoading && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center gap-3">
+          <div className="bg-card p-6 rounded-lg shadow-lg flex flex-col items-center gap-3">
             <Loader2 className="h-10 w-10 animate-spin text-primary" />
-            <p className="text-base font-medium text-gray-700">
+            <p className="text-base font-medium text-card-foreground">
               {customMessage || '페이지 로딩 중...'}
             </p>
           </div>

@@ -680,21 +680,21 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
     <div>
       {isLoading && (
         <div className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center gap-3">
+          <div className="bg-card p-6 rounded-lg shadow-lg flex flex-col items-center gap-3">
             <Loader2 className="h-10 w-10 animate-spin text-primary" />
-            <p className="text-base font-medium text-gray-700">데이터를 불러오는 중입니다...</p>
+            <p className="text-base font-medium text-foreground">데이터를 불러오는 중입니다...</p>
           </div>
         </div>
       )}
-      <div className="flex items-center justify-between gap-4 mb-0">
+      <div className="flex items-center justify-between gap-4 mb-0 p-4 bg-background dark:bg-secondary">
         <div className="flex items-center gap-4 flex-1">
           <Select value={localCategory} onValueChange={handleCategoryChange}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[180px] bg-background dark:bg-background border-border dark:border-border text-foreground dark:text-foreground">
               <SelectValue placeholder="유형 선택" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-popover dark:bg-popover border-border dark:border-border">
               {CATEGORIES.map((category) => (
-                <SelectItem key={category.value} value={category.value} className="text-gray-700 hover:bg-gray-200">
+                <SelectItem key={category.value} value={category.value} className="text-popover-foreground dark:text-popover-foreground hover:bg-accent dark:hover:bg-accent">
                   {category.label}
                 </SelectItem>
               ))}
@@ -702,26 +702,26 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
           </Select>
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2">
-              <label htmlFor="gap-input" className="text-sm font-medium text-gray-700">최근</label>
+              <label htmlFor="gap-input" className="text-sm font-medium text-foreground">최근</label>
               <Input
                 id="gap-input"
                 type="number"
                 min="0"
                 value={gap}
                 onChange={handleGapChange}
-                className="w-16 bg-gray-100 border-gray-300 text-gray-700"
+                className="w-16 bg-muted dark:bg-muted border-border dark:border-border text-foreground dark:text-foreground"
               />
             </div>
           </div>
           <div className="relative flex items-center gap-2 w-[500px]">
             <div className="relative">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground dark:text-muted-foreground" />
               <Input
                 ref={searchInputRef}
                 placeholder="입찰공고 검색..."
                 value={searchTerm}
                 onChange={handleSearchInput}
-                className="pl-8 bg-gray-100 border-gray-300 text-gray-700 placeholder-gray-500"
+                className="pl-8 bg-muted dark:bg-muted border-border dark:border-border text-foreground dark:text-foreground placeholder-muted-foreground dark:placeholder-muted-foreground"
                 autoComplete="off"
                 type="text"
                 onCompositionStart={() => setIsComposing(true)}
@@ -767,7 +767,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
           <Button 
             onClick={handleCategoryEdit} 
             variant="outline" 
-            className="bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200 h-10 w-10 flex items-center justify-center"
+            className="bg-muted border-border text-foreground hover:bg-muted/80 h-10 w-10 flex items-center justify-center"
             title="유형 변경"
           >
             <Edit3 className="h-4 w-4" />
@@ -776,7 +776,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
             <Button 
               onClick={handleBidProcess} 
               variant="outline" 
-              className="bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200 h-10 w-10 flex items-center justify-center"
+              className="bg-muted border-border text-foreground hover:bg-muted/80 h-10 w-10 flex items-center justify-center"
               title="입찰 진행"
             >
               <Star className="h-4 w-4" />
@@ -786,11 +786,11 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
       </div>
 
       {/* 테이블 */}
-      <div className="border border-gray-300 table-container bg-white overflow-x-auto category-page">
+      <div className="border border-border table-container bg-card dark:bg-card overflow-x-auto category-page">
         <Table className="w-full min-w-[800px]">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[40px] [background:var(--table-header-bg)_!important] text-white">
+              <TableHead className="w-[40px] bg-muted dark:bg-muted text-foreground dark:text-foreground">
                 <Checkbox
                   checked={selectedNids.length === notices.length}
                   onCheckedChange={(checked) => {
@@ -801,54 +801,54 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
                     }
                   }}
                   aria-label="모든 항목 선택"
-                  className="!w-4 !h-4 !min-w-4 !min-h-4 !max-w-4 !max-h-4 !bg-white !border-white hover:!bg-white focus:!bg-white data-[state=checked]:!bg-white data-[state=unchecked]:!bg-white data-[state=checked]:!text-[var(--table-header-bg)]"
+                  className="!w-4 !h-4 !min-w-4 !min-h-4 !max-w-4 !max-h-4 !bg-background !border-background hover:!bg-background focus:!bg-background data-[state=checked]:!bg-background data-[state=unchecked]:!bg-background data-[state=checked]:!text-[var(--table-header-bg)]"
                 />
               </TableHead>
               {currentCategory === '제외' && (
-                <TableHead className="w-[80px] [background:var(--table-header-bg)_!important] text-white">
+                <TableHead className="w-[80px] bg-muted dark:bg-muted text-foreground dark:text-foreground">
                   <button
-                    className="flex items-center gap-2 text-white"
+                    className="flex items-center gap-2 text-foreground dark:text-foreground"
                     onClick={() => toggleSort('category')}
                   >
                     유형
                   </button>
                 </TableHead>
               )}
-              <TableHead className="w-auto [background:var(--table-header-bg)_!important] text-white">
+              <TableHead className="w-auto bg-muted dark:bg-muted text-foreground dark:text-foreground">
                 <button
-                  className="flex items-center gap-2 text-white"
+                  className="flex items-center gap-2 [color:var(--table-header-text)]"
                   onClick={() => toggleSort('제목')}
                 >
                   제목
                 </button>
               </TableHead>
-              <TableHead className="w-[100px] [background:var(--table-header-bg)_!important] text-white">
+              <TableHead className="w-[100px] bg-muted dark:bg-muted text-foreground dark:text-foreground">
                 <button
-                  className="flex items-center gap-2 text-white"
+                  className="flex items-center gap-2 [color:var(--table-header-text)]"
                   onClick={() => toggleSort('작성일')}
                 >
                   작성일
                 </button>
               </TableHead>
-              <TableHead className="w-[120px] [background:var(--table-header-bg)_!important] text-white">
+              <TableHead className="w-[120px] bg-muted dark:bg-muted text-foreground dark:text-foreground">
                 <button
-                  className="flex items-center gap-2 text-white"
+                  className="flex items-center gap-2 [color:var(--table-header-text)]"
                   onClick={() => toggleSort('기관명')}
                 >
                   기관명
                 </button>
               </TableHead>
-              <TableHead className="w-[80px] [background:var(--table-header-bg)_!important] text-white">
+              <TableHead className="w-[80px] bg-muted dark:bg-muted text-foreground dark:text-foreground">
                 <button
-                  className="flex items-center gap-2 text-white"
+                  className="flex items-center gap-2 [color:var(--table-header-text)]"
                   onClick={() => toggleSort('region')}
                 >
                   지역
                 </button>
               </TableHead>
-              <TableHead className="w-[60px] [background:var(--table-header-bg)_!important] text-white">
+              <TableHead className="w-[60px] bg-muted dark:bg-muted text-foreground dark:text-foreground">
                 <button
-                  className="flex items-center gap-2 text-white"
+                  className="flex items-center gap-2 [color:var(--table-header-text)]"
                   onClick={() => toggleSort('registration')}
                 >
                   등록
@@ -888,8 +888,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
                             href={`${notice.상세페이지주소}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sm font-medium !text-gray-600 truncate"
-                            style={{ color: '#1f2937' }}
+                            className="text-sm font-medium !text-foreground truncate"
                             onClick={(e) => {
                               e.stopPropagation();
                             }}
@@ -914,8 +913,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
                             href={orgUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sm font-medium text-gray-600 hover:text-blue-600 hover:underline cursor-pointer"
-                            style={{ color: '#1f2937' }}
+                            className="text-sm font-medium text-foreground hover:text-primary hover:underline cursor-pointer"
                             onClick={(e) => e.stopPropagation()}
                             title="기관 게시판 페이지로 이동"
                           >
@@ -925,8 +923,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
                       } else {
                         return (
                           <span 
-                            className="text-sm font-medium text-gray-600" 
-                            style={{ color: '#1f2937' }}
+                            className="text-sm font-medium text-foreground"
                             title={`URL not found for ${notice.기관명}`}
                           >
                             {notice.기관명}
@@ -1065,7 +1062,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
             <DialogTitle>입찰 진행</DialogTitle>
           </DialogHeader>
           <div className="py-4">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               선택된 {selectedNids.length}개 공고의 입찰 단계를 '진행'으로 변경하시겠습니까?
             </p>
           </div>
@@ -1101,10 +1098,10 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
             <DialogTitle>업무에서 제외</DialogTitle>
           </DialogHeader>
           <div className="py-4">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               선택된 {selectedNids.length}개 공고를 업무에서 제외할까요?
             </p>
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-muted-foreground mt-2">
               제외된 공고는 더 이상 목록에 표시되지 않습니다.
             </p>
           </div>
@@ -1141,10 +1138,10 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
             <DialogTitle>업무에 복원</DialogTitle>
           </DialogHeader>
           <div className="py-4">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               선택된 {selectedNids.length}개 공고를 업무에 복원할까요?
             </p>
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-muted-foreground mt-2">
               복원된 공고는 다시 해당 카테고리 목록에 표시됩니다.
             </p>
           </div>

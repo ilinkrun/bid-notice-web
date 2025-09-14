@@ -4,7 +4,7 @@ import { useQuery } from '@apollo/client';
 import { gql } from '@apollo/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -49,20 +49,41 @@ interface ErrorScrapingChartProps {
 
 export function ErrorScrapingChart({ initialData }: ErrorScrapingChartProps) {
   const [gap, setGap] = useState(7); // 기본값: 7일
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
   const { data, loading, error } = useQuery(GET_ERROR_SCRAPINGS, {
     variables: { gap },
     skip: false, // 항상 쿼리 실행
     fetchPolicy: 'no-cache', // 캐시를 사용하지 않고 항상 새로운 데이터를 가져옴
   });
 
+  // 다크 모드 감지
+  useEffect(() => {
+    const checkDarkMode = () => {
+      const isDark = document.documentElement.classList.contains('dark');
+      setIsDarkMode(isDark);
+    };
+
+    checkDarkMode();
+
+    // MutationObserver로 다크 모드 변경 감지
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   const errorScrapings = data?.logsErrorAll || initialData || [];
 
   if (loading && !errorScrapings.length) {
-    return <div>로딩 중...</div>;
+    return <div className="text-foreground">로딩 중...</div>;
   }
 
   if (error && !errorScrapings.length) {
-    return <div>에러가 발생했습니다: {error.message}</div>;
+    return <div className="text-destructive">에러가 발생했습니다: {error.message}</div>;
   }
 
   // 시간별로 오류 그룹화
@@ -92,22 +113,48 @@ export function ErrorScrapingChart({ initialData }: ErrorScrapingChartProps) {
     ],
   };
 
+  // 다크 모드에 따른 색상 설정
+  const textColor = isDarkMode ? '#e5e7eb' : '#374151'; // gray-200 : gray-700
+  const gridColor = isDarkMode ? '#374151' : '#e5e7eb'; // gray-700 : gray-200
+
   const options = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: {
         position: 'top' as const,
+        labels: {
+          color: textColor,
+        },
       },
       title: {
         display: false,
       },
+      tooltip: {
+        backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+        titleColor: textColor,
+        bodyColor: textColor,
+        borderColor: gridColor,
+        borderWidth: 1,
+      },
     },
     scales: {
+      x: {
+        ticks: {
+          color: textColor,
+        },
+        grid: {
+          color: gridColor,
+        },
+      },
       y: {
         beginAtZero: true,
         ticks: {
+          color: textColor,
           stepSize: 1,
+        },
+        grid: {
+          color: gridColor,
         },
       },
     },

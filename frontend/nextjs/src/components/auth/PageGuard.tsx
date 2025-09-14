@@ -118,11 +118,11 @@ export const PageGuard: React.FC<PageGuardProps> = ({ children }) => {
             </svg>
           </div>
           
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">접근 권한이 없습니다</h1>
-          <p className="text-gray-600 mb-4">{accessResult.message}</p>
+          <h1 className="text-2xl font-bold text-foreground mb-2">접근 권한이 없습니다</h1>
+          <p className="text-muted-foreground mb-4">{accessResult.message}</p>
           
           <div className="space-y-2">
-            <p className="text-sm text-gray-500">현재 권한: {getRoleName(accessResult.role)}</p>
+            <p className="text-sm text-muted-foreground">현재 권한: {getRoleName(accessResult.role)}</p>
             {accessResult.redirectTo && (
               <p className="text-sm text-blue-600">
                 {accessResult.redirectTo === '/login' ? '로그인 페이지' : '메인 페이지'}로 이동합니다...
@@ -133,7 +133,7 @@ export const PageGuard: React.FC<PageGuardProps> = ({ children }) => {
           <div className="mt-6 space-x-4">
             <button
               onClick={() => router.back()}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+              className="px-4 py-2 text-sm font-medium text-foreground bg-muted rounded-md hover:bg-muted/80 transition-colors"
             >
               뒤로가기
             </button>

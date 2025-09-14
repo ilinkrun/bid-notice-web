@@ -60,14 +60,14 @@ export default async function LogScrapingStatisticsPage({ searchParams }: PagePr
   const logScrapings = await getLogScrapings(validGap);
 
   return (
-    <div className="theme-default">
+    <div className="theme-default bg-background dark:bg-secondary min-h-screen">
       <div className="container mx-auto">
-      <h1 className="text-xl font-bold pt-1 pl-1">스크래핑 로그 통계</h1>
+      <h1 className="text-xl font-bold pt-1 pl-1 text-foreground">스크래핑 로그 통계</h1>
         <div className="statistics-cell">
           <ApolloWrapper>
-            <LogScrapingStatisticsTable 
-              initialData={logScrapings} 
-              defaultGap={validGap.toString()} 
+            <LogScrapingStatisticsTable
+              initialData={logScrapings}
+              defaultGap={validGap.toString()}
             />
           </ApolloWrapper>
         </div>

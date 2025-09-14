@@ -5,7 +5,7 @@ export default function NoticeListSkeleton() {
   return (
     <div className="grid gap-3">
       {[1, 2, 3, 4, 5].map((index) => (
-        <Card key={index} className="hover:bg-gray-50 transition-colors">
+        <Card key={index} className="hover:bg-muted/50 transition-colors">
           <CardContent className="p-4">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">

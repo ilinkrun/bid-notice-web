@@ -26,6 +26,28 @@
     --radius: 0.5rem;
   }
 
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: var(--primary-color, 0 72.2% 50.6%);
+    --primary-foreground: 0 85.7% 97.3%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: var(--primary-color, 0 72.2% 50.6%);
+  }
+
   [data-theme='dark'] {
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
@@ -108,7 +130,41 @@
   --table-body-text: hsl(var(--primary-dark));
   --table-link: hsl(var(--primary-dark));
   --table-link-hover: hsl(var(--primary-color));
-  @apply p-0;
+  @apply p-0 bg-background;
+}
+
+/* 다크 모드용 카테고리 페이지 스타일 */
+.dark .category-page {
+  --table-header-bg: hsl(var(--primary-color));
+  --table-header-text: hsl(0 0% 100%);
+  --table-body-bg: hsl(var(--card));
+  --table-body-text: hsl(var(--card-foreground));
+  --table-link: hsl(var(--card-foreground));
+  --table-link-hover: hsl(var(--primary));
+}
+
+/* 다크 모드에서 테이블과 폼 요소들 강제 스타일 */
+.dark .category-page * {
+  border-color: hsl(var(--border)) !important;
+}
+
+.dark .category-page .table-container {
+  background-color: hsl(var(--card)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+
+.dark .category-page tbody tr {
+  background-color: hsl(var(--card)) !important;
+  color: hsl(var(--card-foreground)) !important;
+}
+
+.dark .category-page tbody tr:hover {
+  background-color: hsl(var(--muted)) !important;
+}
+
+.dark .category-page tbody td {
+  color: hsl(var(--card-foreground)) !important;
+  border-color: hsl(var(--border)) !important;
 }
 
 /* 테이블 스타일 */
@@ -165,6 +221,7 @@
 .category-page button {
   border-color: hsl(var(--primary-dark));
   color: hsl(var(--primary-dark));
+  background-color: hsl(var(--background));
   transition: all 0.2s ease;
 }
 
@@ -184,6 +241,51 @@
 .category-page .input:focus {
   border-color: hsl(var(--primary-dark));
   ring-color: hsl(var(--primary-dark) / 0.3);
+}
+
+/* 다크 모드용 입력 요소 스타일 */
+.dark .category-page .select-trigger,
+.dark .category-page .input,
+.dark .category-page [type='button'],
+.dark .category-page button {
+  border-color: hsl(var(--border)) !important;
+  color: hsl(var(--foreground)) !important;
+  background-color: hsl(var(--background)) !important;
+}
+
+.dark .category-page .input::placeholder {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.dark .category-page .select-trigger:hover,
+.dark .category-page .input:hover,
+.dark .category-page [type='button']:hover,
+.dark .category-page button:hover {
+  border-color: hsl(var(--primary)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.dark .category-page .select-trigger:focus,
+.dark .category-page .input:focus {
+  border-color: hsl(var(--primary)) !important;
+  ring-color: hsl(var(--primary) / 0.3) !important;
+}
+
+/* Select 드롭다운 내용 다크 모드 */
+.dark .category-page [data-radix-select-content] {
+  background-color: hsl(var(--popover)) !important;
+  border-color: hsl(var(--border)) !important;
+  color: hsl(var(--popover-foreground)) !important;
+}
+
+.dark .category-page [data-radix-select-item] {
+  background-color: hsl(var(--popover)) !important;
+  color: hsl(var(--popover-foreground)) !important;
+}
+
+.dark .category-page [data-radix-select-item][data-highlighted] {
+  background-color: hsl(var(--accent)) !important;
+  color: hsl(var(--accent-foreground)) !important;
 }
 
 /* 버튼 스타일 */
@@ -215,6 +317,33 @@
   color: hsl(var(--primary-dark));
 }
 
+/* 다크 모드용 아이콘 스타일 */
+.dark .category-page .lucide-icon,
+.dark .category-page svg {
+  color: hsl(var(--foreground)) !important;
+  stroke: hsl(var(--foreground)) !important;
+}
+
+/* 다크 모드 버튼 스타일 강화 */
+.dark .category-page button {
+  background-color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+
+.dark .category-page button:hover {
+  background-color: hsl(var(--muted)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.dark .category-page button[class*="bg-"] {
+  opacity: 0.9 !important;
+}
+
+.dark .category-page button[class*="bg-"]:hover {
+  opacity: 1 !important;
+}
+
 /* 체크박스 스타일 */
 .category-page [type='checkbox'] {
   border-color: hsl(var(--primary-dark));
@@ -229,10 +358,26 @@
   border-color: hsl(var(--primary-dark));
 }
 
+/* 다크 모드용 체크박스 스타일 */
+.dark .category-page [type='checkbox'] {
+  border-color: hsl(var(--border));
+  background-color: hsl(var(--background));
+}
+
+.dark .category-page [type='checkbox']:checked {
+  background-color: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+}
+
+.dark .category-page [type='checkbox']:hover {
+  border-color: hsl(var(--primary));
+}
+
 /* 페이지네이션 스타일 */
 .category-page .pagination button {
   border-color: hsl(var(--primary-dark));
   color: hsl(var(--primary-dark));
+  background-color: hsl(var(--background));
 }
 
 .category-page .pagination button:hover {
@@ -243,6 +388,116 @@
 .category-page .pagination button.active {
   background-color: hsl(var(--primary-dark));
   color: hsl(var(--primary-light));
+}
+
+/* 다크 모드용 페이지네이션 스타일 */
+.dark .category-page .pagination button {
+  border-color: hsl(var(--border));
+  color: hsl(var(--foreground));
+  background-color: hsl(var(--background));
+}
+
+.dark .category-page .pagination button:hover {
+  background-color: hsl(var(--muted));
+  border-color: hsl(var(--primary));
+}
+
+.dark .category-page .pagination button.active {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+/* 통계 페이지 스타일 (레거시) */
+.statistics-cell {
+  @apply bg-background;
+}
+
+.dark .statistics-cell {
+  background-color: hsl(var(--secondary)) !important;
+}
+
+/* 재사용 가능한 페이지 컨테이너 스타일 */
+.content-area {
+  @apply bg-background;
+}
+
+.dark .content-area {
+  background-color: hsl(var(--secondary)) !important;
+}
+
+/* 재사용 가능한 데이터 테이블 스타일 */
+.data-table-container {
+  @apply bg-card border-border;
+}
+
+.dark .data-table-container {
+  @apply bg-card border-border;
+}
+
+/* 모든 페이지에 적용되는 테이블 행 hover 스타일 */
+.data-table-container tbody tr:hover,
+.statistics-cell tbody tr:hover,
+.content-area tbody tr:hover {
+  @apply bg-muted;
+}
+
+.dark .data-table-container tbody tr:hover,
+.dark .statistics-cell tbody tr:hover,
+.dark .content-area tbody tr:hover {
+  background-color: hsl(240 3.7% 25%) !important;
+}
+
+.dark .data-table-container tbody tr:hover td,
+.dark .statistics-cell tbody tr:hover td,
+.dark .content-area tbody tr:hover td {
+  color: hsl(var(--background)) !important;
+}
+
+/* 통계 차트 컨테이너 */
+.statistics-cell .h-\[400px\] {
+  @apply bg-card;
+}
+
+.dark .statistics-cell .h-\[400px\] {
+  @apply bg-card;
+}
+
+/* 통계 테이블 스타일 */
+.statistics-cell table {
+  @apply bg-card;
+}
+
+.dark .statistics-cell table {
+  @apply bg-card;
+}
+
+.statistics-cell th {
+  @apply bg-muted text-foreground;
+}
+
+.dark .statistics-cell th {
+  @apply bg-muted text-foreground;
+}
+
+.statistics-cell td {
+  @apply text-foreground;
+}
+
+.dark .statistics-cell td {
+  @apply text-foreground;
+}
+
+/* 테이블 행 hover 스타일 개선 */
+.statistics-cell tbody tr:hover {
+  @apply bg-muted;
+}
+
+.dark .statistics-cell tbody tr:hover {
+  background-color: hsl(240 3.7% 25%) !important; /* 15.9%에서 25%로 더 밝게 */
+}
+
+.dark .statistics-cell tbody tr:hover td {
+  color: hsl(var(--background)) !important;
 }
 
 /* 모달 스타일 */
@@ -484,13 +739,15 @@
 }
 
 /* 다크 모드에서의 코드 블록 스타일 */
-[data-theme='dark'] .wmde-markdown pre.code-highlight {
+[data-theme='dark'] .wmde-markdown pre.code-highlight,
+.dark .wmde-markdown pre.code-highlight {
   background-color: #1e293b !important; /* 다크 배경 */
   border: 1px solid #334155 !important; /* 다크 테두리 */
   color: #e2e8f0 !important; /* 밝은 텍스트 */
 }
 
-[data-theme='dark'] .wmde-markdown .code-line {
+[data-theme='dark'] .wmde-markdown .code-line,
+.dark .wmde-markdown .code-line {
   color: #e2e8f0 !important; /* 다크 모드에서 밝은 텍스트 */
 }
 
@@ -511,12 +768,14 @@
   background-color: #f1f5f9;
 }
 
-[data-theme='dark'] .wmde-markdown .copied {
+[data-theme='dark'] .wmde-markdown .copied,
+.dark .wmde-markdown .copied {
   background-color: rgba(30, 41, 59, 0.9);
   border: 1px solid #475569;
   color: #e2e8f0;
 }
 
-[data-theme='dark'] .wmde-markdown .copied:hover {
+[data-theme='dark'] .wmde-markdown .copied:hover,
+.dark .wmde-markdown .copied:hover {
   background-color: #334155;
 }

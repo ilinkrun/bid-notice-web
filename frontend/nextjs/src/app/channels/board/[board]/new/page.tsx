@@ -52,7 +52,7 @@ const CREATE_POST = `
 `;
 
 // 추가: 커스텀 스타일 클래스
-const inputClass = "text-gray-800 focus:placeholder:text-transparent focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-200";
+const inputClass = "text-foreground focus:placeholder:text-transparent focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-200";
 
 // 마크다운을 HTML로 변환하는 함수
 const convertMarkdownToHtml = (markdown: string): string => {
@@ -402,7 +402,7 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
                         파일을 업로드하는 중... {uploadProgress > 0 ? `${Math.round(uploadProgress)}%` : ''}
                       </div>
                       {uploadProgress > 0 && (
-                        <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="w-full bg-muted rounded-full h-2">
                           <div 
                             className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                             style={{ width: `${uploadProgress}%` }}
@@ -431,7 +431,7 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
                       >
                         📎 파일 업로드
                       </label>
-                      <span className="text-xs text-gray-500">또는 파일을 드래그해서 놓으세요</span>
+                      <span className="text-xs text-muted-foreground">또는 파일을 드래그해서 놓으세요</span>
                     </div>
                     <div
                       onDrop={async (event) => {

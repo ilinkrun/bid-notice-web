@@ -392,9 +392,9 @@ export function NoticeStatisticsTable({
                   {statisticsType === 'organization' && (
                     <TableHead className="w-[60px] text-center">번호</TableHead>
                   )}
-                  <TableHead 
+                  <TableHead
                     className={cn(
-                      "w-[100px]", 
+                      "w-[100px]",
                       statisticsType === 'organization' && "cursor-pointer hover:text-primary",
                       statisticsType === 'organization' && sortColumn === 'orgName' && "text-primary font-medium"
                     )}

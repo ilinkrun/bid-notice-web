@@ -3,6 +3,7 @@ import { NoticeStatisticsTable } from '@/components/statistics/NoticeStatisticsT
 import ApolloWrapper from '@/components/providers/ApolloWrapper';
 import { getClient } from '@/lib/api/graphqlClient';
 import { gql } from '@apollo/client';
+import { PageContainer } from '@/components/shared/PageContainer';
 
 export const metadata: Metadata = {
   title: '입찰공고 통계 | ILMAC BID',
@@ -59,19 +60,16 @@ export default async function NoticeStatisticsPage({ searchParams }: PageProps) 
   const noticesStatistics = await getNoticesStatistics(validGap);
 
   return (
-    <div className="theme-default">
-      <div className="container mx-auto">
-        <h1 className="text-xl font-bold pt-1 pl-1">입찰공고 통계</h1>
-        <div className="statistics-cell overflow-auto">
-          <ApolloWrapper>
-            <NoticeStatisticsTable 
-              initialData={noticesStatistics} 
-              defaultGap={validGap.toString()}
-              defaultViewType={validMode}
-            />
-          </ApolloWrapper>
-        </div>
+    <PageContainer title="입찰공고 통계">
+      <div className="statistics-cell overflow-auto">
+        <ApolloWrapper>
+          <NoticeStatisticsTable
+            initialData={noticesStatistics}
+            defaultGap={validGap.toString()}
+            defaultViewType={validMode}
+          />
+        </ApolloWrapper>
       </div>
-    </div>
+    </PageContainer>
   );
 }

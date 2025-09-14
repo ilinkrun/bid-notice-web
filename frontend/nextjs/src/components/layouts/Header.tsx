@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { useMutation } from '@apollo/client';
 import { gql } from '@apollo/client';
 import { getClient } from '@/lib/api/graphqlClient';
@@ -38,6 +39,8 @@ import {
   Award,
   LogOut,
   UserCircle,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -201,12 +204,12 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ label, icon: Icon, items, a
 
   if (isMobile) {
     return (
-      <div className="w-full py-2 bg-white">
+      <div className="w-full py-2 bg-background">
         <button
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
-            "flex items-center justify-between w-full px-4 py-2 transition-colors bg-white",
-            isOpen ? "bg-gray-100" : "hover:bg-gray-50"
+            "flex items-center justify-between w-full px-4 py-2 transition-colors bg-background",
+            isOpen ? "bg-accent" : "hover:bg-accent/50"
           )}
         >
           <div className="flex items-center gap-2">
@@ -219,7 +222,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ label, icon: Icon, items, a
           )} />
         </button>
         {isOpen && (
-          <div className="w-full bg-white py-2">
+          <div className="w-full bg-background py-2">
             {items.map((item) => (
               <button
                 key={item.href}
@@ -231,8 +234,8 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ label, icon: Icon, items, a
                   navigate(item.href);
                 }}
                 className={cn(
-                  "flex items-center gap-2 px-6 py-2 transition-colors hover:bg-gray-100 w-full text-left",
-                  pathname === item.href && "bg-gray-100"
+                  "flex items-center gap-2 px-6 py-2 transition-colors hover:bg-accent/50 w-full text-left",
+                  pathname === item.href && "bg-accent"
                 )}
               >
                 <item.icon className="h-4 w-4" />
@@ -349,6 +352,28 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ user, size = 'sm' }) => {
     )}>
       {initials}
     </div>
+  );
+};
+
+// 테마 토글 버튼 컴포넌트
+const ThemeToggle: React.FC = () => {
+  const { theme, toggleTheme } = useTheme();
+
+  return (
+    <button
+      onClick={toggleTheme}
+      className={cn(
+        "flex items-center justify-center p-2 rounded-full transition-colors",
+        "hover:bg-accent/50 dark:hover:bg-accent/50"
+      )}
+      aria-label={theme === 'light' ? '다크 모드로 전환' : '라이트 모드로 전환'}
+    >
+      {theme === 'light' ? (
+        <Moon className="h-4 w-4" />
+      ) : (
+        <Sun className="h-4 w-4" />
+      )}
+    </button>
   );
 };
 
@@ -537,18 +562,22 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
           <div className="flex items-center">
             {/* 로그인 상태에 따른 조건부 렌더링 */}
             {isAuthenticated ? (
-              <div className="mr-4">
+              <div className="mr-2">
                 <UserDropdown />
               </div>
             ) : (
               <Link
                 href="/login"
-                className="flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary mr-4"
+                className="flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary mr-2"
               >
                 <User className="h-4 w-4" />
                 <span>로그인</span>
               </Link>
             )}
+            {/* 테마 토글 버튼 */}
+            <div className="mr-4">
+              <ThemeToggle />
+            </div>
             <button
               className="md:hidden"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -565,16 +594,16 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
 
       {/* 모바일 메뉴 패널 */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 top-14 bg-white z-50 md:hidden border-t">
-          <nav className="container py-4 bg-white">
+        <div className="fixed inset-0 top-14 bg-background z-50 md:hidden border-t">
+          <nav className="container py-4 bg-background">
             {/* 모바일 사용자 정보 (로그인 상태일 때만) */}
             {isAuthenticated && (
-              <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+              <div className="mb-4 p-4 bg-muted rounded-lg">
                 <UserDropdown />
               </div>
             )}
 
-            <div className="flex flex-col divide-y bg-white">
+            <div className="flex flex-col divide-y bg-background">
               {/* 공고 목록 - 모든 역할 접근 가능 */}
               <DropdownMenu label="공고 목록" icon={Star} items={notices} isMobile setIsMobileMenuOpen={setIsMobileMenuOpen} />
 
@@ -600,11 +629,11 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
 
               {/* 모바일 로그인 링크 (비로그인 상태일 때만) */}
               {!isAuthenticated && (
-                <div className="py-2 bg-white">
+                <div className="py-2 bg-background">
                   <Link
                     href="/login"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2 transition-colors hover:bg-gray-100 w-full"
+                    className="flex items-center gap-2 px-4 py-2 transition-colors hover:bg-accent/50 w-full"
                   >
                     <User className="h-4 w-4" />
                     <span>로그인</span>

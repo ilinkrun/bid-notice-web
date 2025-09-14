@@ -75,7 +75,7 @@ export function ErrorScrapingTable({ initialData }: ErrorScrapingTableProps) {
           <CardTitle>스크래핑 오류 통계</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-red-500">
+          <div className="text-destructive">
             <p>데이터를 불러오는 중 오류가 발생했습니다.</p>
             <p>{error.message}</p>
           </div>

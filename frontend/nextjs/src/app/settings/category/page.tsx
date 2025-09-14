@@ -3,6 +3,7 @@ import { SettingsCategoryTable } from '@/components/settings/SettingsCategoryTab
 import ApolloWrapper from '@/components/providers/ApolloWrapper';
 import { getClient } from '@/lib/api/graphqlClient';
 import { gql } from '@apollo/client';
+import { PageContainer } from '@/components/shared/PageContainer';
 
 export const metadata: Metadata = {
   title: '입찰공고 카테고리 설정 목록 | ILMAC BID',
@@ -41,13 +42,10 @@ export default async function SettingsCategoryPage() {
   const settingsCategorys = await getSettingsCategorys();
 
   return (
-    <div className="theme-default">
-      <div className="container mx-auto">
-        <h1 className="text-xl font-bold pt-1 pl-1">입찰공고 카테고리 설정 목록</h1>
-        <ApolloWrapper>
-          <SettingsCategoryTable initialData={settingsCategorys} />
-        </ApolloWrapper>
-      </div>
-    </div>
+    <PageContainer title="입찰공고 카테고리 설정 목록">
+      <ApolloWrapper>
+        <SettingsCategoryTable initialData={settingsCategorys} />
+      </ApolloWrapper>
+    </PageContainer>
   );
 } 

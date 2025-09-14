@@ -7,8 +7,8 @@ export default function TestPage() {
       
       <div className="space-y-4">
         {/* 기본 스타일링 테스트 */}
-        <div className="bg-slate-100 p-4 rounded-lg shadow">
-          <p className="text-lg text-gray-800">기본 스타일링 테스트</p>
+        <div className="bg-muted p-4 rounded-lg shadow">
+          <p className="text-lg text-foreground">기본 스타일링 테스트</p>
         </div>
 
         {/* Flexbox 테스트 */}

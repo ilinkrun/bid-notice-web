@@ -12,20 +12,22 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
-import { 
-  User, 
-  Mail, 
-  Calendar, 
-  Shield, 
-  Building, 
-  Edit, 
-  Save, 
-  X, 
-  Eye, 
+import {
+  User,
+  Mail,
+  Calendar,
+  Shield,
+  Building,
+  Edit,
+  Save,
+  X,
+  Eye,
   EyeOff,
   ArrowLeft,
   Camera
 } from 'lucide-react';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { DarkModeButton, DarkModeInput, DarkModeLabel } from '@/components/shared/FormComponents';
 
 const UPDATE_PROFILE_MUTATION = gql`
   mutation UpdateUserProfile($token: String!, $input: UpdateUserInput!) {
@@ -297,10 +299,10 @@ export default function ProfilePage() {
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'admin': return 'bg-red-100 text-red-800';
-      case 'manager': return 'bg-blue-100 text-blue-800';
-      case 'viewer': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-green-100 text-green-800';
+      case 'admin': return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
+      case 'manager': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400';
+      case 'viewer': return 'bg-muted text-foreground';
+      default: return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
     }
   };
 
@@ -309,19 +311,19 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="theme-default">
-      <div className="container mx-auto py-6 max-w-4xl">
+    <PageContainer>
+      <div className="py-6 max-w-4xl mx-auto">
         {/* 헤더 */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
-            <Button
+            <DarkModeButton
               variant="ghost"
               onClick={() => router.back()}
               className="flex items-center gap-2"
             >
               <ArrowLeft className="h-4 w-4" />
               <span>뒤로가기</span>
-            </Button>
+            </DarkModeButton>
             <h1 className="text-2xl font-bold">사용자 정보</h1>
           </div>
         </div>
@@ -394,7 +396,7 @@ export default function ProfilePage() {
                     <Mail className="h-4 w-4" />
                     이메일
                   </Label>
-                  <Input value={user.email} disabled className="bg-gray-50" />
+                  <Input value={user.email} disabled className="bg-muted" />
                 </div>
 
                 {/* 이름 */}
@@ -411,7 +413,7 @@ export default function ProfilePage() {
                       placeholder="이름을 입력하세요"
                     />
                   ) : (
-                    <Input value={user.name} disabled className="bg-gray-50" />
+                    <Input value={user.name} disabled className="bg-muted" />
                   )}
                 </div>
 
@@ -429,7 +431,7 @@ export default function ProfilePage() {
                       placeholder="부서를 입력하세요"
                     />
                   ) : (
-                    <Input value={user.department || '없음'} disabled className="bg-gray-50" />
+                    <Input value={user.department || '없음'} disabled className="bg-muted" />
                   )}
                 </div>
 
@@ -479,7 +481,7 @@ export default function ProfilePage() {
                     <Calendar className="h-4 w-4" />
                     가입일
                   </Label>
-                  <Input value={formatDate(user.createdAt)} disabled className="bg-gray-50" />
+                  <Input value={formatDate(user.createdAt)} disabled className="bg-muted" />
                 </div>
 
                 <div>
@@ -487,7 +489,7 @@ export default function ProfilePage() {
                     <Calendar className="h-4 w-4" />
                     마지막 로그인
                   </Label>
-                  <Input value={formatDate(user.lastLoginAt)} disabled className="bg-gray-50" />
+                  <Input value={formatDate(user.lastLoginAt)} disabled className="bg-muted" />
                 </div>
               </div>
             </CardContent>
@@ -534,9 +536,9 @@ export default function ProfilePage() {
                       onClick={() => setShowPasswords(prev => ({ ...prev, current: !prev.current }))}
                     >
                       {showPasswords.current ? (
-                        <EyeOff className="h-4 w-4 text-gray-400" />
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
                       ) : (
-                        <Eye className="h-4 w-4 text-gray-400" />
+                        <Eye className="h-4 w-4 text-muted-foreground" />
                       )}
                     </button>
                   </div>
@@ -560,9 +562,9 @@ export default function ProfilePage() {
                       onClick={() => setShowPasswords(prev => ({ ...prev, new: !prev.new }))}
                     >
                       {showPasswords.new ? (
-                        <EyeOff className="h-4 w-4 text-gray-400" />
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
                       ) : (
-                        <Eye className="h-4 w-4 text-gray-400" />
+                        <Eye className="h-4 w-4 text-muted-foreground" />
                       )}
                     </button>
                   </div>
@@ -586,9 +588,9 @@ export default function ProfilePage() {
                       onClick={() => setShowPasswords(prev => ({ ...prev, confirm: !prev.confirm }))}
                     >
                       {showPasswords.confirm ? (
-                        <EyeOff className="h-4 w-4 text-gray-400" />
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
                       ) : (
-                        <Eye className="h-4 w-4 text-gray-400" />
+                        <Eye className="h-4 w-4 text-muted-foreground" />
                       )}
                     </button>
                   </div>
@@ -619,6 +621,6 @@ export default function ProfilePage() {
           </Card>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 }

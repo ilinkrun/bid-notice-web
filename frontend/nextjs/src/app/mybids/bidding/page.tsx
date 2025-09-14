@@ -3,6 +3,7 @@ import { getClient } from '@/lib/api/graphqlClient';
 import MybidTable from '@/components/mybids/MybidTable';
 import ApolloWrapper from '@/components/providers/ApolloWrapper';
 import UnifiedDataLoadingWrapper from '@/components/shared/UnifiedDataLoadingWrapper';
+import { PageContainer } from '@/components/shared/PageContainer';
 import '../../themes.css';
 
 const GET_BIDDING_BIDS = gql`
@@ -45,12 +46,12 @@ export default async function BiddingPage() {
   const bids = await getBiddingBids();
 
   return (
-    <div className="theme-etc">
+    <PageContainer>
       <ApolloWrapper>
         <UnifiedDataLoadingWrapper data={bids}>
           <MybidTable bids={bids} currentStatus="bidding" />
         </UnifiedDataLoadingWrapper>
       </ApolloWrapper>
-    </div>
+    </PageContainer>
   );
 }

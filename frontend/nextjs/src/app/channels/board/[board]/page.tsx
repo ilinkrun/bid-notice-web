@@ -6,30 +6,13 @@ import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
 import { useUnifiedLoading } from '@/components/providers/UnifiedLoadingProvider';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from "@/components/ui/card";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
-import { 
-  Tabs, 
+import {
+  Tabs,
   TabsContent,
-  TabsList, 
-  TabsTrigger 
+  TabsList,
+  TabsTrigger
 } from '@/components/ui/tabs';
-import { 
-  Button 
-} from '@/components/ui/button';
-import { 
-  Input 
-} from '@/components/ui/input';
-import { 
-  Textarea 
-} from '@/components/ui/textarea';
-import { 
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -37,20 +20,23 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
-import { 
-  AlertDialog, 
-  AlertDialogAction, 
-  AlertDialogCancel, 
-  AlertDialogContent, 
-  AlertDialogDescription, 
-  AlertDialogFooter, 
-  AlertDialogHeader, 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog';
-import { 
-  Plus, 
-  Search, 
-  ArrowLeft, 
+import {
+  Textarea
+} from '@/components/ui/textarea';
+import {
+  Plus,
+  Search,
+  ArrowLeft,
   ArrowRight,
   Code,
   Eye,
@@ -58,6 +44,9 @@ import {
   Hash
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { DataTable, DataTableHeader, DataTableBody, DataTableRow, DataTableCell } from '@/components/shared/DataTable';
+import { DarkModeButton, DarkModeInput } from '@/components/shared/FormComponents';
 
 import Comments from '@/components/board/Comments';
 
@@ -159,8 +148,8 @@ const DELETE_POST = `
 `;
 
 // 추가: 커스텀 스타일 클래스
-const inputClass = "text-gray-800 focus:placeholder:text-transparent focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-200";
-const textareaClass = "text-gray-800 focus:placeholder:text-transparent focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-200";
+const inputClass = "text-foreground focus:placeholder:text-transparent focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-200";
+const textareaClass = "text-foreground focus:placeholder:text-transparent focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-200";
 
 export default function BoardPage({ params }: { params: Promise<any> }) {
   const { board } = use(params);
@@ -793,7 +782,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
 
 
   return (
-    <div className="w-full">
+    <PageContainer>
       <Card className="border-0 shadow-none">
         <CardContent className="p-0">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -810,88 +799,87 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                     </Tabs>
                     <div className="relative w-[300px]">
                       <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input
+                      <DarkModeInput
                         placeholder="제목 또는 작성자로 검색"
-                        className={`pl-8 ${inputClass}`}
+                        className="pl-8"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                       />
                     </div>
                   </div>
-                  <Button onClick={() => {
+                  <DarkModeButton onClick={() => {
                     navigate(`/channels/board/${board}/new?format=markdown`);
                   }}>
                     <Plus className="mr-2 h-4 w-4" />
                     글쓰기
-                  </Button>
+                  </DarkModeButton>
                 </>
               )}
             </div>
 
             <TabsContent value="list">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[50px]">번호</TableHead>
-                    <TableHead>제목</TableHead>
-                    <TableHead className="w-[100px]">작성자</TableHead>
-                    <TableHead className="w-[100px]">작성일</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+              <DataTable>
+                <DataTableHeader>
+                  <DataTableRow isHoverable={false}>
+                    <DataTableCell isHeader className="w-[50px]">번호</DataTableCell>
+                    <DataTableCell isHeader>제목</DataTableCell>
+                    <DataTableCell isHeader className="w-[100px]">작성자</DataTableCell>
+                    <DataTableCell isHeader className="w-[100px]">작성일</DataTableCell>
+                  </DataTableRow>
+                </DataTableHeader>
+                <DataTableBody>
                   {error ? (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center py-4 text-red-500">
+                    <DataTableRow isHoverable={false}>
+                      <DataTableCell className="text-center py-4 text-red-500" colSpan={4}>
                         {error}
-                      </TableCell>
-                    </TableRow>
+                      </DataTableCell>
+                    </DataTableRow>
                   ) : filteredPosts.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center py-4">
+                    <DataTableRow isHoverable={false}>
+                      <DataTableCell className="text-center py-4" colSpan={4}>
                         검색 결과가 없습니다.
-                      </TableCell>
-                    </TableRow>
+                      </DataTableCell>
+                    </DataTableRow>
                   ) : (
                     filteredPosts.map((post) => (
-                      <TableRow 
+                      <DataTableRow
                         key={post.id}
-                        className="cursor-pointer hover:bg-muted/50"
                         onClick={() => navigate(`/channels/board/${board}/${post.id}`)}
                       >
-                        <TableCell>{post.id}</TableCell>
-                        <TableCell className="max-w-[400px] truncate">
+                        <DataTableCell>{post.id}</DataTableCell>
+                        <DataTableCell className="max-w-[400px] truncate">
                           {post.is_notice && <span className="text-red-600 font-semibold">[공지] </span>}
-                          {post.is_private && <span className="text-gray-600 font-semibold">[비공개] </span>}
+                          {post.is_private && <span className="text-muted-foreground font-semibold">[비공개] </span>}
                           {post.title}
-                        </TableCell>
-                        <TableCell>{post.writer}</TableCell>
-                        <TableCell>{formatDate(post.created_at)}</TableCell>
-                      </TableRow>
+                        </DataTableCell>
+                        <DataTableCell>{post.writer}</DataTableCell>
+                        <DataTableCell>{formatDate(post.created_at)}</DataTableCell>
+                      </DataTableRow>
                     ))
                   )}
-                </TableBody>
-              </Table>
+                </DataTableBody>
+              </DataTable>
             </TabsContent>
 
             <TabsContent value="detail">
               {selectedPost && (
                 <div>
                   <div className="flex justify-between items-center mb-4">
-                    <Button variant="outline" onClick={() => {
+                    <DarkModeButton variant="outline" onClick={() => {
                       setActiveTab('list');
                       setSelectedPost(null);
                       setIsEditMode(false);
                     }}>
                       목록으로
-                    </Button>
+                    </DarkModeButton>
                     {!isEditMode && (
                       <div className="flex space-x-2">
-                        <Button variant="outline" onClick={handleEditToggle}>
+                        <DarkModeButton variant="outline" onClick={handleEditToggle}>
                           수정
-                        </Button>
-                        <Button variant="destructive" onClick={handleDeleteClick}>
+                        </DarkModeButton>
+                        <DarkModeButton variant="destructive" onClick={handleDeleteClick}>
                           삭제
-                        </Button>
+                        </DarkModeButton>
                       </div>
                     )}
                   </div>
@@ -902,10 +890,10 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                         <h2 className="text-2xl font-bold mb-2">
                           {isEditMode ? (
                             <div>
-                              <Input
+                              <DarkModeInput
                                 value={selectedPost.title}
                                 onChange={(e) => setSelectedPost({ ...selectedPost, title: e.target.value })}
-                                className={`text-2xl font-bold ${inputClass}`}
+                                className="text-2xl font-bold"
                               />
                               {/* 공지글/비공개글 체크박스 */}
                               <div className="flex gap-4 mt-2">
@@ -1018,7 +1006,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                             ) : (
                               <>
                                 <div className="flex justify-end mb-2">
-                                  <Button 
+                                  <DarkModeButton
                                     variant="outline"
                                     size="sm"
                                     onClick={() => setIsSourceMode(!isSourceMode)}
@@ -1035,7 +1023,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                                         <span>HTML</span>
                                       </>
                                     )}
-                                  </Button>
+                                  </DarkModeButton>
                                 </div>
                                 {isSourceMode ? (
                                   <div 
@@ -1100,15 +1088,15 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
 
                       {isEditMode && (
                         <div className="flex justify-end space-x-2">
-                          <Button variant="outline" onClick={() => {
+                          <DarkModeButton variant="outline" onClick={() => {
                             setIsEditMode(false);
                             setIsSourceMode(false);
                           }}>
                             취소
-                          </Button>
-                          <Button onClick={handleSaveEdit}>
+                          </DarkModeButton>
+                          <DarkModeButton onClick={handleSaveEdit}>
                             저장
-                          </Button>
+                          </DarkModeButton>
                         </div>
                       )}
                     </div>
@@ -1160,12 +1148,12 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                         <label htmlFor="title" className="block text-sm font-medium mb-1">
                           제목
                         </label>
-                        <Input
+                        <DarkModeInput
                           id="title"
                           value={newPost.title}
                           onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
                           placeholder="게시글 제목을 입력하세요"
-                          className={`text-lg font-medium ${inputClass}`}
+                          className="text-lg font-medium"
                         />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
@@ -1173,12 +1161,11 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                           <label htmlFor="author" className="block text-sm font-medium mb-1">
                             작성자
                           </label>
-                          <Input
+                          <DarkModeInput
                             id="author"
                             value={newPost.writer}
                             onChange={(e) => setNewPost({ ...newPost, writer: e.target.value })}
                             placeholder="작성자 이름을 입력하세요"
-                            className={inputClass}
                           />
                         </div>
                       </div>
@@ -1223,7 +1210,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                       ) : (
                         <>
                           <div className="flex justify-end mb-2">
-                            <Button
+                            <DarkModeButton
                               variant="outline"
                               size="sm"
                               onClick={() => setIsSourceMode(!isSourceMode)}
@@ -1240,7 +1227,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                                   <span>HTML</span>
                                 </>
                               )}
-                            </Button>
+                            </DarkModeButton>
                           </div>
                           {isSourceMode ? (
                             <div 
@@ -1288,15 +1275,15 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                     </div>
 
                     <div className="flex justify-end space-x-2">
-                      <Button
+                      <DarkModeButton
                         variant="outline"
                         onClick={() => setActiveTab('list')}
                       >
                         취소
-                      </Button>
-                      <Button onClick={handleCreatePost}>
+                      </DarkModeButton>
+                      <DarkModeButton onClick={handleCreatePost}>
                         저장
-                      </Button>
+                      </DarkModeButton>
                     </div>
                   </div>
                 </div>
@@ -1305,7 +1292,6 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
           </Tabs>
         </CardContent>
       </Card>
-
 
       {/* 삭제 확인 다이얼로그 */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
@@ -1336,21 +1322,19 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
               <div className="space-y-4 py-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">제목</label>
-                  <Input
+                  <DarkModeInput
                     value={newPost.title}
                     onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
                     placeholder="제목을 입력하세요"
-                    className={inputClass}
                   />
                 </div>
                 
                 <div>
                   <label className="block text-sm font-medium mb-1">작성자</label>
-                  <Input
+                  <DarkModeInput
                     value={newPost.writer}
                     onChange={(e) => setNewPost({ ...newPost, writer: e.target.value })}
                     placeholder="작성자를 입력하세요"
-                    className={inputClass}
                   />
                 </div>
                 
@@ -1358,13 +1342,13 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                 <div>
                   <div className="flex justify-between items-center mb-1">
                     <label className="block text-sm font-medium">내용</label>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
+                    <DarkModeButton
+                      variant="ghost"
+                      size="sm"
                       onClick={() => setIsSourceMode(!isSourceMode)}
                     >
                       {isSourceMode ? <Eye className="h-4 w-4" /> : <Code className="h-4 w-4" />}
-                    </Button>
+                    </DarkModeButton>
                   </div>
                   
                   {isSourceMode ? (
@@ -1411,17 +1395,17 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                <DarkModeButton variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
                   취소
-                </Button>
-                <Button onClick={handleCreatePost}>
+                </DarkModeButton>
+                <DarkModeButton onClick={handleCreatePost}>
                   작성
-                </Button>
+                </DarkModeButton>
               </DialogFooter>
             </>
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </PageContainer>
   );
 } 

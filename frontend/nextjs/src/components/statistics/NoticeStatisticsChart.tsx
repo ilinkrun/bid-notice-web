@@ -10,7 +10,7 @@ import {
   Legend,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Select,
   SelectContent,
@@ -65,6 +65,26 @@ interface NoticeStatisticsChartProps {
 export function NoticeStatisticsChart({ data, type }: NoticeStatisticsChartProps) {
   // 선택된 항목 상태 관리
   const [selectedItem, setSelectedItem] = useState<string>('전체');
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // 다크 모드 감지
+  useEffect(() => {
+    const checkDarkMode = () => {
+      const isDark = document.documentElement.classList.contains('dark');
+      setIsDarkMode(isDark);
+    };
+
+    checkDarkMode();
+
+    // MutationObserver로 다크 모드 변경 감지
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   // 지역별 색상 매핑
   const REGION_COLORS = {
@@ -253,6 +273,10 @@ export function NoticeStatisticsChart({ data, type }: NoticeStatisticsChartProps
     })),
   };
 
+  // 다크 모드에 따른 색상 설정
+  const textColor = isDarkMode ? '#e5e7eb' : '#374151'; // gray-200 : gray-700
+  const gridColor = isDarkMode ? '#374151' : '#e5e7eb'; // gray-700 : gray-200
+
   const options = {
     responsive: true,
     maintainAspectRatio: false,
@@ -263,8 +287,16 @@ export function NoticeStatisticsChart({ data, type }: NoticeStatisticsChartProps
     plugins: {
       legend: {
         position: 'top' as const,
+        labels: {
+          color: textColor,
+        },
       },
       tooltip: {
+        backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+        titleColor: textColor,
+        bodyColor: textColor,
+        borderColor: gridColor,
+        borderWidth: 1,
         callbacks: {
           title: (context: any) => {
             const dataIndex = context[0].dataIndex;
@@ -287,7 +319,8 @@ export function NoticeStatisticsChart({ data, type }: NoticeStatisticsChartProps
         },
         reverse: true,
         ticks: {
-          callback: function(val: any, index: number) {
+          color: textColor,
+          callback: function(_val: any, index: number) {
             const date = allDates[index];
             if (type === 'category') {
               const item = data as CategoryChartData[];
@@ -306,12 +339,17 @@ export function NoticeStatisticsChart({ data, type }: NoticeStatisticsChartProps
         stacked: true,
         beginAtZero: true,
         max: leftAxisMax,
+        grid: {
+          color: gridColor,
+        },
         ticks: {
+          color: textColor,
           stepSize: leftAxisUnit,
         },
         title: {
           display: true,
           text: type === 'category' ? '유형별 공고 수' : '지역별 공고 수',
+          color: textColor,
         },
       },
       y1: type === 'category' ? {
@@ -324,11 +362,13 @@ export function NoticeStatisticsChart({ data, type }: NoticeStatisticsChartProps
           drawOnChartArea: false,
         },
         ticks: {
+          color: textColor,
           stepSize: rightAxisUnit,
         },
         title: {
           display: true,
           text: '전체 공고 수',
+          color: textColor,
         },
       } : {
         display: false,

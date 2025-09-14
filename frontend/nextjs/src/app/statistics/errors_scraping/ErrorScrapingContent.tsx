@@ -21,12 +21,14 @@ export default function ErrorScrapingContent({ initialData }: ErrorScrapingConte
   const [viewMode, setViewMode] = useState<'table' | 'chart'>('table');
 
   return (
-    <div className="space-y-4 theme-default">
-      {viewMode === 'table' ? (
-        <ErrorScrapingTable initialData={initialData} />
-      ) : (
-        <ErrorScrapingChart initialData={initialData} />
-      )}
+    <div className="space-y-4 theme-default bg-background dark:bg-secondary min-h-screen">
+      <div className="statistics-cell">
+        {viewMode === 'table' ? (
+          <ErrorScrapingTable initialData={initialData} />
+        ) : (
+          <ErrorScrapingChart initialData={initialData} />
+        )}
+      </div>
     </div>
   );
 } 

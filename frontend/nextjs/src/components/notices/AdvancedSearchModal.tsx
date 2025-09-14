@@ -155,14 +155,14 @@ export function AdvancedSearchModal() {
                               {field.value ? format(field.value, 'PPP', { locale: ko }) : '날짜 선택'}
                             </Button>
                           </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0 bg-white" align="start">
+                          <PopoverContent className="w-auto p-0 bg-card" align="start">
                             <Calendar
                               mode="single"
                               selected={field.value || undefined}
                               onSelect={field.onChange}
                               initialFocus
                               locale={ko}
-                              className="bg-white rounded-md border"
+                              className="bg-card rounded-md border"
                             />
                           </PopoverContent>
                         </Popover>
@@ -195,14 +195,14 @@ export function AdvancedSearchModal() {
                               {field.value ? format(field.value, 'PPP', { locale: ko }) : '날짜 선택'}
                             </Button>
                           </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0 bg-white" align="start">
+                          <PopoverContent className="w-auto p-0 bg-card" align="start">
                             <Calendar
                               mode="single"
                               selected={field.value || undefined}
                               onSelect={field.onChange}
                               initialFocus
                               locale={ko}
-                              className="bg-white rounded-md border"
+                              className="bg-card rounded-md border"
                             />
                           </PopoverContent>
                         </Popover>

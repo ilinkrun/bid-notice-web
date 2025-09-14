@@ -1,13 +1,6 @@
 'use client';
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { DataTable, DataTableHeader, DataTableBody, DataTableRow, DataTableCell } from '@/components/shared/DataTable';
 import { useState, useMemo, useEffect } from 'react';
 import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
 import { useUnifiedLoading } from '@/components/providers/UnifiedLoadingProvider';
@@ -94,88 +87,80 @@ export function SettingsListTable({ initialData }: SettingsListTableProps) {
   }, [initialData, sortConfig]);
 
   return (
-    <>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>
-                <button
-                  onClick={() => handleSort('orgName')}
-                  className={sortConfig.key === 'orgName' ? 'text-red-500' : ''}
-                >
-                  기관명
-                </button>
-              </TableHead>
-              <TableHead>
-                <button
-                  onClick={() => handleSort('url')}
-                  className={sortConfig.key === 'url' ? 'text-red-500' : ''}
-                >
-                  크롤링 URL
-                </button>
-              </TableHead>
-              <TableHead>
-                <button
-                  onClick={() => handleSort('companyInCharge')}
-                  className={sortConfig.key === 'companyInCharge' ? 'text-red-500' : ''}
-                >
-                  담당업체
-                </button>
-              </TableHead>
-              <TableHead>
-                <button
-                  onClick={() => handleSort('orgRegion')}
-                  className={sortConfig.key === 'orgRegion' ? 'text-red-500' : ''}
-                >
-                  지역
-                </button>
-              </TableHead>
-              <TableHead>
-                <button
-                  onClick={() => handleSort('use')}
-                  className={sortConfig.key === 'use' ? 'text-red-500' : ''}
-                >
-                  상태
-                </button>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sortedData.map((item, index) => (
-              <TableRow 
-                key={index}
-                className="cursor-pointer hover:bg-gray-50"
-                onClick={() => handleRowClick(item.oid)}
-              >
-                <TableCell>{item.orgName}</TableCell>
-                <TableCell>
+    <div className="statistics-cell">
+      <DataTable>
+        <DataTableHeader>
+          <DataTableRow isHoverable={false}>
+            <DataTableCell
+              isHeader
+              onClick={() => handleSort('orgName')}
+              className={`cursor-pointer ${sortConfig.key === 'orgName' ? 'text-primary' : ''}`}
+            >
+              기관명
+            </DataTableCell>
+            <DataTableCell
+              isHeader
+              onClick={() => handleSort('url')}
+              className={`cursor-pointer ${sortConfig.key === 'url' ? 'text-primary' : ''}`}
+            >
+              크롤링 URL
+            </DataTableCell>
+            <DataTableCell
+              isHeader
+              onClick={() => handleSort('companyInCharge')}
+              className={`cursor-pointer ${sortConfig.key === 'companyInCharge' ? 'text-primary' : ''}`}
+            >
+              담당업체
+            </DataTableCell>
+            <DataTableCell
+              isHeader
+              onClick={() => handleSort('orgRegion')}
+              className={`cursor-pointer ${sortConfig.key === 'orgRegion' ? 'text-primary' : ''}`}
+            >
+              지역
+            </DataTableCell>
+            <DataTableCell
+              isHeader
+              onClick={() => handleSort('use')}
+              className={`cursor-pointer ${sortConfig.key === 'use' ? 'text-primary' : ''}`}
+            >
+              상태
+            </DataTableCell>
+          </DataTableRow>
+        </DataTableHeader>
+        <DataTableBody>
+          {sortedData.map((item, index) => (
+            <DataTableRow
+              key={index}
+              onClick={() => handleRowClick(item.oid)}
+            >
+              <DataTableCell>{item.orgName}</DataTableCell>
+              <DataTableCell>
                 <a
                   href={detailUrlHref(item.url)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline"
+                  className="text-blue-600 hover:underline dark:text-blue-400"
                   onClick={(e) => e.stopPropagation()}
                 >
                   {detailUrlA(item.url)}
                 </a>
-                </TableCell>
-                <TableCell>{item.companyInCharge || '-'}</TableCell>
-                <TableCell>{item.orgRegion || '-'}</TableCell>
-                <TableCell>
-                  <span className={`px-2 py-1 rounded-full text-xs ${
-                    item.use === 1
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {item.use === 1 ? '활성' : '비활성'}
-                  </span>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    </>
+              </DataTableCell>
+              <DataTableCell>{item.companyInCharge || '-'}</DataTableCell>
+              <DataTableCell>{item.orgRegion || '-'}</DataTableCell>
+              <DataTableCell>
+                <span className={`px-2 py-1 rounded-full text-xs ${
+                  item.use === 1
+                    ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                    : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                }`}>
+                  {item.use === 1 ? '활성' : '비활성'}
+                </span>
+              </DataTableCell>
+            </DataTableRow>
+          ))}
+        </DataTableBody>
+      </DataTable>
+    </div>
   );
 }

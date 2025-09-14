@@ -1,13 +1,6 @@
 'use client';
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { DataTable, DataTableHeader, DataTableBody, DataTableRow, DataTableCell } from '@/components/shared/DataTable';
 import { useState, useMemo } from 'react';
 import { SettingsCategoryEditModal } from './SettingsCategoryEditModal';
 
@@ -63,86 +56,78 @@ export function SettingsCategoryTable({ initialData }: SettingsCategoryTableProp
 
   return (
     <>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>
-                <button
-                  onClick={() => handleSort('sn')}
-                  className={sortConfig.key === 'sn' ? 'text-red-500' : ''}
-                >
-                  번호
-                </button>
-              </TableHead>
-              <TableHead>
-                <button
-                  onClick={() => handleSort('category')}
-                  className={sortConfig.key === 'category' ? 'text-red-500' : ''}
-                >
-                  카테고리
-                </button>
-              </TableHead>
-              <TableHead>
-                <button
-                  onClick={() => handleSort('keywords')}
-                  className={sortConfig.key === 'keywords' ? 'text-red-500' : ''}
-                >
-                  키워드
-                </button>
-              </TableHead>
-              <TableHead>
-                <button
-                  onClick={() => handleSort('minPoint')}
-                  className={sortConfig.key === 'minPoint' ? 'text-red-500' : ''}
-                >
-                  최소점수
-                </button>
-              </TableHead>
-              <TableHead>
-                <button
-                  onClick={() => handleSort('nots')}
-                  className={sortConfig.key === 'nots' ? 'text-red-500' : ''}
-                >
-                  제외어
-                </button>
-              </TableHead>
-              <TableHead>
-                <button
-                  onClick={() => handleSort('creator')}
-                  className={sortConfig.key === 'creator' ? 'text-red-500' : ''}
-                >
-                  생성자
-                </button>
-              </TableHead>
-              <TableHead>
-                <button
-                  onClick={() => handleSort('memo')}
-                  className={sortConfig.key === 'memo' ? 'text-red-500' : ''}
-                >
-                  메모
-                </button>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+      <div className="statistics-cell">
+        <DataTable>
+          <DataTableHeader>
+            <DataTableRow isHoverable={false}>
+              <DataTableCell
+                isHeader
+                onClick={() => handleSort('sn')}
+                className={`cursor-pointer ${sortConfig.key === 'sn' ? 'text-primary' : ''}`}
+              >
+                번호
+              </DataTableCell>
+              <DataTableCell
+                isHeader
+                onClick={() => handleSort('category')}
+                className={`cursor-pointer ${sortConfig.key === 'category' ? 'text-primary' : ''}`}
+              >
+                카테고리
+              </DataTableCell>
+              <DataTableCell
+                isHeader
+                onClick={() => handleSort('keywords')}
+                className={`cursor-pointer ${sortConfig.key === 'keywords' ? 'text-primary' : ''}`}
+              >
+                키워드
+              </DataTableCell>
+              <DataTableCell
+                isHeader
+                onClick={() => handleSort('minPoint')}
+                className={`cursor-pointer ${sortConfig.key === 'minPoint' ? 'text-primary' : ''}`}
+              >
+                최소점수
+              </DataTableCell>
+              <DataTableCell
+                isHeader
+                onClick={() => handleSort('nots')}
+                className={`cursor-pointer ${sortConfig.key === 'nots' ? 'text-primary' : ''}`}
+              >
+                제외어
+              </DataTableCell>
+              <DataTableCell
+                isHeader
+                onClick={() => handleSort('creator')}
+                className={`cursor-pointer ${sortConfig.key === 'creator' ? 'text-primary' : ''}`}
+              >
+                생성자
+              </DataTableCell>
+              <DataTableCell
+                isHeader
+                onClick={() => handleSort('memo')}
+                className={`cursor-pointer ${sortConfig.key === 'memo' ? 'text-primary' : ''}`}
+              >
+                메모
+              </DataTableCell>
+            </DataTableRow>
+          </DataTableHeader>
+          <DataTableBody>
             {sortedData.map((item) => (
-              <TableRow 
+              <DataTableRow
                 key={item.sn}
-                className="cursor-pointer hover:bg-gray-50"
                 onClick={() => handleRowClick(item.sn)}
               >
-                <TableCell>{item.sn}</TableCell>
-                <TableCell>{item.category}</TableCell>
-                <TableCell>{item.keywords}</TableCell>
-                <TableCell>{item.minPoint}</TableCell>
-                <TableCell>{item.nots}</TableCell>
-                <TableCell>{item.creator}</TableCell>
-                <TableCell>{item.memo}</TableCell>
-              </TableRow>
+                <DataTableCell>{item.sn}</DataTableCell>
+                <DataTableCell>{item.category}</DataTableCell>
+                <DataTableCell>{item.keywords}</DataTableCell>
+                <DataTableCell>{item.minPoint}</DataTableCell>
+                <DataTableCell>{item.nots}</DataTableCell>
+                <DataTableCell>{item.creator}</DataTableCell>
+                <DataTableCell>{item.memo}</DataTableCell>
+              </DataTableRow>
             ))}
-          </TableBody>
-        </Table>
+          </DataTableBody>
+        </DataTable>
       </div>
 
       {selectedSn && (

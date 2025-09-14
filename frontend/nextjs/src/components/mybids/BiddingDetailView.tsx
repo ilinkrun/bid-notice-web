@@ -121,7 +121,7 @@ export default function BiddingDetailView({ bid }: BiddingDetailViewProps) {
     const statusDetail = detailData[selectedStatus] || {};
     
     return (
-      <div className="grid gap-4 mt-4 p-4 bg-gray-50 rounded-lg">
+      <div className="grid gap-4 mt-4 p-4 bg-muted rounded-lg">
         {/* 동적으로 detail 필드들 생성 */}
         {Object.entries(statusDetail).map(([key, value]) => (
           <div key={key} className="grid gap-2">
@@ -198,11 +198,11 @@ export default function BiddingDetailView({ bid }: BiddingDetailViewProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <span className={`px-2 py-1 rounded text-sm font-medium ${
-            bid.status === '응찰' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+            bid.status === '응찰' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-muted text-muted-foreground'
           }`}>
             {bid.status}
           </span>
-          <span className="text-sm text-gray-600">입찰 ID: {bid.nid}</span>
+          <span className="text-sm text-muted-foreground">입찰 ID: {bid.nid}</span>
         </div>
         <Button variant="outline">
           <FileText className="w-4 h-4 mr-2" />
@@ -221,21 +221,21 @@ export default function BiddingDetailView({ bid }: BiddingDetailViewProps) {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Building className="w-4 h-4" />
                 발주기관
               </div>
               <p className="font-medium">{bid.orgName}</p>
             </div>
             <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Calendar className="w-4 h-4" />
                 공고일
               </div>
               <p className="font-medium">{bid.postedAt?.split('T')[0]}</p>
             </div>
             <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Award className="w-4 h-4" />
                 분야
               </div>
@@ -260,7 +260,7 @@ export default function BiddingDetailView({ bid }: BiddingDetailViewProps) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {Object.entries(parsedDetail).map(([key, value]) => (
                   <div key={key} className="flex flex-col gap-1">
-                    <span className="text-sm text-gray-500">{key}</span>
+                    <span className="text-sm text-muted-foreground">{key}</span>
                     <span className="font-medium">{String(value)}</span>
                   </div>
                 ))}
@@ -271,7 +271,7 @@ export default function BiddingDetailView({ bid }: BiddingDetailViewProps) {
           {bid.memo && (
             <div>
               <h4 className="font-semibold mb-2">메모</h4>
-              <div className="p-3 bg-gray-50 rounded-lg">
+              <div className="p-3 bg-muted rounded-lg">
                 <p className="text-sm">{bid.memo}</p>
               </div>
             </div>
@@ -279,11 +279,11 @@ export default function BiddingDetailView({ bid }: BiddingDetailViewProps) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
             <div className="flex flex-col gap-1">
-              <span className="text-sm text-gray-500">응찰 시작</span>
+              <span className="text-sm text-muted-foreground">응찰 시작</span>
               <span className="font-medium">{bid.startedAt || '정보 없음'}</span>
             </div>
             <div className="flex flex-col gap-1">
-              <span className="text-sm text-gray-500">응찰 마감</span>
+              <span className="text-sm text-muted-foreground">응찰 마감</span>
               <span className="font-medium">{bid.endedAt || '정보 없음'}</span>
             </div>
           </div>
@@ -346,21 +346,21 @@ export default function BiddingDetailView({ bid }: BiddingDetailViewProps) {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 gap-3">
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
               <div className="flex items-center gap-3">
-                <FileText className="w-4 h-4 text-gray-500" />
+                <FileText className="w-4 h-4 text-muted-foreground" />
                 <span className="font-medium">제출된 입찰서.pdf</span>
-                <span className="text-sm text-gray-500">(응찰)</span>
+                <span className="text-sm text-muted-foreground">(응찰)</span>
               </div>
               <Button variant="outline" size="sm">
                 다운로드
               </Button>
             </div>
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
               <div className="flex items-center gap-3">
-                <FileText className="w-4 h-4 text-gray-500" />
+                <FileText className="w-4 h-4 text-muted-foreground" />
                 <span className="font-medium">사업계획서.pdf</span>
-                <span className="text-sm text-gray-500">(응찰)</span>
+                <span className="text-sm text-muted-foreground">(응찰)</span>
               </div>
               <Button variant="outline" size="sm">
                 다운로드

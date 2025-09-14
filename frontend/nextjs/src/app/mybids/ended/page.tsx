@@ -3,6 +3,7 @@ import { getClient } from '@/lib/api/graphqlClient';
 import MybidTable from '@/components/mybids/MybidTable';
 import ApolloWrapper from '@/components/providers/ApolloWrapper';
 import UnifiedDataLoadingWrapper from '@/components/shared/UnifiedDataLoadingWrapper';
+import { PageContainer } from '@/components/shared/PageContainer';
 import '../../themes.css';
 
 const GET_COMPLETED_BIDS = gql`
@@ -52,12 +53,12 @@ export default async function EndedPage() {
   const bids = await getCompletedBids();
 
   return (
-    <div className="theme-default">
+    <PageContainer>
       <ApolloWrapper>
         <UnifiedDataLoadingWrapper data={bids}>
           <MybidTable bids={bids} currentStatus="ended" />
         </UnifiedDataLoadingWrapper>
       </ApolloWrapper>
-    </div>
+    </PageContainer>
   );
 }

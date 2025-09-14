@@ -55,34 +55,34 @@ export function LogScrapingStatisticsTable({
           min="1"
           value={gap}
           onChange={(e) => setGap(e.target.value)}
-          className="border p-1 mr-2"
+          className="border border-border p-1 mr-2 bg-background text-foreground"
         />
         <button
           onClick={() => refetch({ gap: parseInt(gap) })}
-          className="bg-blue-500 text-white px-4 py-1 rounded"
+          className="bg-primary text-primary-foreground px-4 py-1 rounded hover:bg-primary/90"
         >
           조회
         </button>
       </div>
       
-      {error && <p className="text-red-500">데이터를 불러오는 중 오류가 발생했습니다.</p>}
+      {error && <p className="text-destructive">데이터를 불러오는 중 오류가 발생했습니다.</p>}
       
-      <table className="min-w-full bg-white">
+      <table className="min-w-full bg-card">
         <thead>
           <tr>
-            <th className="border p-2">시간</th>
-            <th className="border p-2">기관명</th>
-            <th className="border p-2">스크래핑 건수</th>
-            <th className="border p-2">삽입 건수</th>
+            <th className="border border-border p-2 bg-muted text-foreground">시간</th>
+            <th className="border border-border p-2 bg-muted text-foreground">기관명</th>
+            <th className="border border-border p-2 bg-muted text-foreground">스크래핑 건수</th>
+            <th className="border border-border p-2 bg-muted text-foreground">삽입 건수</th>
           </tr>
         </thead>
         <tbody>
           {logScrapings.map((item, index) => (
             <tr key={createUniqueId(item, index)}>
-              <td className="border p-2">{item.time.replace("T", " ")}</td>
-              <td className="border p-2">{item.orgName}</td>
-              <td className="border p-2">{item.scrapedCount}</td>
-              <td className="border p-2">{item.insertedCount}</td>
+              <td className="border border-border p-2">{item.time.replace("T", " ")}</td>
+              <td className="border border-border p-2">{item.orgName}</td>
+              <td className="border border-border p-2">{item.scrapedCount}</td>
+              <td className="border border-border p-2">{item.insertedCount}</td>
             </tr>
           ))}
         </tbody>
