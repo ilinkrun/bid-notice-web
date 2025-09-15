@@ -47,11 +47,13 @@ export default async function BiddingPage() {
 
   return (
     <PageContainer>
-      <ApolloWrapper>
-        <UnifiedDataLoadingWrapper data={bids}>
-          <MybidTable bids={bids} currentStatus="bidding" />
-        </UnifiedDataLoadingWrapper>
-      </ApolloWrapper>
+      <div className="category-page statistics-cell">
+        <ApolloWrapper>
+          <UnifiedDataLoadingWrapper data={bids}>
+            <MybidTable bids={bids} currentStatus="bidding" />
+          </UnifiedDataLoadingWrapper>
+        </ApolloWrapper>
+      </div>
     </PageContainer>
   );
 }

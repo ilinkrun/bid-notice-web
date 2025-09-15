@@ -686,15 +686,15 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
           </div>
         </div>
       )}
-      <div className="flex items-center justify-between gap-4 mb-0 p-4 bg-background dark:bg-secondary">
-        <div className="flex items-center gap-4 flex-1">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-2 w-full">
+        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
           <Select value={localCategory} onValueChange={handleCategoryChange}>
-            <SelectTrigger className="w-[180px] bg-background dark:bg-background border-border dark:border-border text-foreground dark:text-foreground">
+            <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="유형 선택" />
             </SelectTrigger>
-            <SelectContent className="bg-popover dark:bg-popover border-border dark:border-border">
+            <SelectContent>
               {CATEGORIES.map((category) => (
-                <SelectItem key={category.value} value={category.value} className="text-popover-foreground dark:text-popover-foreground hover:bg-accent dark:hover:bg-accent">
+                <SelectItem key={category.value} value={category.value}>
                   {category.label}
                 </SelectItem>
               ))}
@@ -709,7 +709,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
                 min="0"
                 value={gap}
                 onChange={handleGapChange}
-                className="w-16 bg-muted dark:bg-muted border-border dark:border-border text-foreground dark:text-foreground"
+                className="w-16 bg-background border-border hover:bg-muted transition-colors"
               />
             </div>
           </div>
@@ -721,7 +721,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
                 placeholder="입찰공고 검색..."
                 value={searchTerm}
                 onChange={handleSearchInput}
-                className="pl-8 bg-muted dark:bg-muted border-border dark:border-border text-foreground dark:text-foreground placeholder-muted-foreground dark:placeholder-muted-foreground"
+                className="pl-8 bg-background border-border hover:bg-muted transition-colors"
                 autoComplete="off"
                 type="text"
                 onCompositionStart={() => setIsComposing(true)}
@@ -786,11 +786,11 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
       </div>
 
       {/* 테이블 */}
-      <div className="border border-border table-container bg-card dark:bg-card overflow-x-auto category-page">
-        <Table className="w-full min-w-[800px]">
+      <div className="statistics-cell">
+        <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[40px] bg-muted dark:bg-muted text-foreground dark:text-foreground">
+              <TableHead className="w-[40px]">
                 <Checkbox
                   checked={selectedNids.length === notices.length}
                   onCheckedChange={(checked) => {
@@ -801,11 +801,10 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
                     }
                   }}
                   aria-label="모든 항목 선택"
-                  className="!w-4 !h-4 !min-w-4 !min-h-4 !max-w-4 !max-h-4 !bg-background !border-background hover:!bg-background focus:!bg-background data-[state=checked]:!bg-background data-[state=unchecked]:!bg-background data-[state=checked]:!text-[var(--table-header-bg)]"
                 />
               </TableHead>
               {currentCategory === '제외' && (
-                <TableHead className="w-[80px] bg-muted dark:bg-muted text-foreground dark:text-foreground">
+                <TableHead className="w-[80px]">
                   <button
                     className="flex items-center gap-2 text-foreground dark:text-foreground"
                     onClick={() => toggleSort('category')}
@@ -814,41 +813,41 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
                   </button>
                 </TableHead>
               )}
-              <TableHead className="w-auto bg-muted dark:bg-muted text-foreground dark:text-foreground">
+              <TableHead className="w-auto">
                 <button
-                  className="flex items-center gap-2 [color:var(--table-header-text)]"
+                  className="flex items-center gap-2"
                   onClick={() => toggleSort('제목')}
                 >
                   제목
                 </button>
               </TableHead>
-              <TableHead className="w-[100px] bg-muted dark:bg-muted text-foreground dark:text-foreground">
+              <TableHead className="w-[100px]">
                 <button
-                  className="flex items-center gap-2 [color:var(--table-header-text)]"
+                  className="flex items-center gap-2"
                   onClick={() => toggleSort('작성일')}
                 >
                   작성일
                 </button>
               </TableHead>
-              <TableHead className="w-[120px] bg-muted dark:bg-muted text-foreground dark:text-foreground">
+              <TableHead className="w-[120px]">
                 <button
-                  className="flex items-center gap-2 [color:var(--table-header-text)]"
+                  className="flex items-center gap-2"
                   onClick={() => toggleSort('기관명')}
                 >
                   기관명
                 </button>
               </TableHead>
-              <TableHead className="w-[80px] bg-muted dark:bg-muted text-foreground dark:text-foreground">
+              <TableHead className="w-[80px]">
                 <button
-                  className="flex items-center gap-2 [color:var(--table-header-text)]"
+                  className="flex items-center gap-2"
                   onClick={() => toggleSort('region')}
                 >
                   지역
                 </button>
               </TableHead>
-              <TableHead className="w-[60px] bg-muted dark:bg-muted text-foreground dark:text-foreground">
+              <TableHead className="w-[60px]">
                 <button
-                  className="flex items-center gap-2 [color:var(--table-header-text)]"
+                  className="flex items-center gap-2"
                   onClick={() => toggleSort('registration')}
                 >
                   등록
@@ -863,10 +862,9 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
               </TableRow>
             ) : (
               paginatedNotices.map((notice) => (
-                <TableRow 
+                <TableRow
                   key={notice.nid}
                   onClick={(e) => handleRowClick(notice, e)}
-                  className="cursor-pointer hover:bg-muted/50"
                 >
                   <TableCell className="w-[40px]">
                     <Checkbox
@@ -888,7 +886,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
                             href={`${notice.상세페이지주소}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sm font-medium !text-foreground truncate"
+                            className="text-sm font-medium text-foreground hover:text-blue-600 truncate cursor-pointer"
                             onClick={(e) => {
                               e.stopPropagation();
                             }}
@@ -906,14 +904,14 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
                     {(() => {
                       const orgUrl = orgUrls[notice.기관명];
                       console.log(`Rendering org: ${notice.기관명}, URL: ${orgUrl}, type: ${typeof orgUrl}`);
-                      
+
                       if (orgUrl) {
                         return (
                           <a
                             href={orgUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sm font-medium text-foreground hover:text-primary hover:underline cursor-pointer"
+                            className="text-sm font-medium text-foreground hover:text-blue-600 hover:underline cursor-pointer"
                             onClick={(e) => e.stopPropagation()}
                             title="기관 게시판 페이지로 이동"
                           >
@@ -922,7 +920,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
                         );
                       } else {
                         return (
-                          <span 
+                          <span
                             className="text-sm font-medium text-foreground"
                             title={`URL not found for ${notice.기관명}`}
                           >

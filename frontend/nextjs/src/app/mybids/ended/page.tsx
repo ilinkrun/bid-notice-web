@@ -54,11 +54,13 @@ export default async function EndedPage() {
 
   return (
     <PageContainer>
-      <ApolloWrapper>
-        <UnifiedDataLoadingWrapper data={bids}>
-          <MybidTable bids={bids} currentStatus="ended" />
-        </UnifiedDataLoadingWrapper>
-      </ApolloWrapper>
+      <div className="category-page statistics-cell">
+        <ApolloWrapper>
+          <UnifiedDataLoadingWrapper data={bids}>
+            <MybidTable bids={bids} currentStatus="ended" />
+          </UnifiedDataLoadingWrapper>
+        </ApolloWrapper>
+      </div>
     </PageContainer>
   );
 }

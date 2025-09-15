@@ -506,20 +506,19 @@ export default function BidTable({ bids, currentStatus }) {
           </div>
         </div>
       )}
-      <div className="flex items-center justify-between gap-4 mb-0 p-4 bg-background dark:bg-secondary">
-        <div className="flex items-center gap-4 flex-1">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-2 w-full">
+        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
         <Select value={localStatus} onValueChange={handleStatusSelection}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="단계 선택">
                 {BID_STAGES.find(stage => stage.value === localStatus)?.label || localStatus}
               </SelectValue>
             </SelectTrigger>
-            <SelectContent className="bg-card">
+            <SelectContent>
               {BID_STAGES.map((stage) => (
                 <SelectItem 
                   key={stage.value} 
                   value={stage.value} 
-                  className="text-foreground hover:bg-muted"
                 >
                   {stage.label}
                 </SelectItem>
@@ -534,7 +533,7 @@ export default function BidTable({ bids, currentStatus }) {
                 placeholder="입찰 검색..."
                 value={searchTerm}
                 onChange={handleSearchInput}
-                className="pl-8 bg-muted border-border text-foreground placeholder-muted-foreground"
+                className="pl-8 bg-background border-border hover:bg-muted transition-colors"
                 autoComplete="off"
                 type="text"
                 onCompositionStart={() => setIsComposing(true)}
@@ -586,54 +585,54 @@ export default function BidTable({ bids, currentStatus }) {
 
       {/* 테이블 */}
       <div className="border border-border table-container bg-card overflow-x-auto category-page">
-        <Table className="w-full min-w-[800px]">
+        <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px] bg-muted dark:bg-muted text-foreground dark:text-foreground">
+              <TableHead className="w-[100px]">
                 <button
-                  className="flex items-center gap-2 text-white"
+                  className="flex items-center gap-2"
                   onClick={() => toggleSort('category')}
                 >
                   유형
                 </button>
               </TableHead>
-              <TableHead className="w-[120px] bg-muted dark:bg-muted text-foreground dark:text-foreground">
+              <TableHead className="w-[120px]">
                 <button
-                  className="flex items-center gap-2 text-white"
+                  className="flex items-center gap-2"
                   onClick={() => toggleSort('orgName')}
                 >
                   기관명
                 </button>
               </TableHead>
-              <TableHead className="w-auto bg-muted dark:bg-muted text-foreground dark:text-foreground">
+              <TableHead className="w-auto">
                 <button
-                  className="flex items-center gap-2 text-white"
+                  className="flex items-center gap-2"
                   onClick={() => toggleSort('title')}
                 >
                   제목
                 </button>
               </TableHead>
-              <TableHead className="w-[80px] [background:var(--table-header-bg)_!important] text-white">
+              <TableHead className="w-[80px]">
                 <button
-                  className="flex items-center gap-2 text-white"
+                  className="flex items-center gap-2"
                   onClick={() => toggleSort('region')}
                 >
                   지역
                 </button>
               </TableHead>
               {localStatus === 'ended' && (
-                <TableHead className="w-[80px] [background:var(--table-header-bg)_!important] text-white">
+                <TableHead className="w-[80px]">
                   <button
-                    className="flex items-center gap-2 text-white"
+                    className="flex items-center gap-2"
                     onClick={() => toggleSort('status')}
                   >
                     상태
                   </button>
                 </TableHead>
               )}
-              <TableHead className="w-[100px] bg-muted dark:bg-muted text-foreground dark:text-foreground">
+              <TableHead className="w-[100px]">
                 <button
-                  className="flex items-center gap-2 text-white"
+                  className="flex items-center gap-2"
                   onClick={() => toggleSort('postedAt')}
                 >
                   등록일
@@ -648,9 +647,8 @@ export default function BidTable({ bids, currentStatus }) {
               </TableRow>
             ) : (
               paginatedBids.map((bid) => (
-                <TableRow 
+                <TableRow
                   key={bid.mid}
-                  className="cursor-pointer hover:bg-muted/50"
                   onClick={() => {
                     window.location.href = `/mybids/${localStatus}/${bid.nid}`;
                   }}

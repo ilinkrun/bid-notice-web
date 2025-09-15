@@ -133,10 +133,10 @@
   @apply p-0 bg-background;
 }
 
-/* 다크 모드용 카테고리 페이지 스타일 */
+/* 다크 모드용 카테고리 페이지 스타일 - 통계 페이지와 동일한 스타일 */
 .dark .category-page {
-  --table-header-bg: hsl(var(--primary-color));
-  --table-header-text: hsl(0 0% 100%);
+  --table-header-bg: hsl(var(--muted));
+  --table-header-text: hsl(var(--foreground));
   --table-body-bg: hsl(var(--card));
   --table-body-text: hsl(var(--card-foreground));
   --table-link: hsl(var(--card-foreground));
@@ -146,6 +146,11 @@
 /* 다크 모드에서 테이블과 폼 요소들 강제 스타일 */
 .dark .category-page * {
   border-color: hsl(var(--border)) !important;
+}
+
+/* 다크 모드에서 액션바 배경색을 content 영역과 동일하게 */
+.dark .category-page .flex.items-center.justify-between {
+  background-color: hsl(var(--secondary)) !important;
 }
 
 .dark .category-page .table-container {
@@ -159,12 +164,17 @@
 }
 
 .dark .category-page tbody tr:hover {
-  background-color: hsl(var(--muted)) !important;
+  background-color: hsl(240 3.7% 25%) !important;
+  color: hsl(var(--background)) !important;
 }
 
 .dark .category-page tbody td {
   color: hsl(var(--card-foreground)) !important;
   border-color: hsl(var(--border)) !important;
+}
+
+.dark .category-page tbody tr:hover td {
+  color: hsl(var(--background)) !important;
 }
 
 /* 테이블 스타일 */
