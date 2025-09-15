@@ -13,7 +13,6 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Eye, EyeOff, Mail, Lock, User, UserPlus, Key } from 'lucide-react';
-import { PageContainer } from '@/components/shared/PageContainer';
 import { DarkModeButton, DarkModeInput, DarkModeLabel } from '@/components/shared/FormComponents';
 
 const LOGIN_MUTATION = gql`
@@ -142,11 +141,9 @@ export default function LoginPage() {
         }
 
         showAlert('success', data.login.message);
-        
-        // 홈페이지로 리다이렉트
-        setTimeout(() => {
-          router.push('/');
-        }, 1000);
+
+        // 홈페이지로 즉시 리다이렉트
+        router.push('/');
       } else {
         showAlert('error', data.login.message);
       }
@@ -252,7 +249,7 @@ export default function LoginPage() {
   );
 
   return (
-    <PageContainer className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-background">
       <div className="max-w-md w-full space-y-6">
         {/* 로고 및 제목 */}
         <div className="text-center">
@@ -296,7 +293,7 @@ export default function LoginPage() {
                       id="email"
                       type="email"
                       required
-                      className="pl-10 text-foreground"
+                      className="pl-10 bg-muted border-border text-foreground placeholder:text-muted-foreground"
                       placeholder="이메일을 입력하세요"
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
@@ -314,7 +311,7 @@ export default function LoginPage() {
                         id="name"
                         type="text"
                         required
-                        className="pl-10 text-foreground"
+                        className="pl-10 bg-muted border-border text-foreground placeholder:text-muted-foreground"
                         placeholder="이름을 입력하세요"
                         value={formData.name}
                         onChange={(e) => handleInputChange('name', e.target.value)}
@@ -332,7 +329,7 @@ export default function LoginPage() {
                       <Input
                         id="department"
                         type="text"
-                        className="pl-10 text-foreground"
+                        className="pl-10 bg-muted border-border text-foreground placeholder:text-muted-foreground"
                         placeholder="부서를 입력하세요 (선택사항)"
                         value={formData.department}
                         onChange={(e) => handleInputChange('department', e.target.value)}
@@ -351,7 +348,7 @@ export default function LoginPage() {
                         id="password"
                         type={showPassword ? 'text' : 'password'}
                         required
-                        className="pl-10 pr-10 text-foreground"
+                        className="pl-10 pr-10 bg-muted border-border text-foreground placeholder:text-muted-foreground"
                         placeholder="비밀번호를 입력하세요"
                         value={formData.password}
                         onChange={(e) => handleInputChange('password', e.target.value)}
@@ -381,7 +378,7 @@ export default function LoginPage() {
                         id="confirmPassword"
                         type={showConfirmPassword ? 'text' : 'password'}
                         required
-                        className="pl-10 pr-10 text-foreground"
+                        className="pl-10 pr-10 bg-muted border-border text-foreground placeholder:text-muted-foreground"
                         placeholder="비밀번호를 다시 입력하세요"
                         value={formData.confirmPassword}
                         onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
@@ -485,6 +482,6 @@ export default function LoginPage() {
           </CardContent>
         </Card>
       </div>
-    </PageContainer>
+    </div>
   );
 }

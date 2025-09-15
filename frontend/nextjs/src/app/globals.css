@@ -187,26 +187,7 @@
   @apply space-y-2;
 }
 
-.category-page thead tr {
-  background-color: var(--table-header-bg) !important;
-  color: var(--table-header-text);
-}
-
-.category-page thead th {
-  background-color: var(--table-header-bg) !important;
-}
-
-.category-page thead th:hover {
-  background-color: var(--table-header-bg) !important;
-}
-
-.category-page thead button {
-  color: var(--table-header-text) !important;
-}
-
-.category-page thead button:hover {
-  background-color: transparent !important;
-}
+/* 테이블 헤더 스타일을 기본 shadcn/ui 스타일로 통일 */
 
 .category-page tbody {
   color: var(--table-body-text);
@@ -224,79 +205,7 @@
   color: var(--table-link-hover);
 }
 
-/* 입력 요소 스타일 */
-.category-page .select-trigger,
-.category-page .input,
-.category-page [type='button'],
-.category-page button {
-  border-color: hsl(var(--primary-dark));
-  color: hsl(var(--primary-dark));
-  background-color: hsl(var(--background));
-  transition: all 0.2s ease;
-}
-
-.category-page .input::placeholder {
-  color: hsl(var(--primary-dark) / 0.3);
-}
-
-.category-page .select-trigger:hover,
-.category-page .input:hover,
-.category-page [type='button']:hover,
-.category-page button:hover {
-  border-color: hsl(var(--primary-dark));
-  color: hsl(var(--primary-dark));
-}
-
-.category-page .select-trigger:focus,
-.category-page .input:focus {
-  border-color: hsl(var(--primary-dark));
-  ring-color: hsl(var(--primary-dark) / 0.3);
-}
-
-/* 다크 모드용 입력 요소 스타일 */
-.dark .category-page .select-trigger,
-.dark .category-page .input,
-.dark .category-page [type='button'],
-.dark .category-page button {
-  border-color: hsl(var(--border)) !important;
-  color: hsl(var(--foreground)) !important;
-  background-color: hsl(var(--background)) !important;
-}
-
-.dark .category-page .input::placeholder {
-  color: hsl(var(--muted-foreground)) !important;
-}
-
-.dark .category-page .select-trigger:hover,
-.dark .category-page .input:hover,
-.dark .category-page [type='button']:hover,
-.dark .category-page button:hover {
-  border-color: hsl(var(--primary)) !important;
-  color: hsl(var(--foreground)) !important;
-}
-
-.dark .category-page .select-trigger:focus,
-.dark .category-page .input:focus {
-  border-color: hsl(var(--primary)) !important;
-  ring-color: hsl(var(--primary) / 0.3) !important;
-}
-
-/* Select 드롭다운 내용 다크 모드 */
-.dark .category-page [data-radix-select-content] {
-  background-color: hsl(var(--popover)) !important;
-  border-color: hsl(var(--border)) !important;
-  color: hsl(var(--popover-foreground)) !important;
-}
-
-.dark .category-page [data-radix-select-item] {
-  background-color: hsl(var(--popover)) !important;
-  color: hsl(var(--popover-foreground)) !important;
-}
-
-.dark .category-page [data-radix-select-item][data-highlighted] {
-  background-color: hsl(var(--accent)) !important;
-  color: hsl(var(--accent-foreground)) !important;
-}
+/* 기본 shadcn/ui 스타일 사용 */
 
 /* 버튼 스타일 */
 .category-page button[class*='default'] {

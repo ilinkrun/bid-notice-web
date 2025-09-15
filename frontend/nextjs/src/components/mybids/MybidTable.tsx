@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, Star, Loader2, Edit3 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { UnifiedSelect } from '@/components/shared/UnifiedSelect';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useBidFilterStore } from '@/store/bidFilterStore';
@@ -506,25 +506,14 @@ export default function BidTable({ bids, currentStatus }) {
           </div>
         </div>
       )}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-2 w-full">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-        <Select value={localStatus} onValueChange={handleStatusSelection}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="단계 선택">
-                {BID_STAGES.find(stage => stage.value === localStatus)?.label || localStatus}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {BID_STAGES.map((stage) => (
-                <SelectItem 
-                  key={stage.value} 
-                  value={stage.value} 
-                >
-                  {stage.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <UnifiedSelect
+            value={localStatus}
+            onValueChange={handleStatusSelection}
+            placeholder="단계 선택"
+            options={BID_STAGES}
+          />
           <div className="relative flex items-center gap-2 w-[500px]">
             <div className="relative">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -533,7 +522,7 @@ export default function BidTable({ bids, currentStatus }) {
                 placeholder="입찰 검색..."
                 value={searchTerm}
                 onChange={handleSearchInput}
-                className="pl-8 bg-background border-border hover:bg-muted transition-colors"
+                className="pl-8"
                 autoComplete="off"
                 type="text"
                 onCompositionStart={() => setIsComposing(true)}
@@ -588,55 +577,25 @@ export default function BidTable({ bids, currentStatus }) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px]">
-                <button
-                  className="flex items-center gap-2"
-                  onClick={() => toggleSort('category')}
-                >
-                  유형
-                </button>
+              <TableHead className="w-[100px] cursor-pointer hover:text-primary" onClick={() => toggleSort('category')}>
+                유형
               </TableHead>
-              <TableHead className="w-[120px]">
-                <button
-                  className="flex items-center gap-2"
-                  onClick={() => toggleSort('orgName')}
-                >
-                  기관명
-                </button>
+              <TableHead className="w-[120px] cursor-pointer hover:text-primary" onClick={() => toggleSort('orgName')}>
+                기관명
               </TableHead>
-              <TableHead className="w-auto">
-                <button
-                  className="flex items-center gap-2"
-                  onClick={() => toggleSort('title')}
-                >
-                  제목
-                </button>
+              <TableHead className="w-auto cursor-pointer hover:text-primary" onClick={() => toggleSort('title')}>
+                제목
               </TableHead>
-              <TableHead className="w-[80px]">
-                <button
-                  className="flex items-center gap-2"
-                  onClick={() => toggleSort('region')}
-                >
-                  지역
-                </button>
+              <TableHead className="w-[80px] cursor-pointer hover:text-primary" onClick={() => toggleSort('region')}>
+                지역
               </TableHead>
               {localStatus === 'ended' && (
-                <TableHead className="w-[80px]">
-                  <button
-                    className="flex items-center gap-2"
-                    onClick={() => toggleSort('status')}
-                  >
-                    상태
-                  </button>
+                <TableHead className="w-[80px] cursor-pointer hover:text-primary" onClick={() => toggleSort('status')}>
+                  상태
                 </TableHead>
               )}
-              <TableHead className="w-[100px]">
-                <button
-                  className="flex items-center gap-2"
-                  onClick={() => toggleSort('postedAt')}
-                >
-                  등록일
-                </button>
+              <TableHead className="w-[100px] cursor-pointer hover:text-primary" onClick={() => toggleSort('postedAt')}>
+                등록일
               </TableHead>
             </TableRow>
           </TableHeader>

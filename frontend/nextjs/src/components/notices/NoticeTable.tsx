@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Search, Star, Loader2, Edit3, Minus, Plus } from 'lucide-react';
 import { type Notice } from '@/types/notice';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { UnifiedSelect } from '@/components/shared/UnifiedSelect';
 import { useNoticeFilterStore } from '@/store/noticeFilterStore';
 import { filterNotices } from '@/lib/utils/filterNotices';
 import { AdvancedSearchModal } from './AdvancedSearchModal';
@@ -686,20 +686,14 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
           </div>
         </div>
       )}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-2 w-full">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-          <Select value={localCategory} onValueChange={handleCategoryChange}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="유형 선택" />
-            </SelectTrigger>
-            <SelectContent>
-              {CATEGORIES.map((category) => (
-                <SelectItem key={category.value} value={category.value}>
-                  {category.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <UnifiedSelect
+            value={localCategory}
+            onValueChange={handleCategoryChange}
+            placeholder="유형 선택"
+            options={CATEGORIES}
+          />
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2">
               <label htmlFor="gap-input" className="text-sm font-medium text-foreground">최근</label>
@@ -709,19 +703,19 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
                 min="0"
                 value={gap}
                 onChange={handleGapChange}
-                className="w-16 bg-background border-border hover:bg-muted transition-colors"
+                className="w-16"
               />
             </div>
           </div>
           <div className="relative flex items-center gap-2 w-[500px]">
             <div className="relative">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground dark:text-muted-foreground" />
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 ref={searchInputRef}
                 placeholder="입찰공고 검색..."
                 value={searchTerm}
                 onChange={handleSearchInput}
-                className="pl-8 bg-background border-border hover:bg-muted transition-colors"
+                className="pl-8"
                 autoComplete="off"
                 type="text"
                 onCompositionStart={() => setIsComposing(true)}
@@ -804,54 +798,24 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
                 />
               </TableHead>
               {currentCategory === '제외' && (
-                <TableHead className="w-[80px]">
-                  <button
-                    className="flex items-center gap-2 text-foreground dark:text-foreground"
-                    onClick={() => toggleSort('category')}
-                  >
-                    유형
-                  </button>
+                <TableHead className="w-[80px] cursor-pointer hover:text-primary" onClick={() => toggleSort('category')}>
+                  유형
                 </TableHead>
               )}
-              <TableHead className="w-auto">
-                <button
-                  className="flex items-center gap-2"
-                  onClick={() => toggleSort('제목')}
-                >
-                  제목
-                </button>
+              <TableHead className="w-auto cursor-pointer hover:text-primary" onClick={() => toggleSort('제목')}>
+                제목
               </TableHead>
-              <TableHead className="w-[100px]">
-                <button
-                  className="flex items-center gap-2"
-                  onClick={() => toggleSort('작성일')}
-                >
-                  작성일
-                </button>
+              <TableHead className="w-[100px] cursor-pointer hover:text-primary" onClick={() => toggleSort('작성일')}>
+                작성일
               </TableHead>
-              <TableHead className="w-[120px]">
-                <button
-                  className="flex items-center gap-2"
-                  onClick={() => toggleSort('기관명')}
-                >
-                  기관명
-                </button>
+              <TableHead className="w-[120px] cursor-pointer hover:text-primary" onClick={() => toggleSort('기관명')}>
+                기관명
               </TableHead>
-              <TableHead className="w-[80px]">
-                <button
-                  className="flex items-center gap-2"
-                  onClick={() => toggleSort('region')}
-                >
-                  지역
-                </button>
+              <TableHead className="w-[80px] cursor-pointer hover:text-primary" onClick={() => toggleSort('region')}>
+                지역
               </TableHead>
-              <TableHead className="w-[60px]">
-                <button
-                  className="flex items-center gap-2"
-                  onClick={() => toggleSort('registration')}
-                >
-                  등록
-                </button>
+              <TableHead className="w-[60px] cursor-pointer hover:text-primary" onClick={() => toggleSort('registration')}>
+                등록
               </TableHead>
             </TableRow>
           </TableHeader>

@@ -68,8 +68,8 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(bytes);
     await writeFile(filePath, buffer);
 
-    // 파일 URL 반환
-    const fileUrl = `/uploads/${fileName}`;
+    // 파일 URL 반환 (production에서도 동작하도록 API 경로 사용)
+    const fileUrl = `/api/uploads/${fileName}`;
 
     return NextResponse.json({
       url: fileUrl,
