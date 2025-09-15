@@ -169,13 +169,13 @@ export default async function Home() {
             <CardHeader>
               <CardTitle>지역별 공고 통계</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="statistics-cell overflow-auto p-0">
               {data?.noticesStatistics?.length > 0 && (
                 <NoticeStatisticsTable
                   initialData={data.noticesStatistics}
                   defaultGap="10"
                   defaultType="region"
-                  defaultViewType="chart"
+                  defaultViewType="table"
                   hideControls={true}
                   hideTypeSelector={true}
                 />

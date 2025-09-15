@@ -23,7 +23,7 @@
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
     --ring: var(--primary-color, 0 72.2% 50.6%);
-    --radius: 0.5rem;
+    --radius: 0;
   }
 
   .dark {
@@ -122,24 +122,24 @@
   }
 }
 
-/* 카테고리 페이지 스타일 */
+/* 카테고리 페이지 스타일 - content 영역과 동일한 배경 */
 .category-page {
-  --table-header-bg: hsl(var(--primary-dark));
-  --table-header-text: hsl(var(--primary-light));
-  --table-body-bg: hsl(var(--primary-light));
-  --table-body-text: hsl(var(--primary-dark));
-  --table-link: hsl(var(--primary-dark));
-  --table-link-hover: hsl(var(--primary-color));
+  --table-header-bg: hsl(var(--card));
+  --table-header-text: hsl(var(--foreground));
+  --table-body-bg: hsl(var(--card));
+  --table-body-text: hsl(var(--foreground));
+  --table-link: hsl(var(--foreground));
+  --table-link-hover: hsl(var(--primary));
   @apply p-0 bg-background;
 }
 
-/* 다크 모드용 카테고리 페이지 스타일 - 통계 페이지와 동일한 스타일 */
+/* 다크 모드용 카테고리 페이지 스타일 */
 .dark .category-page {
-  --table-header-bg: hsl(var(--muted));
+  --table-header-bg: hsl(var(--card));
   --table-header-text: hsl(var(--foreground));
   --table-body-bg: hsl(var(--card));
-  --table-body-text: hsl(var(--card-foreground));
-  --table-link: hsl(var(--card-foreground));
+  --table-body-text: hsl(var(--foreground));
+  --table-link: hsl(var(--foreground));
   --table-link-hover: hsl(var(--primary));
 }
 
@@ -181,6 +181,37 @@
 .category-page .table-container {
   background-color: var(--table-body-bg);
   @apply mt-0;
+}
+
+/* 카테고리 페이지 테이블 헤더 강제 스타일 */
+.category-page table thead,
+.category-page .table thead,
+.category-page thead {
+  background-color: hsl(var(--card)) !important;
+}
+
+.category-page table th,
+.category-page .table th,
+.category-page th,
+.category-page thead tr {
+  background-color: transparent !important;
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--foreground));
+}
+
+.dark .category-page table thead,
+.dark .category-page .table thead,
+.dark .category-page thead {
+  background-color: hsl(var(--card)) !important;
+}
+
+.dark .category-page table th,
+.dark .category-page .table th,
+.dark .category-page th,
+.dark .category-page thead tr {
+  background-color: transparent !important;
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--foreground));
 }
 
 .category-page .space-y-4 {
@@ -239,20 +270,20 @@
 /* 다크 모드용 아이콘 스타일 */
 .dark .category-page .lucide-icon,
 .dark .category-page svg {
-  color: hsl(var(--foreground)) !important;
+  color: hsl(var(--foreground));
   stroke: hsl(var(--foreground)) !important;
 }
 
 /* 다크 모드 버튼 스타일 강화 */
 .dark .category-page button {
   background-color: hsl(var(--background)) !important;
-  color: hsl(var(--foreground)) !important;
+  color: hsl(var(--foreground));
   border-color: hsl(var(--border)) !important;
 }
 
 .dark .category-page button:hover {
   background-color: hsl(var(--muted)) !important;
-  color: hsl(var(--foreground)) !important;
+  color: hsl(var(--foreground));
 }
 
 .dark .category-page button[class*="bg-"] {
@@ -390,12 +421,32 @@
   @apply bg-card;
 }
 
+/* statistics-cell 테이블 헤더 스타일 - content 영역과 동일한 배경 */
+.statistics-cell thead {
+  background-color: hsl(var(--card)) !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
+}
+
 .statistics-cell th {
-  @apply bg-muted text-foreground;
+  background-color: transparent !important;
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--border)) !important;
+  font-weight: 500 !important;
+}
+
+/* statistics-cell 테이블 헤더 hover 시 배경색 변화 없음, 클릭 기능은 유지 */
+.statistics-cell th:hover {
+  background-color: hsl(var(--card)) !important;
+}
+
+.dark .statistics-cell thead {
+  background-color: hsl(var(--card)) !important;
 }
 
 .dark .statistics-cell th {
-  @apply bg-muted text-foreground;
+  background-color: transparent !important;
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--border)) !important;
 }
 
 .statistics-cell td {
@@ -406,13 +457,13 @@
   @apply text-foreground;
 }
 
-/* 테이블 행 hover 스타일 개선 */
+/* 테이블 행 hover 스타일 - 기존과 동일하게 복원 */
 .statistics-cell tbody tr:hover {
   @apply bg-muted;
 }
 
 .dark .statistics-cell tbody tr:hover {
-  background-color: hsl(240 3.7% 25%) !important; /* 15.9%에서 25%로 더 밝게 */
+  background-color: hsl(240 3.7% 25%) !important;
 }
 
 .dark .statistics-cell tbody tr:hover td {
@@ -433,6 +484,203 @@
   color: hsl(var(--primary-dark));
 }
 
+/* 통합된 저대비 디자인 시스템 */
+
+/* 공통 요소 스타일 - 옅은 회색 배경과 경계선 */
+.unified-element {
+  @apply bg-card border border-border text-foreground;
+  @apply hover:bg-muted/50 focus:bg-card focus:border-primary;
+  @apply transition-all duration-200;
+}
+
+.dark .unified-element {
+  @apply bg-card border-border text-foreground;
+  @apply hover:bg-muted/30 focus:bg-card focus:border-primary;
+}
+
+/* Input 및 Select 스타일 - content와 조화로운 옅은 배경 */
+.button-style-input {
+  @apply bg-card border border-border text-foreground;
+  @apply hover:bg-muted/50 focus:bg-card focus:text-foreground;
+  @apply focus:border-primary focus:ring-1 focus:ring-primary/50;
+  @apply transition-all duration-200;
+}
+
+.dark .button-style-input {
+  @apply bg-card text-foreground border-border;
+  @apply hover:bg-muted/30 focus:bg-card focus:text-foreground;
+  @apply focus:border-primary focus:ring-1 focus:ring-primary/50;
+}
+
+/* Select 컴포넌트 스타일 */
+.button-style-select {
+  @apply bg-card border border-border text-foreground;
+  @apply hover:bg-muted/50 data-[state=open]:bg-card data-[state=open]:text-foreground;
+  @apply focus:border-primary focus:ring-1 focus:ring-primary/50;
+  @apply transition-all duration-200;
+}
+
+.dark .button-style-select {
+  @apply bg-card text-foreground border-border;
+  @apply hover:bg-muted/30 data-[state=open]:bg-card data-[state=open]:text-foreground;
+  @apply focus:border-primary focus:ring-1 focus:ring-primary/50;
+}
+
+/* 통일된 버튼 스타일 - 저대비 디자인 */
+.unified-button {
+  @apply bg-muted/30 border border-border text-foreground;
+  @apply hover:bg-muted/50 hover:border-muted-foreground;
+  @apply active:bg-muted/70 focus:bg-muted/50;
+  @apply focus:border-primary focus:ring-1 focus:ring-primary/50;
+  @apply transition-all duration-200;
+  @apply px-4 py-2;
+}
+
+.dark .unified-button {
+  @apply bg-muted/20 border-border text-foreground;
+  @apply hover:bg-muted/30 hover:border-muted-foreground;
+  @apply active:bg-muted/50 focus:bg-muted/30;
+  @apply focus:border-primary focus:ring-1 focus:ring-primary/50;
+}
+
+/* 기본 버튼 스타일 오버라이드 */
+button:not(.no-unified-style),
+.btn:not(.no-unified-style),
+[role="button"]:not(.no-unified-style) {
+  @apply bg-muted/30 border border-border text-foreground !important;
+  @apply hover:bg-muted/50 hover:border-muted-foreground !important;
+  @apply active:bg-muted/70 focus:bg-muted/50 !important;
+  @apply focus:border-primary focus:ring-1 focus:ring-primary/50 !important;
+  @apply transition-all duration-200 !important;
+}
+
+.dark button:not(.no-unified-style),
+.dark .btn:not(.no-unified-style),
+.dark [role="button"]:not(.no-unified-style) {
+  @apply bg-muted/20 border-border text-foreground !important;
+  @apply hover:bg-muted/30 hover:border-muted-foreground !important;
+  @apply active:bg-muted/50 focus:bg-muted/30 !important;
+  @apply focus:border-primary focus:ring-1 focus:ring-primary/50 !important;
+}
+
+/* 모든 UI 요소의 border-radius를 0으로 강제 설정 */
+*,
+*::before,
+*::after {
+  border-radius: 0 !important;
+}
+
+/* 더 구체적인 전역 설정 */
+html * {
+  border-radius: 0 !important;
+}
+
+/* 특별히 자주 사용되는 요소들 */
+button, 
+input, 
+select, 
+textarea, 
+.btn, 
+.button,
+[role="button"],
+.dialog-content,
+.card,
+.table,
+.popover-content,
+.dropdown-menu-content,
+.select-content,
+.alert,
+.badge,
+.avatar,
+.checkbox,
+.radio,
+.switch,
+.tabs-list,
+.tabs-trigger,
+.toast,
+.tooltip-content,
+.sheet-content,
+.drawer-content,
+.calendar,
+.date-picker {
+  border-radius: 0 !important;
+}
+
+/* 테이블 헤더 영역 배경색을 content 영역과 동일하게 설정 */
+table thead,
+.table thead,
+thead {
+  background-color: hsl(var(--card)) !important;
+}
+
+.dark table thead,
+.dark .table thead,
+.dark thead {
+  background-color: hsl(var(--card)) !important;
+}
+
+/* 개별 th, tr 요소는 투명 배경 */
+table th,
+table thead tr,
+.table th,
+.table thead tr,
+th,
+thead tr {
+  background-color: transparent !important;
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--foreground));
+}
+
+.dark table th,
+.dark table thead tr,
+.dark .table th,
+.dark .table thead tr,
+.dark th,
+.dark thead tr {
+  background-color: transparent !important;
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--foreground));
+}
+
+/* shadcn/ui 컴포넌트들 */
+[data-radix-popper-content-wrapper],
+[data-radix-dropdown-menu-content],
+[data-radix-select-content],
+[data-radix-dialog-content],
+[data-radix-popover-content],
+[data-radix-tooltip-content],
+[data-radix-alert-dialog-content] {
+  border-radius: 0 !important;
+}
+
+/* 추가 요소들 */
+.card,
+.table,
+th,
+td,
+.form-control,
+.input-group,
+.btn-group,
+.dropdown-toggle,
+.modal-content,
+.nav-tabs,
+.nav-pills,
+.breadcrumb,
+.progress,
+.badge,
+.alert,
+.list-group-item,
+.pagination .page-link {
+  border-radius: 0 !important;
+}
+
+/* Chart.js와 기타 third-party 라이브러리들 */
+canvas,
+.chart-container,
+.recharts-wrapper {
+  border-radius: 0 !important;
+}
+
 .rdp {
   --rdp-cell-size: 40px;
   --rdp-accent-color: #0ea5e9;
@@ -442,6 +690,177 @@
   --rdp-outline: 2px solid var(--rdp-accent-color);
   --rdp-outline-selected: 2px solid var(--rdp-accent-color);
   margin: 0;
+}
+
+/* 가장 강력한 우선순위로 테이블 헤더 스타일 강제 적용 */
+html body div div table thead,
+html body .category-page table thead,
+html body .statistics-cell table thead,
+html body div table thead,
+html body table thead {
+  background-color: hsl(var(--card)) !important;
+}
+
+html body div div table thead tr th,
+html body .category-page table thead tr th,
+html body .statistics-cell table thead tr th,
+html body div table thead tr th,
+html body table thead tr th,
+html body div div table th,
+html body .category-page table th,
+html body .statistics-cell table th,
+html body div table th,
+html body table th {
+  background-color: transparent !important;
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--foreground));
+}
+
+/* 다크 모드 */
+html.dark body div div table thead,
+html.dark body .category-page table thead,
+html.dark body .statistics-cell table thead,
+html.dark body div table thead,
+html.dark body table thead {
+  background-color: hsl(var(--card)) !important;
+}
+
+html.dark body div div table thead tr th,
+html.dark body .category-page table thead tr th,
+html.dark body .statistics-cell table thead tr th,
+html.dark body div table thead tr th,
+html.dark body table thead tr th,
+html.dark body div div table th,
+html.dark body .category-page table th,
+html.dark body .statistics-cell table th,
+html.dark body div table th,
+html.dark body table th {
+  background-color: transparent !important;
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--foreground));
+}
+
+/* 추가 강제 스타일 - 디버깅용 */
+[data-table="header"] thead,
+table[data-testid] thead,
+.table-header thead {
+  background-color: hsl(var(--card)) !important;
+  background: hsl(var(--card)) !important;
+}
+
+[data-table="header"] th,
+table[data-testid] th,
+.table-header th {
+  background-color: transparent !important;
+  background: transparent !important;
+  color: hsl(var(--foreground));
+}
+
+/* 통일된 테이블 스타일 - content 영역과 동일한 배경 */
+* thead {
+  background-color: hsl(var(--card)) !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
+}
+
+* th {
+  background-color: transparent !important;
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--border)) !important;
+  font-weight: 500 !important;
+}
+
+/* 테이블 헤더 hover 시 배경색 변화 없음, 클릭과 텍스트 색상 변경 기능은 유지 */
+* th:hover {
+  background-color: hsl(var(--card)) !important;
+}
+
+/* 테이블 헤더 hover시 Tailwind hover:text-primary 클래스가 작동하도록 허용 */
+* th.hover\:text-primary:hover {
+  color: hsl(var(--primary)) !important;
+}
+
+.category-page th.hover\:text-primary:hover {
+  color: hsl(var(--primary)) !important;
+}
+
+.statistics-cell th.hover\:text-primary:hover {
+  color: hsl(var(--primary)) !important;
+}
+
+* tbody tr {
+  background-color: hsl(var(--card)) !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
+}
+
+/* 테이블 행 hover - 기존과 동일하게 복원 */
+* tbody tr:hover {
+  background-color: hsl(var(--muted)) !important;
+}
+
+* td {
+  background-color: transparent !important;
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--border)) !important;
+}
+
+.dark * thead {
+  background-color: hsl(var(--card)) !important;
+}
+
+.dark * tbody tr:hover {
+  background-color: hsl(240 3.7% 25%) !important;
+}
+
+.dark * tbody tr:hover td {
+  color: hsl(var(--background)) !important;
+}
+
+/* 최고 우선순위: 테이블 헤더 배경을 content 영역(--card)과 동일하게 강제 설정 */
+html body * table thead,
+html body * .table thead,
+html body * thead,
+html body div div div table thead,
+html body .category-page .statistics-cell table thead,
+html body .statistics-cell table thead,
+html body .category-page table thead {
+  background-color: hsl(var(--card)) !important;
+  background: hsl(var(--card)) !important;
+}
+
+html.dark body * table thead,
+html.dark body * .table thead,
+html.dark body * thead,
+html.dark body div div div table thead,
+html.dark body .category-page .statistics-cell table thead,
+html.dark body .statistics-cell table thead,
+html.dark body .category-page table thead {
+  background-color: hsl(var(--card)) !important;
+  background: hsl(var(--card)) !important;
+}
+
+/* 테이블 헤더 배경 hover 효과만 제거, 클릭과 텍스트 색상 변화는 유지 */
+html body * table th:hover,
+html body * .table th:hover,
+html body * th:hover,
+html body div div div table th:hover,
+html body .category-page .statistics-cell table th:hover,
+html body .statistics-cell table th:hover,
+html body .category-page table th:hover {
+  background-color: hsl(var(--card)) !important;
+  background: hsl(var(--card)) !important;
+  /* hover시 텍스트 색상 변화와 클릭 기능은 유지 - color 속성 제거 */
+}
+
+html.dark body * table th:hover,
+html.dark body * .table th:hover,
+html.dark body * th:hover,
+html.dark body div div div table th:hover,
+html.dark body .category-page .statistics-cell table th:hover,
+html.dark body .statistics-cell table th:hover,
+html.dark body .category-page table th:hover {
+  background-color: hsl(var(--card)) !important;
+  background: hsl(var(--card)) !important;
+  /* hover시 텍스트 색상 변화와 클릭 기능은 유지 - color 속성 제거 */
 }
 
 .rdp-day_selected,

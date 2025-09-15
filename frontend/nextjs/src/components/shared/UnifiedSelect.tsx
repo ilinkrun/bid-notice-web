@@ -23,7 +23,7 @@ export function UnifiedSelect({
 }: UnifiedSelectProps) {
   return (
     <Select value={value} onValueChange={onValueChange}>
-      <SelectTrigger className={cn("w-[180px] border bg-background", className)}>
+      <SelectTrigger className={cn("w-[180px] button-style-select", className)}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>
