@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { DarkModeButton, OutlineButton } from '@/components/shared/FormComponents';
+import { DarkModeButton, OutlineButton, IconButton } from '@/components/shared/FormComponents';
 import { Search, Star, Loader2, Edit3, Minus, Plus } from 'lucide-react';
 import { type Notice } from '@/types/notice';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -725,37 +725,29 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
         </div>
         <div className="flex items-center gap-2">
           {currentCategory === '제외' ? (
-            <OutlineButton
+            <IconButton
               onClick={handleRestore}
-              size="icon"
               title="업무에 복원"
-            >
-              <Plus className="h-4 w-4" style={{ margin: '0 !important', padding: '0 !important', display: 'block' }} />
-            </OutlineButton>
+              icon={<Plus className="h-4 w-4" />}
+            />
           ) : currentCategory !== '무관' && (
-            <OutlineButton
+            <IconButton
               onClick={handleExclude}
-              size="icon"
               title="업무에서 제외"
-            >
-              <Minus className="h-4 w-4" style={{ margin: '0 !important', padding: '0 !important', display: 'block' }} />
-            </OutlineButton>
+              icon={<Minus className="h-4 w-4" />}
+            />
           )}
-          <OutlineButton
+          <IconButton
             onClick={handleCategoryEdit}
-            size="icon"
             title="유형 변경"
-          >
-            <Edit3 className="h-4 w-4" style={{ margin: '0 !important', padding: '0 !important', display: 'block' }} />
-          </OutlineButton>
+            icon={<Edit3 className="h-4 w-4" />}
+          />
           {currentCategory !== '무관' && currentCategory !== '제외' && (
-            <OutlineButton
+            <IconButton
               onClick={handleBidProcess}
-              size="icon"
               title="입찰 진행"
-            >
-              <Star className="h-4 w-4" style={{ margin: '0 !important', padding: '0 !important', display: 'block' }} />
-            </OutlineButton>
+              icon={<Star className="h-4 w-4" />}
+            />
           )}
           </div>
         </div>

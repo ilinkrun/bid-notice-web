@@ -296,6 +296,14 @@ interface OutlineButtonProps {
   title?: string;
 }
 
+interface IconButtonProps {
+  icon: ReactNode;
+  onClick?: () => void;
+  className?: string;
+  disabled?: boolean;
+  title?: string;
+}
+
 /**
  * 투명한 배경에 테이블 행과 동일한 색상을 사용하는 Outline Button 컴포넌트
  * light/dark 모드 자동 지원
@@ -363,7 +371,7 @@ export function OutlineButton({
         border: '3px solid #ff0000 !important',
         color: '#ff0000 !important',
         borderRadius: '0px !important',
-        padding: '0 !important',
+        padding: size === 'icon' ? '2px 0 !important' : '0 !important',
         margin: '0 !important',
         cursor: disabled ? 'not-allowed' : 'pointer',
         opacity: disabled ? 0.5 : 1,
@@ -399,6 +407,91 @@ export function OutlineButton({
           lineHeight: '0 !important'
         }}>
           {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * 아이콘 버튼 컴포넌트
+ * 투명한 배경, 테이블 행과 동일한 색상, light/dark 모드 자동 지원
+ */
+export function IconButton({
+  icon,
+  onClick,
+  className,
+  disabled = false,
+  title
+}: IconButtonProps) {
+  return (
+    <div
+      onClick={disabled ? undefined : onClick}
+      title={title}
+      className={cn("no-unified-style", className)}
+      role="button"
+      tabIndex={disabled ? -1 : 0}
+      onKeyDown={(e) => {
+        if (!disabled && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          onClick?.();
+        }
+      }}
+      onMouseEnter={(e) => {
+        if (!disabled) {
+          e.currentTarget.style.backgroundColor = 'hsl(var(--muted))';
+          e.currentTarget.style.color = 'hsl(var(--foreground))';
+          e.currentTarget.style.borderColor = 'hsl(var(--foreground))';
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!disabled) {
+          e.currentTarget.style.backgroundColor = 'transparent';
+          e.currentTarget.style.color = 'hsl(var(--foreground))';
+          e.currentTarget.style.borderColor = 'hsl(var(--foreground))';
+        }
+      }}
+      style={{
+        backgroundColor: 'transparent',
+        border: '1px solid hsl(var(--foreground))',
+        color: 'hsl(var(--foreground))',
+        borderRadius: '0px',
+        padding: '2px 0',
+        margin: '0',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.5 : 1,
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '40px',
+        height: '40px',
+        minWidth: '40px',
+        minHeight: '40px',
+        maxWidth: '40px',
+        maxHeight: '40px',
+        boxSizing: 'border-box',
+        flexShrink: '0',
+        overflow: 'hidden'
+      }}
+    >
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        height: '100%',
+        margin: '0',
+        padding: '0'
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          margin: '0',
+          padding: '0',
+          lineHeight: '0'
+        }}>
+          {icon}
         </div>
       </div>
     </div>
