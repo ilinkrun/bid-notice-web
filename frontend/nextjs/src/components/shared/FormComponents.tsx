@@ -531,7 +531,10 @@ export function OutlineSelectBox({
           borderRadius: '0px',
           minHeight: '40px',
           padding: '0 12px',
-          cursor: disabled ? 'not-allowed' : 'pointer'
+          cursor: disabled ? 'not-allowed' : 'pointer',
+          width: '120px',
+          minWidth: '120px',
+          maxWidth: '120px'
         }}
         onMouseEnter={(e) => {
           if (!disabled) {
