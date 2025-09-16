@@ -1210,3 +1210,297 @@ thead th button[role="checkbox"] {
   border: 1px solid hsl(var(--foreground)) !important;
   background-color: hsl(var(--card)) !important;
 }
+
+/* 액션바 요소들 - 테이블과 일관된 스타일 (콘텐츠 영역만) */
+
+/* 1. Select 요소들 - 헤더 제외 */
+main select,
+.content-area select,
+.statistics-cell select,
+.category-page select,
+main .select-trigger,
+.content-area .select-trigger,
+.statistics-cell .select-trigger,
+.category-page .select-trigger,
+main [data-radix-select-trigger],
+.content-area [data-radix-select-trigger],
+.statistics-cell [data-radix-select-trigger],
+.category-page [data-radix-select-trigger] {
+  background-color: hsl(var(--card)) !important;
+  color: hsl(var(--foreground)) !important;
+  border: 1px solid hsl(var(--foreground)) !important;
+  border-radius: 0 !important;
+  padding: 0.5rem !important;
+  margin: 2px 0 !important;
+}
+
+main select:hover,
+.content-area select:hover,
+.statistics-cell select:hover,
+.category-page select:hover,
+main .select-trigger:hover,
+.content-area .select-trigger:hover,
+.statistics-cell .select-trigger:hover,
+.category-page .select-trigger:hover,
+main [data-radix-select-trigger]:hover,
+.content-area [data-radix-select-trigger]:hover,
+.statistics-cell [data-radix-select-trigger]:hover,
+.category-page [data-radix-select-trigger]:hover {
+  background-color: hsl(var(--muted)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+/* 2. Input 요소들 - 헤더 제외 */
+main input[type="text"],
+main input[type="number"],
+main input[type="email"],
+main input[type="password"],
+.content-area input[type="text"],
+.content-area input[type="number"],
+.content-area input[type="email"],
+.content-area input[type="password"],
+.statistics-cell input[type="text"],
+.statistics-cell input[type="number"],
+.statistics-cell input[type="email"],
+.statistics-cell input[type="password"],
+.category-page input[type="text"],
+.category-page input[type="number"],
+.category-page input[type="email"],
+.category-page input[type="password"],
+main .input,
+.content-area .input,
+.statistics-cell .input,
+.category-page .input {
+  background-color: hsl(var(--card)) !important;
+  color: hsl(var(--foreground)) !important;
+  border: 1px solid hsl(var(--foreground)) !important;
+  border-radius: 0 !important;
+  padding: 0.5rem !important;
+  margin: 2px 0 !important;
+}
+
+/* 검색 input - 아이콘 공간을 위한 왼쪽 패딩 추가 (헤더 제외) */
+main input[type="search"],
+.content-area input[type="search"],
+.statistics-cell input[type="search"],
+.category-page input[type="search"] {
+  background-color: hsl(var(--card)) !important;
+  color: hsl(var(--foreground)) !important;
+  border: 1px solid hsl(var(--foreground)) !important;
+  border-radius: 0 !important;
+  padding: 0.5rem 0.5rem 0.5rem 2.5rem !important;
+  margin: 2px 0 !important;
+}
+
+main input[type="text"]:hover,
+main input[type="number"]:hover,
+main input[type="email"]:hover,
+main input[type="password"]:hover,
+.content-area input[type="text"]:hover,
+.content-area input[type="number"]:hover,
+.content-area input[type="email"]:hover,
+.content-area input[type="password"]:hover,
+.statistics-cell input[type="text"]:hover,
+.statistics-cell input[type="number"]:hover,
+.statistics-cell input[type="email"]:hover,
+.statistics-cell input[type="password"]:hover,
+.category-page input[type="text"]:hover,
+.category-page input[type="number"]:hover,
+.category-page input[type="email"]:hover,
+.category-page input[type="password"]:hover,
+main .input:hover,
+.content-area .input:hover,
+.statistics-cell .input:hover,
+.category-page .input:hover {
+  background-color: hsl(var(--muted)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+main input[type="search"]:hover,
+.content-area input[type="search"]:hover,
+.statistics-cell input[type="search"]:hover,
+.category-page input[type="search"]:hover {
+  background-color: hsl(var(--muted)) !important;
+  color: hsl(var(--foreground)) !important;
+  padding: 0.5rem 0.5rem 0.5rem 2.5rem !important;
+}
+
+main input[type="text"]:focus,
+main input[type="number"]:focus,
+main input[type="email"]:focus,
+main input[type="password"]:focus,
+.content-area input[type="text"]:focus,
+.content-area input[type="number"]:focus,
+.content-area input[type="email"]:focus,
+.content-area input[type="password"]:focus,
+.statistics-cell input[type="text"]:focus,
+.statistics-cell input[type="number"]:focus,
+.statistics-cell input[type="email"]:focus,
+.statistics-cell input[type="password"]:focus,
+.category-page input[type="text"]:focus,
+.category-page input[type="number"]:focus,
+.category-page input[type="email"]:focus,
+.category-page input[type="password"]:focus,
+main .input:focus,
+.content-area .input:focus,
+.statistics-cell .input:focus,
+.category-page .input:focus {
+  background-color: hsl(var(--muted)) !important;
+  color: hsl(var(--foreground)) !important;
+  border-color: hsl(var(--foreground)) !important;
+  outline: none !important;
+}
+
+main input[type="search"]:focus,
+.content-area input[type="search"]:focus,
+.statistics-cell input[type="search"]:focus,
+.category-page input[type="search"]:focus {
+  background-color: hsl(var(--muted)) !important;
+  color: hsl(var(--foreground)) !important;
+  border-color: hsl(var(--foreground)) !important;
+  outline: none !important;
+  padding: 0.5rem 0.5rem 0.5rem 2.5rem !important;
+}
+
+/* 3. Button 요소들 - 콘텐츠 영역만 */
+main button:not([role="checkbox"]),
+.content-area button:not([role="checkbox"]),
+.statistics-cell button:not([role="checkbox"]),
+.category-page button:not([role="checkbox"]),
+main .button,
+.content-area .button,
+.statistics-cell .button,
+.category-page .button,
+main [role="button"]:not([role="checkbox"]),
+.content-area [role="button"]:not([role="checkbox"]),
+.statistics-cell [role="button"]:not([role="checkbox"]),
+.category-page [role="button"]:not([role="checkbox"]) {
+  background-color: hsl(var(--card)) !important;
+  color: hsl(var(--foreground)) !important;
+  border: 1px solid hsl(var(--foreground)) !important;
+  border-radius: 0 !important;
+  padding: 0.5rem 1rem !important;
+  margin: 2px 0 !important;
+  cursor: pointer !important;
+}
+
+main button:not([role="checkbox"]):hover,
+.content-area button:not([role="checkbox"]):hover,
+.statistics-cell button:not([role="checkbox"]):hover,
+.category-page button:not([role="checkbox"]):hover,
+main .button:hover,
+.content-area .button:hover,
+.statistics-cell .button:hover,
+.category-page .button:hover,
+main [role="button"]:not([role="checkbox"]):hover,
+.content-area [role="button"]:not([role="checkbox"]):hover,
+.statistics-cell [role="button"]:not([role="checkbox"]):hover,
+.category-page [role="button"]:not([role="checkbox"]):hover {
+  background-color: hsl(var(--muted)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+/* 4. Select content/dropdown 요소들 */
+[data-radix-select-content],
+.select-content {
+  background-color: hsl(var(--card)) !important;
+  color: hsl(var(--foreground)) !important;
+  border: 1px solid hsl(var(--foreground)) !important;
+  border-radius: 0 !important;
+}
+
+[data-radix-select-item],
+.select-item {
+  background-color: hsl(var(--card)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+[data-radix-select-item]:hover,
+.select-item:hover {
+  background-color: hsl(var(--muted)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+/* 헤더 메뉴 활성 상태 밑줄 표시 */
+header a.active,
+header button.active,
+header nav a.active,
+header nav button.active,
+header nav div button.active,
+header div a.active,
+.header-menu.active,
+nav a.active,
+nav button.active {
+  position: relative;
+}
+
+header a.active::after,
+header button.active::after,
+header nav a.active::after,
+header nav button.active::after,
+header nav div button.active::after,
+header div a.active::after,
+.header-menu.active::after,
+nav a.active::after,
+nav button.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: hsl(0 85% 55%) !important;
+  border-radius: 0;
+  z-index: 10;
+}
+
+/* 더 강력한 선택자 추가 */
+.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: red !important;
+  border-radius: 0;
+  z-index: 999;
+}
+
+/* 검색 입력 필드 아이콘과 텍스트 간격 보정 */
+.search-input-with-icon {
+  padding-left: 4rem !important;
+  text-indent: 1.25rem !important;
+}
+
+/* 검색 아이콘이 있는 입력 필드의 placeholder 위치 조정 */
+.search-input-with-icon::placeholder {
+  transform: translateX(0.5rem) !important;
+}
+
+/* 포커스 상태 정상화 - 커서와 깜박임 제어 */
+.search-input-with-icon:focus {
+  caret-color: auto !important;
+}
+
+.search-input-with-icon:not(:focus) {
+  caret-color: transparent !important;
+}
+
+/* 포커스 해제 시 정상 동작 보장 */
+.search-input-with-icon {
+  transition: all 0.2s ease;
+}
+
+/* 다크모드에서 밑줄 색상 */
+.dark header a.active::after,
+.dark header button.active::after,
+.dark header nav a.active::after,
+.dark header nav button.active::after,
+.dark header nav div button.active::after,
+.dark header div a.active::after,
+.dark .header-menu.active::after,
+.dark nav a.active::after,
+.dark nav button.active::after {
+  background-color: hsl(0 85% 65%) !important;
+}

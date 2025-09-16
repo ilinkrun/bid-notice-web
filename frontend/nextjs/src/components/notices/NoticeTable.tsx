@@ -700,7 +700,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
                 placeholder="입찰공고 검색..."
                 value={searchTerm}
                 onChange={handleSearchInput}
-                className="pl-8"
+                className="search-input-with-icon"
                 autoComplete="off"
                 type="text"
                 onCompositionStart={() => setIsComposing(true)}

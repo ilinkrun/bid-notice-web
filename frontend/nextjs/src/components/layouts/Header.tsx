@@ -191,6 +191,26 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ label, icon: Icon, items, a
   const pathname = usePathname();
   const { navigate } = useUnifiedNavigation();
 
+  // Check if current path matches any of the dropdown items
+  // Handle both exact matches and base path matches (ignoring query parameters)
+  const isActive = items.some(item => {
+    const itemPath = item.href.split('?')[0]; // Remove query parameters
+    const decodedItemPath = decodeURIComponent(itemPath);
+    const encodedItemPath = encodeURIComponent(itemPath);
+
+    return pathname === item.href ||
+           pathname === itemPath ||
+           pathname === decodedItemPath ||
+           pathname === encodedItemPath ||
+           pathname.startsWith(itemPath + '/') ||
+           pathname.startsWith(decodedItemPath + '/') ||
+           pathname.startsWith(encodedItemPath + '/');
+  }) || (label === '공고' && pathname.startsWith('/notices')) ||
+       (label === '입찰' && pathname.startsWith('/mybids')) ||
+       (label === '통계' && pathname.startsWith('/statistics')) ||
+       (label === '채널' && pathname.startsWith('/channels')) ||
+       (label === '설정' && pathname.startsWith('/settings'));
+
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -209,7 +229,8 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ label, icon: Icon, items, a
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
             "flex items-center justify-between w-full px-4 py-2 transition-colors bg-background",
-            isOpen ? "bg-accent" : "hover:bg-accent/50"
+            isOpen ? "bg-accent" : "hover:bg-accent/50",
+            isActive && "active"
           )}
         >
           <div className="flex items-center gap-2">
@@ -254,7 +275,8 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ label, icon: Icon, items, a
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           "flex items-center gap-2 px-4 py-2 transition-colors",
-          isOpen ? "bg-accent" : "hover:bg-accent/50"
+          isOpen ? "bg-accent" : "hover:bg-accent/50",
+          isActive && "active"
         )}
       >
         <Icon className="h-4 w-4" />
@@ -384,6 +406,10 @@ const UserDropdown: React.FC = () => {
   const menuRef = React.useRef<HTMLDivElement>(null);
   const { user, logout, token } = useAuth();
   const { navigate } = useUnifiedNavigation();
+  const pathname = usePathname();
+
+  // Check if current path is user-related
+  const isActive = pathname === '/profile' || pathname === '/login';
 
   const [logoutMutation, { data: logoutData, error: logoutError }] = useMutation(LOGOUT_MUTATION, {
     client: getClient()
@@ -445,7 +471,8 @@ const UserDropdown: React.FC = () => {
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           "flex items-center gap-2 p-1 rounded-full transition-colors",
-          isOpen ? "bg-accent" : "hover:bg-accent/50"
+          isOpen ? "bg-accent" : "hover:bg-accent/50",
+          isActive && "active"
         )}
       >
         <UserAvatar user={user} />
@@ -521,12 +548,13 @@ interface HeaderProps {
 export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
   const { isAuthenticated } = useAuth();
   const { hasRole } = usePermissions();
+  const pathname = usePathname();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-slate-200 dark:bg-slate-800 backdrop-blur supports-[backdrop-filter]:bg-slate-200/90 supports-[backdrop-filter]:dark:bg-slate-800/90">
       <div className="flex h-14 items-center" style={{ paddingLeft: 'var(--container-padding-x)', paddingRight: 'calc(var(--container-padding-x) - var(--scrollbar-width))' }}>
         <div className="mr-4 hidden md:flex">
-          <Link href="/" className="flex items-center space-x-2">
+          <Link href="/" className={cn("flex items-center space-x-2", pathname === '/' && "active")}>
             <span className="font-bold">IBW</span>
           </Link>
           <nav className="flex items-center gap-1 ml-12">
@@ -556,7 +584,7 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
         </div>
 
         <div className="flex flex-1 items-center justify-between md:justify-end">
-          <Link href="/" className="flex items-center space-x-2 md:hidden">
+          <Link href="/" className={cn("flex items-center space-x-2 md:hidden", pathname === '/' && "active")}>
             <span className="font-bold">ILE</span>
           </Link>
           <div className="flex items-center gap-2">
@@ -568,7 +596,7 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
             ) : (
               <Link
                 href="/login"
-                className="flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+                className={cn("flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary", pathname === '/login' && "active")}
               >
                 <User className="h-4 w-4" />
                 <span>로그인</span>
@@ -633,7 +661,7 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
                   <Link
                     href="/login"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2 transition-colors hover:bg-accent/50 w-full"
+                    className={cn("flex items-center gap-2 px-4 py-2 transition-colors hover:bg-accent/50 w-full", pathname === '/login' && "active")}
                   >
                     <User className="h-4 w-4" />
                     <span>로그인</span>
