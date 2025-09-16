@@ -524,7 +524,7 @@ export default function BidTable({ bids, currentStatus }) {
                 placeholder="입찰 검색..."
                 value={searchTerm}
                 onChange={handleSearchInput}
-                className="search-input-with-icon"
+                className="pl-8"
                 autoComplete="off"
                 type="text"
                 onCompositionStart={() => setIsComposing(true)}
@@ -580,6 +580,14 @@ export default function BidTable({ bids, currentStatus }) {
           <TableHeader>
             <TableRow>
               <TableHead
+                className="w-[80px] cursor-pointer"
+                data-sortable="true"
+                data-sort-active={sortConfig.field === 'category'}
+                onClick={() => toggleSort('category')}
+              >
+                유형
+              </TableHead>
+              <TableHead
                 className="w-auto cursor-pointer"
                 data-sortable="true"
                 data-sort-active={sortConfig.field === 'title'}
@@ -594,14 +602,6 @@ export default function BidTable({ bids, currentStatus }) {
                 onClick={() => toggleSort('postedAt')}
               >
                 등록일
-              </TableHead>
-              <TableHead
-                className="w-[80px] cursor-pointer"
-                data-sortable="true"
-                data-sort-active={sortConfig.field === 'category'}
-                onClick={() => toggleSort('category')}
-              >
-                유형
               </TableHead>
               <TableHead
                 className="w-[120px] cursor-pointer"
@@ -644,8 +644,11 @@ export default function BidTable({ bids, currentStatus }) {
                     window.location.href = `/mybids/${localStatus}/${bid.nid}`;
                   }}
                 >
+                  <TableCell className="w-[80px] whitespace-nowrap">
+                    {bid.category}
+                  </TableCell>
                   <TableCell className="w-auto max-w-0">
-                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <a
@@ -655,7 +658,8 @@ export default function BidTable({ bids, currentStatus }) {
                             className="text-sm font-medium text-foreground hover:text-blue-600 truncate cursor-pointer"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            {bid.title || '[제목 없음]'}
+                            "제목 테스트"
+                            {/* {bid.title || '[제목 없음]'} */}
                           </a>
                         </div>
                       </div>
@@ -663,9 +667,6 @@ export default function BidTable({ bids, currentStatus }) {
                   </TableCell>
                   <TableCell className="w-[100px] whitespace-nowrap">
                     {bid.postedAt ? bid.postedAt.split('T')[0] : bid.postedAt}
-                  </TableCell>
-                  <TableCell className="w-[80px] whitespace-nowrap">
-                    {bid.category}
                   </TableCell>
                   <TableCell className="w-[120px] whitespace-nowrap">
                     {orgUrls[bid.orgName] ? (

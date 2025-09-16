@@ -801,7 +801,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                       <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                       <DarkModeInput
                         placeholder="제목 또는 작성자로 검색"
-                        className="pl-8"
+                        className="search-input-with-icon"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                       />

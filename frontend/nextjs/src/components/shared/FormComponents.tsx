@@ -123,22 +123,45 @@ export function DarkModeButton({
   type = 'button',
   title
 }: DarkModeButtonProps) {
+  const buttonStyle = {
+    backgroundColor: variant === 'outline' ? 'transparent' : '#00ff00', // 초록색 (default variant)
+    border: variant === 'outline' ? '3px solid #ff0000' : 'none', // 빨간색 테두리 (outline variant)
+    color: variant === 'outline' ? '#ff0000' : '#000000', // outline은 빨간색 글자, default는 검은색 글자
+    borderRadius: '0px',
+    padding: size === 'sm' ? '0.375rem 0.75rem' : '0.5rem 1rem',
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    opacity: disabled ? 0.5 : 1,
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: size === 'sm' ? '0.875rem' : '1rem',
+    fontWeight: '500',
+    transition: 'all 0.2s ease',
+    minHeight: size === 'sm' ? '2rem' : '2.5rem',
+    minWidth: size === 'sm' ? '2rem' : '2.5rem'
+  } as React.CSSProperties;
+
   return (
-    <Button
+    <button
       onClick={onClick}
-      variant={variant}
-      size={size}
       disabled={disabled}
       type={type}
       title={title}
-      className={cn(
-        // 입력 필드와 동일한 스타일 적용
-        variant === 'outline' && "bg-background dark:bg-background border-border dark:border-border text-foreground dark:text-foreground hover:bg-muted dark:hover:bg-muted",
-        className
-      )}
+      className={className}
+      style={buttonStyle}
+      onMouseEnter={(e) => {
+        if (!disabled) {
+          e.currentTarget.style.backgroundColor = variant === 'outline' ? '#ffff00' : '#0000ff'; // outline은 노란색, default는 파란색
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!disabled) {
+          e.currentTarget.style.backgroundColor = variant === 'outline' ? 'transparent' : '#00ff00'; // 원래 색으로 복구
+        }
+      }}
     >
-      {children}
-    </Button>
+      CUSTOM_BUTTON_TEST
+    </button>
   );
 }
 
@@ -262,3 +285,122 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(({
 });
 
 SearchInput.displayName = 'SearchInput';
+
+interface OutlineButtonProps {
+  children: ReactNode;
+  onClick?: () => void;
+  size?: 'default' | 'sm' | 'lg' | 'icon';
+  className?: string;
+  disabled?: boolean;
+  type?: 'button' | 'submit' | 'reset';
+  title?: string;
+}
+
+/**
+ * 투명한 배경에 테이블 행과 동일한 색상을 사용하는 Outline Button 컴포넌트
+ * light/dark 모드 자동 지원
+ */
+export function OutlineButton({
+  children,
+  onClick,
+  size = 'default',
+  className,
+  disabled = false,
+  type = 'button',
+  title
+}: OutlineButtonProps) {
+  const buttonStyle = {
+    backgroundColor: 'transparent !important',
+    border: '3px solid #ff0000 !important',
+    color: '#ff0000 !important',
+    borderRadius: '0px !important',
+    padding: '0 !important',
+    margin: '0 !important',
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    opacity: disabled ? 0.5 : 1,
+    display: 'flex !important',
+    alignItems: 'center !important',
+    justifyContent: 'center !important',
+    fontSize: size === 'sm' ? '0.875rem !important' : size === 'lg' ? '1.125rem !important' : '1rem !important',
+    fontWeight: '500 !important',
+    transition: 'all 0.2s ease !important',
+    width: '100% !important',
+    height: '100% !important',
+    boxSizing: 'border-box !important'
+  } as React.CSSProperties;
+
+  return (
+    <div
+      onClick={disabled ? undefined : onClick}
+      title={title}
+      className={cn(className)}
+      role="button"
+      tabIndex={disabled ? -1 : 0}
+      onKeyDown={(e) => {
+        if (!disabled && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          onClick?.();
+        }
+      }}
+      onMouseEnter={(e) => {
+        if (!disabled) {
+          // 테이블 행의 hover 배경색과 동일하게 설정
+          e.currentTarget.style.backgroundColor = '#ffff00 !important';
+          e.currentTarget.style.color = '#000000 !important';
+          e.currentTarget.style.borderColor = '#000000 !important';
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!disabled) {
+          // 원래 상태로 복구
+          e.currentTarget.style.backgroundColor = 'transparent !important';
+          e.currentTarget.style.color = '#ff0000 !important';
+          e.currentTarget.style.borderColor = '#ff0000 !important';
+        }
+      }}
+      style={{
+        backgroundColor: 'transparent !important',
+        border: '3px solid #ff0000 !important',
+        color: '#ff0000 !important',
+        borderRadius: '0px !important',
+        padding: '0 !important',
+        margin: '0 !important',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.5 : 1,
+        display: 'inline-flex !important',
+        alignItems: 'center !important',
+        justifyContent: 'center !important',
+        width: size === 'icon' ? '40px !important' : 'auto !important',
+        height: size === 'icon' ? '40px !important' : 'auto !important',
+        minWidth: size === 'icon' ? '40px !important' : 'auto !important',
+        minHeight: size === 'icon' ? '40px !important' : 'auto !important',
+        maxWidth: size === 'icon' ? '40px !important' : 'none !important',
+        maxHeight: size === 'icon' ? '40px !important' : 'none !important',
+        boxSizing: 'border-box !important',
+        flexShrink: '0 !important',
+        overflow: 'hidden !important'
+      }}
+    >
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        height: '100%',
+        margin: '0 !important',
+        padding: '0 !important'
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          margin: '0 !important',
+          padding: '0 !important',
+          lineHeight: '0 !important'
+        }}>
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
