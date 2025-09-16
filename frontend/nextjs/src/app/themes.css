@@ -445,18 +445,18 @@ html, body {
 
 
 
-/* 최상위 컨테이너 스타일 (테이블 페이지용) */
-.category-page .container {
+/* 최상위 컨테이너 스타일 (테이블 페이지용) - PageContainer는 제외 */
+.category-page .container:not(.page-content-container) {
   margin: 0 !important;
   padding: 0 !important;
   max-width: none !important;
   width: 100% !important;
 }
 
-/* PageContainer의 container 클래스 오버라이드 */
-.theme-default .container,
-.theme-test-light .container,
-.theme-test-dark .container {
+/* PageContainer의 container 클래스 오버라이드 - PageContainer는 제외 */
+.theme-default .container:not(.page-content-container),
+.theme-test-light .container:not(.page-content-container),
+.theme-test-dark .container:not(.page-content-container) {
   padding-left: 0 !important;
   padding-right: 0 !important;
   max-width: none !important;

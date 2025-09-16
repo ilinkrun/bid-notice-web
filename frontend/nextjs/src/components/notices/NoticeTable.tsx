@@ -671,7 +671,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
           </div>
         </div>
       )}
-      <div className="w-full" style={{ paddingLeft: 'var(--container-padding-x)', paddingRight: 'var(--container-padding-x)' }}>
+      <div className="w-full">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto" style={{ color: 'hsl(var(--foreground))' }}>
           <OutlineSelectBox

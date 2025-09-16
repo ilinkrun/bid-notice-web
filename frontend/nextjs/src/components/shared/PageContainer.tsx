@@ -27,7 +27,7 @@ export function PageContainer({
       "theme-default bg-card dark:bg-card",
       className
     )}>
-      <div className={cn("container mx-auto", containerClassName)}>
+      <div className={cn("page-content-container w-full", containerClassName)} style={{ paddingLeft: 'var(--container-padding-x)', paddingRight: 'calc(var(--container-padding-x) - var(--scrollbar-width))' }}>
         {title && (
           <h1 className={cn(
             "text-xl font-bold pt-1 pl-1 text-foreground mb-4",
