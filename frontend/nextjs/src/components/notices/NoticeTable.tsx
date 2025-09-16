@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { DarkModeButton, OutlineButton, IconButton } from '@/components/shared/FormComponents';
+import { DarkModeButton, OutlineButton, IconButton, OutlineSelectBox, OutlineSelectItem } from '@/components/shared/FormComponents';
 import { Search, Star, Loader2, Edit3, Minus, Plus } from 'lucide-react';
 import { type Notice } from '@/types/notice';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -674,12 +674,17 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
       <div className="w-full" style={{ paddingLeft: 'var(--container-padding-x)', paddingRight: 'var(--container-padding-x)' }}>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-          <UnifiedSelect
+          <OutlineSelectBox
             value={localCategory}
             onValueChange={handleCategoryChange}
             placeholder="유형 선택"
-            options={CATEGORIES}
-          />
+          >
+            {CATEGORIES.map((category) => (
+              <OutlineSelectItem key={category.value} value={category.value}>
+                {category.label}
+              </OutlineSelectItem>
+            ))}
+          </OutlineSelectBox>
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2">
               <label htmlFor="gap-input" className="text-sm font-medium text-foreground">최근</label>

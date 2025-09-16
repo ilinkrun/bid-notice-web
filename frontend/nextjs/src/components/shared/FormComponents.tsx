@@ -304,6 +304,15 @@ interface IconButtonProps {
   title?: string;
 }
 
+interface OutlineSelectBoxProps {
+  value?: string;
+  onValueChange?: (value: string) => void;
+  placeholder?: string;
+  className?: string;
+  disabled?: boolean;
+  children: ReactNode;
+}
+
 /**
  * 투명한 배경에 테이블 행과 동일한 색상을 사용하는 Outline Button 컴포넌트
  * light/dark 모드 자동 지원
@@ -495,5 +504,111 @@ export function IconButton({
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * Outline SelectBox 컴포넌트
+ * 투명한 배경, 테이블 행과 동일한 색상, light/dark 모드 자동 지원
+ * 펼쳐지기 전 요소와 드롭다운 내용 모두 동일한 스타일 적용
+ */
+export function OutlineSelectBox({
+  value,
+  onValueChange,
+  placeholder,
+  className,
+  disabled = false,
+  children
+}: OutlineSelectBoxProps) {
+  return (
+    <Select value={value} onValueChange={onValueChange} disabled={disabled}>
+      <SelectTrigger
+        className={cn("no-unified-style", className)}
+        style={{
+          backgroundColor: 'transparent',
+          border: '1px solid hsl(var(--foreground))',
+          color: 'hsl(var(--foreground))',
+          borderRadius: '0px',
+          minHeight: '40px',
+          padding: '0 12px',
+          cursor: disabled ? 'not-allowed' : 'pointer'
+        }}
+        onMouseEnter={(e) => {
+          if (!disabled) {
+            e.currentTarget.style.backgroundColor = 'hsl(var(--muted))';
+            e.currentTarget.style.color = 'hsl(var(--foreground))';
+            e.currentTarget.style.borderColor = 'hsl(var(--foreground))';
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!disabled) {
+            e.currentTarget.style.backgroundColor = 'transparent';
+            e.currentTarget.style.color = 'hsl(var(--foreground))';
+            e.currentTarget.style.borderColor = 'hsl(var(--foreground))';
+          }
+        }}
+      >
+        <SelectValue
+          placeholder={placeholder}
+          style={{
+            color: 'hsl(var(--foreground))'
+          }}
+        />
+      </SelectTrigger>
+      <SelectContent
+        className="no-unified-style"
+        style={{
+          backgroundColor: 'transparent',
+          border: '1px solid hsl(var(--foreground))',
+          borderRadius: '0px',
+          padding: '0',
+          boxShadow: 'none',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)'
+        }}
+      >
+        {children}
+      </SelectContent>
+    </Select>
+  );
+}
+
+/**
+ * Outline SelectBox Item 컴포넌트
+ * 테이블 행과 동일한 스타일 적용
+ */
+export function OutlineSelectItem({
+  value,
+  children,
+  className
+}: {
+  value: string;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <SelectItem
+      value={value}
+      className={cn("no-unified-style", className)}
+      style={{
+        backgroundColor: 'transparent',
+        color: 'hsl(var(--foreground))',
+        borderRadius: '0px',
+        padding: '8px 12px',
+        margin: '0',
+        cursor: 'pointer',
+        border: 'none'
+      }}
+      onMouseEnter={(e: any) => {
+        e.currentTarget.style.backgroundColor = 'hsl(var(--muted))';
+        e.currentTarget.style.color = 'hsl(var(--foreground))';
+      }}
+      onMouseLeave={(e: any) => {
+        e.currentTarget.style.backgroundColor = 'transparent';
+        e.currentTarget.style.color = 'hsl(var(--foreground))';
+      }}
+    >
+      {children}
+    </SelectItem>
   );
 }
