@@ -673,7 +673,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
       )}
       <div className="w-full" style={{ paddingLeft: 'var(--container-padding-x)', paddingRight: 'var(--container-padding-x)' }}>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
-          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto" style={{ color: 'hsl(var(--foreground))' }}>
           <OutlineSelectBox
             value={localCategory}
             onValueChange={handleCategoryChange}
@@ -698,15 +698,15 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
               />
             </div>
           </div>
-          <div className="relative flex items-center gap-2 w-[500px]">
-            <div className="relative">
+          <div className="relative flex items-center gap-2 flex-1" style={{ minWidth: '10px' }}>
+            <div className="relative flex-1" style={{ minWidth: '10px' }}>
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 ref={searchInputRef}
                 placeholder="입찰공고 검색..."
                 value={searchTerm}
                 onChange={handleSearchInput}
-                className="search-input-with-icon"
+                className="search-input-with-icon w-full"
                 autoComplete="off"
                 type="text"
                 onCompositionStart={() => setIsComposing(true)}
@@ -728,7 +728,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
             <AdvancedSearchModal />
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" style={{ color: 'hsl(var(--foreground))' }}>
           {currentCategory === '제외' ? (
             <IconButton
               onClick={handleRestore}

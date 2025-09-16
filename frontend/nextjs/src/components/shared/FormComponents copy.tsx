@@ -437,7 +437,7 @@ export function IconButton({
     <div
       onClick={disabled ? undefined : onClick}
       title={title}
-      className={cn("no-unified-style text-foreground border bg-transparent", className)}
+      className={cn("no-unified-style text-foreground border-foreground border bg-transparent", className)}
       role="button"
       tabIndex={disabled ? -1 : 0}
       onKeyDown={(e) => {
@@ -450,19 +450,17 @@ export function IconButton({
         if (!disabled) {
           e.currentTarget.style.backgroundColor = 'hsl(var(--muted))';
           e.currentTarget.style.color = 'hsl(var(--foreground))';
-          e.currentTarget.style.borderColor = 'currentColor';
+          e.currentTarget.style.borderColor = 'hsl(var(--foreground))';
         }
       }}
       onMouseLeave={(e) => {
         if (!disabled) {
           e.currentTarget.style.backgroundColor = 'transparent';
           e.currentTarget.style.color = 'hsl(var(--foreground))';
-          e.currentTarget.style.borderColor = 'currentColor';
+          e.currentTarget.style.borderColor = 'hsl(var(--foreground))';
         }
       }}
       style={{
-        borderColor: 'currentColor',
-        borderRadius: '0px',
         padding: '2px 0',
         margin: '0',
         cursor: disabled ? 'not-allowed' : 'pointer',
@@ -478,7 +476,8 @@ export function IconButton({
         maxHeight: '40px',
         boxSizing: 'border-box',
         flexShrink: '0',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        borderRadius: '0px'
       }}
     >
       <div style={{
@@ -547,35 +546,32 @@ export function OutlineSelectBox({
     <div className={cn("no-unified-style relative text-foreground", className)} style={{ width: '120px' }}>
       {/* 드롭다운 버튼 */}
       <div
-        className="text-foreground border bg-transparent"
-        style={{
-          ...{
-            minHeight: '40px',
-            padding: '0 12px',
-            cursor: disabled ? 'not-allowed' : 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            width: '100%',
-            boxSizing: 'border-box',
-            borderRadius: '0px'
-          },
-          borderColor: 'currentColor'
-        }}
+        className="text-foreground border-foreground border bg-transparent"
         onClick={disabled ? undefined : () => setIsOpen(!isOpen)}
         onMouseEnter={(e) => {
           if (!disabled) {
             e.currentTarget.style.backgroundColor = 'hsl(var(--muted))';
             e.currentTarget.style.color = 'hsl(var(--foreground))';
-            e.currentTarget.style.borderColor = 'currentColor';
+            e.currentTarget.style.borderColor = 'hsl(var(--foreground))';
           }
         }}
         onMouseLeave={(e) => {
           if (!disabled) {
             e.currentTarget.style.backgroundColor = 'transparent';
             e.currentTarget.style.color = 'hsl(var(--foreground))';
-            e.currentTarget.style.borderColor = 'currentColor';
+            e.currentTarget.style.borderColor = 'hsl(var(--foreground))';
           }
+        }}
+        style={{
+          minHeight: '40px',
+          padding: '0 12px',
+          cursor: disabled ? 'not-allowed' : 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          width: '100%',
+          boxSizing: 'border-box',
+          borderRadius: '0px'
         }}
         role="combobox"
         aria-expanded={isOpen}
