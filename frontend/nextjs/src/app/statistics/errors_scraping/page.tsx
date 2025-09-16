@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { getClient } from '@/lib/api/graphqlClient';
 import { gql } from '@apollo/client';
 import ErrorScrapingContent from './ErrorScrapingContent';
+import { PageContainer } from '@/components/shared/PageContainer';
 
 export const metadata: Metadata = {
   title: '스크래핑 오류 통계 | ILMAC BID',
@@ -47,6 +48,10 @@ async function getErrorScrapings() {
 
 export default async function ErrorScrapingPage() {
   const initialData = await getErrorScrapings();
-  
-  return <ErrorScrapingContent initialData={initialData} />;
+
+  return (
+    <PageContainer title="스크래핑 오류 통계">
+      <ErrorScrapingContent initialData={initialData} />
+    </PageContainer>
+  );
 }

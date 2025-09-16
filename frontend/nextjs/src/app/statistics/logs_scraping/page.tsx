@@ -3,6 +3,7 @@ import { LogScrapingStatisticsTable } from '@/components/statistics/LogScrapingS
 import ApolloWrapper from '@/components/providers/ApolloWrapper';
 import { getClient } from '@/lib/api/graphqlClient';
 import { gql } from '@apollo/client';
+import { PageContainer } from '@/components/shared/PageContainer';
 
 export const metadata: Metadata = {
   title: '스크래핑 로그 통계 | ILMAC BID',
@@ -60,18 +61,15 @@ export default async function LogScrapingStatisticsPage({ searchParams }: PagePr
   const logScrapings = await getLogScrapings(validGap);
 
   return (
-    <div className="theme-default bg-background dark:bg-secondary min-h-screen">
-      <div className="container mx-auto">
-      <h1 className="text-xl font-bold pt-1 pl-1 text-foreground">스크래핑 로그 통계</h1>
-        <div className="statistics-cell">
-          <ApolloWrapper>
-            <LogScrapingStatisticsTable
-              initialData={logScrapings}
-              defaultGap={validGap.toString()}
-            />
-          </ApolloWrapper>
-        </div>
+    <PageContainer title="스크래핑 로그 통계">
+      <div className="statistics-cell">
+        <ApolloWrapper>
+          <LogScrapingStatisticsTable
+            initialData={logScrapings}
+            defaultGap={validGap.toString()}
+          />
+        </ApolloWrapper>
       </div>
-    </div>
+    </PageContainer>
   );
 }

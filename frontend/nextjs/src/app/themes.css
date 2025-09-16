@@ -222,6 +222,10 @@
   --theme-border: 220 13% 85%;
   --theme-hover: 220 13% 93%;
   --theme-header: 220 13% 95%;
+
+  /* 일관된 여백 변수 */
+  --container-padding-x: 1rem; /* 16px */
+  --scrollbar-width: calc(100vw - 100%); /* 스크롤바 폭 계산 */
 }
 
 /* 공사점검 테마 */
@@ -439,11 +443,30 @@ html, body {
   overflow-x: hidden;
 }
 
+
+
 /* 최상위 컨테이너 스타일 (테이블 페이지용) */
 .category-page .container {
   margin: 0 !important;
   padding: 0 !important;
   max-width: none !important;
+  width: 100% !important;
+}
+
+/* PageContainer의 container 클래스 오버라이드 */
+.theme-default .container,
+.theme-test-light .container,
+.theme-test-dark .container {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  max-width: none !important;
+  width: 100% !important;
+}
+
+/* Header와 Footer 정렬을 위한 강제 스타일 */
+header > div,
+footer {
+  box-sizing: border-box;
   width: 100% !important;
 }
 
@@ -453,19 +476,13 @@ html, body {
   color: hsl(var(--theme-text));
   margin: 0;
   padding: 0;
-  min-height: 100vh;
   width: 100vw;
-  display: flex;
-  flex-direction: column;
 }
 
 /* 페이지 레이아웃 스타일 */
 [class*="theme-"] .category-page {
   margin: 0;
   padding: 0;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
 }
 
 /* 페이지 콘텐츠 영역 스타일 */
@@ -713,19 +730,205 @@ html, body {
 
 /* 테이블 헤더 스타일 재정의 */
 [class*="theme-"] thead th {
-  background-color: hsl(var(--theme-text)) !important;
-  color: white !important;
+  background-color: hsl(var(--theme-surface)) !important;
+  color: hsl(var(--theme-text)) !important;
 }
 
 [class*="theme-"] thead th button {
-  color: white !important;
+  color: hsl(var(--theme-text)) !important;
 }
 
 [class*="theme-"] thead th:hover {
-  background-color: hsl(var(--theme-text)) !important;
+  background-color: hsl(var(--theme-hover)) !important;
 }
 
 [class*="theme-"] thead th button:hover {
   background-color: transparent !important;
-  color: white !important;
+  color: hsl(var(--theme-primary)) !important;
+}
+
+/* theme-test 테마 - 단순화된 slate 기반 테마 */
+.theme-test-light {
+  --content-bg: 241 245 249; /* slate-100 */
+  --text-color: 15 23 42; /* slate-900 */
+  --border-color: 15 23 42; /* slate-900 */
+  --hover-bg-color: 226 232 240; /* slate-200 */
+  --hover-text-color: 239 68 68; /* red-500 for specific functions */
+}
+
+.theme-test-dark {
+  --content-bg: 15 23 42; /* slate-900 */
+  --text-color: 241 245 249; /* slate-100 */
+  --border-color: 241 245 249; /* slate-100 */
+  --hover-bg-color: 30 41 59; /* slate-800 */
+  --hover-text-color: 252 165 165; /* red-300 for specific functions */
+}
+
+/* theme-test 공통 스타일 - content 영역에만 적용 */
+.theme-test-light,
+.theme-test-dark {
+  width: 100%;
+}
+
+.theme-test-light .category-page,
+.theme-test-dark .category-page {
+  background-color: hsl(var(--content-bg)) !important;
+  color: hsl(var(--text-color));
+  border-radius: 0;
+  width: 100%;
+}
+
+/* PageContainer 스타일 재정의 */
+.theme-test-light .page-container,
+.theme-test-dark .page-container {
+  background-color: hsl(var(--content-bg)) !important;
+}
+
+/* 버튼 스타일 */
+.theme-test-light .category-page button,
+.theme-test-dark .category-page button {
+  background-color: hsl(var(--content-bg));
+  color: hsl(var(--text-color));
+  border: 1px solid hsl(var(--border-color));
+  border-radius: 0;
+}
+
+.theme-test-light .category-page button:hover,
+.theme-test-dark .category-page button:hover {
+  background-color: hsl(var(--hover-bg-color));
+  color: hsl(var(--text-color));
+  border-color: hsl(var(--border-color));
+}
+
+/* 테이블 스타일 */
+.theme-test-light .category-page .table-container,
+.theme-test-dark .category-page .table-container {
+  background-color: transparent;
+  border: none;
+  border-radius: 0;
+}
+
+.theme-test-light .category-page table,
+.theme-test-dark .category-page table {
+  background-color: transparent;
+  border-radius: 0;
+}
+
+/* 테이블 헤더 */
+.theme-test-light .category-page thead th,
+.theme-test-dark .category-page thead th {
+  background-color: transparent;
+  color: hsl(var(--text-color));
+  border: 1px solid hsl(var(--border-color));
+  border-radius: 0;
+}
+
+.theme-test-light .category-page thead th button,
+.theme-test-dark .category-page thead th button {
+  background-color: transparent;
+  color: hsl(var(--text-color));
+  border: none;
+  border-radius: 0;
+}
+
+/* 테이블 헤더 호버 - 특정 기능용 (텍스트 색상만 변경) */
+.theme-test-light .category-page thead th:hover,
+.theme-test-dark .category-page thead th:hover {
+  background-color: hsl(var(--content-bg));
+}
+
+.theme-test-light .category-page thead th button:hover,
+.theme-test-dark .category-page thead th button:hover {
+  background-color: transparent;
+  color: hsl(var(--hover-text-color));
+}
+
+/* 테이블 바디 */
+.theme-test-light .category-page tbody td,
+.theme-test-dark .category-page tbody td {
+  background-color: transparent;
+  color: hsl(var(--text-color));
+  border: 1px solid hsl(var(--border-color));
+  border-radius: 0;
+}
+
+/* 테이블 행 호버 - 일반적인 기능용 (배경색만 변경) */
+.theme-test-light .category-page tbody tr:hover,
+.theme-test-dark .category-page tbody tr:hover {
+  background-color: hsl(var(--hover-bg-color));
+}
+
+.theme-test-light .category-page tbody tr:hover td,
+.theme-test-dark .category-page tbody tr:hover td {
+  background-color: hsl(var(--hover-bg-color));
+}
+
+/* 링크 스타일 */
+.theme-test-light .category-page a,
+.theme-test-dark .category-page a {
+  color: hsl(var(--text-color));
+  text-decoration: none;
+  border-radius: 0;
+}
+
+.theme-test-light .category-page a:hover,
+.theme-test-dark .category-page a:hover {
+  color: hsl(var(--hover-text-color));
+  text-decoration: underline;
+}
+
+/* 입력 필드 스타일 */
+.theme-test-light .category-page input,
+.theme-test-light .category-page select,
+.theme-test-light .category-page textarea,
+.theme-test-dark .category-page input,
+.theme-test-dark .category-page select,
+.theme-test-dark .category-page textarea {
+  background-color: hsl(var(--content-bg));
+  color: hsl(var(--text-color));
+  border: 1px solid hsl(var(--border-color));
+  border-radius: 0;
+}
+
+.theme-test-light .category-page input:hover,
+.theme-test-light .category-page select:hover,
+.theme-test-light .category-page textarea:hover,
+.theme-test-dark .category-page input:hover,
+.theme-test-dark .category-page select:hover,
+.theme-test-dark .category-page textarea:hover {
+  background-color: hsl(var(--hover-bg-color));
+  border-color: hsl(var(--border-color));
+}
+
+/* 체크박스 스타일 */
+.theme-test-light .category-page input[type="checkbox"],
+.theme-test-dark .category-page input[type="checkbox"] {
+  background-color: hsl(var(--content-bg));
+  border: 1px solid hsl(var(--border-color));
+  border-radius: 0;
+}
+
+.theme-test-light .category-page input[type="checkbox"]:checked,
+.theme-test-dark .category-page input[type="checkbox"]:checked {
+  background-color: hsl(var(--text-color));
+  border-color: hsl(var(--border-color));
+}
+
+/* 기타 UI 요소들 */
+.theme-test-light .category-page .select-trigger,
+.theme-test-light .category-page [role="combobox"],
+.theme-test-dark .category-page .select-trigger,
+.theme-test-dark .category-page [role="combobox"] {
+  background-color: hsl(var(--content-bg));
+  color: hsl(var(--text-color));
+  border: 1px solid hsl(var(--border-color));
+  border-radius: 0;
+}
+
+.theme-test-light .category-page .select-trigger:hover,
+.theme-test-light .category-page [role="combobox"]:hover,
+.theme-test-dark .category-page .select-trigger:hover,
+.theme-test-dark .category-page [role="combobox"]:hover {
+  background-color: hsl(var(--hover-bg-color));
+  border-color: hsl(var(--border-color));
 } 

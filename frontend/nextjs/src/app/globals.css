@@ -74,42 +74,56 @@
     --primary-color: 0 72.2% 50.6%;
     --primary-dark: 0 90% 25%;
     --primary-light: 0 85% 97%;
+    /* 배경색을 테이블 행과 동일하게 설정 */
+    --background: var(--card);
   }
 
   [data-primary-color='blue'] {
     --primary-color: 221.2 83.2% 53.3%;
     --primary-dark: 221.2 90% 25%;
     --primary-light: 221.2 85% 97%;
+    /* 배경색을 테이블 행과 동일하게 설정 */
+    --background: var(--card);
   }
 
   [data-primary-color='green'] {
     --primary-color: 142.1 76.2% 36.3%;
     --primary-dark: 142.1 90% 25%;
     --primary-light: 142.1 85% 97%;
+    /* 배경색을 테이블 행과 동일하게 설정 */
+    --background: var(--card);
   }
 
   [data-primary-color='orange'] {
     --primary-color: 24.6 95% 53.1%;
     --primary-dark: 24.6 90% 25%;
     --primary-light: 24.6 85% 97%;
+    /* 배경색을 테이블 행과 동일하게 설정 */
+    --background: var(--card);
   }
 
   [data-primary-color='pink'] {
     --primary-color: 346.8 77.2% 49.8%;
     --primary-dark: 346.8 90% 25%;
     --primary-light: 346.8 85% 97%;
+    /* 배경색을 테이블 행과 동일하게 설정 */
+    --background: var(--card);
   }
 
   [data-primary-color='purple'] {
     --primary-color: 262.1 83.3% 57.8%;
     --primary-dark: 262.1 90% 25%;
     --primary-light: 262.1 85% 97%;
+    /* 배경색을 테이블 행과 동일하게 설정 */
+    --background: var(--card);
   }
 
   [data-primary-color='gray'] {
     --primary-color: 220 8.9% 46.1%;
     --primary-dark: 220 15% 25%;
     --primary-light: 220 15% 97%;
+    /* 배경색을 테이블 행과 동일하게 설정 */
+    --background: var(--card);
   }
 }
 
@@ -359,20 +373,20 @@
 
 /* 통계 페이지 스타일 (레거시) */
 .statistics-cell {
-  @apply bg-background;
+  @apply bg-card;
 }
 
 .dark .statistics-cell {
-  background-color: hsl(var(--secondary)) !important;
+  background-color: hsl(var(--card)) !important;
 }
 
 /* 재사용 가능한 페이지 컨테이너 스타일 */
 .content-area {
-  @apply bg-background;
+  @apply bg-card;
 }
 
 .dark .content-area {
-  background-color: hsl(var(--secondary)) !important;
+  background-color: hsl(var(--card)) !important;
 }
 
 /* 재사용 가능한 데이터 테이블 스타일 */

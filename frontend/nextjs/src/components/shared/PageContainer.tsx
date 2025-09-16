@@ -24,7 +24,7 @@ export function PageContainer({
 }: PageContainerProps) {
   return (
     <div className={cn(
-      "theme-default bg-background dark:bg-secondary min-h-screen",
+      "theme-default bg-card dark:bg-card",
       className
     )}>
       <div className={cn("container mx-auto", containerClassName)}>

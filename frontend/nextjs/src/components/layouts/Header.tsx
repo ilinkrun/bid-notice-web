@@ -524,10 +524,10 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-slate-200 dark:bg-slate-800 backdrop-blur supports-[backdrop-filter]:bg-slate-200/90 supports-[backdrop-filter]:dark:bg-slate-800/90">
-      <div className="container flex h-14 items-center">
+      <div className="flex h-14 items-center" style={{ paddingLeft: 'var(--container-padding-x)', paddingRight: 'calc(var(--container-padding-x) - var(--scrollbar-width))' }}>
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="flex items-center space-x-2">
-            <span className="font-bold pl-3">IBW</span>
+            <span className="font-bold">IBW</span>
           </Link>
           <nav className="flex items-center gap-1 ml-12">
             {/* 공고 목록 - 모든 역할 접근 가능 */}
@@ -556,26 +556,26 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
         </div>
 
         <div className="flex flex-1 items-center justify-between md:justify-end">
-          <Link href="/" className="flex items-center space-x-2 md:hidden pl-4">
+          <Link href="/" className="flex items-center space-x-2 md:hidden">
             <span className="font-bold">ILE</span>
           </Link>
-          <div className="flex items-center">
+          <div className="flex items-center gap-2">
             {/* 로그인 상태에 따른 조건부 렌더링 */}
             {isAuthenticated ? (
-              <div className="mr-2">
+              <div>
                 <UserDropdown />
               </div>
             ) : (
               <Link
                 href="/login"
-                className="flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary mr-2"
+                className="flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
               >
                 <User className="h-4 w-4" />
                 <span>로그인</span>
               </Link>
             )}
             {/* 테마 토글 버튼 */}
-            <div className="mr-4">
+            <div>
               <ThemeToggle />
             </div>
             <button
@@ -595,7 +595,7 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
       {/* 모바일 메뉴 패널 */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 top-14 bg-background z-50 md:hidden border-t">
-          <nav className="container py-4 bg-background">
+          <nav className="py-4 bg-background" style={{ paddingLeft: 'var(--container-padding-x)', paddingRight: 'calc(var(--container-padding-x) - var(--scrollbar-width))' }}>
             {/* 모바일 사용자 정보 (로그인 상태일 때만) */}
             {isAuthenticated && (
               <div className="mb-4 p-4 bg-muted rounded-lg">

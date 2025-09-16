@@ -313,31 +313,15 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
     }
   }, [searchParams]);
 
-  // 카테고리에 따른 테마 색상 설정
-  const getThemeColor = (category: string | undefined) => {
-    switch (category) {
-      case '공사점검':
-        return 'orange';
-      case '성능평가':
-        return 'green';
-      case '기타':
-        return 'blue';
-      case '제외':
-        return 'gray';
-      default:
-        return 'gray';
-    }
-  };
-
-  // 테마 색상 적용
+  // 카테고리별 색상 테마 대신 일관된 배경색 사용
+  // data-primary-color 설정을 제거하여 전체 페이지 배경에 영향을 주지 않음
   useEffect(() => {
-    const themeColor = getThemeColor(currentCategory);
     const root = document.documentElement;
-    
-    // data-primary-color 속성 설정
-    root.setAttribute('data-primary-color', themeColor);
-    
-    console.log('테마 색상 변경:', themeColor, '카테고리:', currentCategory);
+
+    // 기존 카테고리별 색상 테마 제거
+    root.removeAttribute('data-primary-color');
+
+    console.log('기본 테마 사용, 카테고리:', currentCategory);
   }, [currentCategory]);
 
   // 정렬 함수
@@ -686,8 +670,9 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
           </div>
         </div>
       )}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
-        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+      <div className="w-full" style={{ paddingLeft: 'var(--container-padding-x)', paddingRight: 'var(--container-padding-x)' }}>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
+          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
           <UnifiedSelect
             value={localCategory}
             onValueChange={handleCategoryChange}
@@ -776,11 +761,11 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
               <Star className="h-4 w-4" />
             </Button>
           )}
+          </div>
         </div>
-      </div>
 
-      {/* 테이블 */}
-      <div className="statistics-cell">
+        {/* 테이블 */}
+        <div className="statistics-cell">
         <Table>
           <TableHeader>
             <TableRow>
@@ -905,13 +890,14 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
             )}
           </TableBody>
         </Table>
-      </div>
-
-      {perPage > 0 && totalPages > 1 && (
-        <div className="flex justify-center gap-2 mt-4 pagination">
-          {renderPaginationButtons()}
         </div>
-      )}
+
+        {perPage > 0 && totalPages > 1 && (
+          <div className="flex justify-center gap-2 mt-4 pagination">
+            {renderPaginationButtons()}
+          </div>
+        )}
+      </div>
 
       {/* 상세 정보 모달 */}
       {selectedNotice && (
