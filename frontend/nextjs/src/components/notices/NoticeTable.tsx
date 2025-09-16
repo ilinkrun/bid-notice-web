@@ -783,23 +783,53 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
                 />
               </TableHead>
               {currentCategory === '제외' && (
-                <TableHead className="w-[80px] cursor-pointer hover:text-primary" onClick={() => toggleSort('category')}>
+                <TableHead
+                  className="w-[80px] cursor-pointer"
+                  data-sortable="true"
+                  data-sort-active={sortConfig.field === 'category'}
+                  onClick={() => toggleSort('category')}
+                >
                   유형
                 </TableHead>
               )}
-              <TableHead className="w-auto cursor-pointer hover:text-primary" onClick={() => toggleSort('제목')}>
+              <TableHead
+                className="w-auto cursor-pointer"
+                data-sortable="true"
+                data-sort-active={sortConfig.field === '제목'}
+                onClick={() => toggleSort('제목')}
+              >
                 제목
               </TableHead>
-              <TableHead className="w-[100px] cursor-pointer hover:text-primary" onClick={() => toggleSort('작성일')}>
+              <TableHead
+                className="w-[100px] cursor-pointer"
+                data-sortable="true"
+                data-sort-active={sortConfig.field === '작성일'}
+                onClick={() => toggleSort('작성일')}
+              >
                 작성일
               </TableHead>
-              <TableHead className="w-[120px] cursor-pointer hover:text-primary" onClick={() => toggleSort('기관명')}>
+              <TableHead
+                className="w-[120px] cursor-pointer"
+                data-sortable="true"
+                data-sort-active={sortConfig.field === '기관명'}
+                onClick={() => toggleSort('기관명')}
+              >
                 기관명
               </TableHead>
-              <TableHead className="w-[80px] cursor-pointer hover:text-primary" onClick={() => toggleSort('region')}>
+              <TableHead
+                className="w-[80px] cursor-pointer"
+                data-sortable="true"
+                data-sort-active={sortConfig.field === 'region'}
+                onClick={() => toggleSort('region')}
+              >
                 지역
               </TableHead>
-              <TableHead className="w-[60px] cursor-pointer hover:text-primary" onClick={() => toggleSort('registration')}>
+              <TableHead
+                className="w-[60px] cursor-pointer"
+                data-sortable="true"
+                data-sort-active={sortConfig.field === 'registration'}
+                onClick={() => toggleSort('registration')}
+              >
                 등록
               </TableHead>
             </TableRow>

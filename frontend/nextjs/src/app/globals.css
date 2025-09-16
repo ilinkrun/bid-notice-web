@@ -178,8 +178,8 @@
 }
 
 .dark .category-page tbody tr:hover {
-  background-color: hsl(240 3.7% 25%) !important;
-  color: hsl(var(--background)) !important;
+  background-color: hsl(var(--muted)) !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 .dark .category-page tbody td {
@@ -188,7 +188,7 @@
 }
 
 .dark .category-page tbody tr:hover td {
-  color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 /* 테이블 스타일 */
@@ -201,7 +201,7 @@
 .category-page table thead,
 .category-page .table thead,
 .category-page thead {
-  background-color: hsl(var(--card)) !important;
+  background-color: hsl(var(--muted)) !important;
 }
 
 .category-page table th,
@@ -209,14 +209,14 @@
 .category-page th,
 .category-page thead tr {
   background-color: transparent !important;
-  color: hsl(var(--foreground));
-  border-color: hsl(var(--foreground));
+  color: hsl(var(--foreground)) !important;
+  border-color: hsl(var(--foreground)) !important;
 }
 
 .dark .category-page table thead,
 .dark .category-page .table thead,
 .dark .category-page thead {
-  background-color: hsl(var(--card)) !important;
+  background-color: hsl(var(--muted)) !important;
 }
 
 .dark .category-page table th,
@@ -224,8 +224,8 @@
 .dark .category-page th,
 .dark .category-page thead tr {
   background-color: transparent !important;
-  color: hsl(var(--foreground));
-  border-color: hsl(var(--foreground));
+  color: hsl(var(--foreground)) !important;
+  border-color: hsl(var(--foreground)) !important;
 }
 
 .category-page .space-y-4 {
@@ -408,13 +408,13 @@
 .dark .data-table-container tbody tr:hover,
 .dark .statistics-cell tbody tr:hover,
 .dark .content-area tbody tr:hover {
-  background-color: hsl(240 3.7% 25%) !important;
+  background-color: hsl(var(--muted)) !important;
 }
 
 .dark .data-table-container tbody tr:hover td,
 .dark .statistics-cell tbody tr:hover td,
 .dark .content-area tbody tr:hover td {
-  color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 /* 통계 차트 컨테이너 */
@@ -477,11 +477,11 @@
 }
 
 .dark .statistics-cell tbody tr:hover {
-  background-color: hsl(240 3.7% 25%) !important;
+  background-color: hsl(var(--muted)) !important;
 }
 
 .dark .statistics-cell tbody tr:hover td {
-  color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 /* 모달 스타일 */
@@ -620,17 +620,17 @@ textarea,
   border-radius: 0 !important;
 }
 
-/* 테이블 헤더 영역 배경색을 content 영역과 동일하게 설정 */
+/* 테이블 헤더 영역 배경색을 테이블 행 hover 색상과 동일하게 설정 */
 table thead,
 .table thead,
 thead {
-  background-color: hsl(var(--card)) !important;
+  background-color: hsl(var(--muted)) !important;
 }
 
 .dark table thead,
 .dark .table thead,
 .dark thead {
-  background-color: hsl(var(--card)) !important;
+  background-color: hsl(var(--muted)) !important;
 }
 
 /* 개별 th, tr 요소는 투명 배경 */
@@ -712,7 +712,7 @@ html body .category-page table thead,
 html body .statistics-cell table thead,
 html body div table thead,
 html body table thead {
-  background-color: hsl(var(--card)) !important;
+  background-color: hsl(var(--muted)) !important;
 }
 
 html body div div table thead tr th,
@@ -726,8 +726,8 @@ html body .statistics-cell table th,
 html body div table th,
 html body table th {
   background-color: transparent !important;
-  color: hsl(var(--foreground));
-  border-color: hsl(var(--foreground));
+  color: hsl(var(--foreground)) !important;
+  border-color: hsl(var(--foreground)) !important;
 }
 
 /* 다크 모드 */
@@ -736,7 +736,7 @@ html.dark body .category-page table thead,
 html.dark body .statistics-cell table thead,
 html.dark body div table thead,
 html.dark body table thead {
-  background-color: hsl(var(--card)) !important;
+  background-color: hsl(var(--muted)) !important;
 }
 
 html.dark body div div table thead tr th,
@@ -750,16 +750,16 @@ html.dark body .statistics-cell table th,
 html.dark body div table th,
 html.dark body table th {
   background-color: transparent !important;
-  color: hsl(var(--foreground));
-  border-color: hsl(var(--foreground));
+  color: hsl(var(--foreground)) !important;
+  border-color: hsl(var(--foreground)) !important;
 }
 
 /* 추가 강제 스타일 - 디버깅용 */
 [data-table="header"] thead,
 table[data-testid] thead,
 .table-header thead {
-  background-color: hsl(var(--card)) !important;
-  background: hsl(var(--card)) !important;
+  background-color: hsl(var(--muted)) !important;
+  background: hsl(var(--muted)) !important;
 }
 
 [data-table="header"] th,
@@ -770,22 +770,26 @@ table[data-testid] th,
   color: hsl(var(--foreground));
 }
 
-/* 통일된 테이블 스타일 - content 영역과 동일한 배경 */
+/* 통일된 테이블 스타일 - 테이블 행 hover 색상과 동일한 배경 */
 * thead {
-  background-color: hsl(var(--card)) !important;
+  background-color: hsl(var(--muted)) !important;
   border-bottom: 1px solid hsl(var(--border)) !important;
 }
 
 * th {
   background-color: transparent !important;
-  color: hsl(var(--foreground));
+  color: hsl(var(--foreground)) !important;
   border-color: hsl(var(--border)) !important;
   font-weight: 500 !important;
 }
 
 /* 테이블 헤더 hover 시 배경색 변화 없음, 클릭과 텍스트 색상 변경 기능은 유지 */
 * th:hover {
-  background-color: hsl(var(--card)) !important;
+  background-color: hsl(var(--muted)) !important;
+}
+
+.dark * th:hover {
+  background-color: hsl(240 3.7% 25%) !important;
 }
 
 /* 테이블 헤더 hover시 Tailwind hover:text-primary 클래스가 작동하도록 허용 */
@@ -822,59 +826,109 @@ table[data-testid] th,
 }
 
 .dark * tbody tr:hover {
-  background-color: hsl(240 3.7% 25%) !important;
+  background-color: hsl(var(--muted)) !important;
 }
 
 .dark * tbody tr:hover td {
-  color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
 }
 
-/* 최고 우선순위: 테이블 헤더 배경을 content 영역(--card)과 동일하게 강제 설정 */
-html body * table thead,
-html body * .table thead,
-html body * thead,
-html body div div div table thead,
-html body .category-page .statistics-cell table thead,
-html body .statistics-cell table thead,
-html body .category-page table thead {
-  background-color: hsl(var(--card)) !important;
-  background: hsl(var(--card)) !important;
+/* 새로운 테이블 헤더 스타일 시스템 */
+
+/* 1. 테이블 헤더 기본 스타일 - 테이블 행 hover 배경색과 일치 */
+* thead,
+* table thead,
+* .table thead {
+  background-color: hsl(var(--muted)) !important;
 }
 
-html.dark body * table thead,
-html.dark body * .table thead,
-html.dark body * thead,
-html.dark body div div div table thead,
-html.dark body .category-page .statistics-cell table thead,
-html.dark body .statistics-cell table thead,
-html.dark body .category-page table thead {
-  background-color: hsl(var(--card)) !important;
-  background: hsl(var(--card)) !important;
+.dark * thead,
+.dark * table thead,
+.dark * .table thead {
+  background-color: hsl(var(--muted)) !important;
 }
 
-/* 테이블 헤더 배경 hover 효과만 제거, 클릭과 텍스트 색상 변화는 유지 */
-html body * table th:hover,
-html body * .table th:hover,
-html body * th:hover,
-html body div div div table th:hover,
-html body .category-page .statistics-cell table th:hover,
-html body .statistics-cell table th:hover,
-html body .category-page table th:hover {
-  background-color: hsl(var(--card)) !important;
-  background: hsl(var(--card)) !important;
-  /* hover시 텍스트 색상 변화와 클릭 기능은 유지 - color 속성 제거 */
+/* 2. 테이블 헤더 셀 기본 스타일 - 테이블 행 문자색과 일치 */
+* th,
+* table th,
+* .table th {
+  background-color: transparent !important;
+  color: hsl(var(--foreground)) !important;
+  border-color: hsl(var(--border)) !important;
+  font-weight: 500 !important;
 }
 
-html.dark body * table th:hover,
-html.dark body * .table th:hover,
-html.dark body * th:hover,
-html.dark body div div div table th:hover,
-html.dark body .category-page .statistics-cell table th:hover,
-html.dark body .statistics-cell table th:hover,
-html.dark body .category-page table th:hover {
-  background-color: hsl(var(--card)) !important;
-  background: hsl(var(--card)) !important;
-  /* hover시 텍스트 색상 변화와 클릭 기능은 유지 - color 속성 제거 */
+.dark * th,
+.dark * table th,
+.dark * .table th {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* 3. 기능이 없는 헤더 - hover 시 변경 없음 */
+* th:not([data-sortable]):hover,
+* table th:not([data-sortable]):hover,
+* .table th:not([data-sortable]):hover {
+  background-color: transparent !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+/* 4. 정렬 기능이 있는 헤더 기본 스타일 */
+* th[data-sortable],
+* table th[data-sortable],
+* .table th[data-sortable],
+* th button,
+* table th button,
+* .table th button {
+  cursor: pointer;
+  background-color: transparent !important;
+  color: hsl(var(--foreground)) !important;
+  border: none !important;
+  padding: 0 !important;
+  width: 100% !important;
+  text-align: inherit !important;
+  font-weight: inherit !important;
+}
+
+/* 5. 정렬 기능 헤더 hover - 문자색만 secondary color 중간 밝기로 변경 */
+* th[data-sortable]:hover,
+* table th[data-sortable]:hover,
+* .table th[data-sortable]:hover,
+* th button:hover,
+* table th button:hover,
+* .table th button:hover {
+  background-color: transparent !important;
+  color: hsl(0 85% 55%) !important; /* 채도가 높은 빨강색 */
+}
+
+.dark * th[data-sortable]:hover,
+.dark * table th[data-sortable]:hover,
+.dark * .table th[data-sortable]:hover,
+.dark * th button:hover,
+.dark * table th button:hover,
+.dark * .table th button:hover {
+  background-color: transparent !important;
+  color: hsl(0 85% 65%) !important; /* dark 모드용 채도가 높은 빨강색 */
+}
+
+/* 6. 정렬 활성 상태 - hover 색상 유지 */
+* th[data-sortable][data-sort-active="true"],
+* table th[data-sortable][data-sort-active="true"],
+* .table th[data-sortable][data-sort-active="true"],
+* th button[data-sort-active="true"],
+* table th button[data-sort-active="true"],
+* .table th button[data-sort-active="true"] {
+  background-color: transparent !important;
+  color: hsl(0 85% 55%) !important; /* 채도가 높은 빨강색 */
+}
+
+.dark * th[data-sortable][data-sort-active="true"],
+.dark * table th[data-sortable][data-sort-active="true"],
+.dark * .table th[data-sortable][data-sort-active="true"],
+.dark * th button[data-sort-active="true"],
+.dark * table th button[data-sort-active="true"],
+.dark * .table th button[data-sort-active="true"] {
+  background-color: transparent !important;
+  color: hsl(0 85% 65%) !important; /* dark 모드용 채도가 높은 빨강색 */
 }
 
 .rdp-day_selected,
@@ -981,6 +1035,7 @@ html.dark body .category-page table th:hover {
   padding-left: 1.5rem !important;
   margin: 0.25rem 0 !important;
 }
+
 
 .w-md-editor-preview ol, .w-markdown-preview ol {
   list-style-type: decimal !important;
@@ -1130,4 +1185,61 @@ html.dark body .category-page table th:hover {
 [data-theme='dark'] .wmde-markdown .copied:hover,
 .dark .wmde-markdown .copied:hover {
   background-color: #334155;
+}
+
+/* 테이블 헤더 체크박스를 테이블 행 체크박스와 동일하게 표시 */
+html body * tbody td button[role="checkbox"],
+html body * thead th button[role="checkbox"] {
+  background-color: hsl(var(--card)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 0 !important;
+  color: hsl(var(--foreground)) !important;
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 16px !important;
+  height: 16px !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+html body * tbody td button[role="checkbox"]:hover,
+html body * thead th button[role="checkbox"]:hover {
+  background-color: hsl(var(--muted)) !important;
+}
+
+html body * tbody td button[role="checkbox"][data-state="checked"],
+html body * thead th button[role="checkbox"][data-state="checked"] {
+  background-color: hsl(var(--primary)) !important;
+  border-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+}
+
+/* 다크모드 체크박스 */
+.dark html body * tbody td button[role="checkbox"],
+.dark html body * thead th button[role="checkbox"] {
+  background-color: hsl(var(--card)) !important;
+  border: 1px solid hsl(var(--foreground)) !important;
+  border-radius: 0 !important;
+  color: hsl(var(--foreground)) !important;
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 16px !important;
+  height: 16px !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.dark html body * tbody td button[role="checkbox"]:hover,
+.dark html body * thead th button[role="checkbox"]:hover {
+  background-color: hsl(var(--muted)) !important;
+  border-color: hsl(var(--foreground)) !important;
+}
+
+.dark html body * tbody td button[role="checkbox"][data-state="checked"],
+.dark html body * thead th button[role="checkbox"][data-state="checked"] {
+  background-color: hsl(var(--primary)) !important;
+  border-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
 }

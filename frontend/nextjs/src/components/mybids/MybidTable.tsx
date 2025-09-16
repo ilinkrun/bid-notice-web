@@ -577,24 +577,54 @@ export default function BidTable({ bids, currentStatus }) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px] cursor-pointer hover:text-primary" onClick={() => toggleSort('category')}>
+              <TableHead
+                className="w-[100px] cursor-pointer"
+                data-sortable="true"
+                data-sort-active={sortConfig.field === 'category'}
+                onClick={() => toggleSort('category')}
+              >
                 유형
               </TableHead>
-              <TableHead className="w-[120px] cursor-pointer hover:text-primary" onClick={() => toggleSort('orgName')}>
+              <TableHead
+                className="w-[120px] cursor-pointer"
+                data-sortable="true"
+                data-sort-active={sortConfig.field === 'orgName'}
+                onClick={() => toggleSort('orgName')}
+              >
                 기관명
               </TableHead>
-              <TableHead className="w-auto cursor-pointer hover:text-primary" onClick={() => toggleSort('title')}>
+              <TableHead
+                className="w-auto cursor-pointer"
+                data-sortable="true"
+                data-sort-active={sortConfig.field === 'title'}
+                onClick={() => toggleSort('title')}
+              >
                 제목
               </TableHead>
-              <TableHead className="w-[80px] cursor-pointer hover:text-primary" onClick={() => toggleSort('region')}>
+              <TableHead
+                className="w-[80px] cursor-pointer"
+                data-sortable="true"
+                data-sort-active={sortConfig.field === 'region'}
+                onClick={() => toggleSort('region')}
+              >
                 지역
               </TableHead>
               {localStatus === 'ended' && (
-                <TableHead className="w-[80px] cursor-pointer hover:text-primary" onClick={() => toggleSort('status')}>
+                <TableHead
+                  className="w-[80px] cursor-pointer"
+                  data-sortable="true"
+                  data-sort-active={sortConfig.field === 'status'}
+                  onClick={() => toggleSort('status')}
+                >
                   상태
                 </TableHead>
               )}
-              <TableHead className="w-[100px] cursor-pointer hover:text-primary" onClick={() => toggleSort('postedAt')}>
+              <TableHead
+                className="w-[100px] cursor-pointer"
+                data-sortable="true"
+                data-sort-active={sortConfig.field === 'postedAt'}
+                onClick={() => toggleSort('postedAt')}
+              >
                 등록일
               </TableHead>
             </TableRow>
