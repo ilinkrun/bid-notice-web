@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { DarkModeButton } from '@/components/shared/FormComponents';
 import { Search, Star, Loader2, Edit3, Minus, Plus } from 'lucide-react';
 import { type Notice } from '@/types/notice';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -706,7 +707,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
                 onCompositionStart={() => setIsComposing(true)}
                 onCompositionEnd={() => {
                   setIsComposing(false);
-                  searchInputRef.current?.focus();
+                  // 한글 입력 완료 후 자동 포커스는 제거 - 사용자가 직접 제어하도록 함
                 }}
                 onKeyDown={(e) => {
                   if (e.key === 'Process' || isComposing) {
@@ -714,9 +715,8 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
                   }
                 }}
                 onBlur={(e) => {
-                  if (!e.relatedTarget || !e.currentTarget.contains(e.relatedTarget as Node)) {
-                    searchInputRef.current?.focus();
-                  }
+                  // 포커스 해제 허용 - 검색 입력 필드에서 다른 곳으로 이동할 때 정상적으로 포커스 해제
+                  // 기존 로직이 포커스를 강제로 유지하고 있었음
                 }}
               />
             </div>
@@ -725,41 +725,41 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
         </div>
         <div className="flex items-center gap-2">
           {currentCategory === '제외' ? (
-            <Button 
-              onClick={handleRestore} 
-              variant="outline" 
-              className="bg-green-50 border-green-300 text-green-700 hover:bg-green-100 h-10 w-10 flex items-center justify-center"
+            <DarkModeButton
+              onClick={handleRestore}
+              variant="outline"
+              className="h-10 w-10 flex items-center justify-center"
               title="업무에 복원"
             >
               <Plus className="h-4 w-4" />
-            </Button>
+            </DarkModeButton>
           ) : currentCategory !== '무관' && (
-            <Button 
-              onClick={handleExclude} 
-              variant="outline" 
-              className="bg-red-50 border-red-300 text-red-700 hover:bg-red-100 h-10 w-10 flex items-center justify-center"
+            <DarkModeButton
+              onClick={handleExclude}
+              variant="outline"
+              className="h-10 w-10 flex items-center justify-center"
               title="업무에서 제외"
             >
               <Minus className="h-4 w-4" />
-            </Button>
+            </DarkModeButton>
           )}
-          <Button 
-            onClick={handleCategoryEdit} 
-            variant="outline" 
-            className="bg-muted border-border text-foreground hover:bg-muted/80 h-10 w-10 flex items-center justify-center"
+          <DarkModeButton
+            onClick={handleCategoryEdit}
+            variant="outline"
+            className="h-10 w-10 flex items-center justify-center"
             title="유형 변경"
           >
             <Edit3 className="h-4 w-4" />
-          </Button>
+          </DarkModeButton>
           {currentCategory !== '무관' && currentCategory !== '제외' && (
-            <Button 
-              onClick={handleBidProcess} 
-              variant="outline" 
-              className="bg-muted border-border text-foreground hover:bg-muted/80 h-10 w-10 flex items-center justify-center"
+            <DarkModeButton
+              onClick={handleBidProcess}
+              variant="outline"
+              className="h-10 w-10 flex items-center justify-center"
               title="입찰 진행"
             >
               <Star className="h-4 w-4" />
-            </Button>
+            </DarkModeButton>
           )}
           </div>
         </div>
@@ -1010,7 +1010,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
           </div>
           <DialogFooter>
             <Button 
-              variant="outline" 
+              variant="ghost" 
               onClick={() => setIsCategoryEditModalOpen(false)}
               disabled={categoryLoading}
             >
@@ -1046,7 +1046,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
           </div>
           <DialogFooter>
             <Button 
-              variant="outline" 
+              variant="ghost" 
               onClick={() => setIsBidProcessModalOpen(false)}
               disabled={progressLoading}
             >
@@ -1085,7 +1085,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
           </div>
           <DialogFooter>
             <Button 
-              variant="outline" 
+              variant="ghost" 
               onClick={() => setIsExcludeModalOpen(false)}
               disabled={excludeLoading}
             >
@@ -1125,7 +1125,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
           </div>
           <DialogFooter>
             <Button 
-              variant="outline" 
+              variant="ghost" 
               onClick={() => setIsRestoreModalOpen(false)}
               disabled={restoreLoading}
             >

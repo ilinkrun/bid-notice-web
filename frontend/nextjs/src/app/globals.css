@@ -1492,6 +1492,76 @@ nav button.active::after {
   transition: all 0.2s ease;
 }
 
+/* 모든 아이콘이 있는 input 필드에 대한 글로벌 스타일링 - pl-10 클래스가 있는 경우 */
+input.pl-10::placeholder {
+  transform: translateX(-0.125rem) !important;
+  padding-left: 0.25rem !important;
+}
+
+/* 모든 아이콘이 있는 input 필드의 텍스트와 커서 위치 조정 */
+input.pl-10 {
+  text-indent: 0.125rem !important;
+  padding-left: 2.375rem !important;
+}
+
+/* 더 구체적인 선택자로 로그인 페이지 input 필드 타겟팅 */
+.relative input.pl-10 {
+  padding-left: 2.375rem !important;
+  text-indent: 0.125rem !important;
+}
+
+.relative input.pl-10::placeholder {
+  transform: translateX(-0.125rem) !important;
+}
+
+/* 새로운 SearchInput 컴포넌트용 스타일 - pl-8 사용 */
+.search-input-universal {
+  text-indent: 0.25rem !important;
+}
+
+.search-input-universal::placeholder {
+  transform: translateX(0.125rem) !important;
+}
+
+/* 액션바 버튼들을 input 필드와 동일한 스타일로 맞춤 */
+button.action-bar-button {
+  background-color: hsl(var(--background)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  color: hsl(var(--foreground)) !important;
+  transition: all 0.2s ease !important;
+}
+
+button.action-bar-button:hover {
+  background-color: hsl(var(--accent)) !important;
+  color: hsl(var(--accent-foreground)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+
+/* 더 구체적인 선택자로 Shadcn 버튼 스타일 덮어쓰기 */
+.flex.items-center.gap-2 > button.action-bar-button {
+  background-color: hsl(var(--background)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.flex.items-center.gap-2 > button.action-bar-button:hover {
+  background-color: hsl(var(--accent)) !important;
+  color: hsl(var(--accent-foreground)) !important;
+}
+
+/* 매우 구체적인 선택자로 강제 적용 */
+button.action-bar-button.h-10.w-10 {
+  background-color: hsl(var(--background)) !important;
+  border-color: hsl(var(--border)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+button.action-bar-button.h-10.w-10:hover {
+  background-color: hsl(var(--accent)) !important;
+  color: hsl(var(--accent-foreground)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+
 /* 다크모드에서 밑줄 색상 */
 .dark header a.active::after,
 .dark header button.active::after,

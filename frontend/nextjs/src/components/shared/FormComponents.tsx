@@ -1,9 +1,10 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, forwardRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Search } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -30,6 +31,7 @@ interface DarkModeButtonProps {
   className?: string;
   disabled?: boolean;
   type?: 'button' | 'submit' | 'reset';
+  title?: string;
 }
 
 interface DarkModeInputProps {
@@ -118,7 +120,8 @@ export function DarkModeButton({
   size = 'default',
   className,
   disabled = false,
-  type = 'button'
+  type = 'button',
+  title
 }: DarkModeButtonProps) {
   return (
     <Button
@@ -127,9 +130,10 @@ export function DarkModeButton({
       size={size}
       disabled={disabled}
       type={type}
+      title={title}
       className={cn(
-        // 기본 다크 모드 스타일은 Button 컴포넌트에서 처리되므로 추가 스타일만 적용
-        variant === 'outline' && "border-border dark:border-border hover:bg-muted dark:hover:bg-muted",
+        // 입력 필드와 동일한 스타일 적용
+        variant === 'outline' && "bg-background dark:bg-background border-border dark:border-border text-foreground dark:text-foreground hover:bg-muted dark:hover:bg-muted",
         className
       )}
     >
@@ -190,3 +194,71 @@ export function DarkModeLabel({ children, htmlFor, className }: DarkModeLabelPro
     </Label>
   );
 }
+
+interface SearchInputProps {
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
+  className?: string;
+  disabled?: boolean;
+  id?: string;
+  autoComplete?: string;
+  type?: string;
+  onCompositionStart?: () => void;
+  onCompositionEnd?: () => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
+}
+
+/**
+ * 검색 아이콘이 포함된 재사용 가능한 검색 입력 컴포넌트
+ * 아이콘과 텍스트 간격이 자동으로 조정됩니다
+ */
+export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(({
+  value,
+  onChange,
+  placeholder = "검색...",
+  className,
+  disabled = false,
+  id,
+  autoComplete = "off",
+  type = "text",
+  onCompositionStart,
+  onCompositionEnd,
+  onKeyDown,
+  onBlur,
+  ...props
+}, ref) => {
+  return (
+    <div className="relative">
+      <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+      <Input
+        ref={ref}
+        id={id}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        type={type}
+        disabled={disabled}
+        autoComplete={autoComplete}
+        onCompositionStart={onCompositionStart}
+        onCompositionEnd={onCompositionEnd}
+        onKeyDown={onKeyDown}
+        onBlur={onBlur}
+        className={cn(
+          "pl-8 bg-background dark:bg-background border-border dark:border-border",
+          "text-foreground dark:text-foreground",
+          "placeholder-muted-foreground dark:placeholder-muted-foreground",
+          "focus:border-primary dark:focus:border-primary",
+          // 아이콘과 텍스트 간격 자동 조정
+          "search-input-universal",
+          disabled && "bg-muted dark:bg-muted",
+          className
+        )}
+        {...props}
+      />
+    </div>
+  );
+});
+
+SearchInput.displayName = 'SearchInput';
