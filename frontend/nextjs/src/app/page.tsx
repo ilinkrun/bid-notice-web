@@ -125,7 +125,7 @@ export default async function Home() {
 
   return (
     <PageContainer>
-      <div className="p-4 space-y-6">
+      <div className="space-y-6">
         <ApolloWrapper>
         <UnifiedDataLoadingWrapper data={data}>
         {/* 최근 스크랩 에러 */}

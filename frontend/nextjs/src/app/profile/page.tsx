@@ -312,7 +312,7 @@ export default function ProfilePage() {
 
   return (
     <PageContainer>
-      <div className="py-6 max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         {/* 헤더 */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">

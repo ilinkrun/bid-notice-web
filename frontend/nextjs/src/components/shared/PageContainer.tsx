@@ -24,10 +24,9 @@ export function PageContainer({
 }: PageContainerProps) {
   return (
     <div className={cn(
-      "theme-default bg-card dark:bg-card",
       className
     )}>
-      <div className={cn("page-content-container w-full", containerClassName)} style={{ paddingLeft: 'var(--container-padding-x)', paddingRight: 'calc(var(--container-padding-x) - var(--scrollbar-width))' }}>
+      <div className={cn("page-content-container w-full py-2", containerClassName)} style={{ paddingLeft: 'var(--container-padding-x)', paddingRight: 'calc(var(--container-padding-x) - var(--scrollbar-width))' }}>
         {title && (
           <h1 className={cn(
             "text-xl font-bold pt-1 pl-1 text-foreground mb-4",

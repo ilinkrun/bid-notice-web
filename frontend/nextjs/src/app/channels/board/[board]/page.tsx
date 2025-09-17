@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { use } from 'react';
+import { usePathname } from 'next/navigation';
 import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
 import { useUnifiedLoading } from '@/components/providers/UnifiedLoadingProvider';
 import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Tabs,
   TabsContent,
@@ -15,7 +15,6 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle
@@ -36,17 +35,15 @@ import {
 import {
   Plus,
   Search,
-  ArrowLeft,
-  ArrowRight,
   Code,
   Eye,
-  FileText,
   Hash
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { DataTable, DataTableHeader, DataTableBody, DataTableRow, DataTableCell } from '@/components/shared/DataTable';
-import { DarkModeButton, DarkModeInput } from '@/components/shared/FormComponents';
+import { DarkModeButton, DarkModeInput, OutlineButton } from '@/components/shared/FormComponents';
+import { cn } from '@/lib/utils';
 
 import Comments from '@/components/board/Comments';
 
@@ -148,11 +145,11 @@ const DELETE_POST = `
 `;
 
 // 추가: 커스텀 스타일 클래스
-const inputClass = "text-foreground focus:placeholder:text-transparent focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-200";
 const textareaClass = "text-foreground focus:placeholder:text-transparent focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-200";
 
 export default function BoardPage({ params }: { params: Promise<any> }) {
   const { board } = use(params);
+  const pathname = usePathname();
   const { navigate } = useUnifiedNavigation();
   const { startLoading, finishLoading, setCustomMessage } = useUnifiedLoading();
   const { user } = useAuth();
@@ -165,7 +162,6 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
   
   const [searchTerm, setSearchTerm] = useState('');
   const [isEditMode, setIsEditMode] = useState(false);
-  const [actionType, setActionType] = useState<any>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newPost, setNewPost] = useState<any>({
@@ -182,7 +178,6 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [editorMode, setEditorMode] = useState<'html' | 'markdown'>('html'); // 에디터 모드 추가
   const contentRef = useRef<HTMLTextAreaElement>(null);
-  const previewRef = useRef<HTMLDivElement>(null);
 
   // board 값이 이미 board_ 접두사를 포함하는지 확인
   const channelBoard = board.startsWith('board_') ? board : `board_${board}`;
@@ -273,59 +268,6 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
     fetchPosts();
   }, [channelBoard, finishLoading, setCustomMessage]);
 
-  // 게시글 선택
-  const handlePostSelect = async (post: any) => {
-    try {
-      setCustomMessage('게시글을 불러오는 중입니다...');
-      startLoading();
-      setError(null);
-      
-      console.log('게시글 선택:', post.id);
-      
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: GET_POST,
-          variables: {
-            id: post.id,
-            board: channelBoard,
-          },
-        }),
-      });
-      
-      const result = await response.json();
-      
-      if (result.errors) {
-        console.error('GraphQL 에러:', result.errors);
-        throw new Error(result.errors[0].message);
-      }
-      
-      // 전체 응답 로깅
-      console.log('API 응답:', JSON.stringify(result, null, 2));
-      
-      // 데이터가 있는지 확인
-      if (result.data && result.data.boardsPostsOne) {
-        const postData = result.data.boardsPostsOne;
-        console.log('게시글 상세 정보:', {
-          id: postData.id,
-          title: postData.title
-        });
-        
-        setSelectedPost(postData);
-        setActiveTab('detail');
-        finishLoading();
-      } else {
-        throw new Error('게시글 정보를 가져올 수 없습니다.');
-      }
-    } catch (err) {
-      console.error('게시글 상세 조회 오류:', err);
-      setError('게시글을 불러오는데 실패했습니다.');
-      finishLoading();
-    }
-  };
 
   // 수정 모드 토글
   const handleEditToggle = () => {
@@ -588,7 +530,8 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
   // 채널 변경
   const handleChannelChange = (channelId: string) => {
     const fullChannelId = `board_${channelId}`;
-    if (fullChannelId !== board) {
+    const currentChannelId = board.startsWith('board_') ? board : `board_${board}`;
+    if (fullChannelId !== currentChannelId) {
       navigate(`/channels/board/${fullChannelId}`);
     }
   };
@@ -783,20 +726,37 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
 
   return (
     <PageContainer>
-      <Card className="border-0 shadow-none">
-        <CardContent className="p-0">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <div className="flex justify-between items-center mb-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="gap-0.5">
+        <div className="flex justify-between items-center mb-0.5">
               {activeTab === 'list' && (
                 <>
                   <div className="flex items-center space-x-4">
-                    <Tabs defaultValue={board.replace('board_', '')} onValueChange={handleChannelChange}>
-                      <TabsList>
-                        <TabsTrigger value="dev">개발</TabsTrigger>
-                        <TabsTrigger value="op">운영</TabsTrigger>
-                        <TabsTrigger value="manual">매뉴얼</TabsTrigger>
-                      </TabsList>
-                    </Tabs>
+                    <div className="flex border border-border rounded-md overflow-hidden">
+                      {[
+                        { value: 'dev', label: '개발' },
+                        { value: 'op', label: '운영' },
+                        { value: 'manual', label: '매뉴얼' }
+                      ].map((option) => {
+                        // pathname을 사용해서 현재 선택된 채널 확인
+                        const expectedPath = `/channels/board/board_${option.value}`;
+                        const isSelected = pathname === expectedPath;
+                        return (
+                          <button
+                            key={option.value}
+                            onClick={() => handleChannelChange(option.value)}
+                            className={cn(
+                              "h-9 px-3 text-sm font-medium transition-colors border-r border-border last:border-r-0 flex items-center justify-center",
+                              "hover:bg-muted hover:text-foreground",
+                              isSelected
+                                ? "bg-muted text-foreground font-bold !bg-slate-200 dark:!bg-slate-700"
+                                : "bg-background text-muted-foreground"
+                            )}
+                          >
+                            {option.label}
+                          </button>
+                        );
+                      })}
+                    </div>
                     <div className="relative w-[300px]">
                       <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                       <DarkModeInput
@@ -807,18 +767,17 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                       />
                     </div>
                   </div>
-                  <DarkModeButton onClick={() => {
+                  <OutlineButton onClick={() => {
                     navigate(`/channels/board/${board}/new?format=markdown`);
                   }}>
                     <Plus className="mr-2 h-4 w-4" />
                     글쓰기
-                  </DarkModeButton>
+                  </OutlineButton>
                 </>
               )}
             </div>
-
-            <TabsContent value="list">
-              <DataTable>
+            <TabsContent value="list" className="mt-0 p-0">
+              <DataTable containerClassName="mt-0">
                 <DataTableHeader>
                   <DataTableRow isHoverable={false}>
                     <DataTableCell isHeader className="w-[50px]">번호</DataTableCell>
@@ -861,7 +820,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
               </DataTable>
             </TabsContent>
 
-            <TabsContent value="detail">
+            <TabsContent value="detail" className="mt-0 p-0">
               {selectedPost && (
                 <div>
                   <div className="flex justify-between items-center mb-4">
@@ -1119,7 +1078,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
               )}
             </TabsContent>
 
-            <TabsContent value="write">
+            <TabsContent value="write" className="mt-0 p-0">
               {(
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
@@ -1289,9 +1248,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                 </div>
               )}
             </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+        </Tabs>
 
       {/* 삭제 확인 다이얼로그 */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>

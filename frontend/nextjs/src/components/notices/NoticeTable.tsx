@@ -758,7 +758,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
         </div>
 
         {/* 테이블 */}
-        <div className="statistics-cell">
+        <div>
         <Table>
           <TableHeader>
             <TableRow>

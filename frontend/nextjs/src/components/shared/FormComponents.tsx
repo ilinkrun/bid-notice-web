@@ -160,7 +160,7 @@ export function DarkModeButton({
         }
       }}
     >
-      CUSTOM_BUTTON_TEST
+      {children}
     </button>
   );
 }
