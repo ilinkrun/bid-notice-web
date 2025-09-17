@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Star, Loader2, Edit3 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { SearchInput, OutlineSelectBox, OutlineSelectItem } from '@/components/shared/FormComponents';
+import { InputWithIcon, OutlineSelectBox, OutlineSelectItem } from '@/components/shared/FormComponents';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
@@ -549,7 +549,7 @@ export default function BidTable({ bids, currentStatus }) {
           </OutlineSelectBox>
           <div className="relative flex items-center gap-2 flex-1" style={{ minWidth: '10px' }}>
             <div className="relative flex-1" style={{ minWidth: '10px' }}>
-              <SearchInput
+              <InputWithIcon
                 ref={searchInputRef}
                 placeholder="입찰 검색..."
                 value={searchTerm}

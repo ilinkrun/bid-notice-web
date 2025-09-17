@@ -13,7 +13,7 @@ import { UnifiedSelect } from '@/components/shared/UnifiedSelect';
 import { useNoticeFilterStore } from '@/store/noticeFilterStore';
 import { filterNotices } from '@/lib/utils/filterNotices';
 import { AdvancedSearchModal } from '../notices/AdvancedSearchModal';
-import { SearchInput, IconButton, OutlineSelectBox, OutlineSelectItem } from '@/components/shared/FormComponents';
+import { InputWithIcon, IconButton, OutlineSelectBox, OutlineSelectItem } from '@/components/shared/FormComponents';
 import { NumberInput } from '@/components/shared/NumberInput';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { useSettingsStore } from '@/store/settingsStore';
@@ -720,7 +720,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
             </div>
             <div className="relative flex items-center gap-2 flex-1" style={{ minWidth: '10px' }}>
               <div className="relative flex-1" style={{ minWidth: '10px' }}>
-                <SearchInput
+                <InputWithIcon
                   ref={searchInputRef}
                   placeholder="입찰공고 검색..."
                   value={searchTerm}

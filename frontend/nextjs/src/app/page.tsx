@@ -1,5 +1,4 @@
 import { gql } from '@apollo/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { NoticeStatisticsChart } from '@/components/statistics/NoticeStatisticsChart';
 import { NoticeStatisticsTable } from '@/components/statistics/NoticeStatisticsTable';
@@ -8,6 +7,7 @@ import { getClient } from '@/lib/api/graphqlClient';
 import ApolloWrapper from '@/components/providers/ApolloWrapper';
 import UnifiedDataLoadingWrapper from '@/components/shared/UnifiedDataLoadingWrapper';
 import { PageContainer } from '@/components/shared/PageContainer';
+import { Separator } from '@/components/ui/separator';
 
 const GET_NOTICES_STATISTICS = gql`
   query GetNoticesStatistics($gap: Int!) {
@@ -125,63 +125,57 @@ export default async function Home() {
 
   return (
     <PageContainer>
-      <div className="space-y-6">
+      <div className="space-y-8">
         <ApolloWrapper>
         <UnifiedDataLoadingWrapper data={data}>
-        {/* 최근 스크랩 에러 */}
-        <Card className="m-1 rounded-none">
-          <CardHeader>
-            <CardTitle>최근 스크랩 에러</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-2">
-              {data?.errorScrapings
-                ?.slice(0, 6)
-                .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
-                .map((error, index) => (
-                  <div key={error.id} className="flex justify-between items-center p-2  border border-border rounded">
-                    <div className="text-sm font-medium text-color-primary-muted-foreground">
-                      {new Date(error.time).toLocaleDateString('ko-KR')} {new Date(error.time).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
-                    </div>
-                    <div className="text-sm text-color-primary-muted-foreground truncate ml-2">
-                      {error.orgName || '에러없음'}
-                    </div>
+
+        {/* 최근 스크랩 에러 섹션 */}
+        <div>
+          <h2 className="text-xl font-semibold mb-4">최근 스크랩 에러</h2>
+          <div className="grid grid-cols-2 gap-2">
+            {data?.errorScrapings
+              ?.slice(0, 6)
+              .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+              .map((error, index) => (
+                <div key={error.id} className="flex justify-between items-center p-2 border border-border rounded">
+                  <div className="text-sm font-medium">
+                    {new Date(error.time).toLocaleDateString('ko-KR')} {new Date(error.time).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
                   </div>
-                ))}
-            </div>
-          </CardContent>
-        </Card>
+                  <div className="text-sm truncate ml-2">
+                    {error.orgName || '에러없음'}
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
 
-        {/* 차트 그리드 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* 유형별 통계 */}
-          <Card className="lg:col-span-2 m-1 rounded-none">
-            <CardHeader>
-              <CardTitle>유형별 공고 통계</CardTitle>
-            </CardHeader>
-            <CardContent className="h-[400px]">
-              {processedStatistics.length > 0 && <NoticeStatisticsChart data={processedStatistics} type="category" />}
-            </CardContent>
-          </Card>
+        <Separator />
 
-          {/* 지역별 통계 */}
-          <Card className="lg:col-span-2 m-1 rounded-none">
-            <CardHeader>
-              <CardTitle>지역별 공고 통계</CardTitle>
-            </CardHeader>
-            <CardContent className="statistics-cell overflow-auto p-0">
-              {data?.noticesStatistics?.length > 0 && (
-                <NoticeStatisticsTable
-                  initialData={data.noticesStatistics}
-                  defaultGap="10"
-                  defaultType="region"
-                  defaultViewType="table"
-                  hideControls={true}
-                  hideTypeSelector={true}
-                />
-              )}
-            </CardContent>
-          </Card>
+        {/* 유형별 공고 통계 섹션 */}
+        <div>
+          <h2 className="text-xl font-semibold mb-4">유형별 공고 통계</h2>
+          <div className="h-[400px]">
+            {processedStatistics.length > 0 && <NoticeStatisticsChart data={processedStatistics} type="category" />}
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* 지역별 공고 통계 섹션 */}
+        <div>
+          <h2 className="text-xl font-semibold mb-4">지역별 공고 통계</h2>
+          <div className="statistics-cell overflow-auto">
+            {data?.noticesStatistics?.length > 0 && (
+              <NoticeStatisticsTable
+                initialData={data.noticesStatistics}
+                defaultGap="10"
+                defaultType="region"
+                defaultViewType="table"
+                hideControls={true}
+                hideTypeSelector={true}
+              />
+            )}
+          </div>
         </div>
 
         </UnifiedDataLoadingWrapper>

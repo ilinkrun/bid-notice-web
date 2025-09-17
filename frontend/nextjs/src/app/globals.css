@@ -214,14 +214,14 @@
   }
 
   /* 테이블 행 내 링크 색상 */
-  /* table tbody tr a {
+  table tbody tr a {
     color: hsl(var(--color-primary-linked)) !important;
-  } */
+  }
 
   /* 테이블 행 내 링크 hover 색상 */
-  /* table tbody tr a:hover {
+  table tbody tr a:hover {
     color: hsl(var(--color-primary-muted)) !important;
-  } */
+  }
 
   /* ELEMENTS: USER */
   /* 검색 입력 필드 아이콘과 텍스트 간격 보정 */

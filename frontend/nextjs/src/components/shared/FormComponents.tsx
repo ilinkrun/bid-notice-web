@@ -62,7 +62,7 @@ interface ButtonWithIconProps {
 }
 
 interface InputWithIconProps {
-  icon: ReactNode;
+  icon?: ReactNode;
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
@@ -155,12 +155,13 @@ SearchInput.displayName = 'SearchInput';
 /**
  * 아이콘이 포함된 재사용 가능한 입력 컴포넌트
  * 아이콘과 텍스트 간격이 자동으로 조정됩니다
+ * 기본 아이콘은 검색 아이콘입니다
  */
 export const InputWithIcon = forwardRef<HTMLInputElement, InputWithIconProps>(({
-  icon,
+  icon = <Search className="h-4 w-4" />,
   value,
   onChange,
-  placeholder = "입력...",
+  placeholder = "검색...",
   className,
   disabled = false,
   id,
@@ -174,7 +175,7 @@ export const InputWithIcon = forwardRef<HTMLInputElement, InputWithIconProps>(({
 }, ref) => {
   return (
     <div className="relative">
-      <div className="absolute left-2 top-2.5 h-4 w-4" style={{ color: 'hsl(var(--color-primary-muted))' }}>
+      <div className="absolute left-2 top-2.5 h-4 w-4 z-10" style={{ color: 'hsl(var(--color-primary-muted))' }}>
         {icon}
       </div>
       <Input
@@ -191,10 +192,11 @@ export const InputWithIcon = forwardRef<HTMLInputElement, InputWithIconProps>(({
         onKeyDown={onKeyDown}
         onBlur={onBlur}
         className={cn(
-          "pl-8 dark:border-border dark:border-border",
+          "pl-8  dark:border-border dark:border-border",
           "text-color-primary-foreground dark:text-color-primary-foreground",
           "placeholder:text-color-primary-muted dark:placeholder:text-color-primary-muted",
           "focus:border-primary dark:focus:border-primary",
+          // 아이콘과 텍스트 간격 자동 조정
           "search-input-universal",
           disabled && "dark:bg-color-primary-hovered",
           className

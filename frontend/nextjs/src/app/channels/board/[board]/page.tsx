@@ -45,7 +45,7 @@ import { DataTable, DataTableHeader, DataTableBody, DataTableRow, DataTableCell 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { RadioButtonSet, SearchInput, ButtonWithIcon } from '@/components/shared/FormComponents';
+import { RadioButtonSet, InputWithIcon, ButtonWithIcon } from '@/components/shared/FormComponents';
 
 import Comments from '@/components/board/Comments';
 import { PageHeader } from '@/components/shared/PageHeader';
@@ -766,7 +766,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                       onChange={handleChannelChange}
                     />
                     <div className="w-[300px]">
-                      <SearchInput
+                      <InputWithIcon
                         placeholder="제목 또는 작성자로 검색"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
