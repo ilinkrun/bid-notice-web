@@ -136,7 +136,7 @@ export default async function Home() {
             {data?.errorScrapings
               ?.slice(0, 6)
               .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
-              .map((error, index) => (
+              .map((error) => (
                 <div key={error.id} className="flex justify-between items-center p-2 border border-border rounded">
                   <div className="text-sm font-medium">
                     {new Date(error.time).toLocaleDateString('ko-KR')} {new Date(error.time).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}

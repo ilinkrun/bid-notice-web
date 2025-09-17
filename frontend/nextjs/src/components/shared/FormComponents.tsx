@@ -8,20 +8,6 @@ import {
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 
-interface SearchInputProps {
-  value?: string;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  placeholder?: string;
-  className?: string;
-  disabled?: boolean;
-  id?: string;
-  autoComplete?: string;
-  type?: string;
-  onCompositionStart?: () => void;
-  onCompositionEnd?: () => void;
-  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
-}
 
 interface IconButtonProps {
   icon: ReactNode;
@@ -95,62 +81,6 @@ interface IsActiveProps {
   className?: string;
 }
 
-/**
- * 검색 아이콘이 포함된 재사용 가능한 검색 입력 컴포넌트
- * 아이콘과 텍스트 간격이 자동으로 조정됩니다
- */
-export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(({
-  value,
-  onChange,
-  placeholder = "검색...",
-  className,
-  disabled = false,
-  id,
-  autoComplete = "off",
-  type = "text",
-  onCompositionStart,
-  onCompositionEnd,
-  onKeyDown,
-  onBlur,
-  ...props
-}, ref) => {
-  return (
-    <div className="relative">
-      <Search className="absolute left-2 top-2.5 h-4 w-4" style={{ color: 'hsl(var(--color-primary-muted))' }} />
-      <Input
-        ref={ref}
-        id={id}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        type={type}
-        disabled={disabled}
-        autoComplete={autoComplete}
-        onCompositionStart={onCompositionStart}
-        onCompositionEnd={onCompositionEnd}
-        onKeyDown={onKeyDown}
-        onBlur={onBlur}
-        className={cn(
-          "pl-8  dark:border-border dark:border-border",
-          "text-color-primary-foreground dark:text-color-primary-foreground",
-          "placeholder:text-color-primary-muted dark:placeholder:text-color-primary-muted",
-          "focus:border-primary dark:focus:border-primary",
-          // 아이콘과 텍스트 간격 자동 조정
-          "search-input-universal",
-          disabled && "dark:bg-color-primary-hovered",
-          className
-        )}
-        style={{
-          ...props.style,
-          '--tw-placeholder-color': 'hsl(var(--color-primary-muted))'
-        } as React.CSSProperties}
-        {...props}
-      />
-    </div>
-  );
-});
-
-SearchInput.displayName = 'SearchInput';
 
 /**
  * 아이콘이 포함된 재사용 가능한 입력 컴포넌트
