@@ -55,6 +55,33 @@
   body {
     @apply text-foreground;
     background-color: hsl(var(--color-primary-background));
+    color: hsl(var(--color-primary-foreground));
+  }
+
+  /* 모든 텍스트 기본 색상 적용 (placeholder, link 제외) */
+  *:not(::placeholder):not(a) {
+    color: hsl(var(--color-primary-foreground));
+  }
+
+  /* 모든 링크(a 태그) 색상 설정 */
+  a {
+    color: hsl(var(--color-primary-linked));
+  }
+
+  a:hover {
+    color: hsl(var(--color-primary-hovered));
+  }
+
+  a:visited {
+    color: hsl(var(--color-primary-muted));
+  }
+
+  /* 모든 Card 컴포넌트 스타일 통일 */
+  .card,
+  [data-card],
+  [class*="card"] {
+    border-color: hsl(var(--color-primary-foreground)) !important;
+    background-color: transparent !important;
   }
 
   /* HEADER */
@@ -187,14 +214,14 @@
   }
 
   /* 테이블 행 내 링크 색상 */
-  table tbody tr a {
+  /* table tbody tr a {
     color: hsl(var(--color-primary-linked)) !important;
-  }
+  } */
 
   /* 테이블 행 내 링크 hover 색상 */
-  table tbody tr a:hover {
+  /* table tbody tr a:hover {
     color: hsl(var(--color-primary-muted)) !important;
-  }
+  } */
 
   /* ELEMENTS: USER */
   /* 검색 입력 필드 아이콘과 텍스트 간격 보정 */

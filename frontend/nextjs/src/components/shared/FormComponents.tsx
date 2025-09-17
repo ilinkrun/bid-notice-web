@@ -61,6 +61,33 @@ interface ButtonWithIconProps {
   type?: 'button' | 'submit' | 'reset';
 }
 
+interface InputWithIconProps {
+  icon: ReactNode;
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
+  className?: string;
+  disabled?: boolean;
+  id?: string;
+  autoComplete?: string;
+  type?: string;
+  onCompositionStart?: () => void;
+  onCompositionEnd?: () => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
+}
+
+interface ButtonWithColorIconProps {
+  icon: ReactNode;
+  children: ReactNode;
+  onClick?: () => void;
+  className?: string;
+  disabled?: boolean;
+  type?: 'button' | 'submit' | 'reset';
+  color?: string; // 주색상 (예: 'blue', 'red', 'green')
+  mode?: 'outline' | 'filled'; // 버튼 스타일 모드
+}
+
 interface IsActiveProps {
   value: boolean;
   labels?: [string, string];
@@ -89,7 +116,7 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(({
 }, ref) => {
   return (
     <div className="relative">
-      <Search className="absolute left-2 top-2.5 h-4 w-4" style={{ color: 'hsl(var(--color-primary-hovered))' }} />
+      <Search className="absolute left-2 top-2.5 h-4 w-4" style={{ color: 'hsl(var(--color-primary-muted))' }} />
       <Input
         ref={ref}
         id={id}
@@ -106,13 +133,17 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(({
         className={cn(
           "pl-8  dark:border-border dark:border-border",
           "text-color-primary-foreground dark:text-color-primary-foreground",
-          "placeholder-muted-foreground dark:placeholder-muted-foreground",
+          "placeholder:text-color-primary-muted dark:placeholder:text-color-primary-muted",
           "focus:border-primary dark:focus:border-primary",
           // 아이콘과 텍스트 간격 자동 조정
           "search-input-universal",
           disabled && "dark:bg-color-primary-hovered",
           className
         )}
+        style={{
+          ...props.style,
+          '--tw-placeholder-color': 'hsl(var(--color-primary-muted))'
+        } as React.CSSProperties}
         {...props}
       />
     </div>
@@ -120,6 +151,65 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(({
 });
 
 SearchInput.displayName = 'SearchInput';
+
+/**
+ * 아이콘이 포함된 재사용 가능한 입력 컴포넌트
+ * 아이콘과 텍스트 간격이 자동으로 조정됩니다
+ */
+export const InputWithIcon = forwardRef<HTMLInputElement, InputWithIconProps>(({
+  icon,
+  value,
+  onChange,
+  placeholder = "입력...",
+  className,
+  disabled = false,
+  id,
+  autoComplete = "off",
+  type = "text",
+  onCompositionStart,
+  onCompositionEnd,
+  onKeyDown,
+  onBlur,
+  ...props
+}, ref) => {
+  return (
+    <div className="relative">
+      <div className="absolute left-2 top-2.5 h-4 w-4" style={{ color: 'hsl(var(--color-primary-muted))' }}>
+        {icon}
+      </div>
+      <Input
+        ref={ref}
+        id={id}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        type={type}
+        disabled={disabled}
+        autoComplete={autoComplete}
+        onCompositionStart={onCompositionStart}
+        onCompositionEnd={onCompositionEnd}
+        onKeyDown={onKeyDown}
+        onBlur={onBlur}
+        className={cn(
+          "pl-8 dark:border-border dark:border-border",
+          "text-color-primary-foreground dark:text-color-primary-foreground",
+          "placeholder:text-color-primary-muted dark:placeholder:text-color-primary-muted",
+          "focus:border-primary dark:focus:border-primary",
+          "search-input-universal",
+          disabled && "dark:bg-color-primary-hovered",
+          className
+        )}
+        style={{
+          ...props.style,
+          '--tw-placeholder-color': 'hsl(var(--color-primary-muted))'
+        } as React.CSSProperties}
+        {...props}
+      />
+    </div>
+  );
+});
+
+InputWithIcon.displayName = 'InputWithIcon';
 
 /**
  * 아이콘 버튼 컴포넌트
@@ -454,6 +544,149 @@ export function ButtonWithIcon({
         "text-color-primary-foreground hover:bg-color-primary-hovered hover:text-color-primary-foreground",
         "disabled:opacity-50 disabled:cursor-not-allowed",
         "rounded-md",
+        className
+      )}
+    >
+      {icon}
+      {children}
+    </button>
+  );
+}
+
+/**
+ * ButtonWithColorIcon 컴포넌트
+ * 주색상을 받아 자동으로 색상 조정하는 버튼
+ * outline 모드: 글자색/테두리색: 주색상-900, hover: 주색상-300, disabled: 주색상-400, active: 주색상-700
+ * filled 모드: 배경색: 주색상-600, 글자색: white, hover: 주색상-700, disabled: 주색상-400
+ */
+export function ButtonWithColorIcon({
+  icon,
+  children,
+  onClick,
+  className,
+  disabled = false,
+  type = 'button',
+  color = 'blue',
+  mode = 'outline'
+}: ButtonWithColorIconProps) {
+  const getColorClasses = (baseColor: string, buttonMode: string) => {
+    const colorMap: { [key: string]: {
+      outline: { text: string; border: string; bg: string; hover: string; disabled: string; active: string };
+      filled: { text: string; border: string; bg: string; hover: string; disabled: string; active: string };
+    } } = {
+      blue: {
+        outline: {
+          text: 'text-blue-900',
+          border: 'border-blue-900',
+          bg: 'bg-transparent',
+          hover: 'hover:bg-blue-300',
+          disabled: 'disabled:text-blue-400 disabled:border-blue-400',
+          active: 'active:bg-blue-700'
+        },
+        filled: {
+          text: 'text-white',
+          border: 'border-blue-600',
+          bg: 'bg-blue-600',
+          hover: 'hover:bg-blue-700',
+          disabled: 'disabled:bg-blue-400 disabled:border-blue-400',
+          active: 'active:bg-blue-800'
+        }
+      },
+      red: {
+        outline: {
+          text: 'text-red-900',
+          border: 'border-red-900',
+          bg: 'bg-transparent',
+          hover: 'hover:bg-red-300',
+          disabled: 'disabled:text-red-400 disabled:border-red-400',
+          active: 'active:bg-red-700'
+        },
+        filled: {
+          text: 'text-white',
+          border: 'border-red-600',
+          bg: 'bg-red-600',
+          hover: 'hover:bg-red-700',
+          disabled: 'disabled:bg-red-400 disabled:border-red-400',
+          active: 'active:bg-red-800'
+        }
+      },
+      green: {
+        outline: {
+          text: 'text-green-900',
+          border: 'border-green-900',
+          bg: 'bg-transparent',
+          hover: 'hover:bg-green-300',
+          disabled: 'disabled:text-green-400 disabled:border-green-400',
+          active: 'active:bg-green-700'
+        },
+        filled: {
+          text: 'text-white',
+          border: 'border-green-600',
+          bg: 'bg-green-600',
+          hover: 'hover:bg-green-700',
+          disabled: 'disabled:bg-green-400 disabled:border-green-400',
+          active: 'active:bg-green-800'
+        }
+      },
+      orange: {
+        outline: {
+          text: 'text-orange-900',
+          border: 'border-orange-900',
+          bg: 'bg-transparent',
+          hover: 'hover:bg-orange-300',
+          disabled: 'disabled:text-orange-400 disabled:border-orange-400',
+          active: 'active:bg-orange-700'
+        },
+        filled: {
+          text: 'text-white',
+          border: 'border-orange-600',
+          bg: 'bg-orange-600',
+          hover: 'hover:bg-orange-700',
+          disabled: 'disabled:bg-orange-400 disabled:border-orange-400',
+          active: 'active:bg-orange-800'
+        }
+      },
+      slate: {
+        outline: {
+          text: 'text-slate-900',
+          border: 'border-slate-900',
+          bg: 'bg-transparent',
+          hover: 'hover:bg-slate-300',
+          disabled: 'disabled:text-slate-400 disabled:border-slate-400',
+          active: 'active:bg-slate-700'
+        },
+        filled: {
+          text: 'text-white',
+          border: 'border-slate-600',
+          bg: 'bg-slate-600',
+          hover: 'hover:bg-slate-700',
+          disabled: 'disabled:bg-slate-400 disabled:border-slate-400',
+          active: 'active:bg-slate-800'
+        }
+      }
+    };
+
+    const colorSet = colorMap[baseColor] || colorMap.blue;
+    return colorSet[buttonMode as keyof typeof colorSet] || colorSet.outline;
+  };
+
+  const colorClasses = getColorClasses(color, mode);
+
+  return (
+    <button
+      type={type}
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
+      className={cn(
+        "inline-flex items-center justify-center px-4 py-2 text-sm font-medium transition-colors",
+        "border rounded-md gap-2",
+        colorClasses.text,
+        colorClasses.border,
+        colorClasses.bg,
+        colorClasses.hover,
+        colorClasses.disabled,
+        colorClasses.active,
+        "disabled:opacity-50 disabled:cursor-not-allowed",
         className
       )}
     >

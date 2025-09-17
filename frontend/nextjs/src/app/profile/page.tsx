@@ -27,6 +27,7 @@ import {
   Camera
 } from 'lucide-react';
 import { PageContainer } from '@/components/shared/PageContainer';
+import { ButtonWithIcon } from '@/components/shared/FormComponents';
 
 const UPDATE_PROFILE_MUTATION = gql`
   mutation UpdateUserProfile($token: String!, $input: UpdateUserInput!) {
@@ -315,15 +316,13 @@ export default function ProfilePage() {
         {/* 헤더 */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
+            <ButtonWithIcon
+              icon={<ArrowLeft className="h-4 w-4" />}
               onClick={() => router.back()}
-              className="flex items-center gap-2"
             >
-              <ArrowLeft className="h-4 w-4" />
-              <span>뒤로가기</span>
-            </Button>
-            <h1 className="text-2xl font-bold">사용자 정보</h1>
+              뒤로가기
+            </ButtonWithIcon>
+            <h1 className="text-2xl font-bold text-color-primary-foreground">사용자 정보</h1>
           </div>
         </div>
 
@@ -340,11 +339,11 @@ export default function ProfilePage() {
           {/* 아바타 정보 카드 */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-color-primary-foreground">
                 <Camera className="h-5 w-5" />
                 프로필 아바타
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-color-primary-foreground">
                 자동으로 생성된 아바타가 표시됩니다.
               </CardDescription>
             </CardHeader>
@@ -352,12 +351,12 @@ export default function ProfilePage() {
               <div className="flex items-center gap-6">
                 <UserAvatar user={user} size="lg" />
                 <div className="flex-1">
-                  <h3 className="text-lg font-medium">{user.name}</h3>
-                  <p className="text-sm text-color-primary-muted-foreground">
+                  <h3 className="text-lg font-medium text-color-primary-foreground">{user.name}</h3>
+                  <p className="text-sm text-color-primary-muted">
                     {user.avatar ? '저장된 아바타' : '자동 생성된 아바타'}
                   </p>
                   {user.avatar && (
-                    <p className="text-xs text-color-primary-muted-foreground mt-1">
+                    <p className="text-xs text-color-primary-muted mt-1">
                       {user.avatar}
                     </p>
                   )}
@@ -371,19 +370,21 @@ export default function ProfilePage() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-color-primary-foreground">
                     <User className="h-5 w-5" />
                     기본 정보
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-color-primary-foreground">
                     계정의 기본 정보를 확인하고 수정할 수 있습니다.
                   </CardDescription>
                 </div>
                 {!isEditingProfile && (
-                  <Button onClick={handleProfileEdit} className="flex items-center gap-2">
-                    <Edit className="h-4 w-4" />
+                  <ButtonWithIcon
+                    icon={<Edit className="h-4 w-4" />}
+                    onClick={handleProfileEdit}
+                  >
                     수정
-                  </Button>
+                  </ButtonWithIcon>
                 )}
               </div>
             </CardHeader>
@@ -391,16 +392,16 @@ export default function ProfilePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* 이메일 (읽기 전용) */}
                 <div>
-                  <Label className="flex items-center gap-2 mb-2">
+                  <Label className="flex items-center gap-2 mb-2 text-color-primary-foreground">
                     <Mail className="h-4 w-4" />
                     이메일
                   </Label>
-                  <Input value={user.email} disabled className="bg-color-primary-hovered" />
+                  <Input value={user.email} disabled className="bg-color-primary-hovered text-color-primary-foreground border-color-primary-foreground" />
                 </div>
 
                 {/* 이름 */}
                 <div>
-                  <Label htmlFor="name" className="flex items-center gap-2 mb-2">
+                  <Label htmlFor="name" className="flex items-center gap-2 mb-2 text-color-primary-foreground">
                     <User className="h-4 w-4" />
                     이름
                   </Label>
@@ -410,15 +411,16 @@ export default function ProfilePage() {
                       value={profileData.name}
                       onChange={(e) => setProfileData(prev => ({ ...prev, name: e.target.value }))}
                       placeholder="이름을 입력하세요"
+                      className="text-color-primary-foreground border-color-primary-foreground"
                     />
                   ) : (
-                    <Input value={user.name} disabled className="bg-color-primary-hovered" />
+                    <Input value={user.name} disabled className="bg-color-primary-hovered text-color-primary-foreground border-color-primary-foreground" />
                   )}
                 </div>
 
                 {/* 부서 */}
                 <div>
-                  <Label htmlFor="department" className="flex items-center gap-2 mb-2">
+                  <Label htmlFor="department" className="flex items-center gap-2 mb-2 text-color-primary-foreground">
                     <Building className="h-4 w-4" />
                     부서
                   </Label>
@@ -428,15 +430,16 @@ export default function ProfilePage() {
                       value={profileData.department}
                       onChange={(e) => setProfileData(prev => ({ ...prev, department: e.target.value }))}
                       placeholder="부서를 입력하세요"
+                      className="text-color-primary-foreground border-color-primary-foreground"
                     />
                   ) : (
-                    <Input value={user.department || '없음'} disabled className="bg-color-primary-hovered" />
+                    <Input value={user.department || '없음'} disabled className="bg-color-primary-hovered text-color-primary-foreground border-color-primary-foreground" />
                   )}
                 </div>
 
                 {/* 역할 (읽기 전용) */}
                 <div>
-                  <Label className="flex items-center gap-2 mb-2">
+                  <Label className="flex items-center gap-2 mb-2 text-color-primary-foreground">
                     <Shield className="h-4 w-4" />
                     역할
                   </Label>
@@ -451,19 +454,28 @@ export default function ProfilePage() {
               {/* 편집 모드 버튼들 */}
               {isEditingProfile && (
                 <div className="flex items-center gap-2 pt-4">
-                  <Button 
-                    onClick={handleProfileSave} 
+                  <Button
+                    variant="outline"
+                    onClick={handleProfileSave}
                     disabled={isLoading}
                     className="flex items-center gap-2"
+                    style={{
+                      color: 'hsl(var(--color-secondary-active))',
+                      borderColor: 'hsl(var(--color-secondary-active))'
+                    }}
                   >
                     <Save className="h-4 w-4" />
                     {isLoading ? '저장 중...' : '저장'}
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     onClick={handleProfileCancel}
                     disabled={isLoading}
                     className="flex items-center gap-2"
+                    style={{
+                      color: 'hsl(var(--color-tertiary-base))',
+                      borderColor: 'hsl(var(--color-tertiary-base))'
+                    }}
                   >
                     <X className="h-4 w-4" />
                     취소
@@ -476,19 +488,19 @@ export default function ProfilePage() {
               {/* 계정 정보 */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <Label className="flex items-center gap-2 mb-2">
+                  <Label className="flex items-center gap-2 mb-2 text-color-primary-foreground">
                     <Calendar className="h-4 w-4" />
                     가입일
                   </Label>
-                  <Input value={formatDate(user.createdAt)} disabled className="bg-color-primary-hovered" />
+                  <Input value={formatDate(user.createdAt)} disabled className="bg-color-primary-hovered text-color-primary-foreground border-color-primary-foreground" />
                 </div>
 
                 <div>
-                  <Label className="flex items-center gap-2 mb-2">
+                  <Label className="flex items-center gap-2 mb-2 text-color-primary-foreground">
                     <Calendar className="h-4 w-4" />
                     마지막 로그인
                   </Label>
-                  <Input value={formatDate(user.lastLoginAt)} disabled className="bg-color-primary-hovered" />
+                  <Input value={formatDate(user.lastLoginAt)} disabled className="bg-color-primary-hovered text-color-primary-foreground border-color-primary-foreground" />
                 </div>
               </div>
             </CardContent>
@@ -499,19 +511,21 @@ export default function ProfilePage() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-color-primary-foreground">
                     <Shield className="h-5 w-5" />
                     비밀번호 변경
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-color-primary-foreground">
                     보안을 위해 정기적으로 비밀번호를 변경하세요.
                   </CardDescription>
                 </div>
                 {!isEditingPassword && (
-                  <Button onClick={handlePasswordEdit} className="flex items-center gap-2">
-                    <Edit className="h-4 w-4" />
+                  <ButtonWithIcon
+                    icon={<Edit className="h-4 w-4" />}
+                    onClick={handlePasswordEdit}
+                  >
                     수정
-                  </Button>
+                  </ButtonWithIcon>
                 )}
               </div>
             </CardHeader>
@@ -519,7 +533,7 @@ export default function ProfilePage() {
               <CardContent className="space-y-4">
                 {/* 현재 비밀번호 */}
                 <div>
-                  <Label htmlFor="currentPassword">현재 비밀번호</Label>
+                  <Label htmlFor="currentPassword" className="text-color-primary-foreground">현재 비밀번호</Label>
                   <div className="relative">
                     <Input
                       id="currentPassword"
@@ -527,7 +541,7 @@ export default function ProfilePage() {
                       value={passwordData.currentPassword}
                       onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
                       placeholder="현재 비밀번호를 입력하세요"
-                      className="pr-10"
+                      className="pr-10 text-color-primary-foreground border-color-primary-foreground"
                     />
                     <button
                       type="button"
@@ -535,9 +549,9 @@ export default function ProfilePage() {
                       onClick={() => setShowPasswords(prev => ({ ...prev, current: !prev.current }))}
                     >
                       {showPasswords.current ? (
-                        <EyeOff className="h-4 w-4 text-color-primary-muted-foreground" />
+                        <EyeOff className="h-4 w-4 text-color-primary-muted" />
                       ) : (
-                        <Eye className="h-4 w-4 text-color-primary-muted-foreground" />
+                        <Eye className="h-4 w-4 text-color-primary-muted" />
                       )}
                     </button>
                   </div>
@@ -545,7 +559,7 @@ export default function ProfilePage() {
 
                 {/* 새 비밀번호 */}
                 <div>
-                  <Label htmlFor="newPassword">새 비밀번호</Label>
+                  <Label htmlFor="newPassword" className="text-color-primary-foreground">새 비밀번호</Label>
                   <div className="relative">
                     <Input
                       id="newPassword"
@@ -553,7 +567,7 @@ export default function ProfilePage() {
                       value={passwordData.newPassword}
                       onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
                       placeholder="새 비밀번호를 입력하세요 (최소 6자)"
-                      className="pr-10"
+                      className="pr-10 text-color-primary-foreground border-color-primary-foreground"
                     />
                     <button
                       type="button"
@@ -561,9 +575,9 @@ export default function ProfilePage() {
                       onClick={() => setShowPasswords(prev => ({ ...prev, new: !prev.new }))}
                     >
                       {showPasswords.new ? (
-                        <EyeOff className="h-4 w-4 text-color-primary-muted-foreground" />
+                        <EyeOff className="h-4 w-4 text-color-primary-muted" />
                       ) : (
-                        <Eye className="h-4 w-4 text-color-primary-muted-foreground" />
+                        <Eye className="h-4 w-4 text-color-primary-muted" />
                       )}
                     </button>
                   </div>
@@ -571,7 +585,7 @@ export default function ProfilePage() {
 
                 {/* 새 비밀번호 확인 */}
                 <div>
-                  <Label htmlFor="confirmPassword">새 비밀번호 확인</Label>
+                  <Label htmlFor="confirmPassword" className="text-color-primary-foreground">새 비밀번호 확인</Label>
                   <div className="relative">
                     <Input
                       id="confirmPassword"
@@ -579,7 +593,7 @@ export default function ProfilePage() {
                       value={passwordData.confirmPassword}
                       onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
                       placeholder="새 비밀번호를 다시 입력하세요"
-                      className="pr-10"
+                      className="pr-10 text-color-primary-foreground border-color-primary-foreground"
                     />
                     <button
                       type="button"
@@ -587,9 +601,9 @@ export default function ProfilePage() {
                       onClick={() => setShowPasswords(prev => ({ ...prev, confirm: !prev.confirm }))}
                     >
                       {showPasswords.confirm ? (
-                        <EyeOff className="h-4 w-4 text-color-primary-muted-foreground" />
+                        <EyeOff className="h-4 w-4 text-color-primary-muted" />
                       ) : (
-                        <Eye className="h-4 w-4 text-color-primary-muted-foreground" />
+                        <Eye className="h-4 w-4 text-color-primary-muted" />
                       )}
                     </button>
                   </div>
@@ -597,19 +611,28 @@ export default function ProfilePage() {
 
                 {/* 버튼들 */}
                 <div className="flex items-center gap-2 pt-4">
-                  <Button 
-                    onClick={handlePasswordSave} 
+                  <Button
+                    variant="outline"
+                    onClick={handlePasswordSave}
                     disabled={isLoading}
                     className="flex items-center gap-2"
+                    style={{
+                      color: 'hsl(var(--color-secondary-active))',
+                      borderColor: 'hsl(var(--color-secondary-active))'
+                    }}
                   >
                     <Save className="h-4 w-4" />
                     {isLoading ? '변경 중...' : '비밀번호 변경'}
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     onClick={handlePasswordCancel}
                     disabled={isLoading}
                     className="flex items-center gap-2"
+                    style={{
+                      color: 'hsl(var(--color-tertiary-base))',
+                      borderColor: 'hsl(var(--color-tertiary-base))'
+                    }}
                   >
                     <X className="h-4 w-4" />
                     취소
