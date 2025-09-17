@@ -11,8 +11,8 @@ export default function AccessLogsPage() {
   return (
     <PageContainer>
       <div className="flex items-center gap-2 mb-6">
-        <AlertCircle className="h-6 w-6 text-foreground" />
-        <h1 className="text-2xl font-bold text-foreground">접속 로그</h1>
+        <AlertCircle className="h-6 w-6 text-color-primary-foreground" />
+        <h1 className="text-2xl font-bold text-color-primary-foreground">접속 로그</h1>
       </div>
         <div className="bg-purple-50 dark:bg-purple-900/20 border-l-4 border-purple-400 dark:border-purple-500 p-4 mb-6">
           <div className="flex">

@@ -781,7 +781,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
                 <TableRow 
                   key={notice.nid}
                   onClick={(e) => handleRowClick(notice, e)}
-                  className="cursor-pointer hover:bg-muted/50"
+                  className="cursor-pointer hover:bg-color-primary-hovered/50"
                 >
                   <TableCell className="w-[40px]">
                     <Checkbox

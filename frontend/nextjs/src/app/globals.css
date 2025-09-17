@@ -4,100 +4,115 @@
 
 @layer base {
   :root {
-    --background: 240 100% 50%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: var(--primary-color, 0 72.2% 50.6%);
-    --primary-foreground: 0 85.7% 97.3%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: var(--primary-color, 0 72.2% 50.6%);
     --radius: 0;
+
+    /* Custom Color System - Light Mode */
+    /* Primary Color (Slate) */
+    --color-primary-foreground: 210 40% 2%;
+    /* slate-900 - 글자색(기본, 테이블 행/헤더) */
+    --color-primary-background: 210 40% 98%;
+    /* slate-100 - 배경색(기본, 테이블 행) */
+    --color-primary-hovered: 210 40% 93%;
+    /* slate-300 - hover 상태, 테이블 헤더 배경색 */
+    --color-primary-muted: 210 40% 78%;
+    /* slate-400 - 비활성화 상태 */
+    --color-primary-linked: 210 40% 40%;
+    /* slate-700 - link(anchor) 글자색 */
+
+    /* Secondary Color (Orange) */
+    --color-secondary-active: 20.5 90.2% 48.2%;
+    /* orange-500 - 활성화 상태 */
+
+    /* Tertiary Color (Green) */
+    --color-tertiary-base: 142.1 76.2% 36.3%;
+    /* green-600 - tertiary 기본 색상 */
   }
 
   .dark {
-    --background: 25 100% 50%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: var(--primary-color, 0 72.2% 50.6%);
-    --primary-foreground: 0 85.7% 97.3%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: var(--primary-color, 0 72.2% 50.6%);
-  }
 
-  [data-primary-color='red'] {
-    --primary-color: 0 72.2% 50.6%;
-    --primary-dark: 0 90% 25%;
-    --primary-light: 0 85% 97%;
-  }
+    /* Custom Color System - Dark Mode */
+    /* Primary Color (Slate) */
+    --color-primary-foreground: 210 40% 98%;
+    /* slate-100 - 글자색(기본, 테이블 행/헤더) */
+    --color-primary-background: 210 40% 2%;
+    /* slate-900 - 배경색(기본, 테이블 행) */
+    --color-primary-hovered: 210 40% 24%;
+    /* slate-700 - hover 상태, 테이블 헤더 배경색 */
+    --color-primary-muted: 210 40% 52%;
+    /* slate-600 - 비활성화 상태 */
+    --color-primary-linked: 210 40% 78%;
+    /* slate-300 - link(anchor) 글자색 */
 
-  [data-primary-color='blue'] {
-    --primary-color: 221.2 83.2% 53.3%;
-    --primary-dark: 221.2 90% 25%;
-    --primary-light: 221.2 85% 97%;
-  }
+    /* Secondary Color (Orange) */
+    --color-secondary-active: 20.5 90.2% 48.2%;
+    /* orange-500 - 활성화 상태 */
 
-  [data-primary-color='green'] {
-    --primary-color: 142.1 76.2% 36.3%;
-    --primary-dark: 142.1 90% 25%;
-    --primary-light: 142.1 85% 97%;
-  }
-
-  [data-primary-color='orange'] {
-    --primary-color: 24.6 95% 53.1%;
-    --primary-dark: 24.6 90% 25%;
-    --primary-light: 24.6 85% 97%;
-  }
-
-  [data-primary-color='pink'] {
-    --primary-color: 346.8 77.2% 49.8%;
-    --primary-dark: 346.8 90% 25%;
-    --primary-light: 346.8 85% 97%;
-  }
-
-  [data-primary-color='purple'] {
-    --primary-color: 262.1 83.3% 57.8%;
-    --primary-dark: 262.1 90% 25%;
-    --primary-light: 262.1 85% 97%;
-  }
-
-  [data-primary-color='gray'] {
-    --primary-color: 220 8.9% 46.1%;
-    --primary-dark: 220 15% 25%;
-    --primary-light: 220 15% 97%;
-  }
-
-  * {
-    @apply border-border;
+    /* Tertiary Color (Green) */
+    --color-tertiary-base: 142.1 76.2% 36.3%;
+    /* green-600 - tertiary 기본 색상 */
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background-color: hsl(var(--color-primary-background));
   }
 
+  /* HEADER */
+  /* 헤더 메뉴 활성 상태 밑줄 표시 */
+  header a.active,
+  header button.active,
+  header nav a.active,
+  header nav button.active,
+  header nav div button.active,
+  header div a.active,
+  .header-menu.active,
+  nav a.active,
+  nav button.active {
+    position: relative;
+  }
+
+  header a.active::after,
+  header button.active::after,
+  header nav a.active::after,
+  header nav button.active::after,
+  header nav div button.active::after,
+  header div a.active::after,
+  .header-menu.active::after,
+  nav a.active::after,
+  nav button.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: hsl(0 85% 55%) !important;
+    border-radius: 0;
+    z-index: 10;
+  }
+
+  /* 헤더 텍스트 색상 - 다크 모드 대응 */
+  header,
+  header * {
+    color: hsl(var(--color-primary-foreground));
+  }
+
+  /* 드롭다운 배경색 - 다크 모드 대응 */
+  header .bg-color-primary-background {
+    background-color: hsl(var(--color-primary-background));
+  }
+
+
+  /* body {
+    @apply text-foreground;
+    background-color: blue;
+  }
+
+  .dark body {
+    background-color: orange;
+  } */
+
+  /* ELEMENTS: FORM */
   /* 투명한 배경을 위한 기본 스타일 */
   input,
   select,
@@ -113,6 +128,16 @@
     background-color: transparent;
   }
 
+  /* input과 select 테두리색과 글자색을 foreground로 */
+  input,
+  select,
+  textarea,
+  .select-trigger,
+  [role="combobox"] {
+    border-color: hsl(var(--color-primary-foreground));
+    color: hsl(var(--color-primary-foreground));
+  }
+
   /* hover 상태 */
   button:hover,
   [role="button"]:hover,
@@ -121,11 +146,156 @@
   input:hover,
   select:hover,
   textarea:hover {
-    background-color: hsl(var(--muted) / 0.5);
+    background-color: hsl(var(--color-primary-hovered) / 0.5);
+  }
+
+  /* ELEMENTS: TABLE */
+
+  /* 테이블 헤더 */
+  thead th,
+  thead td,
+  th {
+    background-color: hsl(var(--color-primary-hovered)) !important;
+    text-align: center !important;
+  }
+
+  /* 테이블 헤더 hover 효과 제거 */
+  thead th:hover,
+  thead td:hover,
+  th:hover {
+    background-color: hsl(var(--color-primary-hovered)) !important;
+  }
+
+  /* 테이블 내 모든 글자색 및 폰트 굵기 */
+  table,
+  table th,
+  table td,
+  table tr,
+  thead th,
+  thead td,
+  tbody th,
+  tbody td,
+  tfoot th,
+  tfoot td {
+    color: hsl(var(--color-primary-foreground)) !important;
+    font-weight: normal !important;
   }
 
   /* 테이블 행 hover */
   tbody tr:hover {
-    background-color: hsl(var(--muted));
+    background-color: hsl(var(--color-primary-hovered));
   }
+
+  /* 테이블 행 내 링크 색상 */
+  table tbody tr a {
+    color: hsl(var(--color-primary-linked)) !important;
+  }
+
+  /* 테이블 행 내 링크 hover 색상 */
+  table tbody tr a:hover {
+    color: hsl(var(--color-primary-muted)) !important;
+  }
+
+  /* ELEMENTS: USER */
+  /* 검색 입력 필드 아이콘과 텍스트 간격 보정 */
+  .search-input-with-icon {
+    padding-left: 4rem !important;
+    text-indent: 1.25rem !important;
+  }
+
+  /* 검색 아이콘이 있는 입력 필드의 placeholder 위치 조정 */
+  .search-input-with-icon::placeholder {
+    transform: translateX(0.5rem) !important;
+  }
+
+  /* 포커스 상태 정상화 - 커서와 깜박임 제어 */
+  .search-input-with-icon:focus {
+    caret-color: auto !important;
+  }
+
+  .search-input-with-icon:not(:focus) {
+    caret-color: transparent !important;
+  }
+
+  /* 포커스 해제 시 정상 동작 보장 */
+  .search-input-with-icon {
+    transition: all 0.2s ease;
+  }
+
+  /* 드롭다운 블러 효과 */
+  .dropdown-blur {
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+  }
+
+  .dark .dropdown-blur {
+    background-color: rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* 숫자 입력 필드 증감 버튼 색상 */
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+
+  /* 커스텀 숫자 입력 증감 버튼 스타일 */
+  .number-input-container {
+    position: relative;
+  }
+
+  .number-input-container input[type="number"] {
+    padding-right: 24px;
+  }
+
+  .number-input-arrows {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .number-input-arrow {
+    width: 16px;
+    height: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: hsl(var(--color-primary-muted));
+    transition: color 0.2s ease;
+  }
+
+  .number-input-arrow:hover {
+    color: hsl(var(--color-primary-foreground));
+  }
+
+  .number-input-arrow svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  /* 페이지네이션 스타일 통일 */
+  .pagination button {
+    color: hsl(var(--color-primary-foreground)) !important;
+    border-color: hsl(var(--color-primary-foreground)) !important;
+  }
+
+  .pagination button:hover:not(:disabled) {
+    background-color: hsl(var(--color-primary-hovered)) !important;
+  }
+
+  .pagination button:disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+  }
+
 }

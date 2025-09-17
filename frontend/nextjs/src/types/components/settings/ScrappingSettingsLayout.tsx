@@ -53,7 +53,7 @@ export function ScrappingSettingsLayout({ children, orgName }: ScrappingSettings
                   "flex items-center gap-2 whitespace-nowrap py-2 px-3 border-b-2 font-medium text-sm",
                   activeTab === 'list'
                     ? "border-primary text-primary"
-                    : "border-transparent text-muted-foreground hover:text-foreground hover:border-gray-300"
+                    : "border-transparent text-color-primary-muted-foreground hover:text-color-primary-foreground hover:border-gray-300"
                 )}
               >
                 <List className="h-4 w-4" />
@@ -65,7 +65,7 @@ export function ScrappingSettingsLayout({ children, orgName }: ScrappingSettings
                   "flex items-center gap-2 whitespace-nowrap py-2 px-3 border-b-2 font-medium text-sm",
                   activeTab === 'detail'
                     ? "border-primary text-primary"
-                    : "border-transparent text-muted-foreground hover:text-foreground hover:border-gray-300"
+                    : "border-transparent text-color-primary-muted-foreground hover:text-color-primary-foreground hover:border-gray-300"
                 )}
               >
                 <FileText className="h-4 w-4" />

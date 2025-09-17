@@ -42,10 +42,13 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { DataTable, DataTableHeader, DataTableBody, DataTableRow, DataTableCell } from '@/components/shared/DataTable';
-import { DarkModeButton, DarkModeInput, OutlineButton } from '@/components/shared/FormComponents';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { RadioButtonSet, SearchInput, ButtonWithIcon } from '@/components/shared/FormComponents';
 
 import Comments from '@/components/board/Comments';
+import { PageHeader } from '@/components/shared/PageHeader';
 
 import dynamic from 'next/dynamic';
 
@@ -145,7 +148,7 @@ const DELETE_POST = `
 `;
 
 // 추가: 커스텀 스타일 클래스
-const textareaClass = "text-foreground focus:placeholder:text-transparent focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-200";
+const textareaClass = "text-color-primary-foreground focus:placeholder:text-transparent focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-200";
 
 export default function BoardPage({ params }: { params: Promise<any> }) {
   const { board } = use(params);
@@ -724,6 +727,28 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
   };
 
 
+  // 채널명 매핑
+  const getChannelInfo = () => {
+    const channelName = board.replace('board_', '');
+    const channelMap = {
+      'dev': { label: '개발 채널', name: '개발' },
+      'op': { label: '운영 채널', name: '운영' },
+      'manual': { label: '매뉴얼 채널', name: '매뉴얼' }
+    };
+
+    const channelInfo = channelMap[channelName as keyof typeof channelMap] || { label: '채널', name: channelName };
+
+    return {
+      title: channelInfo.label,
+      breadcrumbs: [
+        { label: '채널', href: '/channels/board/board_dev' },
+        { label: channelInfo.name, href: `/channels/board/${board}` }
+      ]
+    };
+  };
+
+  const { title, breadcrumbs } = getChannelInfo();
+
   return (
     <PageContainer>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="gap-0.5">
@@ -731,48 +756,31 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
               {activeTab === 'list' && (
                 <>
                   <div className="flex items-center space-x-4">
-                    <div className="flex border border-border rounded-md overflow-hidden">
-                      {[
+                    <RadioButtonSet
+                      options={[
                         { value: 'dev', label: '개발' },
                         { value: 'op', label: '운영' },
                         { value: 'manual', label: '매뉴얼' }
-                      ].map((option) => {
-                        // pathname을 사용해서 현재 선택된 채널 확인
-                        const expectedPath = `/channels/board/board_${option.value}`;
-                        const isSelected = pathname === expectedPath;
-                        return (
-                          <button
-                            key={option.value}
-                            onClick={() => handleChannelChange(option.value)}
-                            className={cn(
-                              "h-9 px-3 text-sm font-medium transition-colors border-r border-border last:border-r-0 flex items-center justify-center",
-                              "hover:bg-muted hover:text-foreground",
-                              isSelected
-                                ? "bg-muted text-foreground font-bold !bg-slate-200 dark:!bg-slate-700"
-                                : "bg-background text-muted-foreground"
-                            )}
-                          >
-                            {option.label}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <div className="relative w-[300px]">
-                      <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <DarkModeInput
+                      ]}
+                      value={board.replace('board_', '')}
+                      onChange={handleChannelChange}
+                    />
+                    <div className="w-[300px]">
+                      <SearchInput
                         placeholder="제목 또는 작성자로 검색"
-                        className="search-input-with-icon"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                       />
                     </div>
                   </div>
-                  <OutlineButton onClick={() => {
-                    navigate(`/channels/board/${board}/new?format=markdown`);
-                  }}>
-                    <Plus className="mr-2 h-4 w-4" />
+                  <ButtonWithIcon
+                    icon={<Plus className="mr-2 h-4 w-4" />}
+                    onClick={() => {
+                      navigate(`/channels/board/${board}/new?format=markdown`);
+                    }}
+                  >
                     글쓰기
-                  </OutlineButton>
+                  </ButtonWithIcon>
                 </>
               )}
             </div>
@@ -808,7 +816,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                         <DataTableCell>{post.id}</DataTableCell>
                         <DataTableCell className="max-w-[400px] truncate">
                           {post.is_notice && <span className="text-red-600 font-semibold">[공지] </span>}
-                          {post.is_private && <span className="text-muted-foreground font-semibold">[비공개] </span>}
+                          {post.is_private && <span className="text-color-primary-muted-foreground font-semibold">[비공개] </span>}
                           {post.title}
                         </DataTableCell>
                         <DataTableCell>{post.writer}</DataTableCell>
@@ -824,21 +832,21 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
               {selectedPost && (
                 <div>
                   <div className="flex justify-between items-center mb-4">
-                    <DarkModeButton variant="outline" onClick={() => {
+                    <Button variant="outline" onClick={() => {
                       setActiveTab('list');
                       setSelectedPost(null);
                       setIsEditMode(false);
                     }}>
                       목록으로
-                    </DarkModeButton>
+                    </Button>
                     {!isEditMode && (
                       <div className="flex space-x-2">
-                        <DarkModeButton variant="outline" onClick={handleEditToggle}>
+                        <Button variant="outline" onClick={handleEditToggle}>
                           수정
-                        </DarkModeButton>
-                        <DarkModeButton variant="destructive" onClick={handleDeleteClick}>
+                        </Button>
+                        <Button variant="destructive" onClick={handleDeleteClick}>
                           삭제
-                        </DarkModeButton>
+                        </Button>
                       </div>
                     )}
                   </div>
@@ -849,7 +857,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                         <h2 className="text-2xl font-bold mb-2">
                           {isEditMode ? (
                             <div>
-                              <DarkModeInput
+                              <Input
                                 value={selectedPost.title}
                                 onChange={(e) => setSelectedPost({ ...selectedPost, title: e.target.value })}
                                 className="text-2xl font-bold"
@@ -891,7 +899,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                             </div>
                           )}
                         </h2>
-                        <div className="flex justify-between text-sm text-muted-foreground">
+                        <div className="flex justify-between text-sm text-color-primary-muted-foreground">
                           <div className="flex space-x-4">
                             <span>작성자: {selectedPost.writer}</span>
                             <span>작성일: {formatDate(selectedPost.created_at)}</span>
@@ -929,7 +937,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                             
                             {selectedPost.format === 'markdown' ? (
                               <div className="space-y-2">
-                                <p className="text-sm text-muted-foreground">
+                                <p className="text-sm text-color-primary-muted-foreground">
                                   마크다운 문법을 사용하여 편집하세요. 이미지를 드래그하여 업로드할 수 있습니다.
                                 </p>
                                 <MDEditor
@@ -965,7 +973,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                             ) : (
                               <>
                                 <div className="flex justify-end mb-2">
-                                  <DarkModeButton
+                                  <Button
                                     variant="outline"
                                     size="sm"
                                     onClick={() => setIsSourceMode(!isSourceMode)}
@@ -982,7 +990,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                                         <span>HTML</span>
                                       </>
                                     )}
-                                  </DarkModeButton>
+                                  </Button>
                                 </div>
                                 {isSourceMode ? (
                                   <div 
@@ -1003,7 +1011,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                                       <div className="absolute inset-0 flex items-center justify-center bg-primary/20 z-10 rounded-md">
                                         <div className="text-center">
                                           <p className="text-lg font-medium text-primary">📁 이미지를 여기에 놓으세요</p>
-                                          <p className="text-sm text-muted-foreground">여러 이미지를 동시에 업로드할 수 있습니다</p>
+                                          <p className="text-sm text-color-primary-muted-foreground">여러 이미지를 동시에 업로드할 수 있습니다</p>
                                         </div>
                                       </div>
                                     )}
@@ -1047,15 +1055,15 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
 
                       {isEditMode && (
                         <div className="flex justify-end space-x-2">
-                          <DarkModeButton variant="outline" onClick={() => {
+                          <Button variant="outline" onClick={() => {
                             setIsEditMode(false);
                             setIsSourceMode(false);
                           }}>
                             취소
-                          </DarkModeButton>
-                          <DarkModeButton onClick={handleSaveEdit}>
+                          </Button>
+                          <Button onClick={handleSaveEdit}>
                             저장
-                          </DarkModeButton>
+                          </Button>
                         </div>
                       )}
                     </div>
@@ -1107,7 +1115,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                         <label htmlFor="title" className="block text-sm font-medium mb-1">
                           제목
                         </label>
-                        <DarkModeInput
+                        <Input
                           id="title"
                           value={newPost.title}
                           onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
@@ -1120,7 +1128,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                           <label htmlFor="author" className="block text-sm font-medium mb-1">
                             작성자
                           </label>
-                          <DarkModeInput
+                          <Input
                             id="author"
                             value={newPost.writer}
                             onChange={(e) => setNewPost({ ...newPost, writer: e.target.value })}
@@ -1133,7 +1141,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                     <div className="min-h-[300px] mb-4">
                       {editorMode === 'markdown' ? (
                         <div className="space-y-2">
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-sm text-color-primary-muted-foreground">
                             마크다운 문법을 사용하여 작성하세요. 이미지를 드래그하여 업로드할 수 있습니다.
                           </p>
                           <MDEditor
@@ -1169,7 +1177,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                       ) : (
                         <>
                           <div className="flex justify-end mb-2">
-                            <DarkModeButton
+                            <Button
                               variant="outline"
                               size="sm"
                               onClick={() => setIsSourceMode(!isSourceMode)}
@@ -1186,7 +1194,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                                   <span>HTML</span>
                                 </>
                               )}
-                            </DarkModeButton>
+                            </Button>
                           </div>
                           {isSourceMode ? (
                             <div 
@@ -1207,7 +1215,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                                 <div className="absolute inset-0 flex items-center justify-center bg-primary/20 z-10 rounded-md">
                                   <div className="text-center">
                                     <p className="text-lg font-medium text-primary">📁 이미지를 여기에 놓으세요</p>
-                                    <p className="text-sm text-muted-foreground">여러 이미지를 동시에 업로드할 수 있습니다</p>
+                                    <p className="text-sm text-color-primary-muted-foreground">여러 이미지를 동시에 업로드할 수 있습니다</p>
                                   </div>
                                 </div>
                               )}
@@ -1225,7 +1233,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                                   })
                                 }} />
                               ) : (
-                                <p className="text-muted-foreground">내용을 입력하세요</p>
+                                <p className="text-color-primary-muted-foreground">내용을 입력하세요</p>
                               )}
                             </div>
                           )}
@@ -1234,15 +1242,15 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                     </div>
 
                     <div className="flex justify-end space-x-2">
-                      <DarkModeButton
+                      <Button
                         variant="outline"
                         onClick={() => setActiveTab('list')}
                       >
                         취소
-                      </DarkModeButton>
-                      <DarkModeButton onClick={handleCreatePost}>
+                      </Button>
+                      <Button onClick={handleCreatePost}>
                         저장
-                      </DarkModeButton>
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -1279,7 +1287,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
               <div className="space-y-4 py-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">제목</label>
-                  <DarkModeInput
+                  <Input
                     value={newPost.title}
                     onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
                     placeholder="제목을 입력하세요"
@@ -1288,7 +1296,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                 
                 <div>
                   <label className="block text-sm font-medium mb-1">작성자</label>
-                  <DarkModeInput
+                  <Input
                     value={newPost.writer}
                     onChange={(e) => setNewPost({ ...newPost, writer: e.target.value })}
                     placeholder="작성자를 입력하세요"
@@ -1299,13 +1307,13 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                 <div>
                   <div className="flex justify-between items-center mb-1">
                     <label className="block text-sm font-medium">내용</label>
-                    <DarkModeButton
+                    <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => setIsSourceMode(!isSourceMode)}
                     >
                       {isSourceMode ? <Eye className="h-4 w-4" /> : <Code className="h-4 w-4" />}
-                    </DarkModeButton>
+                    </Button>
                   </div>
                   
                   {isSourceMode ? (
@@ -1327,7 +1335,7 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                         <div className="absolute inset-0 flex items-center justify-center bg-primary/20 z-10 rounded-md">
                           <div className="text-center">
                             <p className="text-lg font-medium text-primary">📁 이미지를 여기에 놓으세요</p>
-                            <p className="text-sm text-muted-foreground">여러 이미지를 동시에 업로드할 수 있습니다</p>
+                            <p className="text-sm text-color-primary-muted-foreground">여러 이미지를 동시에 업로드할 수 있습니다</p>
                           </div>
                         </div>
                       )}
@@ -1345,19 +1353,19 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                           })
                         }} />
                       ) : (
-                        <p className="text-muted-foreground">내용을 입력하세요</p>
+                        <p className="text-color-primary-muted-foreground">내용을 입력하세요</p>
                       )}
                     </div>
                   )}
                 </div>
               </div>
               <DialogFooter>
-                <DarkModeButton variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
                   취소
-                </DarkModeButton>
-                <DarkModeButton onClick={handleCreatePost}>
+                </Button>
+                <Button onClick={handleCreatePost}>
                   작성
-                </DarkModeButton>
+                </Button>
               </DialogFooter>
             </>
           )}

@@ -43,7 +43,8 @@ import {
 } from '@/components/ui/tabs';
 import Comments from '@/components/board/Comments';
 import { PageContainer } from '@/components/shared/PageContainer';
-import { DarkModeButton, DarkModeInput } from '@/components/shared/FormComponents';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 import dynamic from 'next/dynamic';
 import { marked } from 'marked';
@@ -60,7 +61,7 @@ const MDEditor = dynamic(
       <div className="flex items-center justify-center h-96 border rounded">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
-          <p className="text-sm text-muted-foreground">마크다운 에디터를 불러오는 중...</p>
+          <p className="text-sm text-color-primary-muted-foreground">마크다운 에디터를 불러오는 중...</p>
         </div>
       </div>
     )
@@ -136,8 +137,8 @@ const DELETE_POST = `
 `;
 
 // 추가: 커스텀 스타일 클래스
-const inputClass = "text-foreground focus:placeholder:text-transparent focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-200";
-const textareaClass = "text-foreground focus:placeholder:text-transparent focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-200";
+const inputClass = "text-color-primary-foreground focus:placeholder:text-transparent focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-200";
+const textareaClass = "text-color-primary-foreground focus:placeholder:text-transparent focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-200";
 
 // 마크다운을 HTML로 변환하는 함수
 const convertMarkdownToHtml = (markdown: string): string => {
@@ -575,10 +576,10 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
         <Card className="border-0 shadow-none">
           <CardContent className="p-10 text-center">
             <div className="text-red-500 mb-4">{error}</div>
-            <DarkModeButton onClick={() => navigate(`/channels/board/${board}`)}>
+            <Button onClick={() => navigate(`/channels/board/${board}`)}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               목록으로 돌아가기
-            </DarkModeButton>
+            </Button>
           </CardContent>
         </Card>
       </PageContainer>
@@ -603,15 +604,15 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
         <CardContent className="p-0">
           <div className="mb-4 flex justify-between items-start">
             <div className="flex items-center">
-              <DarkModeButton variant="outline" onClick={() => navigate(`/channels/board/${board}`)}>
+              <Button variant="outline" onClick={() => navigate(`/channels/board/${board}`)}>
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 목록으로
-              </DarkModeButton>
+              </Button>
             </div>
             <div className="flex-1 mx-6">
               <h1 className="text-2xl font-bold mb-2">
                 {isEditMode ? (
-                  <DarkModeInput
+                  <Input
                     value={post.title}
                     onChange={(e) => setPost({ ...post, title: e.target.value })}
                     className="text-2xl font-bold"
@@ -651,7 +652,7 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
                 </div>
               )}
               {!isEditMode && (
-                <div className="flex space-x-4 text-sm text-muted-foreground">
+                <div className="flex space-x-4 text-sm text-color-primary-muted-foreground">
                   <span>작성자: {post.writer}</span>
                   <span>작성일: {formatDate(post.created_at)}</span>
                   {post.updated_at !== post.created_at && (
@@ -662,14 +663,14 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
             </div>
             {!isEditMode && post && user && user.email === post.email && (
               <div className="flex space-x-2">
-                <DarkModeButton variant="outline" onClick={handleEditClick}>
+                <Button variant="outline" onClick={handleEditClick}>
                   <Edit className="mr-2 h-4 w-4" />
                   수정
-                </DarkModeButton>
-                <DarkModeButton variant="destructive" onClick={handleDeleteClick}>
+                </Button>
+                <Button variant="destructive" onClick={handleDeleteClick}>
                   <Trash2 className="mr-2 h-4 w-4" />
                   삭제
-                </DarkModeButton>
+                </Button>
               </div>
             )}
           </div>
@@ -736,7 +737,7 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
                   
                   {editorMode === 'markdown' ? (
                     <div className="space-y-2">
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-color-primary-muted-foreground">
                         마크다운 문법을 사용하여 편집하세요. 파일을 드래그 앤 드롭하거나 클립보드에서 붙여넣기할 수 있습니다.
                       </p>
                       {isUploading && (
@@ -766,7 +767,7 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
                             >
                               📎 파일 업로드
                             </label>
-                            <span className="text-xs text-muted-foreground">또는 파일을 드래그해서 놓으세요</span>
+                            <span className="text-xs text-color-primary-muted-foreground">또는 파일을 드래그해서 놓으세요</span>
                           </div>
                           <div 
                             onDrop={async (event) => {
@@ -800,14 +801,14 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
                         </div>
                       ) : (
                         <div className="flex items-center justify-center h-96 border rounded">
-                          <p className="text-sm text-muted-foreground">에디터를 초기화하는 중...</p>
+                          <p className="text-sm text-color-primary-muted-foreground">에디터를 초기화하는 중...</p>
                         </div>
                       )}
                     </div>
                   ) : (
                     <>
                       <div className="flex justify-end mb-2">
-                        <DarkModeButton
+                        <Button
                           variant="outline"
                           size="sm"
                           onClick={() => setIsSourceMode(!isSourceMode)}
@@ -824,7 +825,7 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
                               <span>HTML</span>
                             </>
                           )}
-                        </DarkModeButton>
+                        </Button>
                       </div>
                       {isSourceMode ? (
                         <Textarea
@@ -856,7 +857,7 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
                       ) : post.content && post.content.trim() ? (
                         <div dangerouslySetInnerHTML={{ __html: post.content }} />
                       ) : (
-                        <div className="text-muted-foreground italic">내용이 없습니다.</div>
+                        <div className="text-color-primary-muted-foreground italic">내용이 없습니다.</div>
                       )}
                     </div>
                   ) : (
@@ -867,7 +868,7 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
                           dangerouslySetInnerHTML={{ __html: post.content }} 
                         />
                       ) : (
-                        <div className="text-muted-foreground italic">내용이 없습니다.</div>
+                        <div className="text-color-primary-muted-foreground italic">내용이 없습니다.</div>
                       )}
                     </>
                   )}
@@ -877,12 +878,12 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
 
             {isEditMode && (
               <div className="flex justify-end space-x-2">
-                <DarkModeButton variant="outline" onClick={handleCancelEdit}>
+                <Button variant="outline" onClick={handleCancelEdit}>
                   취소
-                </DarkModeButton>
-                <DarkModeButton onClick={handleSaveEdit}>
+                </Button>
+                <Button onClick={handleSaveEdit}>
                   저장
-                </DarkModeButton>
+                </Button>
               </div>
             )}
           </div>

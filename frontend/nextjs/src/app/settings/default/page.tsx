@@ -122,7 +122,7 @@ export default function DefaultSettingsPage() {
       <PageContainer title="앱 기본값 설정">
         <div className="flex items-center justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-          <span className="ml-3 text-muted-foreground">설정 데이터를 불러오는 중...</span>
+          <span className="ml-3 text-color-primary-muted-foreground">설정 데이터를 불러오는 중...</span>
         </div>
       </PageContainer>
     );
@@ -173,13 +173,13 @@ export default function DefaultSettingsPage() {
           <div className="bg-card rounded-lg border border-border shadow-sm">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-border">
-                <thead className="bg-muted">
+                <thead className="bg-color-primary-hovered">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">순번</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">경로명</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">경로값</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">활성화</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">설명</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-color-primary-muted-foreground uppercase tracking-wider">순번</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-color-primary-muted-foreground uppercase tracking-wider">경로명</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-color-primary-muted-foreground uppercase tracking-wider">경로값</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-color-primary-muted-foreground uppercase tracking-wider">활성화</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-color-primary-muted-foreground uppercase tracking-wider">설명</th>
                   </tr>
                 </thead>
                 <tbody className="bg-card divide-y divide-border">
@@ -212,22 +212,22 @@ export default function DefaultSettingsPage() {
           </div>
           
           {nasInfo && (
-            <div className="bg-muted rounded-lg p-4">
+            <div className="rounded-lg p-4">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
-                  <span className="text-sm font-medium text-muted-foreground">타입:</span>
-                  <p className="text-sm text-foreground">{nasInfo.type}</p>
+                  <span className="text-sm font-medium text-color-primary-muted-foreground">타입:</span>
+                  <p className="text-sm text-color-primary-foreground">{nasInfo.type}</p>
                 </div>
                 <div>
-                  <span className="text-sm font-medium text-muted-foreground">모델:</span>
-                  <p className="text-sm text-foreground">{nasInfo.model}</p>
+                  <span className="text-sm font-medium text-color-primary-muted-foreground">모델:</span>
+                  <p className="text-sm text-color-primary-foreground">{nasInfo.model}</p>
                 </div>
                 <div>
-                  <span className="text-sm font-medium text-muted-foreground">버전:</span>
-                  <p className="text-sm text-foreground">{nasInfo.version}</p>
+                  <span className="text-sm font-medium text-color-primary-muted-foreground">버전:</span>
+                  <p className="text-sm text-color-primary-foreground">{nasInfo.version}</p>
                 </div>
                 <div>
-                  <span className="text-sm font-medium text-muted-foreground">상태:</span>
+                  <span className="text-sm font-medium text-color-primary-muted-foreground">상태:</span>
                   <p className="text-sm text-green-600">{nasInfo.status}</p>
                 </div>
               </div>
@@ -248,7 +248,7 @@ export default function DefaultSettingsPage() {
         <div className="bg-card rounded-lg border border-border shadow-sm p-6">
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">테마 모드</label>
+              <label className="block text-sm font-medium text-color-primary-foreground mb-2">테마 모드</label>
               <div className="flex items-center space-x-6">
                 <label className="flex items-center">
                   <input
@@ -258,7 +258,7 @@ export default function DefaultSettingsPage() {
                     onChange={() => setUiSettings({...uiSettings, darkMode: false})}
                     className="mr-2"
                   />
-                  <span className="text-sm text-foreground">라이트모드</span>
+                  <span className="text-sm text-color-primary-foreground">라이트모드</span>
                 </label>
                 <label className="flex items-center">
                   <input
@@ -268,7 +268,7 @@ export default function DefaultSettingsPage() {
                     onChange={() => setUiSettings({...uiSettings, darkMode: true})}
                     className="mr-2"
                   />
-                  <span className="text-sm text-foreground">다크모드</span>
+                  <span className="text-sm text-color-primary-foreground">다크모드</span>
                 </label>
               </div>
             </div>
@@ -287,11 +287,11 @@ export default function DefaultSettingsPage() {
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">기본 테마</label>
+                <label className="block text-sm font-medium text-color-primary-foreground mb-2">기본 테마</label>
                 <select 
                   value={themeSettings.defaultTheme}
                   onChange={(e) => setThemeSettings({...themeSettings, defaultTheme: e.target.value})}
-                  className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-background text-foreground"
+                  className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500  text-color-primary-foreground"
                 >
                   <option value="gray">Gray</option>
                   <option value="blue">Blue</option>
@@ -301,11 +301,11 @@ export default function DefaultSettingsPage() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">공고 목록</label>
+                <label className="block text-sm font-medium text-color-primary-foreground mb-2">공고 목록</label>
                 <select 
                   value={themeSettings.noticeTheme}
                   onChange={(e) => setThemeSettings({...themeSettings, noticeTheme: e.target.value})}
-                  className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 bg-background text-foreground"
+                  className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500  text-color-primary-foreground"
                 >
                   <option value="green">Green</option>
                   <option value="blue">Blue</option>
@@ -315,11 +315,11 @@ export default function DefaultSettingsPage() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">입찰 목록</label>
+                <label className="block text-sm font-medium text-color-primary-foreground mb-2">입찰 목록</label>
                 <select 
                   value={themeSettings.bidTheme}
                   onChange={(e) => setThemeSettings({...themeSettings, bidTheme: e.target.value})}
-                  className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-background text-foreground"
+                  className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500  text-color-primary-foreground"
                 >
                   <option value="blue">Blue</option>
                   <option value="green">Green</option>
@@ -344,13 +344,13 @@ export default function DefaultSettingsPage() {
         <div className="bg-card rounded-lg border border-border shadow-sm p-6">
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">스크랩 주기</label>
-              <p className="text-sm text-muted-foreground mb-2">매일 {scrapingSettings.schedule.join(', ')}시</p>
+              <label className="block text-sm font-medium text-color-primary-foreground mb-2">스크랩 주기</label>
+              <p className="text-sm text-color-primary-muted-foreground mb-2">매일 {scrapingSettings.schedule.join(', ')}시</p>
               <div className="flex items-center space-x-2">
                 <input
                   type="text"
                   placeholder="예: 10:00,22:00"
-                  className="flex-1 px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-background text-foreground"
+                  className="flex-1 px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500  text-color-primary-foreground"
                   defaultValue={scrapingSettings.schedule.join(',')}
                 />
                 <button className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -366,17 +366,17 @@ export default function DefaultSettingsPage() {
                 onChange={(e) => setScrapingSettings({...scrapingSettings, isActive: e.target.checked})}
                 className="w-4 h-4 text-blue-600 border-border rounded focus:ring-blue-500"
               />
-              <label className="text-sm font-medium text-foreground">자동 스크래핑 활성화</label>
+              <label className="text-sm font-medium text-color-primary-foreground">자동 스크래핑 활성화</label>
             </div>
 
             {scrapingSettings.lastRun && (
-              <div className="text-sm text-muted-foreground">
+              <div className="text-sm text-color-primary-muted-foreground">
                 마지막 실행: {scrapingSettings.lastRun}
               </div>
             )}
 
             {scrapingSettings.nextRun && (
-              <div className="text-sm text-muted-foreground">
+              <div className="text-sm text-color-primary-muted-foreground">
                 다음 실행 예정: {scrapingSettings.nextRun}
               </div>
             )}

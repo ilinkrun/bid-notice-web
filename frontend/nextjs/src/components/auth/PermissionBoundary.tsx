@@ -34,7 +34,7 @@ export const PermissionBoundary: React.FC<PermissionBoundaryProps> = ({
     
     if (!roleCheck) {
       return fallback || (showMessage ? (
-        <div className="p-4 text-center text-muted-foreground">
+        <div className="p-4 text-center text-color-primary-muted-foreground">
           <p>이 기능을 사용할 권한이 없습니다.</p>
         </div>
       ) : null);
@@ -49,7 +49,7 @@ export const PermissionBoundary: React.FC<PermissionBoundaryProps> = ({
 
     if (!permissionCheck) {
       return fallback || (showMessage ? (
-        <div className="p-4 text-center text-muted-foreground">
+        <div className="p-4 text-center text-color-primary-muted-foreground">
           <p>이 기능을 사용할 권한이 없습니다.</p>
         </div>
       ) : null);

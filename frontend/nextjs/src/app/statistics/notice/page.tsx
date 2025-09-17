@@ -60,7 +60,7 @@ export default async function NoticeStatisticsPage({ searchParams }: PageProps) 
   const noticesStatistics = await getNoticesStatistics(validGap);
 
   return (
-    <PageContainer title="입찰공고 통계">
+    <PageContainer>
       <div className="statistics-cell overflow-auto">
         <ApolloWrapper>
           <NoticeStatisticsTable

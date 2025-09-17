@@ -327,7 +327,7 @@ export default function ScrappingDetailSettingsPage() {
                 onClick={() => setShowHelpModal(true)}
                 title="작성 가이드 보기"
               >
-                <HelpCircle className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                <HelpCircle className="h-4 w-4 text-color-primary-muted-foreground hover:text-color-primary-foreground" />
               </Button>
             </div>
             <div className="flex space-x-2">
@@ -489,7 +489,7 @@ export default function ScrappingDetailSettingsPage() {
               ) : (
                 <div className="space-y-2">
                   <p>다음 항목들이 변경되었습니다:</p>
-                  <div className="bg-muted p-3 rounded text-sm">
+                  <div className="p-3 rounded text-sm">
                     {changes.map((change, index) => (
                       <div key={index}>{change}</div>
                     ))}

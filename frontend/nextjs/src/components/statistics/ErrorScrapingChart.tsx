@@ -79,7 +79,7 @@ export function ErrorScrapingChart({ initialData }: ErrorScrapingChartProps) {
   const errorScrapings = data?.logsErrorAll || initialData || [];
 
   if (loading && !errorScrapings.length) {
-    return <div className="text-foreground">로딩 중...</div>;
+    return <div className="text-color-primary-foreground">로딩 중...</div>;
   }
 
   if (error && !errorScrapings.length) {

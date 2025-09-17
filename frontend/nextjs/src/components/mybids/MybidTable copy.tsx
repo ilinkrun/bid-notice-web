@@ -408,7 +408,7 @@ export default function BidTable({ bids, currentStatus }) {
                 id="memo"
                 value={memo}
                 onChange={(e) => setMemo(e.target.value)}
-                className="w-full p-2 border border-border rounded-md bg-background text-foreground"
+                className="w-full p-2 border border-border rounded-md bg-color-primary-background text-color-primary-foreground"
                 rows={3}
                 placeholder="메모를 입력하세요"
               />
@@ -442,7 +442,7 @@ export default function BidTable({ bids, currentStatus }) {
                 id="memo"
                 value={memo}
                 onChange={(e) => setMemo(e.target.value)}
-                className="w-full p-2 border border-border rounded-md bg-background text-foreground"
+                className="w-full p-2 border border-border rounded-md bg-color-primary-background text-color-primary-foreground"
                 rows={3}
                 placeholder="메모를 입력하세요"
               />
@@ -459,7 +459,7 @@ export default function BidTable({ bids, currentStatus }) {
                 id="memo"
                 value={memo}
                 onChange={(e) => setMemo(e.target.value)}
-                className="w-full p-2 border border-border rounded-md bg-background text-foreground"
+                className="w-full p-2 border border-border rounded-md bg-color-primary-background text-color-primary-foreground"
                 rows={3}
                 placeholder="메모를 입력하세요"
               />
@@ -485,7 +485,7 @@ export default function BidTable({ bids, currentStatus }) {
                 id="memo"
                 value={memo}
                 onChange={(e) => setMemo(e.target.value)}
-                className="w-full p-2 border border-border rounded-md bg-background text-foreground"
+                className="w-full p-2 border border-border rounded-md bg-color-primary-background text-color-primary-foreground"
                 rows={3}
                 placeholder="메모를 입력하세요"
               />
@@ -504,7 +504,7 @@ export default function BidTable({ bids, currentStatus }) {
         <div className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center">
           <div className="bg-card p-6 rounded-lg shadow-lg flex flex-col items-center gap-3">
             <Loader2 className="h-10 w-10 animate-spin text-primary" />
-            <p className="text-base font-medium text-foreground">데이터를 불러오는 중입니다...</p>
+            <p className="text-base font-medium text-color-primary-foreground">데이터를 불러오는 중입니다...</p>
           </div>
         </div>
       )}
@@ -518,7 +518,7 @@ export default function BidTable({ bids, currentStatus }) {
           />
           <div className="relative flex items-center gap-2 w-[500px]">
             <div className="relative">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-color-primary-muted-foreground" />
               <Input
                 ref={searchInputRef}
                 placeholder="입찰 검색..."
@@ -550,7 +550,7 @@ export default function BidTable({ bids, currentStatus }) {
         {/* 종료 페이지에서만 상태별 필터 표시 */}
         {localStatus === 'ended' && (
           <div className="flex items-center gap-2 mr-4">
-            <span className="text-sm text-muted-foreground">상태:</span>
+            <span className="text-sm text-color-primary-muted-foreground">상태:</span>
             {Object.entries(endedStatusFilters).map(([status, checked]) => (
               <label key={status} className="flex items-center gap-1">
                 <input
@@ -655,7 +655,7 @@ export default function BidTable({ bids, currentStatus }) {
                             href={bid.detailUrl || '#'}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sm font-medium text-foreground hover:text-blue-600 truncate cursor-pointer"
+                            className="text-sm font-medium text-color-primary-foreground hover:text-blue-600 truncate cursor-pointer"
                             onClick={(e) => e.stopPropagation()}
                           >
                             "제목 테스트"
@@ -674,14 +674,14 @@ export default function BidTable({ bids, currentStatus }) {
                         href={orgUrls[bid.orgName]!}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm font-medium text-foreground hover:text-blue-600 hover:underline cursor-pointer"
+                        className="text-sm font-medium text-color-primary-foreground hover:text-blue-600 hover:underline cursor-pointer"
                         onClick={(e) => e.stopPropagation()}
                         title="기관 게시판 페이지로 이동"
                       >
                         {bid.orgName}
                       </a>
                     ) : (
-                      <span className="text-sm font-medium text-foreground">
+                      <span className="text-sm font-medium text-color-primary-foreground">
                         {bid.orgName}
                       </span>
                     )}
@@ -694,8 +694,8 @@ export default function BidTable({ bids, currentStatus }) {
                       <span className={`px-2 py-1 rounded text-xs font-medium ${
                         bid.status === '낙찰' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
                         bid.status === '패찰' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' :
-                        bid.status === '포기' ? 'bg-muted text-muted-foreground' :
-                        'bg-muted text-muted-foreground'
+                        bid.status === '포기' ? 'bg-color-primary-hovered text-color-primary-muted-foreground' :
+                        'bg-color-primary-hovered text-color-primary-muted-foreground'
                       }`}>
                         {bid.status}
                       </span>
@@ -737,7 +737,7 @@ export default function BidTable({ bids, currentStatus }) {
               </div>
             </div>
             {renderDynamicFields()}
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-color-primary-muted-foreground">
               선택된 {selectedBids.length}개 항목의 단계를 변경합니다.
             </div>
           </div>

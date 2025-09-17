@@ -148,7 +148,7 @@ export function AdvancedSearchModal() {
                               variant="outline"
                               className={cn(
                                 'w-[240px] justify-start text-left font-normal',
-                                !field.value && 'text-muted-foreground'
+                                !field.value && 'text-color-primary-muted-foreground'
                               )}
                             >
                               <CalendarIcon className="mr-2 h-4 w-4" />
@@ -188,7 +188,7 @@ export function AdvancedSearchModal() {
                               variant="outline"
                               className={cn(
                                 'w-[240px] justify-start text-left font-normal',
-                                !field.value && 'text-muted-foreground'
+                                !field.value && 'text-color-primary-muted-foreground'
                               )}
                             >
                               <CalendarIcon className="mr-2 h-4 w-4" />

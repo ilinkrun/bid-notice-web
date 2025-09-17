@@ -55,7 +55,7 @@ export function LogScrapingStatisticsTable({
           min="1"
           value={gap}
           onChange={(e) => setGap(e.target.value)}
-          className="border border-border p-1 mr-2 bg-background text-foreground"
+          className="border border-border p-1 mr-2  text-color-primary-foreground"
         />
         <button
           onClick={() => refetch({ gap: parseInt(gap) })}
@@ -70,10 +70,10 @@ export function LogScrapingStatisticsTable({
       <table className="min-w-full bg-card">
         <thead>
           <tr>
-            <th className="border border-border p-2 bg-muted text-foreground">시간</th>
-            <th className="border border-border p-2 bg-muted text-foreground">기관명</th>
-            <th className="border border-border p-2 bg-muted text-foreground">스크래핑 건수</th>
-            <th className="border border-border p-2 bg-muted text-foreground">삽입 건수</th>
+            <th className="border border-border p-2  text-color-primary-foreground">시간</th>
+            <th className="border border-border p-2  text-color-primary-foreground">기관명</th>
+            <th className="border border-border p-2  text-color-primary-foreground">스크래핑 건수</th>
+            <th className="border border-border p-2  text-color-primary-foreground">삽입 건수</th>
           </tr>
         </thead>
         <tbody>

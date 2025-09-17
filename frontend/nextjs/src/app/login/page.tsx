@@ -13,7 +13,6 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Eye, EyeOff, Mail, Lock, User, UserPlus, Key } from 'lucide-react';
-import { DarkModeButton, DarkModeInput, DarkModeLabel } from '@/components/shared/FormComponents';
 
 const LOGIN_MUTATION = gql`
   mutation Login($email: String!, $password: String!) {
@@ -231,17 +230,17 @@ export default function LoginPage() {
   const renderTestCredentials = () => (
     <Card className="mb-4">
       <CardHeader>
-        <CardTitle className="text-sm text-muted-foreground">테스트 계정</CardTitle>
+        <CardTitle className="text-sm text-color-primary-muted-foreground">테스트 계정</CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
         <div className="text-xs space-y-1">
           <div className="flex justify-between">
             <span className="font-medium">문정일:</span>
-            <span className="text-muted-foreground">ceo@ilmaceng.com / birthday(****)</span>
+            <span className="text-color-primary-muted-foreground">ceo@ilmaceng.com / birthday(****)</span>
           </div>
           <div className="flex justify-between">
             <span className="font-medium">운영자:</span>
-            <span className="text-muted-foreground">bid1@ilmaceng.com / bid1</span>
+            <span className="text-color-primary-muted-foreground">bid1@ilmaceng.com / bid1</span>
           </div>
         </div>
       </CardContent>
@@ -249,15 +248,15 @@ export default function LoginPage() {
   );
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-background">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 ">
       <div className="max-w-md w-full space-y-6">
         {/* 로고 및 제목 */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-foreground">ILMAC BID</h1>
-          <h2 className="mt-6 text-2xl font-semibold text-foreground">
+          <h1 className="text-3xl font-bold text-color-primary-foreground">ILMAC BID</h1>
+          <h2 className="mt-6 text-2xl font-semibold text-color-primary-foreground">
             {mode === 'login' ? '로그인' : mode === 'register' ? '회원가입' : '비밀번호 찾기'}
           </h2>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="mt-2 text-sm text-color-primary-muted-foreground">
             {mode === 'login' 
               ? '계정에 로그인하세요' 
               : mode === 'register' 
@@ -288,12 +287,12 @@ export default function LoginPage() {
                 <div>
                   <Label htmlFor="email">이메일</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-color-primary-muted-foreground" />
                     <Input
                       id="email"
                       type="email"
                       required
-                      className="pl-10 bg-muted border-border text-foreground placeholder:text-muted-foreground"
+                      className="pl-10  border-border text-color-primary-foreground placeholder:text-color-primary-muted-foreground"
                       placeholder="이메일을 입력하세요"
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
@@ -306,12 +305,12 @@ export default function LoginPage() {
                   <div>
                     <Label htmlFor="name">이름</Label>
                     <div className="relative">
-                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-color-primary-muted-foreground" />
                       <Input
                         id="name"
                         type="text"
                         required
-                        className="pl-10 bg-muted border-border text-foreground placeholder:text-muted-foreground"
+                        className="pl-10  border-border text-color-primary-foreground placeholder:text-color-primary-muted-foreground"
                         placeholder="이름을 입력하세요"
                         value={formData.name}
                         onChange={(e) => handleInputChange('name', e.target.value)}
@@ -325,11 +324,11 @@ export default function LoginPage() {
                   <div>
                     <Label htmlFor="department">부서</Label>
                     <div className="relative">
-                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-color-primary-muted-foreground" />
                       <Input
                         id="department"
                         type="text"
-                        className="pl-10 bg-muted border-border text-foreground placeholder:text-muted-foreground"
+                        className="pl-10  border-border text-color-primary-foreground placeholder:text-color-primary-muted-foreground"
                         placeholder="부서를 입력하세요 (선택사항)"
                         value={formData.department}
                         onChange={(e) => handleInputChange('department', e.target.value)}
@@ -343,12 +342,12 @@ export default function LoginPage() {
                   <div>
                     <Label htmlFor="password">비밀번호</Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-color-primary-muted-foreground" />
                       <Input
                         id="password"
                         type={showPassword ? 'text' : 'password'}
                         required
-                        className="pl-10 pr-10 bg-muted border-border text-foreground placeholder:text-muted-foreground"
+                        className="pl-10 pr-10  border-border text-color-primary-foreground placeholder:text-color-primary-muted-foreground"
                         placeholder="비밀번호를 입력하세요"
                         value={formData.password}
                         onChange={(e) => handleInputChange('password', e.target.value)}
@@ -359,9 +358,9 @@ export default function LoginPage() {
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? (
-                          <EyeOff className="h-4 w-4 text-muted-foreground" />
+                          <EyeOff className="h-4 w-4 text-color-primary-muted-foreground" />
                         ) : (
-                          <Eye className="h-4 w-4 text-muted-foreground" />
+                          <Eye className="h-4 w-4 text-color-primary-muted-foreground" />
                         )}
                       </button>
                     </div>
@@ -373,12 +372,12 @@ export default function LoginPage() {
                   <div>
                     <Label htmlFor="confirmPassword">비밀번호 확인</Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-color-primary-muted-foreground" />
                       <Input
                         id="confirmPassword"
                         type={showConfirmPassword ? 'text' : 'password'}
                         required
-                        className="pl-10 pr-10 bg-muted border-border text-foreground placeholder:text-muted-foreground"
+                        className="pl-10 pr-10  border-border text-color-primary-foreground placeholder:text-color-primary-muted-foreground"
                         placeholder="비밀번호를 다시 입력하세요"
                         value={formData.confirmPassword}
                         onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
@@ -389,9 +388,9 @@ export default function LoginPage() {
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       >
                         {showConfirmPassword ? (
-                          <EyeOff className="h-4 w-4 text-muted-foreground" />
+                          <EyeOff className="h-4 w-4 text-color-primary-muted-foreground" />
                         ) : (
-                          <Eye className="h-4 w-4 text-muted-foreground" />
+                          <Eye className="h-4 w-4 text-color-primary-muted-foreground" />
                         )}
                       </button>
                     </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { OutlineSelectBox, OutlineSelectItem } from '@/components/shared/FormComponents';
 
 interface StatisticsTypeSelectorProps {
   value: string;
@@ -9,15 +9,15 @@ interface StatisticsTypeSelectorProps {
 
 export function StatisticsTypeSelector({ value, onValueChange }: StatisticsTypeSelectorProps) {
   return (
-    <Select value={value} onValueChange={onValueChange}>
-      <SelectTrigger className="w-[180px]">
-        <SelectValue placeholder="통계 유형 선택" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="category">유형별</SelectItem>
-        <SelectItem value="region">지역별</SelectItem>
-        <SelectItem value="organization">기관별</SelectItem>
-      </SelectContent>
-    </Select>
+    <OutlineSelectBox
+      value={value}
+      onValueChange={onValueChange}
+      placeholder="통계 유형 선택"
+      className="w-[180px]"
+    >
+      <OutlineSelectItem value="category">유형별</OutlineSelectItem>
+      <OutlineSelectItem value="region">지역별</OutlineSelectItem>
+      <OutlineSelectItem value="organization">기관별</OutlineSelectItem>
+    </OutlineSelectBox>
   );
 } 

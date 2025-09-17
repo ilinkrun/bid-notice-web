@@ -45,6 +45,20 @@ module.exports = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        // Custom Color System
+        'color-primary': {
+          foreground: 'hsl(var(--color-primary-foreground))',
+          background: 'hsl(var(--color-primary-background))',
+          hovered: 'hsl(var(--color-primary-hovered))',
+          muted: 'hsl(var(--color-primary-muted))',
+          linked: 'hsl(var(--color-primary-linked))',
+        },
+        'color-secondary': {
+          active: 'hsl(var(--color-secondary-active))',
+        },
+        'color-tertiary': {
+          base: 'hsl(var(--color-tertiary-base))',
+        },
       },
       borderRadius: {
         DEFAULT: '0',

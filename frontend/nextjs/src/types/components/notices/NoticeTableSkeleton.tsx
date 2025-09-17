@@ -15,7 +15,7 @@ export default function NoticeTableSkeleton() {
       <div className="border rounded-md">
         <Table>
           <TableHeader>
-            <TableRow className="bg-muted hover:bg-muted/80">
+            <TableRow className="hover:bg-color-primary-hovered/80">
               <TableHead className="w-[80px] text-center">번호</TableHead>
               <TableHead>제목</TableHead>
               <TableHead className="w-[140px]">기관명</TableHead>

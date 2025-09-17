@@ -350,7 +350,7 @@ export default function ScrappingListSettingsPage() {
                 onClick={() => setShowHelpModal(true)}
                 title="작성 가이드 보기"
               >
-                <HelpCircle className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                <HelpCircle className="h-4 w-4 text-color-primary-muted-foreground hover:text-color-primary-foreground" />
               </Button>
             </div>
             <div className="flex space-x-2">
@@ -560,7 +560,7 @@ export default function ScrappingListSettingsPage() {
                             ))
                           ) : (
                             <TableRow>
-                              <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                              <TableCell colSpan={4} className="text-center py-8 text-color-primary-muted-foreground">
                                 요소 설정이 없습니다.
                               </TableCell>
                             </TableRow>
@@ -629,7 +629,7 @@ export default function ScrappingListSettingsPage() {
             </div>
           ) : (
             <div className="text-center py-8">
-              <p className="text-muted-foreground">목록 스크랩 설정이 없습니다.</p>
+              <p className="text-color-primary-muted-foreground">목록 스크랩 설정이 없습니다.</p>
               <Button 
                 variant="outline" 
                 className="mt-4"
@@ -655,7 +655,7 @@ export default function ScrappingListSettingsPage() {
               ) : (
                 <div className="space-y-2">
                   <p>다음 항목들이 변경되었습니다:</p>
-                  <div className="bg-muted p-3 rounded text-sm">
+                  <div className="p-3 rounded text-sm">
                     {changes.map((change, index) => (
                       <div key={index}>{change}</div>
                     ))}

@@ -240,7 +240,7 @@ export function LogScrapingStatisticsTable({
         {/* 검색 입력 필드 */}
         <div className="flex items-center gap-2 w-full md:w-auto">
           <div className="relative flex-1 md:flex-none">
-            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-color-primary-muted-foreground h-4 w-4" />
             <Input
               type="text"
               value={searchQuery}
@@ -268,9 +268,9 @@ export function LogScrapingStatisticsTable({
       {/* 활성화된 필터 표시 - 비활성화됨 */}
       {false && (searchQuery || sortColumn) && (
         <div className="flex flex-wrap items-center gap-2 mb-4 text-sm">
-          <span className="text-muted-foreground">활성 필터:</span>
+          <span className="text-color-primary-muted-foreground">활성 필터:</span>
           {searchQuery && (
-            <div className="bg-muted px-2 py-1 rounded-md flex items-center gap-1">
+            <div className="px-2 py-1 rounded-md flex items-center gap-1">
               <span>검색: {searchQuery}</span>
               <Button variant="ghost" size="sm" className="h-4 w-4 p-0" onClick={handleClearSearch}>
                 ✕
@@ -278,7 +278,7 @@ export function LogScrapingStatisticsTable({
             </div>
           )}
           {sortColumn && (
-            <div className="bg-muted px-2 py-1 rounded-md flex items-center gap-1">
+            <div className="px-2 py-1 rounded-md flex items-center gap-1">
               <span>정렬: {columnDisplayNames[sortColumn as string] || sortColumn} ({sortDirection === 'asc' ? '오름차순' : '내림차순'})</span>
               <Button variant="ghost" size="sm" className="h-4 w-4 p-0" onClick={handleClearSort}>
                 ✕
@@ -294,31 +294,31 @@ export function LogScrapingStatisticsTable({
             <TableRow>
               <TableHead 
                 onClick={() => handleSort('time')}
-                className="cursor-pointer hover:bg-muted"
+                className="cursor-pointer hover:bg-color-primary-hovered"
               >
                 시간 {renderSortIcon('time')}
               </TableHead>
               <TableHead 
                 onClick={() => handleSort('orgName')}
-                className="cursor-pointer hover:bg-muted"
+                className="cursor-pointer hover:bg-color-primary-hovered"
               >
                 기관명 {renderSortIcon('orgName')}
               </TableHead>
               <TableHead 
                 onClick={() => handleSort('scrapedCount')}
-                className="cursor-pointer hover:bg-muted text-right"
+                className="cursor-pointer hover:text-right"
               >
                 스크랩 건수 {renderSortIcon('scrapedCount')}
               </TableHead>
               <TableHead 
                 onClick={() => handleSort('insertedCount')}
-                className="cursor-pointer hover:bg-muted text-right"
+                className="cursor-pointer hover:text-right"
               >
                 신규 추가 건수 {renderSortIcon('insertedCount')}
               </TableHead>
               <TableHead 
                 onClick={() => handleSort('successRate')}
-                className="cursor-pointer hover:bg-muted text-right"
+                className="cursor-pointer hover:text-right"
               >
                 신규 비율 {renderSortIcon('successRate')}
               </TableHead>
@@ -349,7 +349,7 @@ export function LogScrapingStatisticsTable({
       </div>
       
       {/* 검색 결과 요약 */}
-      <div className="mt-2 text-sm text-muted-foreground flex justify-between items-center">
+      <div className="mt-2 text-sm text-color-primary-muted-foreground flex justify-between items-center">
         <div>
           {searchQuery && `검색 결과: 총 ${filteredAndSortedData.length}개 항목`}
         </div>

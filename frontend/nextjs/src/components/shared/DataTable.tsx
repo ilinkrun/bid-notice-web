@@ -62,7 +62,7 @@ export function DataTable({ children, className, containerClassName }: DataTable
 
 export function DataTableHeader({ children, className }: DataTableHeaderProps) {
   return (
-    <TableHeader className={cn("bg-muted", className)}>
+    <TableHeader className={cn("", className)}>
       {children}
     </TableHeader>
   );
@@ -85,7 +85,7 @@ export function DataTableRow({
   return (
     <TableRow
       className={cn(
-        isHoverable && "hover:bg-muted/50 dark:hover:bg-[hsl(240_3.7%_25%)] cursor-pointer",
+        isHoverable && "hover:bg-color-primary-hovered/50 dark:hover:bg-[hsl(240_3.7%_25%)] cursor-pointer",
         isHoverable && "dark:hover:[&>td]:text-[hsl(240_10%_3.9%)]",
         className
       )}
@@ -101,7 +101,7 @@ export function DataTableCell({ children, className, isHeader = false, colSpan, 
     return (
       <TableHead
         className={cn(
-          "bg-muted text-foreground font-medium",
+          "text-color-primary-foreground font-medium",
           onClick && "cursor-pointer",
           className
         )}
@@ -116,7 +116,7 @@ export function DataTableCell({ children, className, isHeader = false, colSpan, 
   return (
     <TableCell
       className={cn(
-        "text-foreground",
+        "text-color-primary-foreground",
         onClick && "cursor-pointer",
         className
       )}

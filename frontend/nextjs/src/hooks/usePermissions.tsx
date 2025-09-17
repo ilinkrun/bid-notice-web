@@ -249,7 +249,7 @@ export const ProtectedPage: React.FC<ProtectedPageProps> = ({
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <h1 className="text-2xl font-bold mb-4">접근 권한이 없습니다</h1>
-            <p className="text-muted-foreground">이 페이지에 접근할 권한이 없습니다.</p>
+            <p className="text-color-primary-muted-foreground">이 페이지에 접근할 권한이 없습니다.</p>
           </div>
         </div>
       );
@@ -267,7 +267,7 @@ export const ProtectedPage: React.FC<ProtectedPageProps> = ({
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <h1 className="text-2xl font-bold mb-4">접근 권한이 없습니다</h1>
-            <p className="text-muted-foreground">이 리소스에 접근할 권한이 없습니다.</p>
+            <p className="text-color-primary-muted-foreground">이 리소스에 접근할 권한이 없습니다.</p>
           </div>
         </div>
       );

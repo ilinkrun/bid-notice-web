@@ -15,6 +15,7 @@ import { useUnifiedLoading } from '@/components/providers/UnifiedLoadingProvider
 import { StatisticsTypeSelector } from './StatisticsTypeSelector';
 import { GapSelector } from './GapSelector';
 import { NoticeStatisticsChart } from './NoticeStatisticsChart';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { processNoticeStatistics } from '@/lib/utils/statistics';
 import { Table as TableIcon, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -277,7 +278,7 @@ export function NoticeStatisticsTable({
                 {regionIndex === 0 && (
                   <TableCell rowSpan={dateStats.regions.length} className="align-top">
                     {dateStats.date}
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-xs text-color-primary-muted-foreground">
                       ({dateStats.dayOfWeek})
                     </div>
                   </TableCell>
@@ -291,7 +292,7 @@ export function NoticeStatisticsTable({
               </TableRow>
             ))
           ))}
-          <TableRow className="bg-muted/50">
+          <TableRow className="bg-color-primary-hovered/50">
             <TableCell colSpan={2} className="font-bold">
               합계
             </TableCell>
@@ -320,7 +321,7 @@ export function NoticeStatisticsTable({
             <TableCell className="text-center font-medium">{stats.total}</TableCell>
           </TableRow>
         ))}
-        <TableRow className="bg-muted/50">
+        <TableRow className="bg-color-primary-hovered/50">
           <TableCell colSpan={statisticsType === 'organization' ? 2 : statisticsType === 'category' ? 2 : 2} className="font-bold">
             합계
           </TableCell>
@@ -335,9 +336,20 @@ export function NoticeStatisticsTable({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-1">
+      {/* 페이지 헤더 */}
+      <PageHeader
+        title="입찰공고 통계"
+        breadcrumbs={[
+          { label: '통계', href: '/statistics/notice' },
+          { label: '입찰공고 통계', href: '/statistics/notice' }
+        ]}
+        helpTooltip="입찰공고 통계를 확인하세요"
+        helpContent="입찰공고 통계 페이지에서는 카테고리별, 지역별, 기관별 통계를 표와 차트로 확인할 수 있습니다."
+      />
+
       {!hideControls && (
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-2 w-full">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
             <StatisticsTypeSelector
               value={statisticsType}
@@ -349,20 +361,17 @@ export function NoticeStatisticsTable({
             {viewTypes.map((type) => (
               <Button
                 key={type.value}
-                variant={viewType === type.value ? "default" : "outline"}
+                variant="outline"
                 size="sm"
                 onClick={() => handleViewTypeChange(type.value)}
                 className={cn(
-                  "flex items-center gap-2 transition-colors",
-                  viewType === type.value 
-                    ? "bg-primary text-primary-foreground font-semibold shadow-md" 
-                    : "hover:bg-muted"
+                  "flex items-center gap-2 transition-colors text-color-primary-foreground border-color-primary-foreground hover:bg-color-primary-hovered",
+                  viewType === type.value
+                    ? "bg-color-primary-muted font-semibold"
+                    : ""
                 )}
               >
-                <type.icon className={cn(
-                  "h-4 w-4",
-                  viewType === type.value ? "text-primary-foreground" : "text-muted-foreground"
-                )} />
+                <type.icon className="h-4 w-4 text-color-primary-foreground" />
                 <span>{type.label}</span>
               </Button>
             ))}
@@ -371,7 +380,7 @@ export function NoticeStatisticsTable({
       )}
       
       {hideControls && !hideTypeSelector && (
-        <div className="flex justify-end px-2">
+        <div className="flex justify-end">
           <StatisticsTypeSelector
             value={statisticsType}
             onValueChange={handleTypeChange}
@@ -463,7 +472,7 @@ export function NoticeStatisticsTable({
                     <TableRow key={item.date}>
                       <TableCell className="font-medium">
                         {item.date}
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-xs text-color-primary-muted-foreground">
                           ({item.dayOfWeek})
                         </div>
                       </TableCell>
@@ -481,7 +490,7 @@ export function NoticeStatisticsTable({
                         {regionIndex === 0 && (
                           <TableCell rowSpan={dateStats.regions.length} className="align-top">
                             {dateStats.date}
-                            <div className="text-xs text-muted-foreground">
+                            <div className="text-xs text-color-primary-muted-foreground">
                               ({dateStats.dayOfWeek})
                             </div>
                           </TableCell>
@@ -508,7 +517,7 @@ export function NoticeStatisticsTable({
                     </TableRow>
                   ))
                 )}
-                <TableRow className="bg-muted/50">
+                <TableRow className="bg-color-primary-hovered/50">
                   <TableCell colSpan={statisticsType === 'organization' ? 2 : 1} className="font-bold">
                     합계
                   </TableCell>
@@ -525,7 +534,7 @@ export function NoticeStatisticsTable({
       ) : (
         <div className="overflow-hidden">
           {statisticsType === 'organization' ? (
-            <div className="flex items-center justify-center h-96 text-muted-foreground">
+            <div className="flex items-center justify-center h-96 text-color-primary-muted-foreground">
               <div className="text-center">
                 <p className="text-lg mb-2">기관별 통계 차트</p>
                 <p className="text-sm">기관별 데이터는 차트 형태로 제공되지 않습니다.</p>

@@ -139,11 +139,11 @@ export default async function Home() {
                 ?.slice(0, 6)
                 .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
                 .map((error, index) => (
-                  <div key={error.id} className="flex justify-between items-center p-2 bg-muted border border-border rounded">
-                    <div className="text-sm font-medium text-muted-foreground">
+                  <div key={error.id} className="flex justify-between items-center p-2  border border-border rounded">
+                    <div className="text-sm font-medium text-color-primary-muted-foreground">
                       {new Date(error.time).toLocaleDateString('ko-KR')} {new Date(error.time).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
                     </div>
-                    <div className="text-sm text-muted-foreground truncate ml-2">
+                    <div className="text-sm text-color-primary-muted-foreground truncate ml-2">
                       {error.orgName || '에러없음'}
                     </div>
                   </div>

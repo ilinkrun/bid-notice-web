@@ -234,7 +234,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ label, icon: Icon, items, a
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           "flex items-center gap-2 px-4 py-2 transition-colors",
-          isOpen ? "bg-accent" : "hover:bg-accent/50"
+          isOpen ? "bg-color-secondary-active" : "hover:bg-color-secondary-active/50"
         )}
       >
         <Icon className="h-4 w-4" />
@@ -260,8 +260,8 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ label, icon: Icon, items, a
                   navigate(item.href);
                 }}
                 className={cn(
-                  "flex items-start gap-4 transition-colors hover:bg-accent/50 p-2 rounded-md w-full text-left",
-                  pathname === item.href && "bg-accent"
+                  "flex items-start gap-4 transition-colors hover:bg-color-secondary-active/50 p-2 rounded-md w-full text-left",
+                  pathname === item.href && "bg-color-secondary-active"
                 )}
               >
                 <item.icon className="h-5 w-5 mt-0.5" />
@@ -286,7 +286,7 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b /95 backdrop-blur supports-[backdrop-filter]:bg-color-primary-background/60">
       <div className="container flex h-14 items-center">
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="flex items-center space-x-2">
@@ -308,7 +308,7 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
           <div className="flex items-center">
             <Link
               href="/login"
-              className="flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary mr-4"
+              className="flex items-center gap-2 text-sm font-medium text-color-primary-muted-foreground transition-colors hover:text-primary mr-4"
             >
               <User className="h-4 w-4" />
               <span>로그인</span>

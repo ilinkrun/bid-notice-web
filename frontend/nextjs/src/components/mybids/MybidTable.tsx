@@ -4,9 +4,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Star, Loader2, Edit3 } from 'lucide-react';
+import { Star, Loader2, Edit3 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { UnifiedSelect } from '@/components/shared/UnifiedSelect';
+import { SearchInput, OutlineSelectBox, OutlineSelectItem } from '@/components/shared/FormComponents';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useBidFilterStore } from '@/store/bidFilterStore';
@@ -408,7 +409,7 @@ export default function BidTable({ bids, currentStatus }) {
                 id="memo"
                 value={memo}
                 onChange={(e) => setMemo(e.target.value)}
-                className="w-full p-2 border border-border rounded-md bg-background text-foreground"
+                className="w-full p-2 border border-border rounded-md  text-color-primary-foreground"
                 rows={3}
                 placeholder="메모를 입력하세요"
               />
@@ -442,7 +443,7 @@ export default function BidTable({ bids, currentStatus }) {
                 id="memo"
                 value={memo}
                 onChange={(e) => setMemo(e.target.value)}
-                className="w-full p-2 border border-border rounded-md bg-background text-foreground"
+                className="w-full p-2 border border-border rounded-md  text-color-primary-foreground"
                 rows={3}
                 placeholder="메모를 입력하세요"
               />
@@ -459,7 +460,7 @@ export default function BidTable({ bids, currentStatus }) {
                 id="memo"
                 value={memo}
                 onChange={(e) => setMemo(e.target.value)}
-                className="w-full p-2 border border-border rounded-md bg-background text-foreground"
+                className="w-full p-2 border border-border rounded-md  text-color-primary-foreground"
                 rows={3}
                 placeholder="메모를 입력하세요"
               />
@@ -485,7 +486,7 @@ export default function BidTable({ bids, currentStatus }) {
                 id="memo"
                 value={memo}
                 onChange={(e) => setMemo(e.target.value)}
-                className="w-full p-2 border border-border rounded-md bg-background text-foreground"
+                className="w-full p-2 border border-border rounded-md  text-color-primary-foreground"
                 rows={3}
                 placeholder="메모를 입력하세요"
               />
@@ -498,39 +499,67 @@ export default function BidTable({ bids, currentStatus }) {
     }
   };
 
+  // 상태별 페이지 타이틀과 브레드크럼 생성
+  const getPageInfo = () => {
+    const statusMap = {
+      'progress': { label: '진행', path: 'progress' },
+      'bidding': { label: '응찰', path: 'bidding' },
+      'ended': { label: '종료', path: 'ended' }
+    };
+
+    const currentStatusInfo = statusMap[localStatus] || { label: '진행', path: 'progress' };
+
+    return {
+      title: `${currentStatusInfo.label} 입찰`,
+      breadcrumbs: [
+        { label: '입찰', href: '/mybids/progress' },
+        { label: currentStatusInfo.label, href: `/mybids/${currentStatusInfo.path}` }
+      ]
+    };
+  };
+
+  const { title, breadcrumbs } = getPageInfo();
+
   return (
     <div>
       {isLoading && (
         <div className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center">
           <div className="bg-card p-6 rounded-lg shadow-lg flex flex-col items-center gap-3">
             <Loader2 className="h-10 w-10 animate-spin text-primary" />
-            <p className="text-base font-medium text-foreground">데이터를 불러오는 중입니다...</p>
+            <p className="text-base font-medium text-color-primary-foreground">데이터를 불러오는 중입니다...</p>
           </div>
         </div>
       )}
+
+      {/* 페이지 헤더 */}
+      <PageHeader title={title} breadcrumbs={breadcrumbs} />
+
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-          <UnifiedSelect
+          <OutlineSelectBox
             value={localStatus}
             onValueChange={handleStatusSelection}
             placeholder="단계 선택"
-            options={BID_STAGES}
-          />
-          <div className="relative flex items-center gap-2 w-[500px]">
-            <div className="relative">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
+          >
+            {BID_STAGES.map((stage) => (
+              <OutlineSelectItem key={stage.value} value={stage.value}>
+                {stage.label}
+              </OutlineSelectItem>
+            ))}
+          </OutlineSelectBox>
+          <div className="relative flex items-center gap-2 flex-1" style={{ minWidth: '10px' }}>
+            <div className="relative flex-1" style={{ minWidth: '10px' }}>
+              <SearchInput
                 ref={searchInputRef}
                 placeholder="입찰 검색..."
                 value={searchTerm}
                 onChange={handleSearchInput}
-                className="search-input-with-icon"
+                className="w-full"
                 autoComplete="off"
                 type="text"
                 onCompositionStart={() => setIsComposing(true)}
                 onCompositionEnd={() => {
                   setIsComposing(false);
-                  searchInputRef.current?.focus();
                 }}
                 onKeyDown={(e) => {
                   if (e.key === 'Process' || isComposing) {
@@ -538,9 +567,6 @@ export default function BidTable({ bids, currentStatus }) {
                   }
                 }}
                 onBlur={(e) => {
-                  if (!e.relatedTarget || !e.currentTarget.contains(e.relatedTarget as Node)) {
-                    searchInputRef.current?.focus();
-                  }
                 }}
               />
             </div>
@@ -550,7 +576,7 @@ export default function BidTable({ bids, currentStatus }) {
         {/* 종료 페이지에서만 상태별 필터 표시 */}
         {localStatus === 'ended' && (
           <div className="flex items-center gap-2 mr-4">
-            <span className="text-sm text-muted-foreground">상태:</span>
+            <span className="text-sm text-color-primary-muted-foreground">상태:</span>
             {Object.entries(endedStatusFilters).map(([status, checked]) => (
               <label key={status} className="flex items-center gap-1">
                 <input
@@ -652,7 +678,7 @@ export default function BidTable({ bids, currentStatus }) {
                             href={bid.detailUrl || '#'}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sm font-medium text-foreground hover:text-blue-600 truncate cursor-pointer"
+                            className="text-sm font-medium text-color-primary-foreground hover:text-blue-600 truncate cursor-pointer"
                             onClick={(e) => e.stopPropagation()}
                           >
                             {bid.title || '[제목 없음]'}
@@ -673,14 +699,14 @@ export default function BidTable({ bids, currentStatus }) {
                         href={orgUrls[bid.orgName]!}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm font-medium text-foreground hover:text-blue-600 hover:underline cursor-pointer"
+                        className="text-sm font-medium text-color-primary-foreground hover:text-blue-600 hover:underline cursor-pointer"
                         onClick={(e) => e.stopPropagation()}
                         title="기관 게시판 페이지로 이동"
                       >
                         {bid.orgName}
                       </a>
                     ) : (
-                      <span className="text-sm font-medium text-foreground">
+                      <span className="text-sm font-medium text-color-primary-foreground">
                         {bid.orgName}
                       </span>
                     )}
@@ -693,8 +719,8 @@ export default function BidTable({ bids, currentStatus }) {
                       <span className={`px-2 py-1 rounded text-xs font-medium ${
                         bid.status === '낙찰' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
                         bid.status === '패찰' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' :
-                        bid.status === '포기' ? 'bg-muted text-muted-foreground' :
-                        'bg-muted text-muted-foreground'
+                        bid.status === '포기' ? 'text-color-primary-muted-foreground' :
+                        'text-color-primary-muted-foreground'
                       }`}>
                         {bid.status}
                       </span>
@@ -736,7 +762,7 @@ export default function BidTable({ bids, currentStatus }) {
               </div>
             </div>
             {renderDynamicFields()}
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-color-primary-muted-foreground">
               선택된 {selectedBids.length}개 항목의 단계를 변경합니다.
             </div>
           </div>

@@ -23,7 +23,7 @@ export function RootLayoutClient({ children }: RootLayoutClientProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <div className={cn(inter.className, 'min-h-screen flex flex-col bg-background')}>
+    <div className={cn(inter.className, 'min-h-screen flex flex-col')}>
       <ThemeProvider>
         <ApolloWrapper>
           <AuthProvider>

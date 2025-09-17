@@ -224,12 +224,12 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ label, icon: Icon, items, a
 
   if (isMobile) {
     return (
-      <div className="w-full py-2 bg-background">
+      <div className="w-full py-2">
         <button
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
-            "flex items-center justify-between w-full px-4 py-2 transition-colors bg-background",
-            isOpen ? "bg-accent" : "hover:bg-accent/50",
+            "flex items-center justify-between w-full px-4 py-2 transition-colors",
+            isOpen ? "bg-color-primary-hovered" : "hover:bg-color-primary-hovered",
             isActive && "active"
           )}
         >
@@ -243,7 +243,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ label, icon: Icon, items, a
           )} />
         </button>
         {isOpen && (
-          <div className="w-full bg-background py-2">
+          <div className="w-full py-2">
             {items.map((item) => (
               <button
                 key={item.href}
@@ -255,8 +255,8 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ label, icon: Icon, items, a
                   navigate(item.href);
                 }}
                 className={cn(
-                  "flex items-center gap-2 px-6 py-2 transition-colors hover:bg-accent/50 w-full text-left",
-                  pathname === item.href && "bg-accent"
+                  "flex items-center gap-2 px-6 py-2 transition-colors hover:bg-color-primary-hovered w-full text-left",
+                  pathname === item.href && "bg-color-primary-hovered"
                 )}
               >
                 <item.icon className="h-4 w-4" />
@@ -275,7 +275,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ label, icon: Icon, items, a
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           "flex items-center gap-2 px-4 py-2 transition-colors",
-          isOpen ? "bg-accent" : "hover:bg-accent/50",
+          isOpen ? "bg-color-primary-hovered" : "hover:bg-color-primary-hovered",
           isActive && "active"
         )}
       >
@@ -288,7 +288,8 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ label, icon: Icon, items, a
       </button>
       {isOpen && (
         <div className={cn(
-          "absolute top-full mt-1 w-[400px] md:w-[500px] p-4 border bg-popover shadow-lg",
+          "absolute top-full mt-1 w-[400px] md:w-[500px] p-4 border shadow-lg",
+          "bg-color-primary-background text-color-primary-foreground",
           align === 'left' && "left-0",
           align === 'center' && "left-1/2 -translate-x-1/2",
           align === 'right' && "right-0"
@@ -302,8 +303,8 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ label, icon: Icon, items, a
                   navigate(item.href);
                 }}
                 className={cn(
-                  "flex items-start gap-4 transition-colors hover:bg-accent/50 p-2 rounded-md w-full text-left",
-                  pathname === item.href && "bg-accent"
+                  "flex items-start gap-4 transition-colors hover:bg-color-primary-hovered p-2 rounded-md w-full text-left",
+                  pathname === item.href && "bg-color-primary-hovered"
                 )}
               >
                 <item.icon className="h-5 w-5 mt-0.5" />
@@ -356,7 +357,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ user, size = 'sm' }) => {
             const parent = target.parentElement;
             if (parent) {
               parent.innerHTML = `
-                <div class="w-full h-full bg-primary text-primary-foreground flex items-center justify-center font-medium rounded-full">
+                <div class="w-full h-full bg-primary text-color-primary-foreground flex items-center justify-center font-medium rounded-full">
                   ${initials}
                 </div>
               `;
@@ -369,7 +370,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ user, size = 'sm' }) => {
 
   return (
     <div className={cn(
-      "rounded-full bg-primary text-primary-foreground flex items-center justify-center font-medium",
+      "rounded-full bg-primary text-color-primary-foreground flex items-center justify-center font-medium",
       sizeClasses
     )}>
       {initials}
@@ -386,7 +387,7 @@ const ThemeToggle: React.FC = () => {
       onClick={toggleTheme}
       className={cn(
         "flex items-center justify-center p-2 rounded-full transition-colors",
-        "hover:bg-accent/50 dark:hover:bg-accent/50"
+        "hover:bg-color-primary-hovered"
       )}
       aria-label={theme === 'light' ? '다크 모드로 전환' : '라이트 모드로 전환'}
     >
@@ -471,7 +472,7 @@ const UserDropdown: React.FC = () => {
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           "flex items-center gap-2 p-1 rounded-full transition-colors",
-          isOpen ? "bg-accent" : "hover:bg-accent/50",
+          isOpen ? "bg-color-primary-hovered" : "hover:bg-color-primary-hovered",
           isActive && "active"
         )}
       >
@@ -479,16 +480,16 @@ const UserDropdown: React.FC = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-64 p-2 border bg-popover shadow-lg rounded-md">
+        <div className="absolute right-0 top-full mt-2 w-64 p-2 border shadow-lg rounded-md bg-color-primary-background text-color-primary-foreground">
           {/* 사용자 정보 */}
           <div className="px-3 py-2 border-b mb-2">
             <div className="flex items-center gap-3">
               <UserAvatar user={user} size="md" />
               <div className="flex-1 min-w-0">
                 <p className="font-medium truncate">{user.name}</p>
-                <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+                <p className="text-sm text-color-primary-muted truncate">{user.email}</p>
                 {user.department && (
-                  <p className="text-xs text-muted-foreground truncate">{user.department}</p>
+                  <p className="text-xs text-color-primary-muted truncate">{user.department}</p>
                 )}
                 <div className="flex items-center gap-1 mt-1">
                   <span className={cn(
@@ -519,7 +520,7 @@ const UserDropdown: React.FC = () => {
           <div className="space-y-1">
             <button
               onClick={handleUserInfo}
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-left hover:bg-accent rounded-md transition-colors"
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-left hover:bg-color-primary-hovered rounded-md transition-colors"
             >
               <UserCircle className="h-4 w-4" />
               <span>사용자 정보</span>
@@ -528,7 +529,7 @@ const UserDropdown: React.FC = () => {
             <button
               onClick={handleLogout}
               disabled={isLoggingOut}
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-left hover:bg-accent rounded-md transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-left hover:bg-color-primary-hovered rounded-md transition-colors disabled:opacity-50"
             >
               <LogOut className="h-4 w-4" />
               <span>{isLoggingOut ? '로그아웃 중...' : '로그아웃'}</span>
@@ -596,7 +597,7 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
             ) : (
               <Link
                 href="/login"
-                className={cn("flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary", pathname === '/login' && "active")}
+                className={cn("flex items-center gap-2 text-sm font-medium text-color-primary-muted transition-colors hover:text-color-primary-foreground", pathname === '/login' && "active")}
               >
                 <User className="h-4 w-4" />
                 <span>로그인</span>
@@ -622,16 +623,16 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
 
       {/* 모바일 메뉴 패널 */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 top-14 bg-background z-50 md:hidden border-t">
-          <nav className="py-4 bg-background" style={{ paddingLeft: 'var(--container-padding-x)', paddingRight: 'calc(var(--container-padding-x) - var(--scrollbar-width))' }}>
+        <div className="fixed inset-0 top-14 z-50 md:hidden border-t bg-color-primary-background text-color-primary-foreground">
+          <nav className="py-4" style={{ paddingLeft: 'var(--container-padding-x)', paddingRight: 'calc(var(--container-padding-x) - var(--scrollbar-width))' }}>
             {/* 모바일 사용자 정보 (로그인 상태일 때만) */}
             {isAuthenticated && (
-              <div className="mb-4 p-4 bg-muted rounded-lg">
+              <div className="mb-4 p-4 rounded-lg bg-color-primary-background">
                 <UserDropdown />
               </div>
             )}
 
-            <div className="flex flex-col divide-y bg-background">
+            <div className="flex flex-col divide-y">
               {/* 공고 목록 - 모든 역할 접근 가능 */}
               <DropdownMenu label="공고 목록" icon={Star} items={notices} isMobile setIsMobileMenuOpen={setIsMobileMenuOpen} />
 
@@ -657,11 +658,11 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
 
               {/* 모바일 로그인 링크 (비로그인 상태일 때만) */}
               {!isAuthenticated && (
-                <div className="py-2 bg-background">
+                <div className="py-2">
                   <Link
                     href="/login"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className={cn("flex items-center gap-2 px-4 py-2 transition-colors hover:bg-accent/50 w-full", pathname === '/login' && "active")}
+                    className={cn("flex items-center gap-2 px-4 py-2 transition-colors hover:bg-color-primary-hovered w-full", pathname === '/login' && "active")}
                   >
                     <User className="h-4 w-4" />
                     <span>로그인</span>

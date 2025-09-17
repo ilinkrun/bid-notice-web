@@ -16,7 +16,7 @@ export function SettingsCategoryEditModal({ sn, onClose }: SettingsCategoryEditM
         </DialogHeader>
         <div className="py-4">
           <p>카테고리 설정 수정 기능은 현재 개발 중입니다.</p>
-          <p className="text-sm text-muted-foreground mt-2">선택된 카테고리 번호: {sn}</p>
+          <p className="text-sm text-color-primary-muted-foreground mt-2">선택된 카테고리 번호: {sn}</p>
         </div>
       </DialogContent>
     </Dialog>

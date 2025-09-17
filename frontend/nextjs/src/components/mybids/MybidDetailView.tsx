@@ -554,7 +554,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
     const statusDetail = detailData[selectedStatus] || {};
     
     return (
-      <div className="grid gap-4 mt-4 p-4 bg-muted rounded-lg">
+      <div className="grid gap-4 mt-4 p-4  rounded-lg">
         {/* 동적으로 detail 필드들 생성 */}
         {Object.entries(statusDetail).map(([key, value]) => (
           <div key={key} className="grid gap-2">
@@ -635,7 +635,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
       {/* 입찰 정보 */}
       <Card>
         <CardHeader 
-          className="cursor-pointer hover:bg-muted/50 transition-colors"
+          className="cursor-pointer hover:bg-color-primary-hovered/50 transition-colors"
           onClick={() => setIsInfoExpanded(!isInfoExpanded)}
         >
           <CardTitle className="flex items-center justify-between">
@@ -658,7 +658,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                 className={`px-4 py-2 font-medium text-sm flex items-center gap-2 ${
                   infoActiveTab === 'notice'
                     ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-muted-foreground hover:text-foreground'
+                    : 'text-color-primary-muted-foreground hover:text-color-primary-foreground'
                 }`}
                 onClick={() => setInfoActiveTab('notice')}
               >
@@ -669,7 +669,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                 className={`px-4 py-2 font-medium text-sm flex items-center gap-2 ${
                   infoActiveTab === 'bid'
                     ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-muted-foreground hover:text-foreground'
+                    : 'text-color-primary-muted-foreground hover:text-color-primary-foreground'
                 }`}
                 onClick={() => setInfoActiveTab('bid')}
               >
@@ -812,7 +812,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                               className="font-medium"
                             />
                           ) : (
-                            <div className="font-medium max-h-32 overflow-y-auto text-sm bg-muted p-3 rounded">
+                            <div className="font-medium max-h-32 overflow-y-auto text-sm  p-3 rounded">
                               {noticeDetailsFields.body_html ? (
                                 <div dangerouslySetInnerHTML={{ __html: noticeDetailsFields.body_html }} />
                               ) : (
@@ -900,7 +900,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                           className="font-medium"
                         />
                       ) : (
-                        <div className="font-medium p-3 bg-muted rounded border min-h-[80px]">
+                        <div className="font-medium p-3  rounded border min-h-[80px]">
                           {progressMemo || '메모가 없습니다.'}
                         </div>
                       )}
@@ -934,7 +934,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
       {/* 입찰 문서 */}
       <Card>
         <CardHeader 
-          className="cursor-pointer hover:bg-muted/50 transition-colors"
+          className="cursor-pointer hover:bg-color-primary-hovered/50 transition-colors"
           onClick={() => setIsDocumentExpanded(!isDocumentExpanded)}
         >
           <CardTitle className="flex items-center justify-between">
@@ -957,7 +957,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                 className={`px-4 py-2 font-medium text-sm flex items-center gap-2 ${
                   documentActiveTab === 'files'
                     ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-muted-foreground hover:text-foreground'
+                    : 'text-color-primary-muted-foreground hover:text-color-primary-foreground'
                 }`}
                 onClick={() => setDocumentActiveTab('files')}
               >
@@ -968,7 +968,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                 className={`px-4 py-2 font-medium text-sm flex items-center gap-2 ${
                   documentActiveTab === 'write'
                     ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-muted-foreground hover:text-foreground'
+                    : 'text-color-primary-muted-foreground hover:text-color-primary-foreground'
                 }`}
                 onClick={() => setDocumentActiveTab('write')}
               >
@@ -1042,7 +1042,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
-                              <FileText className="w-4 h-4 text-muted-foreground" />
+                              <FileText className="w-4 h-4 text-color-primary-muted-foreground" />
                               {isEditingFiles ? (
                                 <Input
                                   value={file.file_name}
@@ -1083,7 +1083,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                     </TableBody>
                   </Table>
                   <div className="pt-2 border-t space-y-3">
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm text-color-primary-muted-foreground">
                       총 {noticeFilesData.noticeFiles.total_count}개 파일 • 마지막 업데이트: {bid.postedAt?.split('T')[0]}
                     </div>
                     
@@ -1091,9 +1091,9 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                     {(() => {
                       const nasPath = noticeFilesData.noticeFiles.files.find((f: any) => f.down_folder)?.down_folder;
                       return nasPath ? (
-                        <div className="bg-muted p-3 rounded-lg">
-                          <div className="text-sm font-medium text-foreground mb-1">NAS 경로 (로컬 경로)</div>
-                          <div className="text-sm text-muted-foreground font-mono break-all">{nasPath}</div>
+                        <div className="p-3 rounded-lg">
+                          <div className="text-sm font-medium text-color-primary-foreground mb-1">NAS 경로 (로컬 경로)</div>
+                          <div className="text-sm text-color-primary-muted-foreground font-mono break-all">{nasPath}</div>
                         </div>
                       ) : null;
                     })()}
@@ -1136,7 +1136,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                   )}
                 </>
               ) : (
-                <div className="text-center py-8 text-muted-foreground">
+                <div className="text-center py-8 text-color-primary-muted-foreground">
                   공고 문서가 없습니다.
                 </div>
               )}
@@ -1166,7 +1166,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                   <span>파일 업로드</span>
                 </Button>
               </div>
-              <div className="text-sm text-muted-foreground">
+              <div className="text-sm text-color-primary-muted-foreground">
                 입찰 마감일까지 모든 필수 서류를 제출해야 합니다.
               </div>
                 </div>
@@ -1179,7 +1179,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
       {/* 단계 변경 */}
       <Card>
         <CardHeader 
-          className="cursor-pointer hover:bg-muted/50 transition-colors"
+          className="cursor-pointer hover:bg-color-primary-hovered/50 transition-colors"
           onClick={() => setIsStageExpanded(!isStageExpanded)}
         >
           <CardTitle className="flex items-center justify-between">

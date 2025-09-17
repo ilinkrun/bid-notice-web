@@ -27,7 +27,6 @@ import {
   Camera
 } from 'lucide-react';
 import { PageContainer } from '@/components/shared/PageContainer';
-import { DarkModeButton, DarkModeInput, DarkModeLabel } from '@/components/shared/FormComponents';
 
 const UPDATE_PROFILE_MUTATION = gql`
   mutation UpdateUserProfile($token: String!, $input: UpdateUserInput!) {
@@ -301,7 +300,7 @@ export default function ProfilePage() {
     switch (role) {
       case 'admin': return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
       case 'manager': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400';
-      case 'viewer': return 'bg-muted text-foreground';
+      case 'viewer': return 'text-color-primary-foreground';
       default: return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
     }
   };
@@ -316,14 +315,14 @@ export default function ProfilePage() {
         {/* 헤더 */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
-            <DarkModeButton
+            <Button
               variant="ghost"
               onClick={() => router.back()}
               className="flex items-center gap-2"
             >
               <ArrowLeft className="h-4 w-4" />
               <span>뒤로가기</span>
-            </DarkModeButton>
+            </Button>
             <h1 className="text-2xl font-bold">사용자 정보</h1>
           </div>
         </div>
@@ -354,11 +353,11 @@ export default function ProfilePage() {
                 <UserAvatar user={user} size="lg" />
                 <div className="flex-1">
                   <h3 className="text-lg font-medium">{user.name}</h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-color-primary-muted-foreground">
                     {user.avatar ? '저장된 아바타' : '자동 생성된 아바타'}
                   </p>
                   {user.avatar && (
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-xs text-color-primary-muted-foreground mt-1">
                       {user.avatar}
                     </p>
                   )}
@@ -396,7 +395,7 @@ export default function ProfilePage() {
                     <Mail className="h-4 w-4" />
                     이메일
                   </Label>
-                  <Input value={user.email} disabled className="bg-muted" />
+                  <Input value={user.email} disabled className="bg-color-primary-hovered" />
                 </div>
 
                 {/* 이름 */}
@@ -413,7 +412,7 @@ export default function ProfilePage() {
                       placeholder="이름을 입력하세요"
                     />
                   ) : (
-                    <Input value={user.name} disabled className="bg-muted" />
+                    <Input value={user.name} disabled className="bg-color-primary-hovered" />
                   )}
                 </div>
 
@@ -431,7 +430,7 @@ export default function ProfilePage() {
                       placeholder="부서를 입력하세요"
                     />
                   ) : (
-                    <Input value={user.department || '없음'} disabled className="bg-muted" />
+                    <Input value={user.department || '없음'} disabled className="bg-color-primary-hovered" />
                   )}
                 </div>
 
@@ -481,7 +480,7 @@ export default function ProfilePage() {
                     <Calendar className="h-4 w-4" />
                     가입일
                   </Label>
-                  <Input value={formatDate(user.createdAt)} disabled className="bg-muted" />
+                  <Input value={formatDate(user.createdAt)} disabled className="bg-color-primary-hovered" />
                 </div>
 
                 <div>
@@ -489,7 +488,7 @@ export default function ProfilePage() {
                     <Calendar className="h-4 w-4" />
                     마지막 로그인
                   </Label>
-                  <Input value={formatDate(user.lastLoginAt)} disabled className="bg-muted" />
+                  <Input value={formatDate(user.lastLoginAt)} disabled className="bg-color-primary-hovered" />
                 </div>
               </div>
             </CardContent>
@@ -536,9 +535,9 @@ export default function ProfilePage() {
                       onClick={() => setShowPasswords(prev => ({ ...prev, current: !prev.current }))}
                     >
                       {showPasswords.current ? (
-                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                        <EyeOff className="h-4 w-4 text-color-primary-muted-foreground" />
                       ) : (
-                        <Eye className="h-4 w-4 text-muted-foreground" />
+                        <Eye className="h-4 w-4 text-color-primary-muted-foreground" />
                       )}
                     </button>
                   </div>
@@ -562,9 +561,9 @@ export default function ProfilePage() {
                       onClick={() => setShowPasswords(prev => ({ ...prev, new: !prev.new }))}
                     >
                       {showPasswords.new ? (
-                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                        <EyeOff className="h-4 w-4 text-color-primary-muted-foreground" />
                       ) : (
-                        <Eye className="h-4 w-4 text-muted-foreground" />
+                        <Eye className="h-4 w-4 text-color-primary-muted-foreground" />
                       )}
                     </button>
                   </div>
@@ -588,9 +587,9 @@ export default function ProfilePage() {
                       onClick={() => setShowPasswords(prev => ({ ...prev, confirm: !prev.confirm }))}
                     >
                       {showPasswords.confirm ? (
-                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                        <EyeOff className="h-4 w-4 text-color-primary-muted-foreground" />
                       ) : (
-                        <Eye className="h-4 w-4 text-muted-foreground" />
+                        <Eye className="h-4 w-4 text-color-primary-muted-foreground" />
                       )}
                     </button>
                   </div>

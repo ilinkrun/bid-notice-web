@@ -1,222 +1,12 @@
 'use client';
 
 import React, { ReactNode, forwardRef, useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Search } from 'lucide-react';
 import {
-  Select,
-  SelectContent,
   SelectItem,
-  SelectTrigger,
-  SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-
-interface DarkModeSelectProps {
-  value?: string;
-  onValueChange?: (value: string) => void;
-  placeholder?: string;
-  className?: string;
-  children: ReactNode;
-  disabled?: boolean;
-}
-
-interface DarkModeButtonProps {
-  children: ReactNode;
-  onClick?: () => void;
-  variant?: 'default' | 'outline' | 'secondary' | 'ghost' | 'link' | 'destructive';
-  size?: 'default' | 'sm' | 'lg' | 'icon';
-  className?: string;
-  disabled?: boolean;
-  type?: 'button' | 'submit' | 'reset';
-  title?: string;
-}
-
-interface DarkModeInputProps {
-  value?: string | number;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  placeholder?: string;
-  className?: string;
-  type?: string;
-  disabled?: boolean;
-  min?: string | number;
-  max?: string | number;
-  id?: string;
-}
-
-interface DarkModeLabelProps {
-  children: ReactNode;
-  htmlFor?: string;
-  className?: string;
-}
-
-/**
- * 다크 모드를 지원하는 재사용 가능한 Select 컴포넌트
- */
-export function DarkModeSelect({
-  value,
-  onValueChange,
-  placeholder,
-  className,
-  children,
-  disabled = false
-}: DarkModeSelectProps) {
-  return (
-    <Select value={value} onValueChange={onValueChange} disabled={disabled}>
-      <SelectTrigger className={cn(
-        "bg-background dark:bg-background border-border dark:border-border",
-        "text-foreground dark:text-foreground",
-        "hover:bg-muted dark:hover:bg-muted",
-        className
-      )}>
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
-      <SelectContent className={cn(
-        "bg-popover dark:bg-popover border-border dark:border-border",
-        "text-popover-foreground dark:text-popover-foreground"
-      )}>
-        {children}
-      </SelectContent>
-    </Select>
-  );
-}
-
-/**
- * 다크 모드를 지원하는 재사용 가능한 SelectItem 컴포넌트
- */
-export function DarkModeSelectItem({
-  value,
-  children,
-  className
-}: {
-  value: string;
-  children: ReactNode;
-  className?: string;
-}) {
-  return (
-    <SelectItem
-      value={value}
-      className={cn(
-        "text-popover-foreground dark:text-popover-foreground",
-        "hover:bg-accent dark:hover:bg-accent",
-        "focus:bg-accent dark:focus:bg-accent",
-        className
-      )}
-    >
-      {children}
-    </SelectItem>
-  );
-}
-
-/**
- * 다크 모드를 지원하는 재사용 가능한 Button 컴포넌트
- */
-export function DarkModeButton({
-  children,
-  onClick,
-  variant = 'default',
-  size = 'default',
-  className,
-  disabled = false,
-  type = 'button',
-  title
-}: DarkModeButtonProps) {
-  const buttonStyle = {
-    backgroundColor: variant === 'outline' ? 'transparent' : '#00ff00', // 초록색 (default variant)
-    border: variant === 'outline' ? '3px solid #ff0000' : 'none', // 빨간색 테두리 (outline variant)
-    color: variant === 'outline' ? '#ff0000' : '#000000', // outline은 빨간색 글자, default는 검은색 글자
-    borderRadius: '0px',
-    padding: size === 'sm' ? '0.375rem 0.75rem' : '0.5rem 1rem',
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    opacity: disabled ? 0.5 : 1,
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: size === 'sm' ? '0.875rem' : '1rem',
-    fontWeight: '500',
-    transition: 'all 0.2s ease',
-    minHeight: size === 'sm' ? '2rem' : '2.5rem',
-    minWidth: size === 'sm' ? '2rem' : '2.5rem'
-  } as React.CSSProperties;
-
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      type={type}
-      title={title}
-      className={className}
-      style={buttonStyle}
-      onMouseEnter={(e) => {
-        if (!disabled) {
-          e.currentTarget.style.backgroundColor = variant === 'outline' ? '#ffff00' : '#0000ff'; // outline은 노란색, default는 파란색
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (!disabled) {
-          e.currentTarget.style.backgroundColor = variant === 'outline' ? 'transparent' : '#00ff00'; // 원래 색으로 복구
-        }
-      }}
-    >
-      {children}
-    </button>
-  );
-}
-
-/**
- * 다크 모드를 지원하는 재사용 가능한 Input 컴포넌트
- */
-export function DarkModeInput({
-  value,
-  onChange,
-  placeholder,
-  className,
-  type = 'text',
-  disabled = false,
-  min,
-  max,
-  id
-}: DarkModeInputProps) {
-  return (
-    <Input
-      id={id}
-      value={value}
-      onChange={onChange}
-      placeholder={placeholder}
-      type={type}
-      disabled={disabled}
-      min={min}
-      max={max}
-      className={cn(
-        "bg-background dark:bg-background border-border dark:border-border",
-        "text-foreground dark:text-foreground",
-        "placeholder-muted-foreground dark:placeholder-muted-foreground",
-        "focus:border-primary dark:focus:border-primary",
-        disabled && "bg-muted dark:bg-muted",
-        className
-      )}
-    />
-  );
-}
-
-/**
- * 다크 모드를 지원하는 재사용 가능한 Label 컴포넌트
- */
-export function DarkModeLabel({ children, htmlFor, className }: DarkModeLabelProps) {
-  return (
-    <Label
-      htmlFor={htmlFor}
-      className={cn(
-        "text-foreground dark:text-foreground font-medium",
-        className
-      )}
-    >
-      {children}
-    </Label>
-  );
-}
 
 interface SearchInputProps {
   value?: string;
@@ -231,6 +21,44 @@ interface SearchInputProps {
   onCompositionEnd?: () => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
+}
+
+interface IconButtonProps {
+  icon: ReactNode;
+  onClick?: () => void;
+  className?: string;
+  disabled?: boolean;
+  title?: string;
+}
+
+interface OutlineSelectBoxProps {
+  value?: string;
+  onValueChange?: (value: string) => void;
+  placeholder?: string;
+  className?: string;
+  disabled?: boolean;
+  children: ReactNode;
+}
+
+interface RadioButtonOption {
+  value: string;
+  label: string;
+}
+
+interface RadioButtonSetProps {
+  options: RadioButtonOption[];
+  value: string;
+  onChange: (value: string) => void;
+  className?: string;
+}
+
+interface ButtonWithIconProps {
+  icon: ReactNode;
+  children: ReactNode;
+  onClick?: () => void;
+  className?: string;
+  disabled?: boolean;
+  type?: 'button' | 'submit' | 'reset';
 }
 
 /**
@@ -254,7 +82,7 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(({
 }, ref) => {
   return (
     <div className="relative">
-      <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+      <Search className="absolute left-2 top-2.5 h-4 w-4" style={{ color: 'hsl(var(--color-primary-hovered))' }} />
       <Input
         ref={ref}
         id={id}
@@ -269,13 +97,13 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(({
         onKeyDown={onKeyDown}
         onBlur={onBlur}
         className={cn(
-          "pl-8 bg-background dark:bg-background border-border dark:border-border",
-          "text-foreground dark:text-foreground",
+          "pl-8  dark:border-border dark:border-border",
+          "text-color-primary-foreground dark:text-color-primary-foreground",
           "placeholder-muted-foreground dark:placeholder-muted-foreground",
           "focus:border-primary dark:focus:border-primary",
           // 아이콘과 텍스트 간격 자동 조정
           "search-input-universal",
-          disabled && "bg-muted dark:bg-muted",
+          disabled && "dark:bg-color-primary-hovered",
           className
         )}
         {...props}
@@ -285,142 +113,6 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(({
 });
 
 SearchInput.displayName = 'SearchInput';
-
-interface OutlineButtonProps {
-  children: ReactNode;
-  onClick?: () => void;
-  size?: 'default' | 'sm' | 'lg' | 'icon';
-  className?: string;
-  disabled?: boolean;
-  type?: 'button' | 'submit' | 'reset';
-  title?: string;
-}
-
-interface IconButtonProps {
-  icon: ReactNode;
-  onClick?: () => void;
-  className?: string;
-  disabled?: boolean;
-  title?: string;
-}
-
-interface OutlineSelectBoxProps {
-  value?: string;
-  onValueChange?: (value: string) => void;
-  placeholder?: string;
-  className?: string;
-  disabled?: boolean;
-  children: ReactNode;
-}
-
-/**
- * 투명한 배경에 테이블 행과 동일한 색상을 사용하는 Outline Button 컴포넌트
- * light/dark 모드 자동 지원
- */
-export function OutlineButton({
-  children,
-  onClick,
-  size = 'default',
-  className,
-  disabled = false,
-  type = 'button',
-  title
-}: OutlineButtonProps) {
-  const buttonStyle = {
-    backgroundColor: 'transparent !important',
-    border: '3px solid #ff0000 !important',
-    color: '#ff0000 !important',
-    borderRadius: '0px !important',
-    padding: '0 !important',
-    margin: '0 !important',
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    opacity: disabled ? 0.5 : 1,
-    display: 'flex !important',
-    alignItems: 'center !important',
-    justifyContent: 'center !important',
-    fontSize: size === 'sm' ? '0.875rem !important' : size === 'lg' ? '1.125rem !important' : '1rem !important',
-    fontWeight: '500 !important',
-    transition: 'all 0.2s ease !important',
-    width: '100% !important',
-    height: '100% !important',
-    boxSizing: 'border-box !important'
-  } as React.CSSProperties;
-
-  return (
-    <div
-      onClick={disabled ? undefined : onClick}
-      title={title}
-      className={cn(className)}
-      role="button"
-      tabIndex={disabled ? -1 : 0}
-      onKeyDown={(e) => {
-        if (!disabled && (e.key === 'Enter' || e.key === ' ')) {
-          e.preventDefault();
-          onClick?.();
-        }
-      }}
-      onMouseEnter={(e) => {
-        if (!disabled) {
-          // 테이블 행의 hover 배경색과 동일하게 설정
-          e.currentTarget.style.backgroundColor = '#ffff00 !important';
-          e.currentTarget.style.color = '#000000 !important';
-          e.currentTarget.style.borderColor = '#000000 !important';
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (!disabled) {
-          // 원래 상태로 복구
-          e.currentTarget.style.backgroundColor = 'transparent !important';
-          e.currentTarget.style.color = '#ff0000 !important';
-          e.currentTarget.style.borderColor = '#ff0000 !important';
-        }
-      }}
-      style={{
-        backgroundColor: 'transparent !important',
-        border: '3px solid #ff0000 !important',
-        color: '#ff0000 !important',
-        borderRadius: '0px !important',
-        padding: size === 'icon' ? '2px 0 !important' : '0 !important',
-        margin: '0 !important',
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        opacity: disabled ? 0.5 : 1,
-        display: 'inline-flex !important',
-        alignItems: 'center !important',
-        justifyContent: 'center !important',
-        width: size === 'icon' ? '40px !important' : 'auto !important',
-        height: size === 'icon' ? '40px !important' : 'auto !important',
-        minWidth: size === 'icon' ? '40px !important' : 'auto !important',
-        minHeight: size === 'icon' ? '40px !important' : 'auto !important',
-        maxWidth: size === 'icon' ? '40px !important' : 'none !important',
-        maxHeight: size === 'icon' ? '40px !important' : 'none !important',
-        boxSizing: 'border-box !important',
-        flexShrink: '0 !important',
-        overflow: 'hidden !important'
-      }}
-    >
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '100%',
-        height: '100%',
-        margin: '0 !important',
-        padding: '0 !important'
-      }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          margin: '0 !important',
-          padding: '0 !important',
-          lineHeight: '0 !important'
-        }}>
-          {children}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 /**
  * 아이콘 버튼 컴포넌트
@@ -437,7 +129,7 @@ export function IconButton({
     <div
       onClick={disabled ? undefined : onClick}
       title={title}
-      className={cn("no-unified-style text-foreground border bg-transparent", className)}
+      className={cn("no-unified-style border bg-transparent", className)}
       role="button"
       tabIndex={disabled ? -1 : 0}
       onKeyDown={(e) => {
@@ -448,20 +140,15 @@ export function IconButton({
       }}
       onMouseEnter={(e) => {
         if (!disabled) {
-          e.currentTarget.style.backgroundColor = 'hsl(var(--muted))';
-          e.currentTarget.style.color = 'hsl(var(--foreground))';
-          e.currentTarget.style.borderColor = 'currentColor';
+          e.currentTarget.style.backgroundColor = 'hsl(var(--color-primary-hovered))';
         }
       }}
       onMouseLeave={(e) => {
         if (!disabled) {
           e.currentTarget.style.backgroundColor = 'transparent';
-          e.currentTarget.style.color = 'hsl(var(--foreground))';
-          e.currentTarget.style.borderColor = 'currentColor';
         }
       }}
       style={{
-        borderColor: 'currentColor',
         borderRadius: '0px',
         padding: '2px 0',
         margin: '0',
@@ -478,7 +165,9 @@ export function IconButton({
         maxHeight: '40px',
         boxSizing: 'border-box',
         flexShrink: '0',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        borderColor: 'hsl(var(--color-primary-foreground))',
+        color: 'hsl(var(--color-primary-foreground))'
       }}
     >
       <div style={{
@@ -544,37 +233,31 @@ export function OutlineSelectBox({
   };
 
   return (
-    <div className={cn("no-unified-style relative text-foreground", className)} style={{ width: '120px' }}>
+    <div className={cn("no-unified-style relative text-color-primary-foreground", className)} style={{ width: '120px' }}>
       {/* 드롭다운 버튼 */}
       <div
-        className="text-foreground border bg-transparent"
+        className="border bg-transparent"
         style={{
-          ...{
-            minHeight: '40px',
-            padding: '0 12px',
-            cursor: disabled ? 'not-allowed' : 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            width: '100%',
-            boxSizing: 'border-box',
-            borderRadius: '0px'
-          },
-          borderColor: 'currentColor'
+          minHeight: '40px',
+          padding: '0 12px',
+          cursor: disabled ? 'not-allowed' : 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          width: '100%',
+          boxSizing: 'border-box',
+          borderRadius: '0px',
+          borderColor: 'hsl(var(--color-primary-foreground))'
         }}
         onClick={disabled ? undefined : () => setIsOpen(!isOpen)}
         onMouseEnter={(e) => {
           if (!disabled) {
-            e.currentTarget.style.backgroundColor = 'hsl(var(--muted))';
-            e.currentTarget.style.color = 'hsl(var(--foreground))';
-            e.currentTarget.style.borderColor = 'currentColor';
+            e.currentTarget.style.backgroundColor = 'hsl(var(--color-primary-hovered))';
           }
         }}
         onMouseLeave={(e) => {
           if (!disabled) {
             e.currentTarget.style.backgroundColor = 'transparent';
-            e.currentTarget.style.color = 'hsl(var(--foreground))';
-            e.currentTarget.style.borderColor = 'currentColor';
           }
         }}
         role="combobox"
@@ -587,7 +270,7 @@ export function OutlineSelectBox({
           }
         }}
       >
-        <span className="text-foreground">
+        <span>
           {selectedLabel || placeholder}
         </span>
         <svg
@@ -599,10 +282,11 @@ export function OutlineSelectBox({
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="text-foreground"
+          className=""
           style={{
             transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform 0.2s ease'
+            transition: 'transform 0.2s ease',
+            color: 'hsl(var(--color-primary-muted))'
           }}
         >
           <polyline points="6,9 12,15 18,9"></polyline>
@@ -612,6 +296,7 @@ export function OutlineSelectBox({
       {/* 드롭다운 내용 - 기존 Select 사용 */}
       {isOpen && (
         <div
+          className="dropdown-blur"
           style={{
             position: 'absolute',
             top: '100%',
@@ -619,12 +304,10 @@ export function OutlineSelectBox({
             right: '0',
             zIndex: 50,
             backgroundColor: 'transparent',
-            border: '1px solid hsl(var(--foreground))',
+            border: '1px solid hsl(var(--color-primary-foreground))',
             borderRadius: '0px',
             padding: '0',
-            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-            backdropFilter: 'blur(8px)',
-            WebkitBackdropFilter: 'blur(8px)'
+            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
           }}
         >
           {React.Children.map(children, (child: any) => {
@@ -634,19 +317,17 @@ export function OutlineSelectBox({
                   key={child.props.value}
                   onClick={() => handleSelect(child.props.value)}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'hsl(var(--muted) / 0.8)';
-                    e.currentTarget.style.color = 'hsl(var(--foreground))';
+                    e.currentTarget.style.backgroundColor = 'hsl(var(--color-primary-hovered) / 0.8)';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'hsl(var(--card) / 0.6)';
-                    e.currentTarget.style.color = 'hsl(var(--foreground))';
+                    e.currentTarget.style.backgroundColor = 'hsl(var(--color-primary-background) / 0.6)';
                   }}
                   style={{
-                    backgroundColor: 'hsl(var(--card) / 0.6)',
-                    color: 'hsl(var(--foreground))',
+                    backgroundColor: 'hsl(var(--color-primary-background) / 0.6)',
                     padding: '8px 12px',
                     cursor: 'pointer',
-                    borderRadius: '0px'
+                    borderRadius: '0px',
+                    color: 'hsl(var(--color-primary-foreground))'
                   }}
                 >
                   {child.props.children}
@@ -695,7 +376,7 @@ export function OutlineSelectItem({
       className={cn("no-unified-style", className)}
       style={{
         backgroundColor: 'transparent',
-        color: 'hsl(var(--foreground))',
+        color: 'hsl(var(--color-primary-foreground))',
         borderRadius: '0px',
         padding: '8px 12px',
         margin: '0',
@@ -703,15 +384,74 @@ export function OutlineSelectItem({
         border: 'none'
       }}
       onMouseEnter={(e: any) => {
-        e.currentTarget.style.backgroundColor = 'hsl(var(--muted))';
-        e.currentTarget.style.color = 'hsl(var(--foreground))';
+        e.currentTarget.style.backgroundColor = 'hsl(var(--color-primary-hovered))';
+        e.currentTarget.style.color = 'hsl(var(--color-primary-foreground))';
       }}
       onMouseLeave={(e: any) => {
         e.currentTarget.style.backgroundColor = 'transparent';
-        e.currentTarget.style.color = 'hsl(var(--foreground))';
+        e.currentTarget.style.color = 'hsl(var(--color-primary-foreground))';
       }}
     >
       {children}
     </SelectItem>
+  );
+}
+
+/**
+ * RadioButtonSet 컴포넌트
+ * 라디오 버튼 형태의 버튼 그룹
+ */
+export function RadioButtonSet({ options, value, onChange, className }: RadioButtonSetProps) {
+  return (
+    <div className={cn("flex border border-color-primary-foreground rounded-md overflow-hidden", className)}>
+      {options.map((option) => (
+        <button
+          key={option.value}
+          onClick={() => onChange(option.value)}
+          className={cn(
+            "h-9 px-3 text-sm font-medium transition-colors border-r border-color-primary-foreground last:border-r-0 flex items-center justify-center",
+            "text-color-primary-foreground hover:bg-color-primary-hovered",
+            value === option.value
+              ? "bg-color-primary-muted font-bold"
+              : "bg-transparent"
+          )}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * ButtonWithIcon 컴포넌트
+ * 아이콘과 텍스트가 포함된 버튼
+ * 일관된 스타일링과 hover 효과 제공
+ */
+export function ButtonWithIcon({
+  icon,
+  children,
+  onClick,
+  className,
+  disabled = false,
+  type = 'button'
+}: ButtonWithIconProps) {
+  return (
+    <button
+      type={type}
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
+      className={cn(
+        "inline-flex items-center justify-center px-4 py-2 text-sm font-medium transition-colors",
+        "border border-color-primary-foreground bg-transparent",
+        "text-color-primary-foreground hover:bg-color-primary-hovered hover:text-color-primary-foreground",
+        "disabled:opacity-50 disabled:cursor-not-allowed",
+        "rounded-md",
+        className
+      )}
+    >
+      {icon}
+      {children}
+    </button>
   );
 }

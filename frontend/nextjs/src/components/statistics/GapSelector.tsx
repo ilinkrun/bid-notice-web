@@ -1,6 +1,6 @@
 'use client';
 
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { OutlineSelectBox, OutlineSelectItem } from '@/components/shared/FormComponents';
 import { useSearchParams } from 'next/navigation';
 import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
 
@@ -19,18 +19,15 @@ export function GapSelector({ defaultValue }: GapSelectorProps) {
   };
 
   return (
-    <Select
-      defaultValue={defaultValue}
+    <OutlineSelectBox
+      value={defaultValue}
       onValueChange={handleGapChange}
+      placeholder="기간 선택"
+      className="w-[180px]"
     >
-      <SelectTrigger className="w-[180px]">
-        <SelectValue placeholder="기간 선택" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="3">최근 3일</SelectItem>
-        <SelectItem value="7">최근 7일</SelectItem>
-        <SelectItem value="14">최근 14일</SelectItem>
-      </SelectContent>
-    </Select>
+      <OutlineSelectItem value="3">최근 3일</OutlineSelectItem>
+      <OutlineSelectItem value="7">최근 7일</OutlineSelectItem>
+      <OutlineSelectItem value="14">최근 14일</OutlineSelectItem>
+    </OutlineSelectBox>
   );
 } 

@@ -52,7 +52,7 @@ const CREATE_POST = `
 `;
 
 // 추가: 커스텀 스타일 클래스
-const inputClass = "text-foreground focus:placeholder:text-transparent focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-200";
+const inputClass = "text-color-primary-foreground focus:placeholder:text-transparent focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-200";
 
 // 마크다운을 HTML로 변환하는 함수
 const convertMarkdownToHtml = (markdown: string): string => {
@@ -392,7 +392,7 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
                 </div>
                 
                 <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-color-primary-muted-foreground">
                     마크다운 문법을 사용하여 작성하세요. 파일을 드래그 앤 드롭하거나 클립보드에서 붙여넣기할 수 있습니다.
                   </p>
                   {isUploading && (
@@ -402,7 +402,7 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
                         파일을 업로드하는 중... {uploadProgress > 0 ? `${Math.round(uploadProgress)}%` : ''}
                       </div>
                       {uploadProgress > 0 && (
-                        <div className="w-full bg-muted rounded-full h-2">
+                        <div className="w-full  rounded-full h-2">
                           <div 
                             className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                             style={{ width: `${uploadProgress}%` }}
@@ -431,7 +431,7 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
                       >
                         📎 파일 업로드
                       </label>
-                      <span className="text-xs text-muted-foreground">또는 파일을 드래그해서 놓으세요</span>
+                      <span className="text-xs text-color-primary-muted-foreground">또는 파일을 드래그해서 놓으세요</span>
                     </div>
                     <div
                       onDrop={async (event) => {

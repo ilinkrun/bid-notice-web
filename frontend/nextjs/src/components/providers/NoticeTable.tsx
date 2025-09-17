@@ -5,16 +5,19 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { DarkModeButton, OutlineButton, IconButton, OutlineSelectBox, OutlineSelectItem } from '@/components/shared/FormComponents';
-import { Search, Star, Loader2, Edit3, Minus, Plus } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Star, Loader2, Edit3, Minus, Plus } from 'lucide-react';
 import { type Notice } from '@/types/notice';
 import { Checkbox } from '@/components/ui/checkbox';
 import { UnifiedSelect } from '@/components/shared/UnifiedSelect';
 import { useNoticeFilterStore } from '@/store/noticeFilterStore';
 import { filterNotices } from '@/lib/utils/filterNotices';
-import { AdvancedSearchModal } from './AdvancedSearchModal';
+import { AdvancedSearchModal } from '../notices/AdvancedSearchModal';
+import { SearchInput, IconButton, OutlineSelectBox, OutlineSelectItem } from '@/components/shared/FormComponents';
+import { NumberInput } from '@/components/shared/NumberInput';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { useSettingsStore } from '@/store/settingsStore';
-import { NoticeDetailModal } from './NoticeDetailModal';
+import { NoticeDetailModal } from '../notices/NoticeDetailModal';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
@@ -170,9 +173,9 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
       console.log('All notices:', notices.slice(0, 3)); // 처음 3개 확인
       console.log('Unique org names:', uniqueOrgNames);
       console.log('Current orgUrls state:', orgUrls);
-      
+
       const urlCache: { [orgName: string]: string | null } = {};
-      
+
       for (const orgName of uniqueOrgNames) {
         if (orgUrls[orgName] === undefined) { // undefined인 경우에만 로드
           console.log('Loading URL for org:', orgName);
@@ -188,7 +191,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
           console.log(`URL already exists for ${orgName}:`, orgUrls[orgName]);
         }
       }
-      
+
       if (Object.keys(urlCache).length > 0) {
         console.log('Setting URLs to state:', urlCache);
         setOrgUrls(prev => {
@@ -216,13 +219,13 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
     try {
       // 로딩 상태 설정
       setIsLoading(true);
-      
+
       // URL 히스토리 업데이트
       window.history.pushState({}, '', url);
-      
+
       // 페이지 새로고침
       router.refresh();
-      
+
       // 실제 데이터 로딩을 시뮬레이션하기 위한 지연
       await new Promise(resolve => setTimeout(resolve, 500));
     } catch (error) {
@@ -265,13 +268,13 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
       try {
         // 1. UI 상태 즉시 업데이트
         setGap(newGap);
-        
+
         // 2. URL 업데이트 준비
         const currentPath = window.location.pathname;
         const newSearchParams = new URLSearchParams(window.location.search);
         newSearchParams.set('gap', newGap.toString());
         const newUrl = `${currentPath}?${newSearchParams.toString()}`;
-        
+
         // 3. URL 히스토리 업데이트 (페이지 새로고침 없이)
         navigate(newUrl);
       } catch (error) {
@@ -288,11 +291,11 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
     try {
       // 1. UI 상태 즉시 업데이트
       setLocalCategory(value);
-      
+
       // 2. URL 업데이트 준비
       const newSearchParams = new URLSearchParams(window.location.search);
       const newUrl = `/notices/${encodeURIComponent(value)}?${newSearchParams.toString()}`;
-      
+
       // 3. URL 히스토리 업데이트 (페이지 새로고침 없이)
       navigate(newUrl);
     } catch (error) {
@@ -383,11 +386,11 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
   // 페이지네이션 버튼 생성 함수
   const renderPaginationButtons = () => {
     const maxButtons = 10; // 최대 표시할 버튼 수
-    
+
     // 페이지 범위 계산
     let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
     const endPage = Math.min(totalPages, startPage + maxButtons - 1);
-    
+
     // 시작 페이지 조정
     if (endPage - startPage + 1 < maxButtons) {
       startPage = Math.max(1, endPage - maxButtons + 1);
@@ -413,7 +416,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
         >
           {'<'}
         </Button>
-        
+
         {Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i).map((page) => (
           <Button
             key={page}
@@ -424,7 +427,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
             {page}
           </Button>
         ))}
-        
+
         <Button
           variant="outline"
           size="sm"
@@ -472,9 +475,9 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
   // 입찰 진행 확인 처리
   const handleConfirmBidProcess = async () => {
     if (selectedNids.length === 0) return;
-    
+
     setProgressLoading(true);
-    
+
     try {
       const { data } = await noticeToProgress({
         variables: {
@@ -518,7 +521,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
         category: localCategory,
         bidStage: selectedBidStage,
       });
-      
+
       // 저장 후 모달 닫기
       setIsFavoriteModalOpen(false);
       setSelectedNids([]); // 선택 초기화
@@ -531,9 +534,9 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
   // 유형 변경 저장
   const handleSaveCategoryChange = async () => {
     if (selectedNids.length === 0) return;
-    
+
     setCategoryLoading(true);
-    
+
     try {
       const { data } = await updateNoticeCategory({
         variables: {
@@ -546,7 +549,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
         // 성공 후 모달 닫기 및 선택 초기화
         setIsCategoryEditModalOpen(false);
         setSelectedNids([]);
-        
+
         // 변경된 카테고리 페이지로 이동
         const currentSearchParams = new URLSearchParams(window.location.search);
         const newUrl = `/notices/${encodeURIComponent(localCategory)}?${currentSearchParams.toString()}`;
@@ -574,9 +577,9 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
   // 제외 확인 처리
   const handleConfirmExclude = async () => {
     if (selectedNids.length === 0) return;
-    
+
     setExcludeLoading(true);
-    
+
     try {
       const { data } = await excludeNotices({
         variables: {
@@ -588,7 +591,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
         // 성공 후 모달 닫기 및 선택 초기화
         setIsExcludeModalOpen(false);
         setSelectedNids([]);
-        
+
         // 제외 페이지로 이동
         const currentSearchParams = new URLSearchParams(window.location.search);
         const newUrl = `/notices/${encodeURIComponent('제외')}?${currentSearchParams.toString()}`;
@@ -616,9 +619,9 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
   // 복원 확인 처리
   const handleConfirmRestore = async () => {
     if (selectedNids.length === 0) return;
-    
+
     setRestoreLoading(true);
-    
+
     try {
       const { data } = await restoreNotices({
         variables: {
@@ -630,7 +633,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
         // 성공 후 모달 닫기 및 선택 초기화
         setIsRestoreModalOpen(false);
         setSelectedNids([]);
-        
+
         // 페이지 새로고침하여 변경된 데이터 반영
         setTimeout(() => {
           window.location.reload();
@@ -661,258 +664,274 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
     setSelectedNotice(notice);
   };
 
+  // 카테고리별 페이지 타이틀과 브레드크럼 생성
+  const getPageInfo = () => {
+    const categoryLabel = CATEGORIES.find(cat => cat.value === currentCategory)?.label || currentCategory || '공사점검';
+    return {
+      title: `${categoryLabel} 공고`,
+      breadcrumbs: [
+        { label: '공고', href: '/notices/공사점검' },
+        { label: categoryLabel, href: `/notices/${encodeURIComponent(currentCategory || '공사점검')}` }
+      ]
+    };
+  };
+
+  const { title, breadcrumbs } = getPageInfo();
+
   return (
     <div>
       {isLoading && (
         <div className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center">
           <div className="bg-card p-6 rounded-lg shadow-lg flex flex-col items-center gap-3">
             <Loader2 className="h-10 w-10 animate-spin text-primary" />
-            <p className="text-base font-medium text-foreground">데이터를 불러오는 중입니다...</p>
+            <p className="text-base font-medium text-color-primary-foreground">데이터를 불러오는 중입니다...</p>
           </div>
         </div>
       )}
+
+      {/* 페이지 헤더 */}
+      <PageHeader title={title} breadcrumbs={breadcrumbs} />
+
       <div className="w-full">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
-          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto" style={{ color: 'hsl(var(--foreground))' }}>
-          <OutlineSelectBox
-            value={localCategory}
-            onValueChange={handleCategoryChange}
-            placeholder="유형 선택"
-          >
-            {CATEGORIES.map((category) => (
-              <OutlineSelectItem key={category.value} value={category.value}>
-                {category.label}
-              </OutlineSelectItem>
-            ))}
-          </OutlineSelectBox>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+            <OutlineSelectBox
+              value={localCategory}
+              onValueChange={handleCategoryChange}
+              placeholder="유형 선택"
+            >
+              {CATEGORIES.map((category) => (
+                <OutlineSelectItem key={category.value} value={category.value}>
+                  {category.label}
+                </OutlineSelectItem>
+              ))}
+            </OutlineSelectBox>
             <div className="flex items-center gap-2">
-              <label htmlFor="gap-input" className="text-sm font-medium text-foreground">최근</label>
-              <Input
-                id="gap-input"
-                type="number"
-                min="0"
-                value={gap}
-                onChange={handleGapChange}
-                className="w-16"
-              />
+              <div className="flex items-center gap-2">
+                <label htmlFor="gap-input" className="text-sm font-medium text-color-primary-foreground">최근</label>
+                <NumberInput
+                  id="gap-input"
+                  min="0"
+                  value={gap}
+                  onChange={handleGapChange}
+                  className="w-16"
+                />
+              </div>
+            </div>
+            <div className="relative flex items-center gap-2 flex-1" style={{ minWidth: '10px' }}>
+              <div className="relative flex-1" style={{ minWidth: '10px' }}>
+                <SearchInput
+                  ref={searchInputRef}
+                  placeholder="입찰공고 검색..."
+                  value={searchTerm}
+                  onChange={handleSearchInput}
+                  className="w-full"
+                  autoComplete="off"
+                  type="text"
+                  onCompositionStart={() => setIsComposing(true)}
+                  onCompositionEnd={() => {
+                    setIsComposing(false);
+                    // 한글 입력 완료 후 자동 포커스는 제거 - 사용자가 직접 제어하도록 함
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Process' || isComposing) {
+                      return;
+                    }
+                  }}
+                  onBlur={(e) => {
+                    // 포커스 해제 허용 - 검색 입력 필드에서 다른 곳으로 이동할 때 정상적으로 포커스 해제
+                    // 기존 로직이 포커스를 강제로 유지하고 있었음
+                  }}
+                />
+              </div>
+              <AdvancedSearchModal />
             </div>
           </div>
-          <div className="relative flex items-center gap-2 flex-1" style={{ minWidth: '10px' }}>
-            <div className="relative flex-1" style={{ minWidth: '10px' }}>
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                ref={searchInputRef}
-                placeholder="입찰공고 검색..."
-                value={searchTerm}
-                onChange={handleSearchInput}
-                className="search-input-with-icon w-full"
-                autoComplete="off"
-                type="text"
-                onCompositionStart={() => setIsComposing(true)}
-                onCompositionEnd={() => {
-                  setIsComposing(false);
-                  // 한글 입력 완료 후 자동 포커스는 제거 - 사용자가 직접 제어하도록 함
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Process' || isComposing) {
-                    return;
-                  }
-                }}
-                onBlur={(e) => {
-                  // 포커스 해제 허용 - 검색 입력 필드에서 다른 곳으로 이동할 때 정상적으로 포커스 해제
-                  // 기존 로직이 포커스를 강제로 유지하고 있었음
-                }}
+          <div className="flex items-center gap-2">
+            {currentCategory === '제외' ? (
+              <IconButton
+                icon={<Plus className="h-4 w-4" />}
+                onClick={handleRestore}
+                title="업무에 복원"
               />
-            </div>
-            <AdvancedSearchModal />
-          </div>
-        </div>
-        <div className="flex items-center gap-2" style={{ color: 'hsl(var(--foreground))' }}>
-          {currentCategory === '제외' ? (
+            ) : currentCategory !== '무관' && (
+              <IconButton
+                icon={<Minus className="h-4 w-4" />}
+                onClick={handleExclude}
+                title="업무에서 제외"
+              />
+            )}
             <IconButton
-              onClick={handleRestore}
-              title="업무에 복원"
-              icon={<Plus className="h-4 w-4" />}
+              icon={<Edit3 className="h-4 w-4" />}
+              onClick={handleCategoryEdit}
+              title="유형 변경"
             />
-          ) : currentCategory !== '무관' && (
-            <IconButton
-              onClick={handleExclude}
-              title="업무에서 제외"
-              icon={<Minus className="h-4 w-4" />}
-            />
-          )}
-          <IconButton
-            onClick={handleCategoryEdit}
-            title="유형 변경"
-            icon={<Edit3 className="h-4 w-4" />}
-          />
-          {currentCategory !== '무관' && currentCategory !== '제외' && (
-            <IconButton
-              onClick={handleBidProcess}
-              title="입찰 진행"
-              icon={<Star className="h-4 w-4" />}
-            />
-          )}
+            {currentCategory !== '무관' && currentCategory !== '제외' && (
+              <IconButton
+                icon={<Star className="h-4 w-4" />}
+                onClick={handleBidProcess}
+                title="입찰 진행"
+              />
+            )}
           </div>
         </div>
 
         {/* 테이블 */}
         <div>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[40px]">
-                <Checkbox
-                  checked={selectedNids.length === notices.length}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      setSelectedNids(notices.map(notice => notice.nid));
-                    } else {
-                      setSelectedNids([]);
-                    }
-                  }}
-                  aria-label="모든 항목 선택"
-                />
-              </TableHead>
-              {currentCategory === '제외' && (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[40px]">
+                  <Checkbox
+                    checked={selectedNids.length === notices.length}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedNids(notices.map(notice => notice.nid));
+                      } else {
+                        setSelectedNids([]);
+                      }
+                    }}
+                    aria-label="모든 항목 선택"
+                  />
+                </TableHead>
+                {currentCategory === '제외' && (
+                  <TableHead
+                    className="w-[80px] cursor-pointer"
+                    data-sortable="true"
+                    data-sort-active={sortConfig.field === 'category'}
+                    onClick={() => toggleSort('category')}
+                  >
+                    유형
+                  </TableHead>
+                )}
+                <TableHead
+                  className="w-auto cursor-pointer"
+                  data-sortable="true"
+                  data-sort-active={sortConfig.field === '제목'}
+                  onClick={() => toggleSort('제목')}
+                >
+                  제목
+                </TableHead>
+                <TableHead
+                  className="w-[100px] cursor-pointer"
+                  data-sortable="true"
+                  data-sort-active={sortConfig.field === '작성일'}
+                  onClick={() => toggleSort('작성일')}
+                >
+                  작성일
+                </TableHead>
+                <TableHead
+                  className="w-[120px] cursor-pointer"
+                  data-sortable="true"
+                  data-sort-active={sortConfig.field === '기관명'}
+                  onClick={() => toggleSort('기관명')}
+                >
+                  기관명
+                </TableHead>
                 <TableHead
                   className="w-[80px] cursor-pointer"
                   data-sortable="true"
-                  data-sort-active={sortConfig.field === 'category'}
-                  onClick={() => toggleSort('category')}
+                  data-sort-active={sortConfig.field === 'region'}
+                  onClick={() => toggleSort('region')}
                 >
-                  유형
+                  지역
                 </TableHead>
-              )}
-              <TableHead
-                className="w-auto cursor-pointer"
-                data-sortable="true"
-                data-sort-active={sortConfig.field === '제목'}
-                onClick={() => toggleSort('제목')}
-              >
-                제목
-              </TableHead>
-              <TableHead
-                className="w-[100px] cursor-pointer"
-                data-sortable="true"
-                data-sort-active={sortConfig.field === '작성일'}
-                onClick={() => toggleSort('작성일')}
-              >
-                작성일
-              </TableHead>
-              <TableHead
-                className="w-[120px] cursor-pointer"
-                data-sortable="true"
-                data-sort-active={sortConfig.field === '기관명'}
-                onClick={() => toggleSort('기관명')}
-              >
-                기관명
-              </TableHead>
-              <TableHead
-                className="w-[80px] cursor-pointer"
-                data-sortable="true"
-                data-sort-active={sortConfig.field === 'region'}
-                onClick={() => toggleSort('region')}
-              >
-                지역
-              </TableHead>
-              <TableHead
-                className="w-[60px] cursor-pointer"
-                data-sortable="true"
-                data-sort-active={sortConfig.field === 'registration'}
-                onClick={() => toggleSort('registration')}
-              >
-                등록
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {paginatedNotices.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={currentCategory === '제외' ? 7 : 6} className="h-[300px]" />
-              </TableRow>
-            ) : (
-              paginatedNotices.map((notice) => (
-                <TableRow
-                  key={notice.nid}
-                  onClick={(e) => handleRowClick(notice, e)}
+                <TableHead
+                  className="w-[60px] cursor-pointer"
+                  data-sortable="true"
+                  data-sort-active={sortConfig.field === 'registration'}
+                  onClick={() => toggleSort('registration')}
                 >
-                  <TableCell className="w-[40px]">
-                    <Checkbox
-                      checked={selectedNids.includes(notice.nid)}
-                      onCheckedChange={() => toggleCheckbox(notice.nid)}
-                      aria-label={`${notice.제목} 선택`}
-                    />
-                  </TableCell>
-                  {currentCategory === '제외' && (
-                    <TableCell className="w-[80px] whitespace-nowrap">
-                      {notice.category}
+                  등록
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paginatedNotices.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={currentCategory === '제외' ? 7 : 6} className="h-[300px]" />
+                </TableRow>
+              ) : (
+                paginatedNotices.map((notice) => (
+                  <TableRow
+                    key={notice.nid}
+                    onClick={(e) => handleRowClick(notice, e)}
+                  >
+                    <TableCell className="w-[40px]">
+                      <Checkbox
+                        checked={selectedNids.includes(notice.nid)}
+                        onCheckedChange={() => toggleCheckbox(notice.nid)}
+                        aria-label={`${notice.제목} 선택`}
+                      />
                     </TableCell>
-                  )}
-                  <TableCell className="w-auto max-w-0">
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <a
-                            href={`${notice.상세페이지주소}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm font-medium text-foreground hover:text-blue-600 truncate cursor-pointer"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                            }}
-                          >
-                            {notice.제목}
-                          </a>
+                    {currentCategory === '제외' && (
+                      <TableCell className="w-[80px] whitespace-nowrap">
+                        {notice.category}
+                      </TableCell>
+                    )}
+                    <TableCell className="w-auto max-w-0">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <a
+                              href={`${notice.상세페이지주소}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm font-medium text-color-primary-foreground hover:text-blue-600 truncate cursor-pointer"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                              }}
+                            >
+                              {notice.제목}
+                            </a>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="w-[100px] whitespace-nowrap">
-                    {notice.작성일}
-                  </TableCell>
-                  <TableCell className="w-[120px] whitespace-nowrap">
-                    {(() => {
-                      const orgUrl = orgUrls[notice.기관명];
-                      console.log(`Rendering org: ${notice.기관명}, URL: ${orgUrl}, type: ${typeof orgUrl}`);
+                    </TableCell>
+                    <TableCell className="w-[100px] whitespace-nowrap">
+                      {notice.작성일}
+                    </TableCell>
+                    <TableCell className="w-[120px] whitespace-nowrap">
+                      {(() => {
+                        const orgUrl = orgUrls[notice.기관명];
+                        console.log(`Rendering org: ${notice.기관명}, URL: ${orgUrl}, type: ${typeof orgUrl}`);
 
-                      if (orgUrl) {
-                        return (
-                          <a
-                            href={orgUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm font-medium text-foreground hover:text-blue-600 hover:underline cursor-pointer"
-                            onClick={(e) => e.stopPropagation()}
-                            title="기관 게시판 페이지로 이동"
-                          >
-                            {notice.기관명}
-                          </a>
-                        );
-                      } else {
-                        return (
-                          <span
-                            className="text-sm font-medium text-foreground"
-                            title={`URL not found for ${notice.기관명}`}
-                          >
-                            {notice.기관명}
-                          </span>
-                        );
-                      }
-                    })()}
-                  </TableCell>
-                  <TableCell className="w-[80px] whitespace-nowrap">
-                    {notice.지역}
-                  </TableCell>
-                  <TableCell className="w-[60px] whitespace-nowrap">
-                    {notice.등록}
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+                        if (orgUrl) {
+                          return (
+                            <a
+                              href={orgUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm font-medium text-color-primary-foreground hover:text-blue-600 hover:underline cursor-pointer"
+                              onClick={(e) => e.stopPropagation()}
+                              title="기관 게시판 페이지로 이동"
+                            >
+                              {notice.기관명}
+                            </a>
+                          );
+                        } else {
+                          return (
+                            <span
+                              className="text-sm font-medium text-color-primary-foreground"
+                              title={`URL not found for ${notice.기관명}`}
+                            >
+                              {notice.기관명}
+                            </span>
+                          );
+                        }
+                      })()}
+                    </TableCell>
+                    <TableCell className="w-[80px] whitespace-nowrap">
+                      {notice.지역}
+                    </TableCell>
+                    <TableCell className="w-[60px] whitespace-nowrap">
+                      {notice.등록}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
         </div>
 
         {perPage > 0 && totalPages > 1 && (
@@ -1002,14 +1021,14 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
             </div>
           </div>
           <DialogFooter>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               onClick={() => setIsCategoryEditModalOpen(false)}
               disabled={categoryLoading}
             >
               취소
             </Button>
-            <Button 
+            <Button
               onClick={handleSaveCategoryChange}
               disabled={categoryLoading}
             >
@@ -1033,19 +1052,19 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
             <DialogTitle>입찰 진행</DialogTitle>
           </DialogHeader>
           <div className="py-4">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-color-primary-muted-foreground">
               선택된 {selectedNids.length}개 공고의 입찰 단계를 '진행'으로 변경하시겠습니까?
             </p>
           </div>
           <DialogFooter>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               onClick={() => setIsBidProcessModalOpen(false)}
               disabled={progressLoading}
             >
               취소
             </Button>
-            <Button 
+            <Button
               onClick={handleConfirmBidProcess}
               disabled={progressLoading}
             >
@@ -1069,22 +1088,22 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
             <DialogTitle>업무에서 제외</DialogTitle>
           </DialogHeader>
           <div className="py-4">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-color-primary-muted-foreground">
               선택된 {selectedNids.length}개 공고를 업무에서 제외할까요?
             </p>
-            <p className="text-xs text-muted-foreground mt-2">
+            <p className="text-xs text-color-primary-muted-foreground mt-2">
               제외된 공고는 더 이상 목록에 표시되지 않습니다.
             </p>
           </div>
           <DialogFooter>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               onClick={() => setIsExcludeModalOpen(false)}
               disabled={excludeLoading}
             >
               취소
             </Button>
-            <Button 
+            <Button
               onClick={handleConfirmExclude}
               disabled={excludeLoading}
               variant="destructive"
@@ -1109,22 +1128,22 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
             <DialogTitle>업무에 복원</DialogTitle>
           </DialogHeader>
           <div className="py-4">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-color-primary-muted-foreground">
               선택된 {selectedNids.length}개 공고를 업무에 복원할까요?
             </p>
-            <p className="text-xs text-muted-foreground mt-2">
+            <p className="text-xs text-color-primary-muted-foreground mt-2">
               복원된 공고는 다시 해당 카테고리 목록에 표시됩니다.
             </p>
           </div>
           <DialogFooter>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               onClick={() => setIsRestoreModalOpen(false)}
               disabled={restoreLoading}
             >
               취소
             </Button>
-            <Button 
+            <Button
               onClick={handleConfirmRestore}
               disabled={restoreLoading}
             >

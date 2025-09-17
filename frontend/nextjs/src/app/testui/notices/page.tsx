@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import NoticeTable from '@/components/notices/NoticeTable';
+import NoticeTable from '@/components/providers/NoticeTable';
 import { Notice } from '@/types/notice';
 import { useUnifiedLoading } from '@/components/providers/UnifiedLoadingProvider';
 import { PageContainer } from '@/components/shared/PageContainer';

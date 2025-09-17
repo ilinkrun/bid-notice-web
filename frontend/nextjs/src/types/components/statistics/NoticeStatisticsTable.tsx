@@ -252,7 +252,7 @@ export function NoticeStatisticsTable({
                 {regionIndex === 0 && (
                   <TableCell rowSpan={dateStats.regions.length} className="align-top">
                     {dateStats.date}
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-xs text-color-primary-muted-foreground">
                       ({dateStats.dayOfWeek})
                     </div>
                   </TableCell>
@@ -266,7 +266,7 @@ export function NoticeStatisticsTable({
               </TableRow>
             ))
           ))}
-          <TableRow className="bg-muted/50">
+          <TableRow className="bg-color-primary-hovered/50">
             <TableCell colSpan={2} className="font-bold">
               합계
             </TableCell>
@@ -295,7 +295,7 @@ export function NoticeStatisticsTable({
             <TableCell className="text-center font-medium">{stats.total}</TableCell>
           </TableRow>
         ))}
-        <TableRow className="bg-muted/50">
+        <TableRow className="bg-color-primary-hovered/50">
           <TableCell colSpan={statisticsType === 'organization' ? 2 : statisticsType === 'category' ? 2 : 2} className="font-bold">
             합계
           </TableCell>
@@ -331,12 +331,12 @@ export function NoticeStatisticsTable({
                   "flex items-center gap-2 transition-colors",
                   viewType === type.value 
                     ? "bg-primary text-primary-foreground font-semibold shadow-md" 
-                    : "hover:bg-muted"
+                    : "hover:bg-color-primary-hovered"
                 )}
               >
                 <type.icon className={cn(
                   "h-4 w-4",
-                  viewType === type.value ? "text-primary-foreground" : "text-muted-foreground"
+                  viewType === type.value ? "text-primary-foreground" : "text-color-primary-muted-foreground"
                 )} />
                 <span>{type.label}</span>
               </Button>
@@ -438,7 +438,7 @@ export function NoticeStatisticsTable({
                     <TableRow key={item.date}>
                       <TableCell className="font-medium">
                         {item.date}
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-xs text-color-primary-muted-foreground">
                           ({item.dayOfWeek})
                         </div>
                       </TableCell>
@@ -456,7 +456,7 @@ export function NoticeStatisticsTable({
                         {regionIndex === 0 && (
                           <TableCell rowSpan={dateStats.regions.length} className="align-top">
                             {dateStats.date}
-                            <div className="text-xs text-muted-foreground">
+                            <div className="text-xs text-color-primary-muted-foreground">
                               ({dateStats.dayOfWeek})
                             </div>
                           </TableCell>
@@ -483,7 +483,7 @@ export function NoticeStatisticsTable({
                     </TableRow>
                   ))
                 )}
-                <TableRow className="bg-muted/50">
+                <TableRow className="bg-color-primary-hovered/50">
                   <TableCell colSpan={statisticsType === 'organization' ? 2 : 1} className="font-bold">
                     합계
                   </TableCell>

@@ -35,16 +35,16 @@ export default function FavoritePage() {
               {favorites.map((favorite) => (
                 <div 
                   key={favorite.id} 
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50"
+                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-color-primary-hovered/50"
                 >
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{favorite.title}</span>
-                      <span className="text-xs bg-muted px-2 py-1 rounded-full">
+                      <span className="text-xs  px-2 py-1 rounded-full">
                         {favorite.board === 'dev' ? '개발' : favorite.board === 'op' ? '운영' : '매뉴얼'}
                       </span>
                     </div>
-                    <div className="text-sm text-muted-foreground mt-1">
+                    <div className="text-sm text-color-primary-muted-foreground mt-1">
                       <span>{favorite.author}</span>
                       <span className="mx-2">•</span>
                       <span>{favorite.date}</span>
@@ -64,7 +64,7 @@ export default function FavoritePage() {
             </div>
           ) : (
             <div className="text-center py-8">
-              <p className="text-muted-foreground">즐겨찾기한 게시글이 없습니다.</p>
+              <p className="text-color-primary-muted-foreground">즐겨찾기한 게시글이 없습니다.</p>
             </div>
           )}
         </CardContent>
