@@ -61,6 +61,13 @@ interface ButtonWithIconProps {
   type?: 'button' | 'submit' | 'reset';
 }
 
+interface IsActiveProps {
+  value: boolean;
+  labels?: [string, string];
+  colors?: [string, string];
+  className?: string;
+}
+
 /**
  * 검색 아이콘이 포함된 재사용 가능한 검색 입력 컴포넌트
  * 아이콘과 텍스트 간격이 자동으로 조정됩니다
@@ -403,13 +410,13 @@ export function OutlineSelectItem({
  */
 export function RadioButtonSet({ options, value, onChange, className }: RadioButtonSetProps) {
   return (
-    <div className={cn("flex border border-color-primary-foreground rounded-md overflow-hidden", className)}>
+    <div className={cn("inline-flex border border-color-primary-foreground rounded-md overflow-hidden", className)}>
       {options.map((option) => (
         <button
           key={option.value}
           onClick={() => onChange(option.value)}
           className={cn(
-            "h-9 px-3 text-sm font-medium transition-colors border-r border-color-primary-foreground last:border-r-0 flex items-center justify-center",
+            "h-9 px-3 text-sm font-medium transition-colors border-r border-color-primary-foreground last:border-r-0 flex items-center justify-center whitespace-nowrap",
             "text-color-primary-foreground hover:bg-color-primary-hovered",
             value === option.value
               ? "bg-color-primary-muted font-bold"
@@ -453,5 +460,35 @@ export function ButtonWithIcon({
       {icon}
       {children}
     </button>
+  );
+}
+
+/**
+ * IsActive 컴포넌트
+ * 활성/비활성 상태를 표시하는 컴포넌트
+ * 기본값: ['활성', '비활성'], ['text-green-800 dark:text-green-400', 'text-red-800 dark:text-red-400']
+ * CSS 커스텀 속성도 지원: ['text-color-secondary-active', 'text-color-primary-muted']
+ */
+export function IsActive({
+  value,
+  labels = ['활성', '비활성'],
+  colors = ['text-green-800 dark:text-green-400', 'text-red-800 dark:text-red-400'],
+  className
+}: IsActiveProps) {
+  const displayText = value ? labels[0] : labels[1];
+  const colorClass = value ? colors[0] : colors[1];
+
+  return (
+    <span
+      className={cn(colorClass, className)}
+      style={
+        // CSS 커스텀 속성 지원 (text-color-* 형태)
+        colorClass.includes('text-color-') ? {
+          color: `hsl(var(--${colorClass.replace('text-', '')}))`
+        } : undefined
+      }
+    >
+      {displayText}
+    </span>
   );
 }

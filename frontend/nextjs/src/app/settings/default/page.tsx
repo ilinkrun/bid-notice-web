@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react';
 import { HardDrive, Palette, Settings, Clock, Database } from 'lucide-react';
 import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { IsActive, RadioButtonSet, OutlineSelectBox, OutlineSelectItem } from '@/components/shared/FormComponents';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 const SETTINGS_DEFAULT_QUERY = `
   query GetSettingsDefault {
@@ -119,7 +122,14 @@ export default function DefaultSettingsPage() {
 
   if (loading) {
     return (
-      <PageContainer title="앱 기본값 설정">
+      <PageContainer>
+        <PageHeader
+          title="앱 기본값 설정"
+          breadcrumbs={[
+            { label: '설정', href: '/settings' },
+            { label: '앱 기본값 설정', href: '/settings/default' }
+          ]}
+        />
         <div className="flex items-center justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
           <span className="ml-3 text-color-primary-muted-foreground">설정 데이터를 불러오는 중...</span>
@@ -130,7 +140,14 @@ export default function DefaultSettingsPage() {
 
   if (error) {
     return (
-      <PageContainer title="앱 기본값 설정">
+      <PageContainer>
+        <PageHeader
+          title="앱 기본값 설정"
+          breadcrumbs={[
+            { label: '설정', href: '/settings' },
+            { label: '앱 기본값 설정', href: '/settings/default' }
+          ]}
+        />
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
           <div className="flex">
             <div className="ml-3">
@@ -154,81 +171,88 @@ export default function DefaultSettingsPage() {
   }
 
   return (
-    <PageContainer title="앱 기본값 설정">
+    <PageContainer>
+      <PageHeader
+        title="앱 기본값 설정"
+        breadcrumbs={[
+          { label: '설정', href: '/settings' },
+          { label: '앱 기본값 설정', href: '/settings/default' }
+        ]}
+      />
       
       {/* NAS 설정 섹션 */}
       <div className="mb-8">
         <div className="flex items-center mb-4">
-          <HardDrive className="w-5 h-5 mr-2" />
-          <h2 className="text-xl font-semibold">NAS 설정</h2>
+          <HardDrive className="w-5 h-5 mr-2 text-color-primary-foreground" />
+          <h2 className="text-xl font-semibold text-color-primary-foreground">NAS 설정</h2>
         </div>
         
         {/* NAS 폴더 설정 */}
         <div className="mb-6">
           <div className="flex items-center mb-3">
-            <Database className="w-4 h-4 mr-2" />
-            <h3 className="text-lg font-medium">NAS 폴더</h3>
+            <Database className="w-4 h-4 mr-2 text-color-primary-foreground" />
+            <h3 className="text-lg font-medium text-color-primary-foreground">NAS 폴더</h3>
           </div>
           
-          <div className="bg-card rounded-lg border border-border shadow-sm">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-border">
-                <thead className="bg-color-primary-hovered">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-color-primary-muted-foreground uppercase tracking-wider">순번</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-color-primary-muted-foreground uppercase tracking-wider">경로명</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-color-primary-muted-foreground uppercase tracking-wider">경로값</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-color-primary-muted-foreground uppercase tracking-wider">활성화</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-color-primary-muted-foreground uppercase tracking-wider">설명</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-card divide-y divide-border">
-                  {nasSettings.map((setting, index) => (
-                    <tr key={setting.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-card-foreground">{index + 1}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-card-foreground">{setting.pathName}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-card-foreground">{setting.pathValue}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-card-foreground">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          setting.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
-                          {setting.isActive ? '활성' : '비활성'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-card-foreground">{setting.description || '-'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[80px]">순번</TableHead>
+                <TableHead className="w-[120px]">경로명</TableHead>
+                <TableHead className="w-[200px]">경로값</TableHead>
+                <TableHead className="w-[100px]">활성화</TableHead>
+                <TableHead className="w-auto">설명</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {nasSettings.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="h-[100px] text-center text-color-primary-muted-foreground">
+                    데이터가 없습니다.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                nasSettings.map((setting, index) => (
+                  <TableRow key={setting.id}>
+                    <TableCell className="w-[80px]">{index + 1}</TableCell>
+                    <TableCell className="w-[120px]">{setting.pathName}</TableCell>
+                    <TableCell className="w-[200px]">{setting.pathValue}</TableCell>
+                    <TableCell className="w-[100px]">
+                      <IsActive value={setting.isActive} />
+                    </TableCell>
+                    <TableCell className="w-auto">{setting.description || '-'}</TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
         </div>
 
         {/* NAS 정보 */}
         <div className="mb-6">
           <div className="flex items-center mb-3">
-            <HardDrive className="w-4 h-4 mr-2" />
-            <h3 className="text-lg font-medium">NAS 정보</h3>
+            <HardDrive className="w-4 h-4 mr-2 text-color-primary-foreground" />
+            <h3 className="text-lg font-medium text-color-primary-foreground">NAS 정보</h3>
           </div>
           
           {nasInfo && (
             <div className="rounded-lg p-4">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
-                  <span className="text-sm font-medium text-color-primary-muted-foreground">타입:</span>
+                  <span className="text-sm font-medium text-color-primary-foreground">타입:</span>
                   <p className="text-sm text-color-primary-foreground">{nasInfo.type}</p>
                 </div>
                 <div>
-                  <span className="text-sm font-medium text-color-primary-muted-foreground">모델:</span>
+                  <span className="text-sm font-medium text-color-primary-foreground">모델:</span>
                   <p className="text-sm text-color-primary-foreground">{nasInfo.model}</p>
                 </div>
                 <div>
-                  <span className="text-sm font-medium text-color-primary-muted-foreground">버전:</span>
+                  <span className="text-sm font-medium text-color-primary-foreground">버전:</span>
                   <p className="text-sm text-color-primary-foreground">{nasInfo.version}</p>
                 </div>
                 <div>
-                  <span className="text-sm font-medium text-color-primary-muted-foreground">상태:</span>
-                  <p className="text-sm text-green-600">{nasInfo.status}</p>
+                  <span className="text-sm font-medium text-color-primary-foreground">상태:</span>
+                  <p className="text-sm text-color-primary-foreground">{nasInfo.status}</p>
                 </div>
               </div>
             </div>
@@ -236,41 +260,27 @@ export default function DefaultSettingsPage() {
         </div>
       </div>
 
-      <hr className="my-8 border-border" />
+      <hr className="my-8 border-color-primary-foreground" />
 
       {/* UI 설정 섹션 */}
       <div className="mb-8">
         <div className="flex items-center mb-4">
-          <Settings className="w-5 h-5 mr-2" />
-          <h2 className="text-xl font-semibold">UI 설정</h2>
+          <Settings className="w-5 h-5 mr-2 text-color-primary-foreground" />
+          <h2 className="text-xl font-semibold text-color-primary-foreground">UI 설정</h2>
         </div>
         
-        <div className="bg-card rounded-lg border border-border shadow-sm p-6">
+        <div className="rounded-lg border border-color-primary-foreground p-6">
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-color-primary-foreground mb-2">테마 모드</label>
-              <div className="flex items-center space-x-6">
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    name="theme"
-                    checked={!uiSettings.darkMode}
-                    onChange={() => setUiSettings({...uiSettings, darkMode: false})}
-                    className="mr-2"
-                  />
-                  <span className="text-sm text-color-primary-foreground">라이트모드</span>
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    name="theme"
-                    checked={uiSettings.darkMode}
-                    onChange={() => setUiSettings({...uiSettings, darkMode: true})}
-                    className="mr-2"
-                  />
-                  <span className="text-sm text-color-primary-foreground">다크모드</span>
-                </label>
-              </div>
+              <RadioButtonSet
+                options={[
+                  { value: 'light', label: '라이트모드' },
+                  { value: 'dark', label: '다크모드' }
+                ]}
+                value={uiSettings.darkMode ? 'dark' : 'light'}
+                onChange={(value) => setUiSettings({...uiSettings, darkMode: value === 'dark'})}
+              />
             </div>
           </div>
         </div>
@@ -279,78 +289,78 @@ export default function DefaultSettingsPage() {
       {/* 테마 색상 설정 섹션 */}
       <div className="mb-8">
         <div className="flex items-center mb-4">
-          <Palette className="w-5 h-5 mr-2" />
-          <h2 className="text-xl font-semibold">테마 색상 설정</h2>
+          <Palette className="w-5 h-5 mr-2 text-color-primary-foreground" />
+          <h2 className="text-xl font-semibold text-color-primary-foreground">테마 색상 설정</h2>
         </div>
         
-        <div className="bg-card rounded-lg border border-border shadow-sm p-6">
+        <div className="rounded-lg border border-color-primary-foreground p-6">
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-color-primary-foreground mb-2">기본 테마</label>
-                <select 
+                <OutlineSelectBox
                   value={themeSettings.defaultTheme}
-                  onChange={(e) => setThemeSettings({...themeSettings, defaultTheme: e.target.value})}
-                  className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500  text-color-primary-foreground"
+                  onValueChange={(value) => setThemeSettings({...themeSettings, defaultTheme: value})}
+                  placeholder="테마 선택"
                 >
-                  <option value="gray">Gray</option>
-                  <option value="blue">Blue</option>
-                  <option value="green">Green</option>
-                  <option value="red">Red</option>
-                </select>
+                  <OutlineSelectItem value="gray">Gray</OutlineSelectItem>
+                  <OutlineSelectItem value="blue">Blue</OutlineSelectItem>
+                  <OutlineSelectItem value="green">Green</OutlineSelectItem>
+                  <OutlineSelectItem value="red">Red</OutlineSelectItem>
+                </OutlineSelectBox>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-color-primary-foreground mb-2">공고 목록</label>
-                <select 
+                <OutlineSelectBox
                   value={themeSettings.noticeTheme}
-                  onChange={(e) => setThemeSettings({...themeSettings, noticeTheme: e.target.value})}
-                  className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500  text-color-primary-foreground"
+                  onValueChange={(value) => setThemeSettings({...themeSettings, noticeTheme: value})}
+                  placeholder="테마 선택"
                 >
-                  <option value="green">Green</option>
-                  <option value="blue">Blue</option>
-                  <option value="gray">Gray</option>
-                  <option value="red">Red</option>
-                </select>
+                  <OutlineSelectItem value="green">Green</OutlineSelectItem>
+                  <OutlineSelectItem value="blue">Blue</OutlineSelectItem>
+                  <OutlineSelectItem value="gray">Gray</OutlineSelectItem>
+                  <OutlineSelectItem value="red">Red</OutlineSelectItem>
+                </OutlineSelectBox>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-color-primary-foreground mb-2">입찰 목록</label>
-                <select 
+                <OutlineSelectBox
                   value={themeSettings.bidTheme}
-                  onChange={(e) => setThemeSettings({...themeSettings, bidTheme: e.target.value})}
-                  className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500  text-color-primary-foreground"
+                  onValueChange={(value) => setThemeSettings({...themeSettings, bidTheme: value})}
+                  placeholder="테마 선택"
                 >
-                  <option value="blue">Blue</option>
-                  <option value="green">Green</option>
-                  <option value="gray">Gray</option>
-                  <option value="red">Red</option>
-                </select>
+                  <OutlineSelectItem value="blue">Blue</OutlineSelectItem>
+                  <OutlineSelectItem value="green">Green</OutlineSelectItem>
+                  <OutlineSelectItem value="gray">Gray</OutlineSelectItem>
+                  <OutlineSelectItem value="red">Red</OutlineSelectItem>
+                </OutlineSelectBox>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <hr className="my-8 border-border" />
+      <hr className="my-8 border-color-primary-foreground" />
 
       {/* 스크랩 설정 섹션 */}
       <div className="mb-8">
         <div className="flex items-center mb-4">
-          <Clock className="w-5 h-5 mr-2" />
-          <h2 className="text-xl font-semibold">스크랩 설정</h2>
+          <Clock className="w-5 h-5 mr-2 text-color-primary-foreground" />
+          <h2 className="text-xl font-semibold text-color-primary-foreground">스크랩 설정</h2>
         </div>
         
-        <div className="bg-card rounded-lg border border-border shadow-sm p-6">
+        <div className="rounded-lg border border-color-primary-foreground p-6">
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-color-primary-foreground mb-2">스크랩 주기</label>
-              <p className="text-sm text-color-primary-muted-foreground mb-2">매일 {scrapingSettings.schedule.join(', ')}시</p>
+              <p className="text-sm text-color-primary-foreground mb-2">매일 {scrapingSettings.schedule.join(', ')}시</p>
               <div className="flex items-center space-x-2">
                 <input
                   type="text"
                   placeholder="예: 10:00,22:00"
-                  className="flex-1 px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500  text-color-primary-foreground"
+                  className="flex-1 px-3 py-2 border border-color-primary-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-color-primary-foreground"
                   defaultValue={scrapingSettings.schedule.join(',')}
                 />
                 <button className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -358,25 +368,25 @@ export default function DefaultSettingsPage() {
                 </button>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <input
                 type="checkbox"
                 checked={scrapingSettings.isActive}
                 onChange={(e) => setScrapingSettings({...scrapingSettings, isActive: e.target.checked})}
-                className="w-4 h-4 text-blue-600 border-border rounded focus:ring-blue-500"
+                className="w-4 h-4 text-blue-600 border-color-primary-foreground rounded focus:ring-blue-500"
               />
               <label className="text-sm font-medium text-color-primary-foreground">자동 스크래핑 활성화</label>
             </div>
 
             {scrapingSettings.lastRun && (
-              <div className="text-sm text-color-primary-muted-foreground">
+              <div className="text-sm text-color-primary-foreground">
                 마지막 실행: {scrapingSettings.lastRun}
               </div>
             )}
 
             {scrapingSettings.nextRun && (
-              <div className="text-sm text-color-primary-muted-foreground">
+              <div className="text-sm text-color-primary-foreground">
                 다음 실행 예정: {scrapingSettings.nextRun}
               </div>
             )}

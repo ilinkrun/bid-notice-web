@@ -4,6 +4,7 @@ import { DataTable, DataTableHeader, DataTableBody, DataTableRow, DataTableCell 
 import { useState, useMemo, useEffect } from 'react';
 import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
 import { useUnifiedLoading } from '@/components/providers/UnifiedLoadingProvider';
+import { IsActive } from '@/components/shared/FormComponents';
 
 interface SettingsListTableProps {
   initialData: {
@@ -149,13 +150,7 @@ export function SettingsListTable({ initialData }: SettingsListTableProps) {
               <DataTableCell>{item.companyInCharge || '-'}</DataTableCell>
               <DataTableCell>{item.orgRegion || '-'}</DataTableCell>
               <DataTableCell>
-                <span className={`px-2 py-1 rounded-full text-xs ${
-                  item.use === 1
-                    ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                    : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-                }`}>
-                  {item.use === 1 ? '활성' : '비활성'}
-                </span>
+                <IsActive value={item.use === 1} />
               </DataTableCell>
             </DataTableRow>
           ))}
