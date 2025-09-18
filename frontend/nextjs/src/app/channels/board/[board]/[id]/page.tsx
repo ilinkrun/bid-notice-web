@@ -32,7 +32,9 @@ import {
   Trash2,
   Code,
   Eye,
-  Hash
+  Hash,
+  X,
+  Save
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -44,6 +46,7 @@ import {
 import Comments from '@/components/board/Comments';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { Button } from '@/components/ui/button';
+import { ButtonWithIcon, ButtonWithColorIcon } from '@/components/shared/FormComponents';
 import { Input } from '@/components/ui/input';
 
 import dynamic from 'next/dynamic';
@@ -602,7 +605,7 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
     <PageContainer>
       <Card className="border-0 shadow-none">
         <CardContent className="p-0">
-          <div className="mb-4 flex justify-between items-start">
+          <div className="py-2 flex justify-between items-start">
             <div className="flex items-center">
               <Button variant="outline" onClick={() => navigate(`/channels/board/${board}`)}>
                 <ArrowLeft className="mr-2 h-4 w-4" />
@@ -663,21 +666,23 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
             </div>
             {!isEditMode && post && user && user.email === post.email && (
               <div className="flex space-x-2">
-                <Button variant="outline" onClick={handleEditClick}>
-                  <Edit className="mr-2 h-4 w-4" />
+                <ButtonWithIcon
+                  icon={<Edit className="h-4 w-4" />}
+                  onClick={handleEditClick}
+                >
                   수정
-                </Button>
-                <Button variant="destructive" onClick={handleDeleteClick}>
-                  <Trash2 className="mr-2 h-4 w-4" />
+                </ButtonWithIcon>
+                <ButtonWithIcon
+                  icon={<Trash2 className="h-4 w-4" />}
+                  onClick={handleDeleteClick}
+                >
                   삭제
-                </Button>
+                </ButtonWithIcon>
               </div>
             )}
           </div>
 
-          <div className="border rounded-lg p-4">
-
-            <div className="min-h-[300px] mb-4">
+          <div className="min-h-[300px] mb-4">
               {isEditMode ? (
                 <div>
                   <div className="flex justify-between items-center mb-2">
@@ -787,13 +792,13 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
                               onChange={(value) => {
                                 const newMarkdown = value || '';
                                 setEditingMarkdown(newMarkdown);
-                                setPost({ 
-                                  ...post, 
+                                setPost({
+                                  ...post,
                                   format: 'markdown'
                                 });
                                 console.log('✏️ Markdown content updated:', newMarkdown);
                               }}
-                              data-color-mode="light"
+                              data-color-mode="auto"
                               height={400}
                               preview="live"
                             />
@@ -843,15 +848,15 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
                   )}
                 </div>
               ) : (
-                <div className="min-h-[300px] border rounded-md p-4">
+                <div className="min-h-[300px] p-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
                   {post.format === 'markdown' ? (
-                    <div className="prose max-w-none">
+                    <div className="prose max-w-none dark:prose-invert">
                       {originalMarkdownSource && originalMarkdownSource.trim() ? (
-                        <MarkdownPreview 
+                        <MarkdownPreview
                           source={originalMarkdownSource}
-                          data-color-mode="light"
+                          data-color-mode="auto"
                           wrapperElement={{
-                            "data-color-mode": "light"
+                            "data-color-mode": "auto"
                           }}
                         />
                       ) : post.content && post.content.trim() ? (
@@ -863,9 +868,9 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
                   ) : (
                     <>
                       {post.content && post.content.trim() ? (
-                        <div 
+                        <div
                           className="whitespace-pre-wrap break-words"
-                          dangerouslySetInnerHTML={{ __html: post.content }} 
+                          dangerouslySetInnerHTML={{ __html: post.content }}
                         />
                       ) : (
                         <div className="text-color-primary-muted-foreground italic">내용이 없습니다.</div>
@@ -876,17 +881,26 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
               )}
             </div>
 
-            {isEditMode && (
-              <div className="flex justify-end space-x-2">
-                <Button variant="outline" onClick={handleCancelEdit}>
-                  취소
-                </Button>
-                <Button onClick={handleSaveEdit}>
-                  저장
-                </Button>
-              </div>
-            )}
-          </div>
+          {isEditMode && (
+            <div className="flex justify-end space-x-2">
+              <ButtonWithColorIcon
+                icon={<X className="h-4 w-4" />}
+                color="tertiary"
+                mode="outline"
+                onClick={handleCancelEdit}
+              >
+                취소
+              </ButtonWithColorIcon>
+              <ButtonWithColorIcon
+                icon={<Save className="h-4 w-4" />}
+                color="secondary"
+                mode="outline"
+                onClick={handleSaveEdit}
+              >
+                저장
+              </ButtonWithColorIcon>
+            </div>
+          )}
 
           {/* 댓글 섹션 - 수정 모드가 아닐 때만 표시 */}
           {!isEditMode && (

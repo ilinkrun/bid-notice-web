@@ -8,10 +8,13 @@ import { useUnifiedLoading } from '@/components/providers/UnifiedLoadingProvider
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
+import { ButtonWithColorIcon } from '@/components/shared/FormComponents';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import { 
-  ArrowLeft
+import {
+  ArrowLeft,
+  X,
+  Save
 } from 'lucide-react';
 import { 
   Tabs, 
@@ -313,7 +316,7 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
           </div>
 
           <div className="border rounded-lg p-4">
-            <div className="border-b pb-4 mb-4">
+            <div className="border-b py-2 mb-4">
               <h1 className="text-2xl font-bold mb-2">
                 <Input
                   value={newPost.title}
@@ -453,7 +456,7 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
                           setEditingMarkdown(newMarkdown);
                           console.log('✏️ Markdown content updated:', newMarkdown);
                         }}
-                        data-color-mode="light"
+                        data-color-mode="auto"
                         height={400}
                         preview="live"
                         previewOptions={{
@@ -467,12 +470,22 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
             </div>
 
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={handleCancel}>
+              <ButtonWithColorIcon
+                icon={<X className="h-4 w-4" />}
+                color="tertiary"
+                mode="outline"
+                onClick={handleCancel}
+              >
                 취소
-              </Button>
-              <Button onClick={handleCreatePost}>
+              </ButtonWithColorIcon>
+              <ButtonWithColorIcon
+                icon={<Save className="h-4 w-4" />}
+                color="secondary"
+                mode="outline"
+                onClick={handleCreatePost}
+              >
                 저장
-              </Button>
+              </ButtonWithColorIcon>
             </div>
           </div>
         </CardContent>

@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { ButtonWithIcon, ButtonWithColorIcon } from '@/components/shared/FormComponents';
 import { Textarea } from '@/components/ui/textarea';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { MessageCircle, Edit, Trash2, Send } from 'lucide-react';
+import { MessageCircle, Edit, Trash2, Send, X, Save } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface Comment {
@@ -390,7 +391,8 @@ export default function Comments({ board, postId, onCommentCountChange }: Commen
           <span className="font-medium">댓글 ({totalCount})</span>
         </div>
         {!isWriting && (
-          <Button 
+          <ButtonWithIcon
+            icon={<Send className="h-4 w-4" />}
             onClick={() => {
               if (!user) {
                 alert('댓글 작성을 위해 로그인해주세요.');
@@ -398,49 +400,51 @@ export default function Comments({ board, postId, onCommentCountChange }: Commen
               }
               setIsWriting(true);
             }}
-            size="sm"
-            className="flex items-center gap-2"
           >
-            <Send className="h-4 w-4" />
             댓글 작성
-          </Button>
+          </ButtonWithIcon>
         )}
       </div>
 
       {/* 댓글 작성 폼 */}
       {isWriting && user && (
-        <div className="border rounded-lg p-4 bg-gray-50">
+        <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-800 dark:border-gray-600">
           <form onSubmit={(e) => {
             e.preventDefault();
             handleCreateComment();
           }}>
             <div className="space-y-3">
             <div className="mb-2">
-              <span className="text-sm text-gray-600">작성자: {user.name} ({user.email})</span>
+              <span className="text-sm text-gray-600 dark:text-gray-300">작성자: {user.name} ({user.email})</span>
             </div>
             <Textarea
               placeholder="댓글을 입력하세요"
               value={newComment.content}
               onChange={(e) => setNewComment({ ...newComment, content: e.target.value })}
-              className="text-gray-800 focus:placeholder:text-transparent focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-200"
+              className="text-gray-800 dark:text-gray-200 dark:bg-gray-700 dark:border-gray-600 focus:placeholder:text-transparent focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-200"
               rows={3}
             />
             <div className="flex justify-end gap-2">
-              <Button 
-                variant="outline" 
+              <ButtonWithColorIcon
+                icon={<X className="h-4 w-4" />}
+                color="tertiary"
+                mode="outline"
                 onClick={() => {
                   setIsWriting(false);
                   setNewComment({ content: '', writer: '', email: '' });
                 }}
               >
                 취소
-              </Button>
-              <Button 
+              </ButtonWithColorIcon>
+              <ButtonWithColorIcon
+                icon={<Save className="h-4 w-4" />}
+                color="secondary"
+                mode="outline"
                 type="submit"
                 disabled={loading}
               >
-                {loading ? '작성 중...' : '댓글 작성'}
-              </Button>
+                {loading ? '작성 중...' : '저장'}
+              </ButtonWithColorIcon>
             </div>
             </div>
           </form>
