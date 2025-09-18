@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { ButtonWithIcon } from '@/components/shared/FormComponents';
+import { ButtonWithIcon, ButtonWithColorIcon } from '@/components/shared/FormComponents';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -809,11 +809,14 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                       )}
                     </div>
                   )}
-                  {isEditingNoticeDetails && (
-                    <div className="flex justify-end gap-2 pt-2 border-t">
-                      <Button
-                        variant="outline"
-                        size="sm"
+                </div>
+                <div className="flex justify-end gap-2 mt-4">
+                  {isEditingNoticeDetails ? (
+                    <>
+                      <ButtonWithColorIcon
+                        icon={<span className="mr-2"><Edit3 className="h-4 w-4" /></span>}
+                        color="tertiary"
+                        mode="filled"
                         onClick={() => {
                           setIsEditingNoticeDetails(false);
                           // 원래 데이터로 복원
@@ -823,24 +826,25 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                         }}
                       >
                         취소
-                      </Button>
-                    </div>
+                      </ButtonWithColorIcon>
+                      <ButtonWithColorIcon
+                        icon={<span className="mr-2"><CheckSquare className="h-4 w-4" /></span>}
+                        color="secondary"
+                        mode="active"
+                        onClick={saveNoticeDetailsFields}
+                        disabled={updatingDetails}
+                      >
+                        저장
+                      </ButtonWithColorIcon>
+                    </>
+                  ) : (
+                    <ButtonWithIcon
+                      icon={<span className="mr-2"><Edit3 className="h-4 w-4" /></span>}
+                      onClick={() => setIsEditingNoticeDetails(true)}
+                    >
+                      편집
+                    </ButtonWithIcon>
                   )}
-                </div>
-                <div className="flex justify-end gap-2 mt-4">
-                  <ButtonWithIcon
-                    icon={<span className="mr-2">{isEditingNoticeDetails ? <CheckSquare className="h-4 w-4" /> : <Edit3 className="h-4 w-4" />}</span>}
-                    onClick={() => {
-                      if (isEditingNoticeDetails) {
-                        saveNoticeDetailsFields();
-                      } else {
-                        setIsEditingNoticeDetails(true);
-                      }
-                    }}
-                    disabled={updatingDetails}
-                  >
-                    {isEditingNoticeDetails ? "저장" : "편집"}
-                  </ButtonWithIcon>
                 </div>
               </div>
             )}
@@ -887,11 +891,14 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                     </div>
                   </div>
                   
-                  {isEditingNotice && (
-                    <div className="flex justify-end gap-2 pt-2 border-t">
-                      <Button
-                        variant="outline"
-                        size="sm"
+                </div>
+                <div className="flex justify-end gap-2 mt-4">
+                  {isEditingNotice ? (
+                    <>
+                      <ButtonWithColorIcon
+                        icon={<span className="mr-2"><Edit3 className="h-4 w-4" /></span>}
+                        color="tertiary"
+                        mode="filled"
                         onClick={() => {
                           setIsEditingNotice(false);
                           // 원래 데이터로 복원
@@ -901,24 +908,25 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                         }}
                       >
                         취소
-                      </Button>
-                    </div>
+                      </ButtonWithColorIcon>
+                      <ButtonWithColorIcon
+                        icon={<span className="mr-2"><CheckSquare className="h-4 w-4" /></span>}
+                        color="secondary"
+                        mode="active"
+                        onClick={saveNoticeFields}
+                        disabled={loading}
+                      >
+                        저장
+                      </ButtonWithColorIcon>
+                    </>
+                  ) : (
+                    <ButtonWithIcon
+                      icon={<span className="mr-2"><Edit3 className="h-4 w-4" /></span>}
+                      onClick={() => setIsEditingNotice(true)}
+                    >
+                      편집
+                    </ButtonWithIcon>
                   )}
-                </div>
-                <div className="flex justify-end gap-2 mt-4">
-                  <ButtonWithIcon
-                    icon={<span className="mr-2">{isEditingNotice ? <CheckSquare className="h-4 w-4" /> : <Edit3 className="h-4 w-4" />}</span>}
-                    onClick={() => {
-                      if (isEditingNotice) {
-                        saveNoticeFields();
-                      } else {
-                        setIsEditingNotice(true);
-                      }
-                    }}
-                    disabled={loading}
-                  >
-                    {isEditingNotice ? "저장" : "편집"}
-                  </ButtonWithIcon>
                 </div>
               </div>
             )}
