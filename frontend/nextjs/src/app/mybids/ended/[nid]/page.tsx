@@ -1,19 +1,19 @@
 import { gql } from '@apollo/client';
 import { getClient } from '@/lib/api/graphqlClient';
-import BidDetailView from '@/components/mybids/MybidDetailView';
+import EndedBidDetailView from '@/components/mybids/EndedBidDetailView';
 import ApolloWrapper from '@/components/providers/ApolloWrapper';
 import { notFound } from 'next/navigation';
 import '../../../themes.css';
 
 const GET_BID_DETAIL = gql`
-  query GetBidDetail($nid: Int!) {
-    bidByNid(nid: $nid) {
+  query GetMyBidDetail($nid: Int!) {
+    mybidsOne(nid: $nid) {
       mid
       nid
       title
       status
-      started_at
-      ended_at
+      startedAt
+      endedAt
       memo
       orgName
       postedAt
@@ -33,7 +33,7 @@ async function getBidDetail(nid: string) {
       fetchPolicy: 'no-cache',
       errorPolicy: 'all'
     });
-    return result.data?.bidByNid || null;
+    return result.data?.mybidsOne || null;
   } catch (error) {
     console.error('Failed to fetch bid detail:', error);
     return null;
@@ -51,7 +51,7 @@ export default async function BidEndedDetailPage({ params }: { params: Promise<{
   return (
     <div className="theme-default">
       <ApolloWrapper>
-        <BidDetailView bid={bid} />
+        <EndedBidDetailView bid={bid} />
       </ApolloWrapper>
     </div>
   );

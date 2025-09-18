@@ -5,6 +5,7 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { ButtonWithIcon, ButtonWithColorIcon, DropdownSectionHeader, TabHeader, TabContainer } from '@/components/shared/FormComponents';
 import { SectionTitleHelp } from '@/components/shared/Help';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -658,6 +659,19 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
 
   return (
     <div className="container mx-auto px-4 py-6 space-y-5">
+      {/* 페이지 헤더 */}
+      <PageHeader
+        title="입찰 진행 상세"
+        breadcrumbs={[
+          { label: '홈', href: '/' },
+          { label: '나의 입찰', href: '/mybids' },
+          { label: '진행', href: '/mybids/progress' },
+          { label: bid.title, href: `/mybids/progress/${bid.nid}` }
+        ]}
+        helpTooltip="입찰 진행 상세 페이지 도움말"
+        helpContent="입찰 진행 중인 공고의 상세 정보를 확인하고 관리할 수 있습니다. 입찰 정보, 문서 관리, 단계 변경 등의 기능을 제공합니다."
+      />
+
       {/* 입찰 정보 */}
       <div>
         <div className="flex items-center gap-2">

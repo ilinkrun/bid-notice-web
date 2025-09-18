@@ -81,7 +81,7 @@ export default function BidTable({ bids, currentStatus }) {
   // 출처 필터 상태 (진행 페이지에서만 사용)
   const [sourceFilters, setSourceFilters] = useState({
     '관공서': true,
-    '나라장터': true,
+    '관공서': true,
   });
 
   // 기관명 URL 조회 및 생성 함수
@@ -602,7 +602,6 @@ export default function BidTable({ bids, currentStatus }) {
         {/* 종료 페이지에서만 상태별 필터 표시 */}
         {localStatus === 'ended' && (
           <div className="flex items-center gap-2 mr-4">
-            <span className="text-sm text-color-primary-muted-foreground">상태:</span>
             {Object.entries(endedStatusFilters).map(([status, checked]) => (
               <label key={status} className="flex items-center gap-1">
                 <input
@@ -705,7 +704,7 @@ export default function BidTable({ bids, currentStatus }) {
                   }}
                 >
                   <TableCell className="w-[80px] whitespace-nowrap">
-                    나라장터
+                    관공서
                   </TableCell>
                   <TableCell className="w-auto max-w-0">
                   <div className="flex items-center gap-2">
