@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Star, Loader2, Edit3 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { InputWithIcon, OutlineSelectBox, OutlineSelectItem } from '@/components/shared/FormComponents';
+import { InputWithIcon, OutlineSelectBox, OutlineSelectItem, CheckButtonSet } from '@/components/shared/FormComponents';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
@@ -153,11 +153,7 @@ export default function BidTable({ bids, currentStatus }) {
   }, [bids]); // orgUrls는 의존성에서 제외하여 무한루프 방지
   
   // 종료 페이지에서 사용할 상태별 필터링
-  const [endedStatusFilters, setEndedStatusFilters] = useState({
-    '낙찰': true,
-    '패찰': true,
-    '포기': true,
-  });
+  const [endedStatusFilters, setEndedStatusFilters] = useState(['낙찰', '패찰', '포기']);
 
   // URL 변경시 localStatus 동기화
   useEffect(() => {
@@ -248,7 +244,7 @@ export default function BidTable({ bids, currentStatus }) {
       // 종료 페이지에서 상태별 필터링
       if (localStatus === 'ended') {
         const bidStatus = bid.status;
-        if (!endedStatusFilters[bidStatus]) {
+        if (!endedStatusFilters.includes(bidStatus)) {
           return false;
         }
       }
@@ -581,7 +577,7 @@ export default function BidTable({ bids, currentStatus }) {
         <div className="flex items-center gap-2">
         {/* 진행 페이지에서만 출처별 필터 표시 */}
         {localStatus === 'progress' && (
-          <div className="flex items-center gap-2 mr-4">
+          <div className="flex items-center gap-2">
             {Object.entries(sourceFilters).map(([source, checked]) => (
               <label key={source} className="flex items-center gap-1">
                 <Checkbox
@@ -601,23 +597,16 @@ export default function BidTable({ bids, currentStatus }) {
 
         {/* 종료 페이지에서만 상태별 필터 표시 */}
         {localStatus === 'ended' && (
-          <div className="flex items-center gap-2 mr-4">
-            {Object.entries(endedStatusFilters).map(([status, checked]) => (
-              <label key={status} className="flex items-center gap-1">
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  onChange={(e) =>
-                    setEndedStatusFilters(prev => ({
-                      ...prev,
-                      [status]: e.target.checked
-                    }))
-                  }
-                  className="rounded border-border"
-                />
-                <span className="text-sm">{status}</span>
-              </label>
-            ))}
+          <div className="flex items-center">
+            <CheckButtonSet
+              options={[
+                { value: '낙찰', label: '낙찰' },
+                { value: '패찰', label: '패찰' },
+                { value: '포기', label: '포기' }
+              ]}
+              values={endedStatusFilters}
+              onChange={setEndedStatusFilters}
+            />
           </div>
         )}
         </div>

@@ -39,6 +39,18 @@ interface RadioButtonSetProps {
   className?: string;
 }
 
+interface CheckButtonOption {
+  value: string;
+  label: string;
+}
+
+interface CheckButtonSetProps {
+  options: CheckButtonOption[];
+  values: string[];
+  onChange: (values: string[]) => void;
+  className?: string;
+}
+
 interface ButtonWithIconProps {
   icon: ReactNode;
   children: ReactNode;
@@ -461,6 +473,58 @@ export function RadioButtonSet({ options, value, onChange, className }: RadioBut
           }}
           onMouseLeave={(e) => {
             if (value !== option.value) {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }
+          }}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * CheckButtonSet 컴포넌트
+ * RadioButtonSet과 동일한 UI이지만 다중 선택이 가능한 체크박스 버튼 그룹
+ */
+export function CheckButtonSet({ options, values, onChange, className }: CheckButtonSetProps) {
+  const handleToggle = (optionValue: string) => {
+    const newValues = values.includes(optionValue)
+      ? values.filter(value => value !== optionValue)
+      : [...values, optionValue];
+    onChange(newValues);
+  };
+
+  return (
+    <div
+      className={cn("inline-flex border rounded-md overflow-hidden", className)}
+      style={{
+        borderColor: 'hsl(var(--color-primary-foreground))'
+      }}
+    >
+      {options.map((option) => (
+        <button
+          key={option.value}
+          onClick={() => handleToggle(option.value)}
+          className={cn(
+            "h-9 px-3 text-sm font-medium transition-colors border-r last:border-r-0 flex items-center justify-center whitespace-nowrap",
+            values.includes(option.value)
+              ? "font-bold"
+              : ""
+          )}
+          style={{
+            color: 'hsl(var(--color-primary-foreground))',
+            borderColor: 'hsl(var(--color-primary-foreground))',
+            backgroundColor: values.includes(option.value) ? 'hsl(var(--color-primary-muted))' : 'transparent',
+          }}
+          onMouseEnter={(e) => {
+            if (!values.includes(option.value)) {
+              e.currentTarget.style.backgroundColor = 'hsl(var(--color-primary-hovered))';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!values.includes(option.value)) {
               e.currentTarget.style.backgroundColor = 'transparent';
             }
           }}
