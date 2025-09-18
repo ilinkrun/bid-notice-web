@@ -638,7 +638,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-8">
+    <div className="container mx-auto px-4 py-6 space-y-2">
       {/* 입찰 정보 */}
       <div>
         <button
@@ -656,7 +656,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
           )}
         </button>
         {isInfoExpanded && (
-          <div className="mt-4 space-y-6">
+          <div className="mt-2 space-y-0">
             {/* 탭 버튼 */}
             <div className="flex border-b">
               <button
@@ -686,7 +686,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
             {/* 공고 상세정보 탭 */}
             {infoActiveTab === 'notice' && (
               <div>
-                <div className="border rounded-lg p-4 space-y-3">
+                <div className="border rounded-lg p-4 space-y-3" style={{borderColor: 'var(--color-primary-foreground)'}}>
                   {detailsLoading ? (
                     <div className="flex items-center justify-center py-4">
                       <Loader2 className="w-5 h-5 animate-spin mr-2" />
@@ -809,42 +809,42 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                       )}
                     </div>
                   )}
-                </div>
-                <div className="flex justify-end gap-2 mt-4">
-                  {isEditingNoticeDetails ? (
-                    <>
-                      <ButtonWithColorIcon
+                  <div className="flex justify-end gap-2 mt-6 pt-4 border-t">
+                    {isEditingNoticeDetails ? (
+                      <>
+                        <ButtonWithColorIcon
+                          icon={<span className="mr-2"><Edit3 className="h-4 w-4" /></span>}
+                          color="tertiary"
+                          mode="filled"
+                          onClick={() => {
+                            setIsEditingNoticeDetails(false);
+                            // 원래 데이터로 복원
+                            if (noticeDetailsData?.noticeDetails?.details) {
+                              setNoticeDetailsFields(noticeDetailsData.noticeDetails.details);
+                            }
+                          }}
+                        >
+                          취소
+                        </ButtonWithColorIcon>
+                        <ButtonWithColorIcon
+                          icon={<span className="mr-2"><CheckSquare className="h-4 w-4" /></span>}
+                          color="secondary"
+                          mode="active"
+                          onClick={saveNoticeDetailsFields}
+                          disabled={updatingDetails}
+                        >
+                          저장
+                        </ButtonWithColorIcon>
+                      </>
+                    ) : (
+                      <ButtonWithIcon
                         icon={<span className="mr-2"><Edit3 className="h-4 w-4" /></span>}
-                        color="tertiary"
-                        mode="filled"
-                        onClick={() => {
-                          setIsEditingNoticeDetails(false);
-                          // 원래 데이터로 복원
-                          if (noticeDetailsData?.noticeDetails?.details) {
-                            setNoticeDetailsFields(noticeDetailsData.noticeDetails.details);
-                          }
-                        }}
+                        onClick={() => setIsEditingNoticeDetails(true)}
                       >
-                        취소
-                      </ButtonWithColorIcon>
-                      <ButtonWithColorIcon
-                        icon={<span className="mr-2"><CheckSquare className="h-4 w-4" /></span>}
-                        color="secondary"
-                        mode="active"
-                        onClick={saveNoticeDetailsFields}
-                        disabled={updatingDetails}
-                      >
-                        저장
-                      </ButtonWithColorIcon>
-                    </>
-                  ) : (
-                    <ButtonWithIcon
-                      icon={<span className="mr-2"><Edit3 className="h-4 w-4" /></span>}
-                      onClick={() => setIsEditingNoticeDetails(true)}
-                    >
-                      편집
-                    </ButtonWithIcon>
-                  )}
+                        편집
+                      </ButtonWithIcon>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
@@ -852,7 +852,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
             {/* 입찰 상세정보 탭 */}
             {infoActiveTab === 'bid' && (
               <div>
-                <div className="border rounded-lg p-4 space-y-3">
+                <div className="border rounded-lg p-4 space-y-3" style={{borderColor: 'var(--color-primary-foreground)'}}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {Object.entries(noticeFields).map(([key, value]) => (
                       <div key={key} className="flex flex-col gap-1">
@@ -890,51 +890,48 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                       )}
                     </div>
                   </div>
-                  
-                </div>
-                <div className="flex justify-end gap-2 mt-4">
-                  {isEditingNotice ? (
-                    <>
-                      <ButtonWithColorIcon
+                  <div className="flex justify-end gap-2 mt-6 pt-4 border-t">
+                    {isEditingNotice ? (
+                      <>
+                        <ButtonWithColorIcon
+                          icon={<span className="mr-2"><Edit3 className="h-4 w-4" /></span>}
+                          color="tertiary"
+                          mode="filled"
+                          onClick={() => {
+                            setIsEditingNotice(false);
+                            // 원래 데이터로 복원
+                            const bidDetail = detailData['입찰'] || {};
+                            setNoticeFields(bidDetail);
+                            setProgressMemo(extractProgressMemo());
+                          }}
+                        >
+                          취소
+                        </ButtonWithColorIcon>
+                        <ButtonWithColorIcon
+                          icon={<span className="mr-2"><CheckSquare className="h-4 w-4" /></span>}
+                          color="secondary"
+                          mode="active"
+                          onClick={saveNoticeFields}
+                          disabled={loading}
+                        >
+                          저장
+                        </ButtonWithColorIcon>
+                      </>
+                    ) : (
+                      <ButtonWithIcon
                         icon={<span className="mr-2"><Edit3 className="h-4 w-4" /></span>}
-                        color="tertiary"
-                        mode="filled"
-                        onClick={() => {
-                          setIsEditingNotice(false);
-                          // 원래 데이터로 복원
-                          const bidDetail = detailData['입찰'] || {};
-                          setNoticeFields(bidDetail);
-                          setProgressMemo(extractProgressMemo());
-                        }}
+                        onClick={() => setIsEditingNotice(true)}
                       >
-                        취소
-                      </ButtonWithColorIcon>
-                      <ButtonWithColorIcon
-                        icon={<span className="mr-2"><CheckSquare className="h-4 w-4" /></span>}
-                        color="secondary"
-                        mode="active"
-                        onClick={saveNoticeFields}
-                        disabled={loading}
-                      >
-                        저장
-                      </ButtonWithColorIcon>
-                    </>
-                  ) : (
-                    <ButtonWithIcon
-                      icon={<span className="mr-2"><Edit3 className="h-4 w-4" /></span>}
-                      onClick={() => setIsEditingNotice(true)}
-                    >
-                      편집
-                    </ButtonWithIcon>
-                  )}
+                        편집
+                      </ButtonWithIcon>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
           </div>
         )}
       </div>
-
-      <Separator />
 
       {/* 입찰 문서 */}
       <div>
@@ -953,7 +950,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
           )}
         </button>
         {isDocumentExpanded && (
-          <div className="mt-4 space-y-6">
+          <div className="mt-2 space-y-0">
             {/* 탭 버튼 */}
             <div className="flex border-b">
               <button
@@ -983,7 +980,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
             {/* 공고 문서 탭 */}
             {documentActiveTab === 'files' && (
               <div>
-            <div className="border rounded-lg p-4 space-y-3">
+            <div className="border rounded-lg p-4 space-y-3" style={{borderColor: 'var(--color-primary-foreground)'}}>
               {filesLoading ? (
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="w-6 h-6 animate-spin" />
@@ -1105,43 +1102,43 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                   공고 문서가 없습니다.
                 </div>
               )}
-                </div>
-                <div className="flex justify-end gap-2 mt-4">
-                  <ButtonWithIcon
-                    icon={<span className="mr-2">{isEditingFiles ? <CheckSquare className="h-4 w-4" /> : <Edit3 className="h-4 w-4" />}</span>}
-                    onClick={() => {
-                      if (isEditingFiles) {
-                        saveFilesData();
-                      } else {
-                        setIsEditingFiles(!isEditingFiles);
-                      }
-                    }}
-                  >
-                    {isEditingFiles ? "저장" : "편집"}
-                  </ButtonWithIcon>
-                  <ButtonWithIcon
-                    icon={<span className="mr-2"><Plus className="h-4 w-4" /></span>}
-                    onClick={() => {
-                      // TODO: 추가 기능 구현
-                      alert('파일 추가 기능 구현 예정');
-                    }}
-                  >
-                    추가
-                  </ButtonWithIcon>
-                  <ButtonWithIcon
-                    icon={<span className="mr-2"><Download className="h-4 w-4" /></span>}
-                    onClick={() => {
-                      // TODO: 선택된 파일들 다운로드 기능 구현
-                      if (selectedDownloads.size > 0) {
-                        alert(`${selectedDownloads.size}개 파일 다운로드 기능 구현 예정`);
-                      } else {
-                        alert('다운로드할 파일을 선택해주세요.');
-                      }
-                    }}
-                    disabled={selectedDownloads.size === 0}
-                  >
-                    다운
-                  </ButtonWithIcon>
+                  <div className="flex justify-end gap-2 mt-6 pt-4 border-t">
+                    <ButtonWithIcon
+                      icon={<span className="mr-2">{isEditingFiles ? <CheckSquare className="h-4 w-4" /> : <Edit3 className="h-4 w-4" />}</span>}
+                      onClick={() => {
+                        if (isEditingFiles) {
+                          saveFilesData();
+                        } else {
+                          setIsEditingFiles(!isEditingFiles);
+                        }
+                      }}
+                    >
+                      {isEditingFiles ? "저장" : "편집"}
+                    </ButtonWithIcon>
+                    <ButtonWithIcon
+                      icon={<span className="mr-2"><Plus className="h-4 w-4" /></span>}
+                      onClick={() => {
+                        // TODO: 추가 기능 구현
+                        alert('파일 추가 기능 구현 예정');
+                      }}
+                    >
+                      추가
+                    </ButtonWithIcon>
+                    <ButtonWithIcon
+                      icon={<span className="mr-2"><Download className="h-4 w-4" /></span>}
+                      onClick={() => {
+                        // TODO: 선택된 파일들 다운로드 기능 구현
+                        if (selectedDownloads.size > 0) {
+                          alert(`${selectedDownloads.size}개 파일 다운로드 기능 구현 예정`);
+                        } else {
+                          alert('다운로드할 파일을 선택해주세요.');
+                        }
+                      }}
+                      disabled={selectedDownloads.size === 0}
+                    >
+                      다운
+                    </ButtonWithIcon>
+                  </div>
                 </div>
               </div>
             )}
@@ -1149,7 +1146,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
             {/* 문서 작성 탭 */}
             {documentActiveTab === 'write' && (
               <div>
-                <div className="border rounded-lg p-4 space-y-4">
+                <div className="border rounded-lg p-4 space-y-4" style={{borderColor: 'var(--color-primary-foreground)'}}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Button variant="outline" className="h-20 flex flex-col gap-2">
                   <FileText className="w-6 h-6" />
@@ -1178,8 +1175,6 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
         )}
       </div>
 
-      <Separator />
-
       {/* 단계 변경 */}
       <div>
         <button
@@ -1197,8 +1192,8 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
           )}
         </button>
         {isStageExpanded && (
-          <div className="mt-4">
-          <div className="space-y-4">
+          <div className="mt-2 space-y-0">
+            <div className="border rounded-lg p-4 space-y-4" style={{borderColor: 'var(--color-primary-foreground)'}}>
             <div className="flex flex-wrap gap-4">
               {statusOptions.map((option) => (
                 <div key={option.value} className="flex items-center space-x-2">
@@ -1231,7 +1226,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                 </Button>
               </div>
             )}
-          </div>
+            </div>
           </div>
         )}
       </div>
