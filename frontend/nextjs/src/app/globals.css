@@ -58,8 +58,13 @@
     color: hsl(var(--color-primary-foreground));
   }
 
+  /* 페이지 콘텐츠 영역 최소 높이 설정 */
+  main {
+    min-height: 800px;
+  }
+
   /* 모든 텍스트 기본 색상 적용 (placeholder, link 제외) */
-  *:not(::placeholder):not(a) {
+  *:not(::placeholder):not(a):not(table tbody tr a) {
     color: hsl(var(--color-primary-foreground));
   }
 
@@ -144,14 +149,18 @@
   input,
   select,
   textarea,
-  button,
   .select-trigger,
   [role="combobox"],
-  [role="button"],
   table,
   tbody,
   tr,
   td {
+    background-color: transparent;
+  }
+
+  /* 일반 버튼은 투명하게, 단 ButtonWithColorIcon은 제외 */
+  button:not(.bg-color-secondary-active):not(.bg-color-tertiary-base):not([class*="bg-red"]):not([class*="bg-green"]),
+  [role="button"]:not(.bg-color-secondary-active):not(.bg-color-tertiary-base):not([class*="bg-red"]):not([class*="bg-green"]) {
     background-color: transparent;
   }
 
@@ -221,6 +230,40 @@
   /* 테이블 행 내 링크 hover 색상 */
   table tbody tr a:hover {
     color: hsl(var(--color-primary-muted)) !important;
+  }
+
+  /* SORTABLE TABLE HEADERS */
+  /* 정렬 가능한 테이블 헤더 스타일 */
+  th[data-sortable="true"],
+  th.cursor-pointer,
+  thead th.cursor-pointer,
+  thead td.cursor-pointer {
+    cursor: pointer !important;
+    transition: color 0.2s ease !important;
+  }
+
+  /* 정렬 가능한 헤더 hover 상태 */
+  th[data-sortable="true"]:hover,
+  th.cursor-pointer:hover,
+  thead th.cursor-pointer:hover,
+  thead td.cursor-pointer:hover {
+    color: hsl(var(--color-secondary-active)) !important;
+  }
+
+  /* 현재 정렬된 헤더 (활성 상태) */
+  th[data-sortable="true"].sorted,
+  th.cursor-pointer.sorted,
+  thead th.cursor-pointer.sorted,
+  thead td.cursor-pointer.sorted,
+  th[data-sorted="true"],
+  th.cursor-pointer[data-sorted="true"],
+  thead th.cursor-pointer[data-sorted="true"],
+  thead td.cursor-pointer[data-sorted="true"],
+  th[data-sort-active="true"],
+  th.cursor-pointer[data-sort-active="true"],
+  thead th.cursor-pointer[data-sort-active="true"],
+  thead td.cursor-pointer[data-sort-active="true"] {
+    color: hsl(var(--color-secondary-active)) !important;
   }
 
   /* ELEMENTS: USER */
@@ -324,5 +367,101 @@
     opacity: 0.5 !important;
     cursor: not-allowed !important;
   }
+
+  /* MODAL STYLING */
+  /* 모달 배경색과 글자색 설정 */
+  [data-dialog-content],
+  .dialog-content,
+  [role="dialog"],
+  [data-radix-dialog-content] {
+    background-color: hsl(var(--color-primary-background)) !important;
+    color: hsl(var(--color-primary-foreground)) !important;
+  }
+
+  /* 모달 내 모든 텍스트 색상 설정 (테이블 링크 제외) */
+  [data-dialog-content] *:not(table tbody tr a),
+  .dialog-content *:not(table tbody tr a),
+  [role="dialog"] *:not(table tbody tr a),
+  [data-radix-dialog-content] *:not(table tbody tr a) {
+    color: hsl(var(--color-primary-foreground)) !important;
+  }
+
+  /* 모달 헤더 색상 */
+  [data-dialog-header],
+  .dialog-header,
+  [data-dialog-title],
+  .dialog-title,
+  [data-radix-dialog-title] {
+    color: hsl(var(--color-primary-foreground)) !important;
+  }
+
+  /* 모든 shadcn/ui 모달 컴포넌트에 배경색 강제 적용 */
+  .fixed.inset-0 div[role="dialog"],
+  div[data-state="open"][role="dialog"],
+  [cmdk-dialog] {
+    background-color: hsl(var(--color-primary-background)) !important;
+  }
+
+  /* ButtonWithColorIcon CSS 변수 클래스 */
+  .text-color-primary-foreground {
+    color: hsl(var(--color-primary-foreground)) !important;
+  }
+
+  .border-color-primary-foreground {
+    border-color: hsl(var(--color-primary-foreground)) !important;
+  }
+
+  .hover\:bg-color-primary-hovered:hover {
+    background-color: hsl(var(--color-primary-hovered)) !important;
+  }
+
+  .disabled\:text-color-primary-muted:disabled {
+    color: hsl(var(--color-primary-muted)) !important;
+  }
+
+  .disabled\:border-color-primary-muted:disabled {
+    border-color: hsl(var(--color-primary-muted)) !important;
+  }
+
+  .active\:bg-color-primary-hovered:active {
+    background-color: hsl(var(--color-primary-hovered)) !important;
+  }
+
+  .bg-color-secondary-active {
+    background-color: hsl(var(--color-secondary-active)) !important;
+  }
+
+  .border-color-secondary-active {
+    border-color: hsl(var(--color-secondary-active)) !important;
+  }
+
+  .hover\:bg-color-secondary-active:hover {
+    background-color: hsl(var(--color-secondary-active)) !important;
+  }
+
+  .active\:bg-color-secondary-active:active {
+    background-color: hsl(var(--color-secondary-active)) !important;
+  }
+
+  .bg-color-tertiary-base {
+    background-color: hsl(var(--color-tertiary-base)) !important;
+  }
+
+  .border-color-tertiary-base {
+    border-color: hsl(var(--color-tertiary-base)) !important;
+  }
+
+  .hover\:bg-color-tertiary-base:hover {
+    background-color: hsl(var(--color-tertiary-base)) !important;
+  }
+
+  .active\:bg-color-tertiary-base:active {
+    background-color: hsl(var(--color-tertiary-base)) !important;
+  }
+
+  .disabled\:bg-color-primary-muted:disabled {
+    background-color: hsl(var(--color-primary-muted)) !important;
+  }
+
 
 }

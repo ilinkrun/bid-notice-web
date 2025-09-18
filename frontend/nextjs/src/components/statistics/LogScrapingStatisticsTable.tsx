@@ -49,6 +49,62 @@ export function LogScrapingStatisticsTable({
   const { finishLoading } = useUnifiedLoading();
   const searchParams = useSearchParams();
 
+  // 기관명별 URL 캐시
+  const [orgUrls, setOrgUrls] = useState<{ [orgName: string]: string | null }>({});
+
+  // 기관명 URL 조회 함수
+  const getOrganizationUrl = async (orgName: string): Promise<string | null> => {
+    try {
+      if (!orgName || typeof orgName !== 'string') {
+        return null;
+      }
+
+      const requestBody = {
+        query: `
+          query SettingsNoticeListByOrg($orgName: String!) {
+            settingsNoticeListByOrg(orgName: $orgName) {
+              oid
+              orgName
+              url
+            }
+          }
+        `,
+        variables: { orgName }
+      };
+
+      const response = await fetch('/api/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      if (!response.ok) {
+        console.error(`GraphQL request failed: ${response.status} ${response.statusText}`);
+        return null;
+      }
+
+      const result = await response.json();
+
+      if (result.errors) {
+        console.error('GraphQL errors:', result.errors);
+        return null;
+      }
+
+      if (result.data?.settingsNoticeListByOrg?.length > 0) {
+        const orgSettings = result.data.settingsNoticeListByOrg[0];
+        if (orgSettings.url) {
+          return orgSettings.url.replace(/\$\{i\}/g, '1');
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('기관 정보 조회 중 오류 발생:', error);
+      return null;
+    }
+  };
+
   // URL 파라미터에서 초기값 가져오기
   const [gap, setGap] = useState(() => {
     const gapParam = searchParams.get('gap');
@@ -82,6 +138,34 @@ export function LogScrapingStatisticsTable({
     if (order) setSortDirection(order === 'desc' ? 'desc' : 'asc');
     if (query !== null) setSearchQuery(query);
   }, [searchParams]);
+
+  // 기관명 URL 로드
+  useEffect(() => {
+    const loadOrgUrls = async () => {
+      const uniqueOrgNames = Array.from(new Set(initialData.map(item => item.orgName).filter(Boolean))) as string[];
+      const urlCache: { [orgName: string]: string | null } = {};
+
+      for (const orgName of uniqueOrgNames) {
+        if (orgUrls[orgName] === undefined) {
+          try {
+            const url = await getOrganizationUrl(orgName);
+            urlCache[orgName] = url;
+          } catch (error) {
+            console.error(`Error loading URL for ${orgName}:`, error);
+            urlCache[orgName] = null;
+          }
+        }
+      }
+
+      if (Object.keys(urlCache).length > 0) {
+        setOrgUrls(prev => ({ ...prev, ...urlCache }));
+      }
+    };
+
+    if (initialData.length > 0) {
+      loadOrgUrls().catch(console.error);
+    }
+  }, [initialData]);
 
   // 초기 데이터가 있거나 렌더링 완료시 로딩 해제
   useEffect(() => {
@@ -336,7 +420,30 @@ export function LogScrapingStatisticsTable({
                 return (
                   <TableRow key={`${item.time}-${item.orgName}-${index}`}>
                     <TableCell>{formatDate(item.time)}</TableCell>
-                    <TableCell>{item.orgName}</TableCell>
+                    <TableCell>
+                      {(() => {
+                        const orgUrl = orgUrls[item.orgName];
+                        if (orgUrl) {
+                          return (
+                            <a
+                              href={orgUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm font-medium text-color-primary-foreground hover:text-blue-600 hover:underline cursor-pointer"
+                              title="기관 게시판 페이지로 이동"
+                            >
+                              {item.orgName}
+                            </a>
+                          );
+                        } else {
+                          return (
+                            <span className="text-sm font-medium text-color-primary-foreground">
+                              {item.orgName}
+                            </span>
+                          );
+                        }
+                      })()}
+                    </TableCell>
                     <TableCell className="text-right">{item.scrapedCount.toLocaleString()}</TableCell>
                     <TableCell className="text-right">{item.insertedCount.toLocaleString()}</TableCell>
                     <TableCell className="text-right">{item.successRate.toFixed(1)}%</TableCell>

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,7 @@ import { UnifiedSelect } from '@/components/shared/UnifiedSelect';
 import { useNoticeFilterStore } from '@/store/noticeFilterStore';
 import { filterNotices } from '@/lib/utils/filterNotices';
 import { AdvancedSearchModal } from '../notices/AdvancedSearchModal';
-import { InputWithIcon, IconButton, OutlineSelectBox, OutlineSelectItem } from '@/components/shared/FormComponents';
+import { InputWithIcon, IconButton, OutlineSelectBox, OutlineSelectItem, ButtonWithColorIcon } from '@/components/shared/FormComponents';
 import { NumberInput } from '@/components/shared/NumberInput';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { useSettingsStore } from '@/store/settingsStore';
@@ -69,6 +69,8 @@ interface NoticeTableProps {
   notices: Notice[];
   currentCategory?: string;
   gap?: number;
+  sort?: string;
+  order?: string;
 }
 
 const CATEGORIES = [
@@ -89,8 +91,9 @@ const BID_STAGES = [
 // DAY_GAP 환경변수 가져오기
 const DEFAULT_GAP = process.env.NEXT_PUBLIC_DAY_GAP || '1';
 
-export default function NoticeTable({ notices, currentCategory, gap: initialGap }: NoticeTableProps) {
+export default function NoticeTable({ notices, currentCategory, gap: initialGap, sort: initialSort, order: initialOrder }: NoticeTableProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const { navigate } = useUnifiedNavigation();
   const searchParams = useSearchParams();
   const [noticeToProgress] = useMutation(NOTICE_TO_PROGRESS);
@@ -105,8 +108,8 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
   const [gap, setGap] = useState<number>(initialGap || parseInt(searchParams.get('gap') || DEFAULT_GAP, 10));
   const [isLoading, setIsLoading] = useState(false);
   const [sortConfig, setSortConfig] = useState<{ field: SortField; order: SortOrder }>({
-    field: '작성일',
-    order: 'desc',
+    field: (initialSort as SortField) || '작성일',
+    order: (initialOrder as SortOrder) || 'desc',
   });
   const { filter } = useNoticeFilterStore();
   const { perPage } = useSettingsStore();
@@ -127,27 +130,43 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
   // 기관명 URL 조회 및 생성 함수
   const getOrganizationUrl = async (orgName: string): Promise<string | null> => {
     try {
+      if (!orgName || typeof orgName !== 'string') {
+        return null;
+      }
+
+      const requestBody = {
+        query: `
+          query SettingsNoticeListByOrg($orgName: String!) {
+            settingsNoticeListByOrg(orgName: $orgName) {
+              oid
+              orgName
+              url
+            }
+          }
+        `,
+        variables: { orgName }
+      };
+
       // GraphQL 쿼리로 기관 URL 가져오기
       const response = await fetch('/api/graphql', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          query: `
-            query SettingsNoticeListByOrg($orgName: String!) {
-              settingsNoticeListByOrg(orgName: $orgName) {
-                oid
-                orgName
-                url
-              }
-            }
-          `,
-          variables: { orgName }
-        })
+        body: JSON.stringify(requestBody)
       });
 
+      if (!response.ok) {
+        console.error(`GraphQL request failed: ${response.status} ${response.statusText}`);
+        return null;
+      }
+
       const result = await response.json();
+
+      if (result.errors) {
+        console.error('GraphQL errors:', result.errors);
+        return null;
+      }
 
       if (result.data?.settingsNoticeListByOrg?.length > 0) {
         const orgSettings = result.data.settingsNoticeListByOrg[0];
@@ -170,40 +189,33 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
   useEffect(() => {
     const loadOrgUrls = async () => {
       const uniqueOrgNames = Array.from(new Set(notices.map(notice => notice.기관명).filter(Boolean))) as string[];
-      console.log('All notices:', notices.slice(0, 3)); // 처음 3개 확인
-      console.log('Unique org names:', uniqueOrgNames);
-      console.log('Current orgUrls state:', orgUrls);
+      const orgsToLoad = uniqueOrgNames.filter(orgName => orgUrls[orgName] === undefined);
 
-      const urlCache: { [orgName: string]: string | null } = {};
+      if (orgsToLoad.length === 0) return;
 
-      for (const orgName of uniqueOrgNames) {
-        if (orgUrls[orgName] === undefined) { // undefined인 경우에만 로드
-          console.log('Loading URL for org:', orgName);
-          try {
-            const url = await getOrganizationUrl(orgName);
-            console.log(`URL result for ${orgName}:`, url);
-            urlCache[orgName] = url;
-          } catch (error) {
-            console.error(`Error loading URL for ${orgName}:`, error);
-            urlCache[orgName] = null;
-          }
-        } else {
-          console.log(`URL already exists for ${orgName}:`, orgUrls[orgName]);
+      // 병렬로 모든 기관 URL 로드
+      const urlPromises = orgsToLoad.map(async (orgName) => {
+        try {
+          const url = await getOrganizationUrl(orgName);
+          return { orgName, url };
+        } catch (error) {
+          console.error(`Error loading URL for ${orgName}:`, error);
+          return { orgName, url: null };
         }
-      }
+      });
+
+      const results = await Promise.all(urlPromises);
+      const urlCache = results.reduce((acc, { orgName, url }) => {
+        acc[orgName] = url;
+        return acc;
+      }, {} as { [orgName: string]: string | null });
 
       if (Object.keys(urlCache).length > 0) {
-        console.log('Setting URLs to state:', urlCache);
-        setOrgUrls(prev => {
-          const newState = { ...prev, ...urlCache };
-          console.log('New orgUrls state:', newState);
-          return newState;
-        });
+        setOrgUrls(prev => ({ ...prev, ...urlCache }));
       }
     };
 
     if (notices.length > 0) {
-      console.log('Starting URL loading process...');
       loadOrgUrls().catch(console.error);
     }
   }, [notices]); // orgUrls는 의존성에서 제외하여 무한루프 방지
@@ -314,6 +326,22 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
       newSearchParams.set('gap', DEFAULT_GAP);
       const url = `${currentPath}?${newSearchParams.toString()}`;
       loadPage(url).catch(console.error);
+    }
+  }, [searchParams]);
+
+  // URL 파라미터 변경을 감지하여 정렬 상태 동기화 (뒤로가기/앞으로가기 지원)
+  useEffect(() => {
+    const sortParam = searchParams.get('sort') as SortField;
+    const orderParam = searchParams.get('order') as SortOrder;
+
+    if (sortParam && orderParam) {
+      // URL 파라미터가 현재 정렬 상태와 다른 경우에만 업데이트
+      if (sortConfig.field !== sortParam || sortConfig.order !== orderParam) {
+        setSortConfig({
+          field: sortParam,
+          order: orderParam,
+        });
+      }
     }
   }, [searchParams]);
 
@@ -452,10 +480,21 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
 
   // 정렬 토글
   const toggleSort = (field: SortField) => {
+    const newOrder = sortConfig.field === field && sortConfig.order === 'asc' ? 'desc' : 'asc';
     setSortConfig({
       field,
-      order: sortConfig.field === field && sortConfig.order === 'asc' ? 'desc' : 'asc',
+      order: newOrder,
     });
+
+    // URL 파라미터 업데이트
+    const currentParams = new URLSearchParams(window.location.search);
+    currentParams.set('sort', field);
+    currentParams.set('order', newOrder);
+
+    const newUrl = `${pathname}?${currentParams.toString()}`;
+
+    // 즉시 URL 업데이트 (브라우저 주소창에 반영)
+    window.history.pushState({}, '', newUrl);
   };
 
   // 체크박스 토글
@@ -894,7 +933,6 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
                     <TableCell className="w-[120px] whitespace-nowrap">
                       {(() => {
                         const orgUrl = orgUrls[notice.기관명];
-                        console.log(`Rendering org: ${notice.기관명}, URL: ${orgUrl}, type: ${typeof orgUrl}`);
 
                         if (orgUrl) {
                           return (
@@ -989,10 +1027,20 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsFavoriteModalOpen(false)}>
+            <ButtonWithColorIcon
+              color="tertiary"
+              mode="base"
+              onClick={() => setIsFavoriteModalOpen(false)}
+            >
               취소
-            </Button>
-            <Button onClick={handleSaveFavorites}>저장</Button>
+            </ButtonWithColorIcon>
+            <ButtonWithColorIcon
+              color="secondary"
+              mode="active"
+              onClick={handleSaveFavorites}
+            >
+              저장
+            </ButtonWithColorIcon>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1021,14 +1069,17 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
             </div>
           </div>
           <DialogFooter>
-            <Button
-              variant="ghost"
+            <ButtonWithColorIcon
+              color="tertiary"
+              mode="base"
               onClick={() => setIsCategoryEditModalOpen(false)}
               disabled={categoryLoading}
             >
               취소
-            </Button>
-            <Button
+            </ButtonWithColorIcon>
+            <ButtonWithColorIcon
+              color="secondary"
+              mode="active"
               onClick={handleSaveCategoryChange}
               disabled={categoryLoading}
             >
@@ -1040,7 +1091,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
               ) : (
                 '저장'
               )}
-            </Button>
+            </ButtonWithColorIcon>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1057,14 +1108,17 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
             </p>
           </div>
           <DialogFooter>
-            <Button
-              variant="ghost"
+            <ButtonWithColorIcon
+              color="tertiary"
+              mode="base"
               onClick={() => setIsBidProcessModalOpen(false)}
               disabled={progressLoading}
             >
               취소
-            </Button>
-            <Button
+            </ButtonWithColorIcon>
+            <ButtonWithColorIcon
+              color="secondary"
+              mode="active"
               onClick={handleConfirmBidProcess}
               disabled={progressLoading}
             >
@@ -1076,7 +1130,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
               ) : (
                 '예'
               )}
-            </Button>
+            </ButtonWithColorIcon>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1096,17 +1150,19 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
             </p>
           </div>
           <DialogFooter>
-            <Button
-              variant="ghost"
+            <ButtonWithColorIcon
+              color="tertiary"
+              mode="base"
               onClick={() => setIsExcludeModalOpen(false)}
               disabled={excludeLoading}
             >
               취소
-            </Button>
-            <Button
+            </ButtonWithColorIcon>
+            <ButtonWithColorIcon
+              color="red"
+              mode="active"
               onClick={handleConfirmExclude}
               disabled={excludeLoading}
-              variant="destructive"
             >
               {excludeLoading ? (
                 <>
@@ -1116,7 +1172,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
               ) : (
                 '확인'
               )}
-            </Button>
+            </ButtonWithColorIcon>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1136,14 +1192,17 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
             </p>
           </div>
           <DialogFooter>
-            <Button
-              variant="ghost"
+            <ButtonWithColorIcon
+              color="tertiary"
+              mode="base"
               onClick={() => setIsRestoreModalOpen(false)}
               disabled={restoreLoading}
             >
               취소
-            </Button>
-            <Button
+            </ButtonWithColorIcon>
+            <ButtonWithColorIcon
+              color="green"
+              mode="active"
               onClick={handleConfirmRestore}
               disabled={restoreLoading}
             >
@@ -1155,7 +1214,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap 
               ) : (
                 '확인'
               )}
-            </Button>
+            </ButtonWithColorIcon>
           </DialogFooter>
         </DialogContent>
       </Dialog>

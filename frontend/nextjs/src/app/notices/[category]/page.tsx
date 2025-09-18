@@ -91,15 +91,19 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
 
   try {
     const gap = parseInt(resolvedSearchParams.gap as string || process.env.NEXT_PUBLIC_DAY_GAP || '1', 10);
+    const sort = resolvedSearchParams.sort as string || '';
+    const order = resolvedSearchParams.order as string || 'asc';
     const notices = await getNoticesByCategory(category, gap);
 
     return (
       <div>
         <Suspense fallback={<NoticeTableSkeleton />}>
-          <CategoryPageClient 
+          <CategoryPageClient
             notices={notices}
             category={category}
             gap={gap}
+            sort={sort}
+            order={order}
           />
         </Suspense>
       </div>

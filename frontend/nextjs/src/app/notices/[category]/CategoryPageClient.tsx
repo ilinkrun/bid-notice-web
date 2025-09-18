@@ -10,11 +10,13 @@ interface CategoryPageClientProps {
   notices: Notice[];
   category: string;
   gap: number;
+  sort?: string;
+  order?: string;
 }
 
 // 통계 페이지 기반으로 통일된 테마 사용
 
-export default function CategoryPageClient({ notices, category, gap }: CategoryPageClientProps) {
+export default function CategoryPageClient({ notices, category, gap, sort, order }: CategoryPageClientProps) {
   const { finishLoading } = useUnifiedLoading();
 
   // 공고 데이터 로딩 완료 감지: undefined에서 배열(빈 배열 포함)로 변경되면 로딩 완료
@@ -36,6 +38,8 @@ export default function CategoryPageClient({ notices, category, gap }: CategoryP
           notices={notices}
           currentCategory={category}
           gap={gap}
+          sort={sort}
+          order={order}
         />
       </div>
     </PageContainer>

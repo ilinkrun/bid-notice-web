@@ -108,6 +108,60 @@ export function NoticeStatisticsTable({
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [orgStatistics, setOrgStatistics] = useState<any[]>([]);
   const [isLoadingOrg, setIsLoadingOrg] = useState(false);
+  const [orgUrls, setOrgUrls] = useState<{ [orgName: string]: string | null }>({});
+
+  // 기관명 URL 조회 함수
+  const getOrganizationUrl = async (orgName: string): Promise<string | null> => {
+    try {
+      if (!orgName || typeof orgName !== 'string') {
+        return null;
+      }
+
+      const requestBody = {
+        query: `
+          query SettingsNoticeListByOrg($orgName: String!) {
+            settingsNoticeListByOrg(orgName: $orgName) {
+              oid
+              orgName
+              url
+            }
+          }
+        `,
+        variables: { orgName }
+      };
+
+      const response = await fetch('/api/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      if (!response.ok) {
+        console.error(`GraphQL request failed: ${response.status} ${response.statusText}`);
+        return null;
+      }
+
+      const result = await response.json();
+
+      if (result.errors) {
+        console.error('GraphQL errors:', result.errors);
+        return null;
+      }
+
+      if (result.data?.settingsNoticeListByOrg?.length > 0) {
+        const orgSettings = result.data.settingsNoticeListByOrg[0];
+        if (orgSettings.url) {
+          return orgSettings.url.replace(/\$\{i\}/g, '1');
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('기관 정보 조회 중 오류 발생:', error);
+      return null;
+    }
+  };
 
   const handleTypeChange = (value: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -166,6 +220,34 @@ export function NoticeStatisticsTable({
     
     loadOrgStatistics();
   }, [statisticsType, initialData]);
+
+  // 기관명 URL 로드
+  useEffect(() => {
+    const loadOrgUrls = async () => {
+      if (statisticsType === 'organization' && orgStatistics.length > 0) {
+        const uniqueOrgNames = Array.from(new Set(orgStatistics.map(item => item.orgName).filter(Boolean))) as string[];
+        const urlCache: { [orgName: string]: string | null } = {};
+
+        for (const orgName of uniqueOrgNames) {
+          if (orgUrls[orgName] === undefined) {
+            try {
+              const url = await getOrganizationUrl(orgName);
+              urlCache[orgName] = url;
+            } catch (error) {
+              console.error(`Error loading URL for ${orgName}:`, error);
+              urlCache[orgName] = null;
+            }
+          }
+        }
+
+        if (Object.keys(urlCache).length > 0) {
+          setOrgUrls(prev => ({ ...prev, ...urlCache }));
+        }
+      }
+    };
+
+    loadOrgUrls().catch(console.error);
+  }, [statisticsType, orgStatistics]);
 
   // 통계 데이터 로딩 완료 감지: undefined에서 배열(빈 배열 포함)로 변경되면 로딩 완료
   useEffect(() => {
@@ -508,7 +590,30 @@ export function NoticeStatisticsTable({
                   (sortedStatistics as any[]).map((item, index) => (
                     <TableRow key={index}>
                       <TableCell className="text-center">{index + 1}</TableCell>
-                      <TableCell className="font-medium">{item.orgName}</TableCell>
+                      <TableCell className="font-medium">
+                        {(() => {
+                          const orgUrl = orgUrls[item.orgName];
+                          if (orgUrl) {
+                            return (
+                              <a
+                                href={orgUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm font-medium text-color-primary-foreground hover:text-blue-600 hover:underline cursor-pointer"
+                                title="기관 게시판 페이지로 이동"
+                              >
+                                {item.orgName}
+                              </a>
+                            );
+                          } else {
+                            return (
+                              <span className="text-sm font-medium text-color-primary-foreground">
+                                {item.orgName}
+                              </span>
+                            );
+                          }
+                        })()}
+                      </TableCell>
                       <TableCell className="text-center">{item.construction}</TableCell>
                       <TableCell className="text-center">{item.performance}</TableCell>
                       <TableCell className="text-center">{item.etc}</TableCell>

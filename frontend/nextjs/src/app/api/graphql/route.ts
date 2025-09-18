@@ -4,8 +4,28 @@ const GRAPHQL_ENDPOINT = process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    
+    // 요청 본문을 텍스트로 먼저 읽어서 확인
+    const bodyText = await request.text();
+
+    if (!bodyText || bodyText.trim() === '') {
+      console.error('GraphQL Proxy Error: Empty request body');
+      return NextResponse.json(
+        { error: 'Bad request', details: 'Request body is empty' },
+        { status: 400 }
+      );
+    }
+
+    let body;
+    try {
+      body = JSON.parse(bodyText);
+    } catch (parseError) {
+      console.error('GraphQL Proxy Error: Invalid JSON in request body:', bodyText);
+      return NextResponse.json(
+        { error: 'Bad request', details: 'Invalid JSON in request body' },
+        { status: 400 }
+      );
+    }
+
     console.log('GraphQL Proxy - Request:', body);
     
     const response = await fetch(GRAPHQL_ENDPOINT, {

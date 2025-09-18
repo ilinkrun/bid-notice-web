@@ -70,8 +70,8 @@ interface ButtonWithColorIconProps {
   className?: string;
   disabled?: boolean;
   type?: 'button' | 'submit' | 'reset';
-  color?: string; // 주색상 (예: 'blue', 'red', 'green')
-  mode?: 'outline' | 'filled'; // 버튼 스타일 모드
+  color?: string; // 주색상 (예: 'blue', 'red', 'green', 'secondary', 'tertiary')
+  mode?: 'outline' | 'filled' | 'active' | 'base'; // 버튼 스타일 모드
 }
 
 interface IsActiveProps {
@@ -540,6 +540,14 @@ export function ButtonWithColorIcon({
           hover: 'hover:bg-red-700',
           disabled: 'disabled:bg-red-400 disabled:border-red-400',
           active: 'active:bg-red-800'
+        },
+        active: {
+          text: 'text-white',
+          border: 'border-red-600',
+          bg: 'bg-red-600',
+          hover: 'hover:bg-red-700',
+          disabled: 'disabled:bg-red-400 disabled:border-red-400',
+          active: 'active:bg-red-800'
         }
       },
       green: {
@@ -552,6 +560,14 @@ export function ButtonWithColorIcon({
           active: 'active:bg-green-700'
         },
         filled: {
+          text: 'text-white',
+          border: 'border-green-600',
+          bg: 'bg-green-600',
+          hover: 'hover:bg-green-700',
+          disabled: 'disabled:bg-green-400 disabled:border-green-400',
+          active: 'active:bg-green-800'
+        },
+        active: {
           text: 'text-white',
           border: 'border-green-600',
           bg: 'bg-green-600',
@@ -594,6 +610,74 @@ export function ButtonWithColorIcon({
           hover: 'hover:bg-slate-700',
           disabled: 'disabled:bg-slate-400 disabled:border-slate-400',
           active: 'active:bg-slate-800'
+        }
+      },
+      secondary: {
+        outline: {
+          text: 'text-color-primary-foreground',
+          border: 'border-color-primary-foreground',
+          bg: 'bg-transparent',
+          hover: 'hover:bg-color-primary-hovered',
+          disabled: 'disabled:text-color-primary-muted disabled:border-color-primary-muted',
+          active: 'active:bg-color-primary-hovered'
+        },
+        filled: {
+          text: 'text-white',
+          border: 'border-color-secondary-active',
+          bg: 'bg-color-secondary-active',
+          hover: 'hover:bg-color-secondary-active',
+          disabled: 'disabled:bg-color-primary-muted disabled:border-color-primary-muted',
+          active: 'active:bg-color-secondary-active'
+        },
+        active: {
+          text: 'text-white',
+          border: 'border-color-secondary-active',
+          bg: 'bg-color-secondary-active',
+          hover: 'hover:bg-color-secondary-active',
+          disabled: 'disabled:bg-color-primary-muted disabled:border-color-primary-muted',
+          active: 'active:bg-color-secondary-active'
+        },
+        base: {
+          text: 'text-color-primary-foreground',
+          border: 'border-color-primary-foreground',
+          bg: 'bg-transparent',
+          hover: 'hover:bg-color-primary-hovered',
+          disabled: 'disabled:text-color-primary-muted disabled:border-color-primary-muted',
+          active: 'active:bg-color-primary-hovered'
+        }
+      },
+      tertiary: {
+        outline: {
+          text: 'text-color-primary-foreground',
+          border: 'border-color-primary-foreground',
+          bg: 'bg-transparent',
+          hover: 'hover:bg-color-primary-hovered',
+          disabled: 'disabled:text-color-primary-muted disabled:border-color-primary-muted',
+          active: 'active:bg-color-primary-hovered'
+        },
+        filled: {
+          text: 'text-white',
+          border: 'border-color-tertiary-base',
+          bg: 'bg-color-tertiary-base',
+          hover: 'hover:bg-color-tertiary-base',
+          disabled: 'disabled:bg-color-primary-muted disabled:border-color-primary-muted',
+          active: 'active:bg-color-tertiary-base'
+        },
+        active: {
+          text: 'text-white',
+          border: 'border-color-tertiary-base',
+          bg: 'bg-color-tertiary-base',
+          hover: 'hover:bg-color-tertiary-base',
+          disabled: 'disabled:bg-color-primary-muted disabled:border-color-primary-muted',
+          active: 'active:bg-color-tertiary-base'
+        },
+        base: {
+          text: 'text-color-primary-foreground',
+          border: 'border-color-primary-foreground',
+          bg: 'bg-transparent',
+          hover: 'hover:bg-color-primary-hovered',
+          disabled: 'disabled:text-color-primary-muted disabled:border-color-primary-muted',
+          active: 'active:bg-color-primary-hovered'
         }
       }
     };
