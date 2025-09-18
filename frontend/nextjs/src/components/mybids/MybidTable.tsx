@@ -78,6 +78,12 @@ export default function BidTable({ bids, currentStatus }) {
   const [pm, setPm] = useState('');
   const [giveupReason, setGiveupReason] = useState('');
 
+  // 출처 필터 상태 (진행 페이지에서만 사용)
+  const [sourceFilters, setSourceFilters] = useState({
+    '관공서': true,
+    '나라장터': true,
+  });
+
   // 기관명 URL 조회 및 생성 함수
   const getOrganizationUrl = async (orgName: string): Promise<string | null> => {
     try {
@@ -573,6 +579,26 @@ export default function BidTable({ bids, currentStatus }) {
           </div>
         </div>
         <div className="flex items-center gap-2">
+        {/* 진행 페이지에서만 출처별 필터 표시 */}
+        {localStatus === 'progress' && (
+          <div className="flex items-center gap-2 mr-4">
+            {Object.entries(sourceFilters).map(([source, checked]) => (
+              <label key={source} className="flex items-center gap-1">
+                <Checkbox
+                  checked={checked}
+                  onCheckedChange={(checked) =>
+                    setSourceFilters(prev => ({
+                      ...prev,
+                      [source]: checked === true
+                    }))
+                  }
+                />
+                <span className="text-sm">{source}</span>
+              </label>
+            ))}
+          </div>
+        )}
+
         {/* 종료 페이지에서만 상태별 필터 표시 */}
         {localStatus === 'ended' && (
           <div className="flex items-center gap-2 mr-4">
@@ -605,6 +631,14 @@ export default function BidTable({ bids, currentStatus }) {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead
+                className="w-[80px] cursor-pointer"
+                data-sortable="true"
+                data-sort-active={sortConfig.field === 'source'}
+                onClick={() => toggleSort('source')}
+              >
+                출처
+              </TableHead>
               <TableHead
                 className="w-auto cursor-pointer"
                 data-sortable="true"
@@ -660,7 +694,7 @@ export default function BidTable({ bids, currentStatus }) {
           <TableBody>
             {paginatedBids.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={localStatus === 'ended' ? 6 : 5} className="h-[300px]" />
+                <TableCell colSpan={localStatus === 'ended' ? 7 : 6} className="h-[300px]" />
               </TableRow>
             ) : (
               paginatedBids.map((bid) => (
@@ -670,6 +704,9 @@ export default function BidTable({ bids, currentStatus }) {
                     window.location.href = `/mybids/${localStatus}/${bid.nid}`;
                   }}
                 >
+                  <TableCell className="w-[80px] whitespace-nowrap">
+                    나라장터
+                  </TableCell>
                   <TableCell className="w-auto max-w-0">
                   <div className="flex items-center gap-2">
                       <div className="flex-1 min-w-0">
