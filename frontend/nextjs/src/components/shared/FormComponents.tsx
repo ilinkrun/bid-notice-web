@@ -787,13 +787,31 @@ export function ButtonWithColorIcon({
 
   const colorClasses = getColorClasses(color, mode);
 
-  // Check if this uses custom CSS properties that need manual hover handling
-  const needsCustomHover = colorClasses.hover.includes('color-primary-hovered') ||
-                          colorClasses.hover.includes('color-secondary-active') ||
-                          colorClasses.hover.includes('color-tertiary-base');
+  // Helper function to get the base background color
+  const getBaseBackgroundColor = () => {
+    if (colorClasses.bg.includes('bg-transparent')) return 'transparent';
+    if (colorClasses.bg.includes('color-secondary-active')) return 'hsl(var(--color-secondary-active))';
+    if (colorClasses.bg.includes('color-tertiary-base')) return 'hsl(var(--color-tertiary-base))';
+    if (colorClasses.bg.includes('bg-slate-600')) return undefined; // Let CSS handle it
+    if (colorClasses.bg.includes('bg-blue-600')) return undefined; // Let CSS handle it
+    if (colorClasses.bg.includes('bg-red-600')) return undefined; // Let CSS handle it
+    if (colorClasses.bg.includes('bg-green-600')) return undefined; // Let CSS handle it
+    return undefined;
+  };
+
+  // Helper function to get the hover background color
+  const getHoverBackgroundColor = () => {
+    if (colorClasses.hover.includes('color-primary-hovered')) return 'hsl(var(--color-primary-hovered))';
+    if (colorClasses.hover.includes('color-secondary-active')) return 'hsl(var(--color-secondary-active))';
+    if (colorClasses.hover.includes('color-tertiary-base')) return 'hsl(var(--color-tertiary-base))';
+    return null; // Let CSS handle standard colors
+  };
+
+  // Check if we need manual hover handling for CSS custom properties
+  const needsCustomHover = getHoverBackgroundColor() !== null;
 
   if (needsCustomHover) {
-    // Use manual hover handling for CSS custom properties, like IconButton
+    // Use manual hover handling for CSS custom properties
     return (
       <button
         type={type}
@@ -807,30 +825,24 @@ export function ButtonWithColorIcon({
         )}
         style={{
           color: colorClasses.text.includes('color-primary-foreground') ? 'hsl(var(--color-primary-foreground))' : undefined,
-          borderColor: colorClasses.border.includes('color-primary-foreground') ? 'hsl(var(--color-primary-foreground))' : undefined,
-          backgroundColor: colorClasses.bg.includes('bg-transparent') ? 'transparent' :
-                          colorClasses.bg.includes('color-secondary-active') ? 'hsl(var(--color-secondary-active))' :
-                          colorClasses.bg.includes('color-tertiary-base') ? 'hsl(var(--color-tertiary-base))' : undefined,
+          borderColor: colorClasses.border.includes('color-primary-foreground') ? 'hsl(var(--color-primary-foreground))' :
+                      colorClasses.border.includes('color-secondary-active') ? 'hsl(var(--color-secondary-active))' :
+                      colorClasses.border.includes('color-tertiary-base') ? 'hsl(var(--color-tertiary-base))' : undefined,
+          backgroundColor: getBaseBackgroundColor(),
         }}
         onMouseEnter={(e) => {
           if (!disabled) {
-            if (colorClasses.hover.includes('color-primary-hovered')) {
-              e.currentTarget.style.backgroundColor = 'hsl(var(--color-primary-hovered))';
-            } else if (colorClasses.hover.includes('color-secondary-active')) {
-              e.currentTarget.style.backgroundColor = 'hsl(var(--color-secondary-active))';
-            } else if (colorClasses.hover.includes('color-tertiary-base')) {
-              e.currentTarget.style.backgroundColor = 'hsl(var(--color-tertiary-base))';
+            const hoverColor = getHoverBackgroundColor();
+            if (hoverColor) {
+              e.currentTarget.style.backgroundColor = hoverColor;
             }
           }
         }}
         onMouseLeave={(e) => {
           if (!disabled) {
-            if (colorClasses.bg.includes('bg-transparent')) {
-              e.currentTarget.style.backgroundColor = 'transparent';
-            } else if (colorClasses.bg.includes('color-secondary-active')) {
-              e.currentTarget.style.backgroundColor = 'hsl(var(--color-secondary-active))';
-            } else if (colorClasses.bg.includes('color-tertiary-base')) {
-              e.currentTarget.style.backgroundColor = 'hsl(var(--color-tertiary-base))';
+            const baseColor = getBaseBackgroundColor();
+            if (baseColor !== undefined) {
+              e.currentTarget.style.backgroundColor = baseColor;
             }
           }
         }}
@@ -841,6 +853,7 @@ export function ButtonWithColorIcon({
     );
   }
 
+  // Use standard CSS classes for built-in colors
   return (
     <button
       type={type}

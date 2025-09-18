@@ -13,7 +13,7 @@ import { UnifiedSelect } from '@/components/shared/UnifiedSelect';
 import { useNoticeFilterStore } from '@/store/noticeFilterStore';
 import { filterNotices } from '@/lib/utils/filterNotices';
 import { AdvancedSearchModal } from '../notices/AdvancedSearchModal';
-import { InputWithIcon, IconButton, OutlineSelectBox, OutlineSelectItem, ButtonWithColorIcon } from '@/components/shared/FormComponents';
+import { InputWithIcon, IconButton, OutlineSelectBox, OutlineSelectItem, ButtonWithColorIcon, RadioButtonSet } from '@/components/shared/FormComponents';
 import { NumberInput } from '@/components/shared/NumberInput';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { useSettingsStore } from '@/store/settingsStore';
@@ -734,17 +734,6 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap,
       <div className="w-full">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-            <OutlineSelectBox
-              value={localCategory}
-              onValueChange={handleCategoryChange}
-              placeholder="유형 선택"
-            >
-              {CATEGORIES.map((category) => (
-                <OutlineSelectItem key={category.value} value={category.value}>
-                  {category.label}
-                </OutlineSelectItem>
-              ))}
-            </OutlineSelectBox>
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-2">
                 <label htmlFor="gap-input" className="text-sm font-medium text-color-primary-foreground">최근</label>
@@ -786,7 +775,17 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap,
               <AdvancedSearchModal />
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
+            <RadioButtonSet
+              options={[
+                { value: '공사점검', label: '공사점검' },
+                { value: '성능평가', label: '성능평가' },
+                { value: '기타', label: '기타' }
+              ]}
+              value={localCategory}
+              onChange={handleCategoryChange}
+            />
+            <div className="flex items-center gap-2">
             {currentCategory === '제외' ? (
               <IconButton
                 icon={<Plus className="h-4 w-4" />}
@@ -812,6 +811,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap,
                 title="입찰 진행"
               />
             )}
+            </div>
           </div>
         </div>
 
@@ -833,16 +833,14 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap,
                     aria-label="모든 항목 선택"
                   />
                 </TableHead>
-                {currentCategory === '제외' && (
-                  <TableHead
-                    className="w-[80px] cursor-pointer"
-                    data-sortable="true"
-                    data-sort-active={sortConfig.field === 'category'}
-                    onClick={() => toggleSort('category')}
-                  >
-                    유형
-                  </TableHead>
-                )}
+                <TableHead
+                  className="w-[80px] cursor-pointer"
+                  data-sortable="true"
+                  data-sort-active={sortConfig.field === 'category'}
+                  onClick={() => toggleSort('category')}
+                >
+                  유형
+                </TableHead>
                 <TableHead
                   className="w-auto cursor-pointer"
                   data-sortable="true"
@@ -888,7 +886,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap,
             <TableBody>
               {paginatedNotices.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={currentCategory === '제외' ? 7 : 6} className="h-[300px]" />
+                  <TableCell colSpan={7} className="h-[300px]" />
                 </TableRow>
               ) : (
                 paginatedNotices.map((notice) => (
@@ -903,11 +901,9 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap,
                         aria-label={`${notice.제목} 선택`}
                       />
                     </TableCell>
-                    {currentCategory === '제외' && (
-                      <TableCell className="w-[80px] whitespace-nowrap">
-                        {notice.category}
-                      </TableCell>
-                    )}
+                    <TableCell className="w-[80px] whitespace-nowrap">
+                      {notice.category}
+                    </TableCell>
                     <TableCell className="w-auto max-w-0">
                       <div className="flex items-center gap-2">
                         <div className="flex-1 min-w-0">

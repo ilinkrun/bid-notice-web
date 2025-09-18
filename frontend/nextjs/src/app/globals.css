@@ -75,16 +75,34 @@
   }
 
   /* 모든 링크(a 태그) 색상 설정 */
-  a {
-    color: hsl(var(--color-primary-linked));
+  a,
+  a:link {
+    color: hsl(var(--color-primary-linked)) !important;
   }
 
   a:hover {
-    color: hsl(var(--color-primary-hovered));
+    color: hsl(var(--color-primary-hovered)) !important;
   }
 
   a:visited {
-    color: hsl(var(--color-primary-muted));
+    color: hsl(var(--color-primary-muted)) !important;
+  }
+
+  /* 추가 specificty를 위한 규칙 */
+  body a,
+  main a,
+  div a,
+  p a,
+  span a {
+    color: hsl(var(--color-primary-linked)) !important;
+  }
+
+  body a:hover,
+  main a:hover,
+  div a:hover,
+  p a:hover,
+  span a:hover {
+    color: hsl(var(--color-primary-hovered)) !important;
   }
 
   /* 모든 Card 컴포넌트 스타일 통일 */
