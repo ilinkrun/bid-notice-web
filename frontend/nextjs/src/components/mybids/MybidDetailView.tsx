@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
+import { ButtonWithIcon } from '@/components/shared/FormComponents';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -540,6 +541,12 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
     }
   };
 
+  const saveFilesData = () => {
+    // TODO: 파일 데이터 저장 기능 구현
+    alert('파일 저장 기능 구현 예정');
+    setIsEditingFiles(false);
+  };
+
   const statusOptions = [
     { value: '응찰', label: '응찰' },
     { value: '낙찰', label: '낙찰' },
@@ -631,34 +638,32 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-6">
+    <div className="container mx-auto px-4 py-6 space-y-8">
       {/* 입찰 정보 */}
-      <Card>
-        <CardHeader 
-          className="cursor-pointer hover:bg-color-primary-hovered/50 transition-colors"
+      <div>
+        <button
+          className="w-full flex items-center justify-between p-1.5 hover:bg-color-primary-hovered transition-colors rounded"
           onClick={() => setIsInfoExpanded(!isInfoExpanded)}
         >
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Info className="w-5 h-5" />
-              입찰 정보
-            </div>
-            {isInfoExpanded ? (
-              <ChevronUp className="w-5 h-5" />
-            ) : (
-              <ChevronDown className="w-5 h-5" />
-            )}
-          </CardTitle>
-        </CardHeader>
+          <div className="flex items-center gap-2">
+            <Info className="w-5 h-5" />
+            <span className="font-semibold">입찰 정보</span>
+          </div>
+          {isInfoExpanded ? (
+            <ChevronUp className="w-5 h-5" />
+          ) : (
+            <ChevronDown className="w-5 h-5" />
+          )}
+        </button>
         {isInfoExpanded && (
-          <CardContent className="space-y-6">
+          <div className="mt-4 space-y-6">
             {/* 탭 버튼 */}
             <div className="flex border-b">
               <button
-                className={`px-4 py-2 font-medium text-sm flex items-center gap-2 ${
+                className={`tab-button px-4 py-2 font-medium text-sm flex items-center gap-2 ${
                   infoActiveTab === 'notice'
-                    ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-color-primary-muted-foreground hover:text-color-primary-foreground'
+                    ? 'active'
+                    : 'text-color-primary-muted-foreground'
                 }`}
                 onClick={() => setInfoActiveTab('notice')}
               >
@@ -666,10 +671,10 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                 공고 상세정보
               </button>
               <button
-                className={`px-4 py-2 font-medium text-sm flex items-center gap-2 ${
+                className={`tab-button px-4 py-2 font-medium text-sm flex items-center gap-2 ${
                   infoActiveTab === 'bid'
-                    ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-color-primary-muted-foreground hover:text-color-primary-foreground'
+                    ? 'active'
+                    : 'text-color-primary-muted-foreground'
                 }`}
                 onClick={() => setInfoActiveTab('bid')}
               >
@@ -681,26 +686,6 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
             {/* 공고 상세정보 탭 */}
             {infoActiveTab === 'notice' && (
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      if (isEditingNoticeDetails) {
-                        saveNoticeDetailsFields();
-                      } else {
-                        setIsEditingNoticeDetails(true);
-                      }
-                    }}
-                    disabled={updatingDetails || detailsLoading}
-                  >
-                    {updatingDetails ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      isEditingNoticeDetails ? '저장' : '편집'
-                    )}
-                  </Button>
-                </div>
                 <div className="border rounded-lg p-4 space-y-3">
                   {detailsLoading ? (
                     <div className="flex items-center justify-center py-4">
@@ -842,32 +827,27 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                     </div>
                   )}
                 </div>
+                <div className="flex justify-end gap-2 mt-4">
+                  <ButtonWithIcon
+                    icon={<span className="mr-2">{isEditingNoticeDetails ? <CheckSquare className="h-4 w-4" /> : <Edit3 className="h-4 w-4" />}</span>}
+                    onClick={() => {
+                      if (isEditingNoticeDetails) {
+                        saveNoticeDetailsFields();
+                      } else {
+                        setIsEditingNoticeDetails(true);
+                      }
+                    }}
+                    disabled={updatingDetails}
+                  >
+                    {isEditingNoticeDetails ? "저장" : "편집"}
+                  </ButtonWithIcon>
+                </div>
               </div>
             )}
 
             {/* 입찰 상세정보 탭 */}
             {infoActiveTab === 'bid' && (
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      if (isEditingNotice) {
-                        saveNoticeFields();
-                      } else {
-                        setIsEditingNotice(true);
-                      }
-                    }}
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      isEditingNotice ? '저장' : '편집'
-                    )}
-                  </Button>
-                </div>
                 <div className="border rounded-lg p-4 space-y-3">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {Object.entries(noticeFields).map(([key, value]) => (
@@ -925,39 +905,54 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                     </div>
                   )}
                 </div>
+                <div className="flex justify-end gap-2 mt-4">
+                  <ButtonWithIcon
+                    icon={<span className="mr-2">{isEditingNotice ? <CheckSquare className="h-4 w-4" /> : <Edit3 className="h-4 w-4" />}</span>}
+                    onClick={() => {
+                      if (isEditingNotice) {
+                        saveNoticeFields();
+                      } else {
+                        setIsEditingNotice(true);
+                      }
+                    }}
+                    disabled={loading}
+                  >
+                    {isEditingNotice ? "저장" : "편집"}
+                  </ButtonWithIcon>
+                </div>
               </div>
             )}
-          </CardContent>
+          </div>
         )}
-      </Card>
+      </div>
+
+      <Separator />
 
       {/* 입찰 문서 */}
-      <Card>
-        <CardHeader 
-          className="cursor-pointer hover:bg-color-primary-hovered/50 transition-colors"
+      <div>
+        <button
+          className="w-full flex items-center justify-between p-1.5 hover:bg-color-primary-hovered transition-colors rounded"
           onClick={() => setIsDocumentExpanded(!isDocumentExpanded)}
         >
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <FileText className="w-5 h-5" />
-              입찰 문서
-            </div>
-            {isDocumentExpanded ? (
-              <ChevronUp className="w-5 h-5" />
-            ) : (
-              <ChevronDown className="w-5 h-5" />
-            )}
-          </CardTitle>
-        </CardHeader>
+          <div className="flex items-center gap-2">
+            <FileText className="w-5 h-5" />
+            <span className="font-semibold">입찰 문서</span>
+          </div>
+          {isDocumentExpanded ? (
+            <ChevronUp className="w-5 h-5" />
+          ) : (
+            <ChevronDown className="w-5 h-5" />
+          )}
+        </button>
         {isDocumentExpanded && (
-          <CardContent className="space-y-6">
+          <div className="mt-4 space-y-6">
             {/* 탭 버튼 */}
             <div className="flex border-b">
               <button
-                className={`px-4 py-2 font-medium text-sm flex items-center gap-2 ${
+                className={`tab-button px-4 py-2 font-medium text-sm flex items-center gap-2 ${
                   documentActiveTab === 'files'
-                    ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-color-primary-muted-foreground hover:text-color-primary-foreground'
+                    ? 'active'
+                    : 'text-color-primary-muted-foreground'
                 }`}
                 onClick={() => setDocumentActiveTab('files')}
               >
@@ -965,10 +960,10 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                 공고 문서
               </button>
               <button
-                className={`px-4 py-2 font-medium text-sm flex items-center gap-2 ${
+                className={`tab-button px-4 py-2 font-medium text-sm flex items-center gap-2 ${
                   documentActiveTab === 'write'
-                    ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-color-primary-muted-foreground hover:text-color-primary-foreground'
+                    ? 'active'
+                    : 'text-color-primary-muted-foreground'
                 }`}
                 onClick={() => setDocumentActiveTab('write')}
               >
@@ -980,44 +975,6 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
             {/* 공고 문서 탭 */}
             {documentActiveTab === 'files' && (
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setIsEditingFiles(!isEditingFiles)}
-                    >
-                      {isEditingFiles ? '저장' : '편집'}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        // TODO: 추가 기능 구현
-                        alert('파일 추가 기능 구현 예정');
-                      }}
-                    >
-                      <Plus className="w-4 h-4 mr-1" />
-                      추가
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        // TODO: 선택된 파일들 다운로드 기능 구현
-                        if (selectedDownloads.size > 0) {
-                          alert(`${selectedDownloads.size}개 파일 다운로드 기능 구현 예정`);
-                        } else {
-                          alert('다운로드할 파일을 선택해주세요.');
-                        }
-                      }}
-                      disabled={selectedDownloads.size === 0}
-                    >
-                      <Download className="w-4 h-4 mr-1" />
-                      다운
-                    </Button>
-                  </div>
-                </div>
             <div className="border rounded-lg p-4 space-y-3">
               {filesLoading ? (
                 <div className="flex items-center justify-center py-8">
@@ -1141,6 +1098,43 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                 </div>
               )}
                 </div>
+                <div className="flex justify-end gap-2 mt-4">
+                  <ButtonWithIcon
+                    icon={<span className="mr-2">{isEditingFiles ? <CheckSquare className="h-4 w-4" /> : <Edit3 className="h-4 w-4" />}</span>}
+                    onClick={() => {
+                      if (isEditingFiles) {
+                        saveFilesData();
+                      } else {
+                        setIsEditingFiles(!isEditingFiles);
+                      }
+                    }}
+                  >
+                    {isEditingFiles ? "저장" : "편집"}
+                  </ButtonWithIcon>
+                  <ButtonWithIcon
+                    icon={<span className="mr-2"><Plus className="h-4 w-4" /></span>}
+                    onClick={() => {
+                      // TODO: 추가 기능 구현
+                      alert('파일 추가 기능 구현 예정');
+                    }}
+                  >
+                    추가
+                  </ButtonWithIcon>
+                  <ButtonWithIcon
+                    icon={<span className="mr-2"><Download className="h-4 w-4" /></span>}
+                    onClick={() => {
+                      // TODO: 선택된 파일들 다운로드 기능 구현
+                      if (selectedDownloads.size > 0) {
+                        alert(`${selectedDownloads.size}개 파일 다운로드 기능 구현 예정`);
+                      } else {
+                        alert('다운로드할 파일을 선택해주세요.');
+                      }
+                    }}
+                    disabled={selectedDownloads.size === 0}
+                  >
+                    다운
+                  </ButtonWithIcon>
+                </div>
               </div>
             )}
 
@@ -1172,30 +1166,30 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                 </div>
               </div>
             )}
-          </CardContent>
+          </div>
         )}
-      </Card>
+      </div>
+
+      <Separator />
 
       {/* 단계 변경 */}
-      <Card>
-        <CardHeader 
-          className="cursor-pointer hover:bg-color-primary-hovered/50 transition-colors"
+      <div>
+        <button
+          className="w-full flex items-center justify-between p-1.5 hover:bg-color-primary-hovered transition-colors rounded"
           onClick={() => setIsStageExpanded(!isStageExpanded)}
         >
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <CheckSquare className="w-5 h-5" />
-              단계 변경
-            </div>
-            {isStageExpanded ? (
-              <ChevronUp className="w-5 h-5" />
-            ) : (
-              <ChevronDown className="w-5 h-5" />
-            )}
-          </CardTitle>
-        </CardHeader>
+          <div className="flex items-center gap-2">
+            <CheckSquare className="w-5 h-5" />
+            <span className="font-semibold">단계 변경</span>
+          </div>
+          {isStageExpanded ? (
+            <ChevronUp className="w-5 h-5" />
+          ) : (
+            <ChevronDown className="w-5 h-5" />
+          )}
+        </button>
         {isStageExpanded && (
-          <CardContent>
+          <div className="mt-4">
           <div className="space-y-4">
             <div className="flex flex-wrap gap-4">
               {statusOptions.map((option) => (
@@ -1230,9 +1224,10 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
               </div>
             )}
           </div>
-          </CardContent>
+          </div>
         )}
-      </Card>
+      </div>
+
     </div>
   );
 }

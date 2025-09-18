@@ -149,6 +149,18 @@
     transition: background-color 0.2s ease !important;
   }
 
+  /* 탭 UI hover 효과 */
+  .tab-button:hover {
+    background-color: hsl(var(--color-primary-hovered)) !important;
+    transition: background-color 0.2s ease !important;
+  }
+
+  /* 선택된 탭 스타일 */
+  .tab-button.active {
+    background-color: hsl(var(--color-primary-hovered)) !important;
+    border-bottom: 2px solid hsl(var(--color-secondary-active)) !important;
+  }
+
 
   /* body {
     @apply text-foreground;
