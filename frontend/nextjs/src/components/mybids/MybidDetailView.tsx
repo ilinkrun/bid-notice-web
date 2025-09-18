@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { ButtonWithIcon, ButtonWithColorIcon } from '@/components/shared/FormComponents';
+import { ButtonWithIcon, ButtonWithColorIcon, DropdownSectionHeader, TabHeader, TabContainer } from '@/components/shared/FormComponents';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -653,52 +653,37 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
     <div className="container mx-auto px-4 py-6 space-y-2">
       {/* 입찰 정보 */}
       <div>
-        <button
-          className="w-full flex items-center justify-between p-1.5 hover:bg-color-primary-hovered transition-colors rounded"
-          onClick={() => setIsInfoExpanded(!isInfoExpanded)}
-        >
-          <div className="flex items-center gap-2">
-            <Info className="w-5 h-5" />
-            <span className="font-semibold">입찰 정보</span>
-          </div>
-          {isInfoExpanded ? (
-            <ChevronUp className="w-5 h-5" />
-          ) : (
-            <ChevronDown className="w-5 h-5" />
-          )}
-        </button>
+        <DropdownSectionHeader
+          title="입찰 정보"
+          icon={<Info className="w-5 h-5" />}
+          isExpanded={isInfoExpanded}
+          onToggle={() => setIsInfoExpanded(!isInfoExpanded)}
+          accentColor="#6366f1"
+        />
         {isInfoExpanded && (
           <div className="mt-2 space-y-0">
             {/* 탭 버튼 */}
-            <div className="flex border-b">
-              <button
-                className={`tab-button px-4 py-2 font-medium text-sm flex items-center gap-2 ${
-                  infoActiveTab === 'notice'
-                    ? 'active'
-                    : 'text-color-primary-muted-foreground'
-                }`}
-                onClick={() => setInfoActiveTab('notice')}
-              >
-                <FileText className="w-4 h-4" />
-                공고 상세정보
-              </button>
-              <button
-                className={`tab-button px-4 py-2 font-medium text-sm flex items-center gap-2 ${
-                  infoActiveTab === 'bid'
-                    ? 'active'
-                    : 'text-color-primary-muted-foreground'
-                }`}
-                onClick={() => setInfoActiveTab('bid')}
-              >
-                <Clock className="w-4 h-4" />
-                입찰 상세정보
-              </button>
-            </div>
+            <TabHeader
+              tabs={[
+                {
+                  id: 'notice',
+                  label: '공고 상세정보',
+                  icon: <FileText className="w-4 h-4" />
+                },
+                {
+                  id: 'bid',
+                  label: '입찰 상세정보',
+                  icon: <Clock className="w-4 h-4" />
+                }
+              ]}
+              activeTab={infoActiveTab}
+              onTabChange={setInfoActiveTab}
+            />
             
             {/* 공고 상세정보 탭 */}
             {infoActiveTab === 'notice' && (
               <div>
-                <div className="border rounded-lg p-4 space-y-3" style={{borderColor: 'var(--color-primary-foreground)'}}>
+                <TabContainer>
                   {detailsLoading ? (
                     <div className="flex items-center justify-center py-4">
                       <Loader2 className="w-5 h-5 animate-spin mr-2" />
@@ -857,14 +842,14 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                       </ButtonWithIcon>
                     )}
                   </div>
-                </div>
+                </TabContainer>
               </div>
             )}
 
             {/* 입찰 상세정보 탭 */}
             {infoActiveTab === 'bid' && (
               <div>
-                <div className="border rounded-lg p-4 space-y-3" style={{borderColor: 'var(--color-primary-foreground)'}}>
+                <TabContainer>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {Object.entries(noticeFields).map(([key, value]) => (
                       <div key={key} className="flex flex-col gap-1">
@@ -938,7 +923,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                       </ButtonWithIcon>
                     )}
                   </div>
-                </div>
+                </TabContainer>
               </div>
             )}
           </div>
@@ -947,20 +932,13 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
 
       {/* 입찰 문서 */}
       <div>
-        <button
-          className="w-full flex items-center justify-between p-1.5 hover:bg-color-primary-hovered transition-colors rounded"
-          onClick={() => setIsDocumentExpanded(!isDocumentExpanded)}
-        >
-          <div className="flex items-center gap-2">
-            <FileText className="w-5 h-5" />
-            <span className="font-semibold">입찰 문서</span>
-          </div>
-          {isDocumentExpanded ? (
-            <ChevronUp className="w-5 h-5" />
-          ) : (
-            <ChevronDown className="w-5 h-5" />
-          )}
-        </button>
+        <DropdownSectionHeader
+          title="입찰 문서"
+          icon={<FileText className="w-5 h-5" />}
+          isExpanded={isDocumentExpanded}
+          onToggle={() => setIsDocumentExpanded(!isDocumentExpanded)}
+          accentColor="#10b981"
+        />
         {isDocumentExpanded && (
           <div className="mt-2 space-y-0">
             {/* 탭 버튼 */}
@@ -1158,7 +1136,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
             {/* 문서 작성 탭 */}
             {documentActiveTab === 'write' && (
               <div>
-                <div className="border rounded-lg p-4 space-y-4" style={{borderColor: 'var(--color-primary-foreground)'}}>
+                <TabContainer>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Button variant="outline" className="h-20 flex flex-col gap-2">
                   <FileText className="w-6 h-6" />
@@ -1180,7 +1158,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
               <div className="text-sm text-color-primary-muted-foreground">
                 입찰 마감일까지 모든 필수 서류를 제출해야 합니다.
               </div>
-                </div>
+                </TabContainer>
               </div>
             )}
           </div>
@@ -1189,20 +1167,13 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
 
       {/* 단계 변경 */}
       <div>
-        <button
-          className="w-full flex items-center justify-between p-1.5 hover:bg-color-primary-hovered transition-colors rounded"
-          onClick={() => setIsStageExpanded(!isStageExpanded)}
-        >
-          <div className="flex items-center gap-2">
-            <RefreshCw className="w-5 h-5" />
-            <span className="font-semibold">단계 변경</span>
-          </div>
-          {isStageExpanded ? (
-            <ChevronUp className="w-5 h-5" />
-          ) : (
-            <ChevronDown className="w-5 h-5" />
-          )}
-        </button>
+        <DropdownSectionHeader
+          title="단계 변경"
+          icon={<RefreshCw className="w-5 h-5" />}
+          isExpanded={isStageExpanded}
+          onToggle={() => setIsStageExpanded(!isStageExpanded)}
+          accentColor="#f59e0b"
+        />
         {isStageExpanded && (
           <div className="mt-2 space-y-0">
             {/* 탭 버튼 */}

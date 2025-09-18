@@ -1,6 +1,7 @@
 'use client';
 
 import React, { ReactNode, forwardRef, useState, useEffect } from 'react';
+import { ChevronUp, ChevronDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import {
@@ -739,5 +740,114 @@ export function IsActive({
     >
       {displayText}
     </span>
+  );
+}
+
+// 드롭다운 섹션 헤더 컴포넌트
+interface DropdownSectionHeaderProps {
+  title: string;
+  icon: React.ReactNode;
+  isExpanded: boolean;
+  onToggle: () => void;
+  borderColor?: string;
+  accentColor?: string;
+}
+
+export function DropdownSectionHeader({
+  title,
+  icon,
+  isExpanded,
+  onToggle,
+  borderColor = '#d1d5db', // 기본 회색 테두리
+  accentColor = '#6366f1'   // 기본 인디고 accent
+}: DropdownSectionHeaderProps) {
+  return (
+    <button
+      className="inline-flex items-center justify-between px-4 py-2 bg-white font-medium"
+      style={{
+        borderLeft: `8px solid ${accentColor}`,
+        borderTop: `1px solid ${borderColor}`,
+        borderRight: `1px solid ${borderColor}`,
+        borderBottom: `1px solid ${borderColor}`,
+        borderRadius: '8px',
+        boxShadow: 'none',
+        outline: 'none'
+      }}
+      onClick={onToggle}
+    >
+      <div className="flex items-center gap-2">
+        {icon}
+        <span className="font-semibold">{title}</span>
+      </div>
+      {isExpanded ? (
+        <ChevronUp className="w-5 h-5" />
+      ) : (
+        <ChevronDown className="w-5 h-5" />
+      )}
+    </button>
+  );
+}
+
+// 탭 헤더 컴포넌트
+interface TabHeaderProps {
+  tabs: Array<{
+    id: string;
+    label: string;
+    icon: React.ReactNode;
+  }>;
+  activeTab: string;
+  onTabChange: (tabId: string) => void;
+}
+
+export function TabHeader({
+  tabs,
+  activeTab,
+  onTabChange
+}: TabHeaderProps) {
+  return (
+    <div className="flex border-b">
+      {tabs.map((tab) => (
+        <button
+          key={tab.id}
+          className={`tab-button px-4 py-2 font-medium text-sm flex items-center gap-2 ${
+            activeTab === tab.id
+              ? 'active'
+              : 'text-color-primary-muted-foreground'
+          } ${
+            // 비활성화된 탭 처리 (activeTab이 빈 문자열이고 onTabChange가 빈 함수인 경우)
+            activeTab === '' && onTabChange.toString() === '() => {}'
+              ? 'cursor-not-allowed opacity-50'
+              : ''
+          }`}
+          onClick={() => {
+            // 비활성화된 탭이 아닌 경우만 클릭 처리
+            if (!(activeTab === '' && onTabChange.toString() === '() => {}')) {
+              onTabChange(tab.id);
+            }
+          }}
+          disabled={activeTab === '' && onTabChange.toString() === '() => {}'}
+        >
+          {tab.icon}
+          {tab.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// 탭 컨테이너 컴포넌트
+interface TabContainerProps {
+  children: React.ReactNode;
+  borderColor?: string;
+}
+
+export function TabContainer({
+  children,
+  borderColor = 'var(--color-primary-foreground)'
+}: TabContainerProps) {
+  return (
+    <div className="border rounded-lg p-4 space-y-3" style={{borderColor}}>
+      {children}
+    </div>
   );
 }
