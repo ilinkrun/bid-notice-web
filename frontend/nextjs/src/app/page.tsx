@@ -2,11 +2,12 @@ import { gql } from '@apollo/client';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { NoticeStatisticsChart } from '@/components/statistics/NoticeStatisticsChart';
 import { NoticeStatisticsTable } from '@/components/statistics/NoticeStatisticsTable';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, TrendingUp, FileText, AlertTriangle, Users } from 'lucide-react';
 import { getClient } from '@/lib/api/graphqlClient';
 import ApolloWrapper from '@/components/providers/ApolloWrapper';
 import UnifiedDataLoadingWrapper from '@/components/shared/UnifiedDataLoadingWrapper';
-import { PageContainer } from '@/components/shared/PageContainer';
+import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { DashboardCard } from '@/components/dashboard/DashboardCard';
 import { Separator } from '@/components/ui/separator';
 
 const GET_NOTICES_STATISTICS = gql`
@@ -123,64 +124,130 @@ export default async function Home() {
   const data = await getDashboardData();
   const processedStatistics = data?.noticesStatistics ? processNoticeStatistics(data.noticesStatistics) : [];
 
+  // 통계 계산
+  const totalNotices = data?.noticesStatistics?.length || 0;
+  const totalErrors = data?.errorScrapings?.length || 0;
+  const todayNotices = data?.noticesStatistics?.filter(notice => {
+    const today = new Date().toDateString();
+    const noticeDate = new Date(notice.postedAt).toDateString();
+    return today === noticeDate;
+  }).length || 0;
+
+  const categoryStats = data?.noticesStatistics?.reduce((acc: any, curr) => {
+    acc[curr.category] = (acc[curr.category] || 0) + 1;
+    return acc;
+  }, {}) || {};
+
   return (
-    <PageContainer>
-      <div className="space-y-8">
+    <DashboardLayout>
+      <div className="space-y-6">
+        {/* 페이지 헤더 */}
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">대시보드</h1>
+          <p className="text-gray-600 dark:text-gray-400">입찰공고 시스템 현황을 한눈에 확인하세요</p>
+        </div>
+
         <ApolloWrapper>
-        <UnifiedDataLoadingWrapper data={data}>
-
-        {/* 최근 스크랩 에러 섹션 */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4">최근 스크랩 에러</h2>
-          <div className="grid grid-cols-2 gap-2">
-            {data?.errorScrapings
-              ?.slice(0, 6)
-              .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
-              .map((error) => (
-                <div key={error.id} className="flex justify-between items-center p-2 border border-border rounded">
-                  <div className="text-sm font-medium">
-                    {new Date(error.time).toLocaleDateString('ko-KR')} {new Date(error.time).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
-                  </div>
-                  <div className="text-sm truncate ml-2">
-                    {error.orgName || '에러없음'}
-                  </div>
-                </div>
-              ))}
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* 유형별 공고 통계 섹션 */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4">유형별 공고 통계</h2>
-          <div className="h-[400px]">
-            {processedStatistics.length > 0 && <NoticeStatisticsChart data={processedStatistics} type="category" />}
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* 지역별 공고 통계 섹션 */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4">지역별 공고 통계</h2>
-          <div className="statistics-cell overflow-auto">
-            {data?.noticesStatistics?.length > 0 && (
-              <NoticeStatisticsTable
-                initialData={data.noticesStatistics}
-                defaultGap="10"
-                defaultType="region"
-                defaultViewType="table"
-                hideControls={true}
-                hideTypeSelector={true}
+          <UnifiedDataLoadingWrapper data={data}>
+            {/* 주요 지표 카드 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <DashboardCard
+                title="총 공고 수"
+                value={totalNotices.toLocaleString()}
+                description="최근 10일간"
+                icon={<FileText className="h-4 w-4" />}
+                trend={{ value: 12, isPositive: true }}
               />
-            )}
-          </div>
-        </div>
+              <DashboardCard
+                title="오늘 공고"
+                value={todayNotices.toLocaleString()}
+                description="오늘 수집된 공고"
+                icon={<TrendingUp className="h-4 w-4" />}
+              />
+              <DashboardCard
+                title="스크랩 에러"
+                value={totalErrors.toLocaleString()}
+                description="최근 10일간"
+                icon={<AlertTriangle className="h-4 w-4" />}
+                trend={{ value: 5, isPositive: false }}
+              />
+              <DashboardCard
+                title="공사점검"
+                value={(categoryStats['공사점검'] || 0).toLocaleString()}
+                description="공사점검 공고"
+                icon={<Users className="h-4 w-4" />}
+              />
+            </div>
 
-        </UnifiedDataLoadingWrapper>
+            {/* 차트 섹션 */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* 유형별 공고 통계 */}
+              <DashboardCard
+                title="유형별 공고 통계"
+                value=""
+                className="lg:col-span-2"
+              >
+                <div className="h-[400px] mt-4">
+                  {processedStatistics.length > 0 && (
+                    <NoticeStatisticsChart data={processedStatistics} type="category" />
+                  )}
+                </div>
+              </DashboardCard>
+            </div>
+
+            {/* 상세 정보 섹션 */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* 최근 스크랩 에러 */}
+              <DashboardCard
+                title="최근 스크랩 에러"
+                value={`${Math.min(6, totalErrors)}개`}
+                description="최신 에러 목록"
+              >
+                <div className="mt-4 space-y-3">
+                  {data?.errorScrapings
+                    ?.slice(0, 6)
+                    .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+                    .map((error) => (
+                      <div key={error.id} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+                        <div className="text-sm font-medium">
+                          {new Date(error.time).toLocaleDateString('ko-KR')} {new Date(error.time).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400 truncate ml-2">
+                          {error.orgName || '에러없음'}
+                        </div>
+                      </div>
+                    ))}
+                  {totalErrors === 0 && (
+                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                      최근 에러가 없습니다
+                    </div>
+                  )}
+                </div>
+              </DashboardCard>
+
+              {/* 지역별 공고 통계 */}
+              <DashboardCard
+                title="지역별 공고 통계"
+                value=""
+                description="상위 지역별 분포"
+              >
+                <div className="mt-4 max-h-[400px] overflow-auto">
+                  {data?.noticesStatistics?.length > 0 && (
+                    <NoticeStatisticsTable
+                      initialData={data.noticesStatistics}
+                      defaultGap="10"
+                      defaultType="region"
+                      defaultViewType="table"
+                      hideControls={true}
+                      hideTypeSelector={true}
+                    />
+                  )}
+                </div>
+              </DashboardCard>
+            </div>
+          </UnifiedDataLoadingWrapper>
         </ApolloWrapper>
       </div>
-    </PageContainer>
+    </DashboardLayout>
   );
 }

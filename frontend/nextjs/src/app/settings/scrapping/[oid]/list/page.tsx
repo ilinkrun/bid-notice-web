@@ -12,7 +12,8 @@ import { useUnifiedLoading } from '@/components/providers/UnifiedLoadingProvider
 import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
-import { Edit, Eye, Save, ChevronLeft, HelpCircle } from 'lucide-react';
+import { Edit, Eye, Save, ChevronLeft, HelpCircle, Settings, Puzzle, Wrench, List as ListIcon } from 'lucide-react';
+import { ButtonWithIcon, TabHeader, TabContainer } from '@/components/shared/FormComponents';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -118,6 +119,9 @@ export default function ScrappingListSettingsPage() {
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [changes, setChanges] = useState<string[]>([]);
+
+  // 탭 상태
+  const [activeSubTab, setActiveSubTab] = useState('all');
 
   // 목록 스크랩 설정 쿼리
   const { loading, error, data } = useQuery(GET_SETTINGS_LIST, {
@@ -332,110 +336,93 @@ export default function ScrappingListSettingsPage() {
     );
   }
 
+  // 서브탭 구성
+  const subTabs = [
+    {
+      id: 'all',
+      label: '전체 설정',
+      icon: <ListIcon className="h-4 w-4" />
+    },
+    {
+      id: 'basic',
+      label: '기본 설정',
+      icon: <Settings className="h-4 w-4" />
+    },
+    {
+      id: 'elements',
+      label: '요소 설정',
+      icon: <Puzzle className="h-4 w-4" />
+    },
+    {
+      id: 'additional',
+      label: '부가 설정',
+      icon: <Wrench className="h-4 w-4" />
+    }
+  ];
+
   return (
-    <ScrappingSettingsLayout 
-      orgName={listSettings?.orgName || `OID: ${oid}`} 
-      isActive={listSettings?.use} 
+    <ScrappingSettingsLayout
+      orgName={listSettings?.orgName || `OID: ${oid}`}
+      isActive={listSettings?.use}
       region={listSettings?.orgRegion}
     >
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <CardTitle className="text-lg">입찰공고 목록 스크랩 설정</CardTitle>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
-                onClick={() => setShowHelpModal(true)}
-                title="작성 가이드 보기"
-              >
-                <HelpCircle className="h-4 w-4 text-color-primary-muted-foreground hover:text-color-primary-foreground" />
-              </Button>
-            </div>
-            <div className="flex space-x-2">
-              {isEditMode ? (
-                <>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={handleViewMode}
-                  >
-                    <Eye className="h-4 w-4 mr-1" />
-                    보기
-                  </Button>
-                  <Button 
-                    variant="default" 
-                    size="sm" 
-                    onClick={handleSave}
-                  >
-                    <Save className="h-4 w-4 mr-1" />
-                    저장
-                  </Button>
-                </>
-              ) : (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleEditMode}
-                >
-                  <Edit className="h-4 w-4 mr-1" />
-                  편집
-                </Button>
-              )}
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
+      <div className="space-y-0">
+        {/* 서브탭 헤더 */}
+        <TabHeader
+          tabs={subTabs}
+          activeTab={activeSubTab}
+          onTabChange={setActiveSubTab}
+        />
+
+        {/* 탭 컨텐츠 */}
+        <TabContainer className="p-0 mt-0">
           {listSettings ? (
-            <div className="space-y-6">
-              {/* 기본 설정 */}
-              <div className="mb-6">
-                  <h4 className="text-sm font-medium mb-3 text-pink-900">📋 기본 설정</h4>
-                  <div className="bg-white border rounded-lg overflow-hidden">
+            <div>
+              {/* 전체 설정 탭 */}
+              {activeSubTab === 'all' && (
+                <div className="space-y-1">
+                  {/* 기본 설정 */}
+                  <div className="border rounded-lg overflow-hidden" style={{ backgroundColor: 'transparent' }}>
                     <Table>
                       <TableBody>
                         <TableRow>
                           <TableCell className="font-medium w-24">
-                            <span className="text-pink-900 text-xs font-medium">
-                              기관명
-                            </span>
+                            <span className="text-gray-500 text-sm">기관명</span>
                           </TableCell>
                           <TableCell className="break-all">
                             <Input
                               value={editData.orgName}
                               onChange={(e) => handleInputChange('orgName', e.target.value)}
-                              className="w-full text-xs bg-pink-25 text-pink-900 border-pink-200 focus:border-pink-400 focus:ring-pink-200"
+                              className="w-full text-sm"
+                              style={{ color: 'var(--color-primary-foreground)' }}
                               disabled={!isEditMode}
                             />
                           </TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell className="font-medium w-24">
-                            <span className="text-pink-900 text-xs font-medium">
-                              URL
-                            </span>
+                            <span className="text-gray-500 text-sm">URL</span>
                           </TableCell>
                           <TableCell className="break-all">
                             <Input
                               value={editData.detailUrl}
                               onChange={(e) => handleInputChange('detailUrl', e.target.value)}
-                              className="w-full text-xs bg-pink-25 text-pink-900 border-pink-200 focus:border-pink-400 focus:ring-pink-200"
+                              className="w-full text-sm"
+                              style={{ color: 'var(--color-primary-foreground)' }}
                               disabled={!isEditMode}
                             />
                           </TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell className="font-medium">
-                            <span className="text-pink-900 text-xs font-medium">
-                              페이징
-                            </span>
+                            <span className="text-gray-500 text-sm">페이징</span>
                           </TableCell>
                           <TableCell>
                             <Input
                               value={editData.paging}
                               onChange={(e) => handleInputChange('paging', e.target.value)}
-                              className="w-full text-xs font-mono bg-pink-25 text-pink-900 border-pink-200 focus:border-pink-400 focus:ring-pink-200"
+                              className="w-full text-sm font-mono"
+                              style={{ color: 'var(--color-primary-foreground)' }}
                               placeholder="설정 없음"
                               disabled={!isEditMode}
                             />
@@ -443,63 +430,70 @@ export default function ScrappingListSettingsPage() {
                         </TableRow>
                         <TableRow>
                           <TableCell className="font-medium">
-                            <span className="text-pink-900 text-xs font-medium">
-                              시작 페이지
-                            </span>
+                            <span className="text-gray-500 text-sm">시작 페이지</span>
                           </TableCell>
-                          <TableCell className="flex items-center space-x-6">
-                            <Input
-                              value={editData.startPage}
-                              onChange={(e) => handleInputChange('startPage', e.target.value)}
-                              className="w-20 text-xs bg-pink-25 text-pink-900 border-pink-200 focus:border-pink-400 focus:ring-pink-200"
-                              type="number"
-                              disabled={!isEditMode}
-                            />
-                            <span className="text-pink-900 text-xs font-medium">종료 페이지</span>
-                            <Input
-                              value={editData.endPage}
-                              onChange={(e) => handleInputChange('endPage', e.target.value)}
-                              className="w-20 text-xs bg-pink-25 text-pink-900 border-pink-200 focus:border-pink-400 focus:ring-pink-200"
-                              type="number"
-                              disabled={!isEditMode}
-                            />
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell className="font-medium">
-                            <span className="text-pink-900 text-xs font-medium">
-                              iFrame
-                            </span>
-                          </TableCell>
-                          <TableCell className="flex items-center space-x-6">
-                            <Input
-                              value={editData.iframe}
-                              onChange={(e) => handleInputChange('iframe', e.target.value)}
-                              className="w-32 text-xs bg-pink-25 text-pink-900 border-pink-200 focus:border-pink-400 focus:ring-pink-200"
-                              placeholder="없음"
-                              disabled={!isEditMode}
-                            />
-                            <span className="text-pink-900 text-xs font-medium">제외항목</span>
-                            <Input
-                              value={editData.exceptionRow}
-                              onChange={(e) => handleInputChange('exceptionRow', e.target.value)}
-                              className="w-48 text-xs font-mono bg-pink-25 text-pink-900 border-pink-200 focus:border-pink-400 focus:ring-pink-200"
-                              placeholder="제외할 행 조건"
-                              disabled={!isEditMode}
-                            />
+                          <TableCell className="flex items-center">
+                            <div className="flex items-center" style={{ width: '160px' }}>
+                              <Input
+                                value={editData.startPage}
+                                onChange={(e) => handleInputChange('startPage', e.target.value)}
+                                className="w-20 text-sm"
+                                style={{ color: 'var(--color-primary-foreground)' }}
+                                type="number"
+                                disabled={!isEditMode}
+                              />
+                            </div>
+                            <div className="flex items-center">
+                              <span className="text-gray-500 text-sm" style={{ width: '80px' }}>종료 페이지</span>
+                              <Input
+                                value={editData.endPage}
+                                onChange={(e) => handleInputChange('endPage', e.target.value)}
+                                className="w-20 text-sm"
+                                style={{ color: 'var(--color-primary-foreground)' }}
+                                type="number"
+                                disabled={!isEditMode}
+                              />
+                            </div>
                           </TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell className="font-medium">
-                            <span className="text-pink-900 text-xs font-medium">
-                              행 XPath
-                            </span>
+                            <span className="text-gray-500 text-sm">iFrame</span>
+                          </TableCell>
+                          <TableCell className="flex items-center">
+                            <div className="flex items-center" style={{ width: '160px' }}>
+                              <Input
+                                value={editData.iframe}
+                                onChange={(e) => handleInputChange('iframe', e.target.value)}
+                                className="w-32 text-sm"
+                                style={{ color: 'var(--color-primary-foreground)' }}
+                                placeholder="없음"
+                                disabled={!isEditMode}
+                              />
+                            </div>
+                            <div className="flex items-center">
+                              <span className="text-gray-500 text-sm" style={{ width: '80px' }}>제외항목</span>
+                              <Input
+                                value={editData.exceptionRow}
+                                onChange={(e) => handleInputChange('exceptionRow', e.target.value)}
+                                className="w-48 text-sm font-mono"
+                                style={{ color: 'var(--color-primary-foreground)' }}
+                                placeholder="제외할 행 조건"
+                                disabled={!isEditMode}
+                              />
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-medium">
+                            <span className="text-gray-500 text-sm">행 XPath</span>
                           </TableCell>
                           <TableCell>
                             <Input
                               value={editData.rowXpath}
                               onChange={(e) => handleInputChange('rowXpath', e.target.value)}
-                              className="w-full text-xs font-mono bg-pink-25 text-pink-900 border-pink-200 focus:border-pink-400 focus:ring-pink-200"
+                              className="w-full text-sm font-mono"
+                              style={{ color: 'var(--color-primary-foreground)' }}
                               disabled={!isEditMode}
                             />
                           </TableCell>
@@ -507,140 +501,413 @@ export default function ScrappingListSettingsPage() {
                       </TableBody>
                     </Table>
                   </div>
-                </div>
-                
-                {/* 요소 설정 */}
-                {listSettings || isEditMode ? (
-                  <div className="mb-6">
-                    <h4 className="text-sm font-medium mb-3 text-pink-900">🔧 요소 설정</h4>
-                    <div className="bg-white border rounded-lg overflow-hidden">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-32">키</TableHead>
-                            <TableHead>Xpath</TableHead>
-                            <TableHead className="w-24">타겟</TableHead>
-                            <TableHead className="w-48">콜백</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {(isEditMode ? editData.elements : listSettings.elements || []).length > 0 ? (
-                            (isEditMode ? editData.elements : listSettings.elements || []).map((element: any, index: number) => (
-                              <TableRow key={index}>
-                                <TableCell className="font-medium">
-                                  <span className="text-pink-900 text-xs font-medium">
-                                    {element.key}
-                                  </span>
-                                </TableCell>
-                                <TableCell>
-                                  <Input
-                                    value={element.xpath || ''}
-                                    onChange={(e) => handleElementChange(index, 'xpath', e.target.value)}
-                                    className="w-full text-xs font-mono bg-pink-25 text-pink-900 border-pink-200 focus:border-pink-400 focus:ring-pink-200"
-                                    disabled={!isEditMode}
-                                  />
-                                </TableCell>
-                                <TableCell>
-                                  <Input
-                                    value={element.target || ''}
-                                    onChange={(e) => handleElementChange(index, 'target', e.target.value)}
-                                    className="w-full text-xs bg-pink-25 text-pink-900 border-pink-200 focus:border-pink-400 focus:ring-pink-200"
-                                    disabled={!isEditMode}
-                                  />
-                                </TableCell>
-                                <TableCell>
-                                  <Input
-                                    value={element.callback || ''}
-                                    onChange={(e) => handleElementChange(index, 'callback', e.target.value)}
-                                    className="w-full text-xs font-mono bg-pink-25 text-pink-900 border-pink-200 focus:border-pink-400 focus:ring-pink-200"
-                                    disabled={!isEditMode}
-                                  />
-                                </TableCell>
-                              </TableRow>
-                            ))
-                          ) : (
-                            <TableRow>
-                              <TableCell colSpan={4} className="text-center py-8 text-color-primary-muted-foreground">
-                                요소 설정이 없습니다.
+
+                  {/* 요소 설정 */}
+                  <div className="border rounded-lg overflow-hidden" style={{ backgroundColor: 'transparent' }}>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-32 text-gray-500 text-sm">키</TableHead>
+                          <TableHead className="text-gray-500 text-sm">Xpath</TableHead>
+                          <TableHead className="w-24 text-gray-500 text-sm">타겟</TableHead>
+                          <TableHead className="w-48 text-gray-500 text-sm">콜백</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {(isEditMode ? editData.elements : listSettings.elements || []).length > 0 ? (
+                          (isEditMode ? editData.elements : listSettings.elements || []).map((element: any, index: number) => (
+                            <TableRow key={index}>
+                              <TableCell className="font-medium">
+                                <span className="text-sm" style={{ color: 'var(--color-primary-foreground)' }}>{element.key}</span>
+                              </TableCell>
+                              <TableCell>
+                                <Input
+                                  value={element.xpath || ''}
+                                  onChange={(e) => handleElementChange(index, 'xpath', e.target.value)}
+                                  className="w-full text-sm font-mono"
+                                  style={{ color: 'var(--color-primary-foreground)' }}
+                                  disabled={!isEditMode}
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <Input
+                                  value={element.target || ''}
+                                  onChange={(e) => handleElementChange(index, 'target', e.target.value)}
+                                  className="w-full text-sm"
+                                  style={{ color: 'var(--color-primary-foreground)' }}
+                                  disabled={!isEditMode}
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <Input
+                                  value={element.callback || ''}
+                                  onChange={(e) => handleElementChange(index, 'callback', e.target.value)}
+                                  className="w-full text-sm font-mono"
+                                  style={{ color: 'var(--color-primary-foreground)' }}
+                                  disabled={!isEditMode}
+                                />
                               </TableCell>
                             </TableRow>
-                          )}
-                        </TableBody>
-                      </Table>
-                    </div>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={4} className="text-center py-8 text-color-primary-muted-foreground">
+                              요소 설정이 없습니다.
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
                   </div>
-                ) : null}
-                
-                {/* 부가 설정 */}
-                <div className="mb-6">
-                  <h4 className="text-sm font-medium mb-3 text-pink-900">⚙️ 부가 설정</h4>
-                  <div className="bg-white border rounded-lg overflow-hidden">
+
+                  {/* 부가 설정 */}
+                  <div className="border rounded-lg overflow-hidden" style={{ backgroundColor: 'transparent' }}>
                     <Table>
                       <TableBody>
                         <TableRow>
                           <TableCell className="font-medium">
-                            <span className="text-pink-900 text-xs font-medium">
-                              지역
-                            </span>
+                            <span className="text-gray-500 text-sm">지역</span>
                           </TableCell>
-                          <TableCell className="flex items-center space-x-6">
-                            <Input
-                              value={editData.orgRegion}
-                              onChange={(e) => handleInputChange('orgRegion', e.target.value)}
-                              className="w-32 text-xs bg-pink-25 text-pink-900 border-pink-200 focus:border-pink-400 focus:ring-pink-200"
-                              disabled={!isEditMode}
-                            />
-                            <span className="text-pink-900 text-xs font-medium">사용</span>
-                            <Input
-                              value={editData.use}
-                              onChange={(e) => handleInputChange('use', e.target.value)}
-                              className="w-20 text-xs bg-pink-25 text-pink-900 border-pink-200 focus:border-pink-400 focus:ring-pink-200"
-                              disabled={!isEditMode}
-                            />
+                          <TableCell className="flex items-center">
+                            <div className="flex items-center" style={{ width: '160px' }}>
+                              <Input
+                                value={editData.orgRegion}
+                                onChange={(e) => handleInputChange('orgRegion', e.target.value)}
+                                className="w-32 text-sm"
+                                style={{ color: 'var(--color-primary-foreground)' }}
+                                disabled={!isEditMode}
+                              />
+                            </div>
+                            <div className="flex items-center">
+                              <span className="text-gray-500 text-sm" style={{ width: '80px' }}>사용</span>
+                              <Input
+                                value={editData.use}
+                                onChange={(e) => handleInputChange('use', e.target.value)}
+                                className="w-20 text-sm"
+                                style={{ color: 'var(--color-primary-foreground)' }}
+                                disabled={!isEditMode}
+                              />
+                            </div>
                           </TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell className="font-medium">
-                            <span className="text-pink-900 text-xs font-medium">
-                              담당업체
-                            </span>
+                            <span className="text-gray-500 text-sm">담당업체</span>
                           </TableCell>
-                          <TableCell className="flex items-center space-x-6">
-                            <Input
-                              value={editData.companyInCharge}
-                              onChange={(e) => handleInputChange('companyInCharge', e.target.value)}
-                              className="w-32 text-xs bg-pink-25 text-pink-900 border-pink-200 focus:border-pink-400 focus:ring-pink-200"
-                              disabled={!isEditMode}
-                            />
-                            <span className="text-pink-900 text-xs font-medium">담당자</span>
-                            <Input
-                              value={editData.orgMan}
-                              onChange={(e) => handleInputChange('orgMan', e.target.value)}
-                              className="w-32 text-xs bg-pink-25 text-pink-900 border-pink-200 focus:border-pink-400 focus:ring-pink-200"
-                              disabled={!isEditMode}
-                            />
+                          <TableCell className="flex items-center">
+                            <div className="flex items-center" style={{ width: '160px' }}>
+                              <Input
+                                value={editData.companyInCharge}
+                                onChange={(e) => handleInputChange('companyInCharge', e.target.value)}
+                                className="w-32 text-sm"
+                                style={{ color: 'var(--color-primary-foreground)' }}
+                                disabled={!isEditMode}
+                              />
+                            </div>
+                            <div className="flex items-center">
+                              <span className="text-gray-500 text-sm" style={{ width: '80px' }}>담당자</span>
+                              <Input
+                                value={editData.orgMan}
+                                onChange={(e) => handleInputChange('orgMan', e.target.value)}
+                                className="w-32 text-sm"
+                                style={{ color: 'var(--color-primary-foreground)' }}
+                                disabled={!isEditMode}
+                              />
+                            </div>
                           </TableCell>
                         </TableRow>
                       </TableBody>
                     </Table>
                   </div>
                 </div>
+              )}
 
+              {/* 기본 설정 탭 */}
+              {activeSubTab === 'basic' && (
+                <div className="border rounded-lg overflow-hidden" style={{ backgroundColor: 'transparent' }}>
+                  <Table>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell className="font-medium w-24">
+                          <span className="text-gray-500 text-sm">기관명</span>
+                        </TableCell>
+                        <TableCell className="break-all">
+                          <Input
+                            value={editData.orgName}
+                            onChange={(e) => handleInputChange('orgName', e.target.value)}
+                            className="w-full text-sm"
+                            style={{ color: 'var(--color-primary-foreground)' }}
+                            disabled={!isEditMode}
+                          />
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium w-24">
+                          <span className="text-gray-500 text-sm">URL</span>
+                        </TableCell>
+                        <TableCell className="break-all">
+                          <Input
+                            value={editData.detailUrl}
+                            onChange={(e) => handleInputChange('detailUrl', e.target.value)}
+                            className="w-full text-sm"
+                            style={{ color: 'var(--color-primary-foreground)' }}
+                            disabled={!isEditMode}
+                          />
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium">
+                          <span className="text-gray-500 text-sm">페이징</span>
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            value={editData.paging}
+                            onChange={(e) => handleInputChange('paging', e.target.value)}
+                            className="w-full text-sm font-mono"
+                            style={{ color: 'var(--color-primary-foreground)' }}
+                            placeholder="설정 없음"
+                            disabled={!isEditMode}
+                          />
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium">
+                          <span className="text-gray-500 text-sm">시작 페이지</span>
+                        </TableCell>
+                        <TableCell className="flex items-center">
+                          <div className="flex items-center" style={{ width: '160px' }}>
+                            <Input
+                              value={editData.startPage}
+                              onChange={(e) => handleInputChange('startPage', e.target.value)}
+                              className="w-20 text-sm"
+                              style={{ color: 'var(--color-primary-foreground)' }}
+                              type="number"
+                              disabled={!isEditMode}
+                            />
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-gray-500 text-sm" style={{ width: '80px' }}>종료 페이지</span>
+                            <Input
+                              value={editData.endPage}
+                              onChange={(e) => handleInputChange('endPage', e.target.value)}
+                              className="w-20 text-sm"
+                              style={{ color: 'var(--color-primary-foreground)' }}
+                              type="number"
+                              disabled={!isEditMode}
+                            />
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium">
+                          <span className="text-gray-500 text-sm">iFrame</span>
+                        </TableCell>
+                        <TableCell className="flex items-center">
+                          <div className="flex items-center" style={{ width: '160px' }}>
+                            <Input
+                              value={editData.iframe}
+                              onChange={(e) => handleInputChange('iframe', e.target.value)}
+                              className="w-32 text-sm"
+                              style={{ color: 'var(--color-primary-foreground)' }}
+                              placeholder="없음"
+                              disabled={!isEditMode}
+                            />
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-gray-500 text-sm" style={{ width: '80px' }}>제외항목</span>
+                            <Input
+                              value={editData.exceptionRow}
+                              onChange={(e) => handleInputChange('exceptionRow', e.target.value)}
+                              className="w-48 text-sm font-mono"
+                              style={{ color: 'var(--color-primary-foreground)' }}
+                              placeholder="제외할 행 조건"
+                              disabled={!isEditMode}
+                            />
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium">
+                          <span className="text-gray-500 text-sm">행 XPath</span>
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            value={editData.rowXpath}
+                            onChange={(e) => handleInputChange('rowXpath', e.target.value)}
+                            className="w-full text-sm font-mono"
+                            style={{ color: 'var(--color-primary-foreground)' }}
+                            disabled={!isEditMode}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+
+              {/* 요소 설정 탭 */}
+              {activeSubTab === 'elements' && (
+                <div className="border rounded-lg overflow-hidden" style={{ backgroundColor: 'transparent' }}>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-32 text-gray-500 text-sm">키</TableHead>
+                        <TableHead className="text-gray-500 text-sm">Xpath</TableHead>
+                        <TableHead className="w-24 text-gray-500 text-sm">타겟</TableHead>
+                        <TableHead className="w-48 text-gray-500 text-sm">콜백</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {(isEditMode ? editData.elements : listSettings.elements || []).length > 0 ? (
+                        (isEditMode ? editData.elements : listSettings.elements || []).map((element: any, index: number) => (
+                          <TableRow key={index}>
+                            <TableCell className="font-medium">
+                              <span className="text-sm" style={{ color: 'var(--color-primary-foreground)' }}>{element.key}</span>
+                            </TableCell>
+                            <TableCell>
+                              <Input
+                                value={element.xpath || ''}
+                                onChange={(e) => handleElementChange(index, 'xpath', e.target.value)}
+                                className="w-full text-sm font-mono"
+                                style={{ color: 'var(--color-primary-foreground)' }}
+                                disabled={!isEditMode}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Input
+                                value={element.target || ''}
+                                onChange={(e) => handleElementChange(index, 'target', e.target.value)}
+                                className="w-full text-sm"
+                                style={{ color: 'var(--color-primary-foreground)' }}
+                                disabled={!isEditMode}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Input
+                                value={element.callback || ''}
+                                onChange={(e) => handleElementChange(index, 'callback', e.target.value)}
+                                className="w-full text-sm font-mono"
+                                style={{ color: 'var(--color-primary-foreground)' }}
+                                disabled={!isEditMode}
+                              />
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={4} className="text-center py-8 text-color-primary-muted-foreground">
+                            요소 설정이 없습니다.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+
+              {/* 부가 설정 탭 */}
+              {activeSubTab === 'additional' && (
+                <div className="border rounded-lg overflow-hidden" style={{ backgroundColor: 'transparent' }}>
+                  <Table>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell className="font-medium">
+                          <span className="text-gray-500 text-sm">지역</span>
+                        </TableCell>
+                        <TableCell className="flex items-center">
+                          <div className="flex items-center" style={{ width: '160px' }}>
+                            <Input
+                              value={editData.orgRegion}
+                              onChange={(e) => handleInputChange('orgRegion', e.target.value)}
+                              className="w-32 text-sm"
+                              style={{ color: 'var(--color-primary-foreground)' }}
+                              disabled={!isEditMode}
+                            />
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-gray-500 text-sm" style={{ width: '80px' }}>사용</span>
+                            <Input
+                              value={editData.use}
+                              onChange={(e) => handleInputChange('use', e.target.value)}
+                              className="w-20 text-sm"
+                              style={{ color: 'var(--color-primary-foreground)' }}
+                              disabled={!isEditMode}
+                            />
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium">
+                          <span className="text-gray-500 text-sm">담당업체</span>
+                        </TableCell>
+                        <TableCell className="flex items-center">
+                          <div className="flex items-center" style={{ width: '160px' }}>
+                            <Input
+                              value={editData.companyInCharge}
+                              onChange={(e) => handleInputChange('companyInCharge', e.target.value)}
+                              className="w-32 text-sm"
+                              style={{ color: 'var(--color-primary-foreground)' }}
+                              disabled={!isEditMode}
+                            />
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-gray-500 text-sm" style={{ width: '80px' }}>담당자</span>
+                            <Input
+                              value={editData.orgMan}
+                              onChange={(e) => handleInputChange('orgMan', e.target.value)}
+                              className="w-32 text-sm"
+                              style={{ color: 'var(--color-primary-foreground)' }}
+                              disabled={!isEditMode}
+                            />
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
             </div>
           ) : (
             <div className="text-center py-8">
               <p className="text-color-primary-muted-foreground">목록 스크랩 설정이 없습니다.</p>
-              <Button 
-                variant="outline" 
-                className="mt-4"
+              <ButtonWithIcon
+                icon={<Edit className="h-4 w-4" />}
                 onClick={handleEditMode}
+                className="mt-4"
               >
                 설정 추가하기
-              </Button>
+              </ButtonWithIcon>
             </div>
           )}
-        </CardContent>
-      </Card>
+
+          {/* 버튼 영역 - TabContainer 하단 우측 */}
+          <div className="flex justify-end space-x-2 mt-6 pt-4 border-t">
+            {isEditMode ? (
+              <>
+                <ButtonWithIcon
+                  icon={<Eye className="h-4 w-4" />}
+                  onClick={handleViewMode}
+                >
+                  보기
+                </ButtonWithIcon>
+                <ButtonWithIcon
+                  icon={<Save className="h-4 w-4" />}
+                  onClick={handleSave}
+                >
+                  저장
+                </ButtonWithIcon>
+              </>
+            ) : (
+              <ButtonWithIcon
+                icon={<Edit className="h-4 w-4" />}
+                onClick={handleEditMode}
+              >
+                편집
+              </ButtonWithIcon>
+            )}
+          </div>
+        </TabContainer>
+      </div>
 
       {/* 저장 확인 모달 */}
       <Dialog open={showSaveModal} onOpenChange={setShowSaveModal}>
