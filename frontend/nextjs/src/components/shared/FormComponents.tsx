@@ -433,18 +433,37 @@ export function OutlineSelectItem({
  */
 export function RadioButtonSet({ options, value, onChange, className }: RadioButtonSetProps) {
   return (
-    <div className={cn("inline-flex border border-color-primary-foreground rounded-md overflow-hidden", className)}>
+    <div
+      className={cn("inline-flex border rounded-md overflow-hidden", className)}
+      style={{
+        borderColor: 'hsl(var(--color-primary-foreground))'
+      }}
+    >
       {options.map((option) => (
         <button
           key={option.value}
           onClick={() => onChange(option.value)}
           className={cn(
-            "h-9 px-3 text-sm font-medium transition-colors border-r border-color-primary-foreground last:border-r-0 flex items-center justify-center whitespace-nowrap",
-            "text-color-primary-foreground hover:bg-color-primary-hovered",
+            "h-9 px-3 text-sm font-medium transition-colors border-r last:border-r-0 flex items-center justify-center whitespace-nowrap",
             value === option.value
-              ? "bg-color-primary-muted font-bold"
-              : "bg-transparent"
+              ? "font-bold"
+              : ""
           )}
+          style={{
+            color: 'hsl(var(--color-primary-foreground))',
+            borderColor: 'hsl(var(--color-primary-foreground))',
+            backgroundColor: value === option.value ? 'hsl(var(--color-primary-muted))' : 'transparent',
+          }}
+          onMouseEnter={(e) => {
+            if (value !== option.value) {
+              e.currentTarget.style.backgroundColor = 'hsl(var(--color-primary-hovered))';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (value !== option.value) {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }
+          }}
         >
           {option.label}
         </button>
@@ -473,12 +492,25 @@ export function ButtonWithIcon({
       disabled={disabled}
       className={cn(
         "inline-flex items-center justify-center px-4 py-2 text-sm font-medium transition-colors",
-        "border border-color-primary-foreground bg-transparent",
-        "text-color-primary-foreground hover:bg-color-primary-hovered hover:text-color-primary-foreground",
+        "border bg-transparent",
         "disabled:opacity-50 disabled:cursor-not-allowed",
         "rounded-md",
         className
       )}
+      style={{
+        borderColor: 'hsl(var(--color-primary-foreground))',
+        color: 'hsl(var(--color-primary-foreground))',
+      }}
+      onMouseEnter={(e) => {
+        if (!disabled) {
+          e.currentTarget.style.backgroundColor = 'hsl(var(--color-primary-hovered))';
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!disabled) {
+          e.currentTarget.style.backgroundColor = 'transparent';
+        }
+      }}
     >
       {icon}
       {children}
@@ -506,6 +538,8 @@ export function ButtonWithColorIcon({
     const colorMap: { [key: string]: {
       outline: { text: string; border: string; bg: string; hover: string; disabled: string; active: string };
       filled: { text: string; border: string; bg: string; hover: string; disabled: string; active: string };
+      active?: { text: string; border: string; bg: string; hover: string; disabled: string; active: string };
+      base?: { text: string; border: string; bg: string; hover: string; disabled: string; active: string };
     } } = {
       blue: {
         outline: {
@@ -688,6 +722,60 @@ export function ButtonWithColorIcon({
   };
 
   const colorClasses = getColorClasses(color, mode);
+
+  // Check if this uses custom CSS properties that need manual hover handling
+  const needsCustomHover = colorClasses.hover.includes('color-primary-hovered') ||
+                          colorClasses.hover.includes('color-secondary-active') ||
+                          colorClasses.hover.includes('color-tertiary-base');
+
+  if (needsCustomHover) {
+    // Use manual hover handling for CSS custom properties, like IconButton
+    return (
+      <button
+        type={type}
+        onClick={disabled ? undefined : onClick}
+        disabled={disabled}
+        className={cn(
+          "inline-flex items-center justify-center px-4 py-2 text-sm font-medium transition-colors",
+          "border rounded-md gap-2",
+          "disabled:opacity-50 disabled:cursor-not-allowed",
+          className
+        )}
+        style={{
+          color: colorClasses.text.includes('color-primary-foreground') ? 'hsl(var(--color-primary-foreground))' : undefined,
+          borderColor: colorClasses.border.includes('color-primary-foreground') ? 'hsl(var(--color-primary-foreground))' : undefined,
+          backgroundColor: colorClasses.bg.includes('bg-transparent') ? 'transparent' :
+                          colorClasses.bg.includes('color-secondary-active') ? 'hsl(var(--color-secondary-active))' :
+                          colorClasses.bg.includes('color-tertiary-base') ? 'hsl(var(--color-tertiary-base))' : undefined,
+        }}
+        onMouseEnter={(e) => {
+          if (!disabled) {
+            if (colorClasses.hover.includes('color-primary-hovered')) {
+              e.currentTarget.style.backgroundColor = 'hsl(var(--color-primary-hovered))';
+            } else if (colorClasses.hover.includes('color-secondary-active')) {
+              e.currentTarget.style.backgroundColor = 'hsl(var(--color-secondary-active))';
+            } else if (colorClasses.hover.includes('color-tertiary-base')) {
+              e.currentTarget.style.backgroundColor = 'hsl(var(--color-tertiary-base))';
+            }
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!disabled) {
+            if (colorClasses.bg.includes('bg-transparent')) {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            } else if (colorClasses.bg.includes('color-secondary-active')) {
+              e.currentTarget.style.backgroundColor = 'hsl(var(--color-secondary-active))';
+            } else if (colorClasses.bg.includes('color-tertiary-base')) {
+              e.currentTarget.style.backgroundColor = 'hsl(var(--color-tertiary-base))';
+            }
+          }
+        }}
+      >
+        {icon}
+        {children}
+      </button>
+    );
+  }
 
   return (
     <button
