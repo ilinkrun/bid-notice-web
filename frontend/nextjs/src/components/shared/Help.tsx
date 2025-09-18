@@ -8,6 +8,11 @@ interface PageTitleHelpProps {
   helpContent?: string;
 }
 
+interface SectionTitleHelpProps {
+  isOpen: boolean;
+  onToggle: () => void;
+}
+
 export function PageTitleHelp({
   helpTooltip = "도움말을 확인하세요",
   helpContent = "이 페이지에 대한 자세한 도움말입니다."
@@ -53,5 +58,31 @@ export function PageTitleHelp({
         </>
       )}
     </div>
+  );
+}
+
+export function SectionTitleHelp({ isOpen, onToggle }: SectionTitleHelpProps) {
+  return (
+    <button
+      className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:transition-colors"
+      onClick={onToggle}
+      title="업무 가이드"
+      style={{
+        color: 'var(--color-primary-foreground)',
+        backgroundColor: isOpen ? 'var(--color-primary-hovered)' : 'transparent'
+      }}
+      onMouseEnter={(e) => {
+        if (!isOpen) {
+          e.currentTarget.style.backgroundColor = 'var(--color-primary-hovered)';
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!isOpen) {
+          e.currentTarget.style.backgroundColor = 'transparent';
+        }
+      }}
+    >
+      <HelpCircle className="w-4 h-4" />
+    </button>
   );
 }

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { ButtonWithIcon, ButtonWithColorIcon, DropdownSectionHeader, TabHeader, TabContainer } from '@/components/shared/FormComponents';
+import { SectionTitleHelp } from '@/components/shared/Help';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -28,7 +29,8 @@ import {
   Trophy,
   XCircle,
   RefreshCw,
-  ArrowRight
+  ArrowRight,
+  HelpCircle
 } from 'lucide-react';
 import { useMutation, useQuery, gql } from '@apollo/client';
 import { useRouter } from 'next/navigation';
@@ -139,6 +141,11 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
   const [isInfoExpanded, setIsInfoExpanded] = useState(true);
   const [isDocumentExpanded, setIsDocumentExpanded] = useState(true);
   const [isStageExpanded, setIsStageExpanded] = useState(true);
+
+  // 업무 가이드 표시 상태
+  const [isInfoGuideOpen, setIsInfoGuideOpen] = useState(false);
+  const [isDocumentGuideOpen, setIsDocumentGuideOpen] = useState(false);
+  const [isStageGuideOpen, setIsStageGuideOpen] = useState(false);
   
   // 탭 상태
   const [infoActiveTab, setInfoActiveTab] = useState('notice');
@@ -653,13 +660,34 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
     <div className="container mx-auto px-4 py-6 space-y-5">
       {/* 입찰 정보 */}
       <div>
-        <DropdownSectionHeader
-          title="입찰 정보"
-          icon={<Info className="w-5 h-5" />}
-          isExpanded={isInfoExpanded}
-          onToggle={() => setIsInfoExpanded(!isInfoExpanded)}
-          accentColor="#6366f1"
-        />
+        <div className="flex items-center gap-2">
+          <DropdownSectionHeader
+            title="입찰 정보"
+            icon={<Info className="w-5 h-5" />}
+            isExpanded={isInfoExpanded}
+            onToggle={() => setIsInfoExpanded(!isInfoExpanded)}
+            accentColor="#6366f1"
+          />
+          <SectionTitleHelp
+            isOpen={isInfoGuideOpen}
+            onToggle={() => setIsInfoGuideOpen(!isInfoGuideOpen)}
+          />
+        </div>
+
+        {/* 입찰 정보 업무 가이드 */}
+        {isInfoGuideOpen && (
+          <div className="mt-2 bg-blue-50 border border-blue-200 p-4 rounded-lg">
+            <div className="max-w-full">
+              <h4 className="font-semibold text-blue-800 mb-2">입찰 정보 업무 가이드</h4>
+              <div className="text-sm text-blue-700 space-y-2">
+                <p>• 공고 상세정보: 입찰 공고의 기본 정보를 확인하고 편집할 수 있습니다.</p>
+                <p>• 입찰 상세정보: 입찰과 관련된 세부 사항을 입력하고 관리할 수 있습니다.</p>
+                <p>• 편집 모드에서 정보를 수정한 후 반드시 저장 버튼을 클릭하여 변경사항을 적용하세요.</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {isInfoExpanded && (
           <div className="mt-2 space-y-0">
             {/* 탭 버튼 */}
@@ -859,7 +887,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                   <div className="space-y-3">
                     {(() => {
                       const fields = Object.entries(noticeFields);
-                      const rows = [];
+                      const rows: React.ReactElement[] = [];
 
                       // 2개씩 그룹화
                       for (let i = 0; i < fields.length; i += 2) {
@@ -969,13 +997,34 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
 
       {/* 입찰 문서 */}
       <div>
-        <DropdownSectionHeader
-          title="입찰 문서"
-          icon={<FileText className="w-5 h-5" />}
-          isExpanded={isDocumentExpanded}
-          onToggle={() => setIsDocumentExpanded(!isDocumentExpanded)}
-          accentColor="#10b981"
-        />
+        <div className="flex items-center gap-2">
+          <DropdownSectionHeader
+            title="입찰 문서"
+            icon={<FileText className="w-5 h-5" />}
+            isExpanded={isDocumentExpanded}
+            onToggle={() => setIsDocumentExpanded(!isDocumentExpanded)}
+            accentColor="#10b981"
+          />
+          <SectionTitleHelp
+            isOpen={isDocumentGuideOpen}
+            onToggle={() => setIsDocumentGuideOpen(!isDocumentGuideOpen)}
+          />
+        </div>
+
+        {/* 입찰 문서 업무 가이드 */}
+        {isDocumentGuideOpen && (
+          <div className="mt-2 bg-green-50 border border-green-200 p-4 rounded-lg">
+            <div className="max-w-full">
+              <h4 className="font-semibold text-green-800 mb-2">입찰 문서 업무 가이드</h4>
+              <div className="text-sm text-green-700 space-y-2">
+                <p>• 공고 문서: 입찰 공고에 첨부된 문서들을 확인하고 다운로드할 수 있습니다.</p>
+                <p>• 문서 작성: 입찰서, 사업계획서 등 필요한 서류를 작성할 수 있습니다.</p>
+                <p>• 다운로드 체크박스를 사용하여 필요한 파일들을 선택하여 일괄 다운로드할 수 있습니다.</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {isDocumentExpanded && (
           <div className="mt-2 space-y-0">
             {/* 탭 버튼 */}
@@ -1200,17 +1249,39 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
             )}
           </div>
         )}
+
       </div>
 
       {/* 단계 변경 */}
       <div>
-        <DropdownSectionHeader
-          title="단계 변경"
-          icon={<RefreshCw className="w-5 h-5" />}
-          isExpanded={isStageExpanded}
-          onToggle={() => setIsStageExpanded(!isStageExpanded)}
-          accentColor="#f59e0b"
-        />
+        <div className="flex items-center gap-2">
+          <DropdownSectionHeader
+            title="단계 변경"
+            icon={<RefreshCw className="w-5 h-5" />}
+            isExpanded={isStageExpanded}
+            onToggle={() => setIsStageExpanded(!isStageExpanded)}
+            accentColor="#f59e0b"
+          />
+          <SectionTitleHelp
+            isOpen={isStageGuideOpen}
+            onToggle={() => setIsStageGuideOpen(!isStageGuideOpen)}
+          />
+        </div>
+
+        {/* 단계 변경 업무 가이드 */}
+        {isStageGuideOpen && (
+          <div className="mt-2 bg-orange-50 border border-orange-200 p-4 rounded-lg">
+            <div className="max-w-full">
+              <h4 className="font-semibold text-orange-800 mb-2">단계 변경 업무 가이드</h4>
+              <div className="text-sm text-orange-700 space-y-2">
+                <p>• 응찰: 입찰 참여 단계로, 필요한 서류를 준비하고 제출합니다.</p>
+                <p>• 포기: 다양한 사유로 입찰을 포기하는 경우 선택합니다.</p>
+                <p>• 단계 변경 시 메모를 작성하여 변경 사유를 기록할 수 있습니다.</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {isStageExpanded && (
           <div className="mt-2 space-y-0">
             {/* 탭 버튼 */}
@@ -1289,6 +1360,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
             </div>
           </div>
         )}
+
       </div>
 
     </div>
