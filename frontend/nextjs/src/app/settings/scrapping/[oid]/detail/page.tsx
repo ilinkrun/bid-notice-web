@@ -317,9 +317,10 @@ export default function ScrappingDetailSettingsPage() {
       isActive={listSettings?.use}
       region={listSettings?.region}
     >
-      <div className="space-y-6">
-        {/* 기본 설정 */}
-        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+      {/* 상세 스크랩 설정 통합 박스 */}
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+        {/* 기본 설정 섹션 */}
+        <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
             <Settings className="h-5 w-5 text-gray-700 dark:text-gray-300" />
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">기본 설정</h3>
@@ -346,8 +347,8 @@ export default function ScrappingDetailSettingsPage() {
           </div>
         </div>
 
-        {/* 요소 설정 */}
-        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+        {/* 요소 설정 섹션 */}
+        <div className="mb-6">
           <div className="flex items-center gap-2 mb-4">
             <Puzzle className="h-5 w-5 text-gray-700 dark:text-gray-300" />
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">요소 설정</h3>
@@ -401,39 +402,39 @@ export default function ScrappingDetailSettingsPage() {
               </TableBody>
             </Table>
           </div>
+        </div>
 
-          {/* 버튼 영역을 내용 박스 우측하단에 배치 */}
-          <div className="flex justify-end space-x-2 mt-6">
-            {isEditMode ? (
-              <>
-                <ButtonWithIcon
-                  variant="outline"
-                  size="sm"
-                  icon={<Eye className="w-4 h-4" />}
-                  onClick={handleViewMode}
-                >
-                  보기
-                </ButtonWithIcon>
-                <ButtonWithIcon
-                  variant="default"
-                  size="sm"
-                  icon={<Save className="w-4 h-4" />}
-                  onClick={handleSave}
-                >
-                  저장
-                </ButtonWithIcon>
-              </>
-            ) : (
+        {/* 버튼 영역을 통합 박스 우측하단에 배치 */}
+        <div className="flex justify-end space-x-2 mt-6">
+          {isEditMode ? (
+            <>
               <ButtonWithIcon
                 variant="outline"
                 size="sm"
-                icon={<Edit className="w-4 h-4" />}
-                onClick={handleEditMode}
+                icon={<Eye className="w-4 h-4" />}
+                onClick={handleViewMode}
               >
-                편집
+                보기
               </ButtonWithIcon>
-            )}
-          </div>
+              <ButtonWithIcon
+                variant="default"
+                size="sm"
+                icon={<Save className="w-4 h-4" />}
+                onClick={handleSave}
+              >
+                저장
+              </ButtonWithIcon>
+            </>
+          ) : (
+            <ButtonWithIcon
+              variant="outline"
+              size="sm"
+              icon={<Edit className="w-4 h-4" />}
+              onClick={handleEditMode}
+            >
+              편집
+            </ButtonWithIcon>
+          )}
         </div>
       </div>
 

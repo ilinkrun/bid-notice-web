@@ -90,25 +90,95 @@ export function ScrappingSettingsLayout({ children, orgName }: ScrappingSettings
             {isListGuideOpen && (
               <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
                 <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-3">📖 목록 스크랩 설정 가이드</h4>
-                <div className="space-y-3 text-sm text-blue-800 dark:text-blue-200">
+                <div className="space-y-6">
+                  {/* 기본 설정 가이드 */}
                   <div>
-                    <h5 className="font-medium">기본 설정</h5>
-                    <ul className="ml-4 space-y-1 text-xs">
-                      <li>• URL: 스크랩할 게시판 URL (페이지 번호는 $&#123;i&#125;로 표시)</li>
-                      <li>• 페이징: 페이지 이동을 위한 XPath</li>
-                      <li>• 시작/종료 페이지: 1회 스크랩할 페이지 범위</li>
-                      <li>• iFrame: 게시판이 iframe 내에 있는 경우 선택자</li>
-                      <li>• 행 XPath: 게시판에서 1개 공고 행의 XPath</li>
-                    </ul>
+                    <h3 className="text-base font-semibold text-blue-900 dark:text-blue-100 mb-3">📋 기본 설정</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <h4 className="font-medium text-gray-800 dark:text-gray-200">• URL</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 ml-4">게시판 url</p>
+                        <p className="text-sm text-blue-700 dark:text-blue-300 ml-4">- 페이지가 url에 있는 포함된 경우 'pgno=$&#123;i&#125;'와 같이 '$&#123;i&#125;'로 표시</p>
+                        <p className="text-sm text-blue-700 dark:text-blue-300 ml-4">- 예: https://www.gangnam.go.kr/notice/list.do?mid=ID05_0402&pgno=$&#123;i&#125;</p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-800 dark:text-gray-200">• 페이징</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 ml-4">페이지를 클릭으로 이동하는 경우, 해당 요소의 XPath</p>
+                        <p className="text-sm text-blue-700 dark:text-blue-300 ml-4">- 예: //div[contains(@class, "pagination")]/span/a[contains(text(),"$&#123;i&#125;")]</p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-800 dark:text-gray-200">• 시작페이지 / 종료페이지</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 ml-4">1회에 스크랩하는 페이지의 시작/종료 페이지 번호</p>
+                        <p className="text-sm text-blue-700 dark:text-blue-300 ml-4">- 예: 1, 3</p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-800 dark:text-gray-200">• iFrame</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 ml-4">게시판이 iframe 내에 있는 경우 iframe 선택자</p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-800 dark:text-gray-200">• 제외항목</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 ml-4">스크랩에서 제외할 행의 조건</p>
+                        <p className="text-sm text-blue-700 dark:text-blue-300 ml-4">- 예: td[1]/strong|-|-"공지" in rst</p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-800 dark:text-gray-200">• 행 XPath</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 ml-4">스크랩하는 게시판에서 1개의 공고 행의 XPath</p>
+                        <p className="text-sm text-blue-700 dark:text-blue-300 ml-4">- 예: //*[@id="board"]/table/tbody/tr</p>
+                      </div>
+                    </div>
                   </div>
+
+                  {/* 요소 설정 가이드 */}
                   <div>
-                    <h5 className="font-medium">요소 설정</h5>
-                    <ul className="ml-4 space-y-1 text-xs">
-                      <li>• 키: title(제목), detail_url(상세URL), posted_date(작성일), posted_by(작성자)</li>
-                      <li>• XPath: 목록 행 내에서의 상대 XPath</li>
-                      <li>• 타겟: HTML 속성명 (텍스트인 경우 빈값)</li>
-                      <li>• 콜백: 추출된 값을 수정하는 JavaScript 함수</li>
-                    </ul>
+                    <h3 className="text-base font-semibold text-blue-900 dark:text-blue-100 mb-3">🔧 요소 설정</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <h4 className="font-medium text-gray-800 dark:text-gray-200">• 키</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 ml-4">요소의 이름</p>
+                        <p className="text-sm text-blue-700 dark:text-blue-300 ml-4">- title: 제목</p>
+                        <p className="text-sm text-blue-700 dark:text-blue-300 ml-4">- detail_url: 상세페이지 url</p>
+                        <p className="text-sm text-blue-700 dark:text-blue-300 ml-4">- posted_date: 작성일</p>
+                        <p className="text-sm text-blue-700 dark:text-blue-300 ml-4">- posted_by: 작성자</p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-800 dark:text-gray-200">• XPath</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 ml-4">목록 행 내에서의 상대 XPath</p>
+                        <p className="text-sm text-blue-700 dark:text-blue-300 ml-4">- 예: td[4]/a</p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-800 dark:text-gray-200">• 타겟</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 ml-4">요소의 html 속성(text인 경우 빈값)</p>
+                        <p className="text-sm text-blue-700 dark:text-blue-300 ml-4">- 예: href</p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-800 dark:text-gray-200">• 콜백</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 ml-4">XPath, 타겟으로 얻은 값(rst)을 수정하는 함수</p>
+                        <p className="text-sm text-blue-700 dark:text-blue-300 ml-4">- 예: "https://www.gp.go.kr/portal/" + rst.split("/")[1]</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 부가 설정 가이드 */}
+                  <div>
+                    <h3 className="text-base font-semibold text-blue-900 dark:text-blue-100 mb-3">⚙️ 부가 설정</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <h4 className="font-medium text-gray-800 dark:text-gray-200">• 지역</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 ml-4">입찰 공고 관련 지역명(서울, 경기, 충남, 전국)</p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-800 dark:text-gray-200">• 사용</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 ml-4">스크랩 사용 여부(1: 사용, 0: 사용안함)</p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-800 dark:text-gray-200">• 담당업체</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 ml-4">'일맥', '링크', '일맥,링크'</p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-800 dark:text-gray-200">• 담당자</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 ml-4">관련 업무 담당자</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
