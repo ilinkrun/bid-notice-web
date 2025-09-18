@@ -140,6 +140,15 @@
     background-color: hsl(var(--color-primary-background));
   }
 
+  /* 헤더 드롭다운 메뉴 hover 효과 */
+  header [role="menu"] a:hover,
+  header [role="menu"] button:hover,
+  header .dropdown-content a:hover,
+  header .dropdown-content button:hover {
+    background-color: hsl(var(--color-primary-hovered)) !important;
+    transition: background-color 0.2s ease !important;
+  }
+
 
   /* body {
     @apply text-foreground;
@@ -164,9 +173,9 @@
     background-color: transparent;
   }
 
-  /* 일반 버튼은 투명하게, 단 ButtonWithColorIcon은 제외 */
-  button:not(.bg-color-secondary-active):not(.bg-color-tertiary-base):not([class*="bg-red"]):not([class*="bg-green"]),
-  [role="button"]:not(.bg-color-secondary-active):not(.bg-color-tertiary-base):not([class*="bg-red"]):not([class*="bg-green"]) {
+  /* 일반 버튼은 투명하게, 단 ButtonWithColorIcon과 헤더 요소는 제외 */
+  button:not(.bg-color-secondary-active):not(.bg-color-tertiary-base):not([class*="bg-red"]):not([class*="bg-green"]):not(header button):not(header *),
+  [role="button"]:not(.bg-color-secondary-active):not(.bg-color-tertiary-base):not([class*="bg-red"]):not([class*="bg-green"]):not(header [role="button"]):not(header *) {
     background-color: transparent;
   }
 
@@ -180,9 +189,9 @@
     color: hsl(var(--color-primary-foreground));
   }
 
-  /* hover 상태 */
-  button:hover,
-  [role="button"]:hover,
+  /* hover 상태 (헤더 요소 제외) */
+  button:hover:not(header button):not(header *),
+  [role="button"]:hover:not(header [role="button"]):not(header *),
   [role="combobox"]:hover,
   .select-trigger:hover,
   input:hover,
@@ -420,6 +429,7 @@
   .hover\:bg-color-primary-hovered:hover {
     background-color: hsl(var(--color-primary-hovered)) !important;
   }
+
 
   .disabled\:text-color-primary-muted:disabled {
     color: hsl(var(--color-primary-muted)) !important;
