@@ -368,20 +368,19 @@ export default function ScrappingDetailSettingsPage() {
             {/* 기본 설정 */}
             <div className="mb-6">
               <h4 className="text-sm font-medium mb-3 text-pink-900">📋 기본 설정</h4>
-              <div className="bg-white border rounded-lg overflow-hidden">
+              <div className="border rounded-lg overflow-hidden" style={{ backgroundColor: 'transparent' }}>
                 <Table>
                   <TableBody>
                     <TableRow>
                       <TableCell className="font-medium w-24">
-                        <span className="text-pink-900 text-xs font-medium">
-                          기관명
-                        </span>
+                        <span className="text-gray-500 text-sm">기관명</span>
                       </TableCell>
                       <TableCell className="break-all">
                         <Input
                           value={editData.orgName}
                           onChange={(e) => handleInputChange('orgName', e.target.value)}
-                          className="w-full text-xs bg-pink-25 text-pink-900 border-pink-200 focus:border-pink-400 focus:ring-pink-200"
+                          className="w-full text-sm"
+                          style={{ color: 'var(--color-primary-foreground)' }}
                           disabled={!isEditMode}
                         />
                       </TableCell>
@@ -394,7 +393,7 @@ export default function ScrappingDetailSettingsPage() {
             {/* 요소 설정 */}
             <div className="mb-6">
               <h4 className="text-sm font-medium mb-3 text-pink-900">🔧 요소 설정</h4>
-              <div className="bg-white border rounded-lg overflow-hidden">
+              <div className="border rounded-lg overflow-hidden" style={{ backgroundColor: 'transparent' }}>
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -419,15 +418,14 @@ export default function ScrappingDetailSettingsPage() {
                     ].map((element, index) => (
                       <TableRow key={index}>
                         <TableCell className="font-medium">
-                          <span className="text-pink-900 text-xs font-medium">
-                            {element.key}
-                          </span>
+                          <span className="text-gray-500 text-sm">{element.key}</span>
                         </TableCell>
                         <TableCell>
                           <Input
                             value={editData[element.field as keyof typeof editData] || ''}
                             onChange={(e) => handleInputChange(element.field, e.target.value)}
-                            className="w-full text-xs font-mono bg-pink-25 text-pink-900 border-pink-200 focus:border-pink-400 focus:ring-pink-200"
+                            className="w-full text-sm font-mono"
+                            style={{ color: 'var(--color-primary-foreground)' }}
                             disabled={!isEditMode}
                             placeholder={`${element.key} XPath`}
                           />
@@ -436,7 +434,8 @@ export default function ScrappingDetailSettingsPage() {
                           <Input
                             value={element.target || ''}
                             onChange={(e) => handleInputChange(`${element.field}Target`, e.target.value)}
-                            className="w-full text-xs bg-pink-25 text-pink-900 border-pink-200 focus:border-pink-400 focus:ring-pink-200"
+                            className="w-full text-sm"
+                            style={{ color: 'var(--color-primary-foreground)' }}
                             disabled={!isEditMode}
                             placeholder="타겟"
                           />
@@ -445,7 +444,8 @@ export default function ScrappingDetailSettingsPage() {
                           <Input
                             value={element.callback || ''}
                             onChange={(e) => handleInputChange(`${element.field}Callback`, e.target.value)}
-                            className="w-full text-xs font-mono bg-pink-25 text-pink-900 border-pink-200 focus:border-pink-400 focus:ring-pink-200"
+                            className="w-full text-sm font-mono"
+                            style={{ color: 'var(--color-primary-foreground)' }}
                             disabled={!isEditMode}
                             placeholder="콜백"
                           />
@@ -454,15 +454,14 @@ export default function ScrappingDetailSettingsPage() {
                     ))}
                     <TableRow>
                       <TableCell className="font-medium">
-                        <span className="text-pink-900 text-xs font-medium">
-                          샘플 url
-                        </span>
+                        <span className="text-gray-500 text-sm">샘플 URL</span>
                       </TableCell>
                       <TableCell colSpan={3}>
                         <Input
                           value={editData.sampleUrl}
                           onChange={(e) => handleInputChange('sampleUrl', e.target.value)}
-                          className="w-full text-xs bg-pink-25 text-pink-900 border-pink-200 focus:border-pink-400 focus:ring-pink-200"
+                          className="w-full text-sm"
+                          style={{ color: 'var(--color-primary-foreground)' }}
                           disabled={!isEditMode}
                           placeholder="테스트용 샘플 URL"
                         />
