@@ -306,7 +306,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap,
 
       // 2. URL 업데이트 준비
       const newSearchParams = new URLSearchParams(window.location.search);
-      const newUrl = `/notices/${encodeURIComponent(value)}?${newSearchParams.toString()}`;
+      const newUrl = `/notices/gov/${encodeURIComponent(value)}?${newSearchParams.toString()}`;
 
       // 3. URL 히스토리 업데이트 (페이지 새로고침 없이)
       navigate(newUrl);
@@ -591,7 +591,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap,
 
         // 변경된 카테고리 페이지로 이동
         const currentSearchParams = new URLSearchParams(window.location.search);
-        const newUrl = `/notices/${encodeURIComponent(localCategory)}?${currentSearchParams.toString()}`;
+        const newUrl = `/notices/gov/${encodeURIComponent(localCategory)}?${currentSearchParams.toString()}`;
         navigate(newUrl);
       } else {
         throw new Error(data?.updateNoticeCategory?.message || '유형 변경에 실패했습니다.');
@@ -633,7 +633,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap,
 
         // 제외 페이지로 이동
         const currentSearchParams = new URLSearchParams(window.location.search);
-        const newUrl = `/notices/${encodeURIComponent('제외')}?${currentSearchParams.toString()}`;
+        const newUrl = `/notices/gov/${encodeURIComponent('제외')}?${currentSearchParams.toString()}`;
         navigate(newUrl);
       } else {
         throw new Error(data?.excludeNotices?.message || '제외 처리에 실패했습니다.');
@@ -709,8 +709,8 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap,
     return {
       title: `${categoryLabel} 공고`,
       breadcrumbs: [
-        { label: '공고', href: '/notices/공사점검' },
-        { label: categoryLabel, href: `/notices/${encodeURIComponent(currentCategory || '공사점검')}` }
+        { label: '공고', href: '/notices/gov/공사점검' },
+        { label: categoryLabel, href: `/notices/gov/${encodeURIComponent(currentCategory || '공사점검')}` }
       ]
     };
   };

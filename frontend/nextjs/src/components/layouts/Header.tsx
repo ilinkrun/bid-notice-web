@@ -53,30 +53,38 @@ const LOGOUT_MUTATION = gql`
   }
 `;
 
-const notices = [
+const govNotices = [
   {
-    title: '공사점검',
-    href: '/notices/공사점검?gap=1',
+    title: '업무',
+    href: '/notices/gov/공사점검?gap=1',
     icon: BookmarkPlus,
-  },
-  {
-    title: '성능평가',
-    href: '/notices/성능평가?gap=1',
-    icon: BookmarkPlus,
-  },
-  {
-    title: '기타',
-    href: '/notices/기타?gap=1',
-    icon: BookmarkPlus,
+    description: '공사점검, 성능평가, 기타 통합 페이지',
   },
   {
     title: '무관',
-    href: '/notices/무관?gap=1',
+    href: '/notices/gov/무관?gap=1',
     icon: Bookmark,
   },
+];
+
+const naraNotices = [
+  {
+    title: '업무',
+    href: '/notices/nara/공사점검?gap=1',
+    icon: BookmarkPlus,
+    description: '공사점검, 성능평가, 기타 통합 페이지',
+  },
+  {
+    title: '무관',
+    href: '/notices/nara/무관?gap=1',
+    icon: Bookmark,
+  },
+];
+
+const otherNotices = [
   {
     title: '제외',
-    href: '/notices/제외?gap=1',
+    href: '/notices/gov/제외?gap=1',
     icon: Archive,
   },
 ];
@@ -179,6 +187,23 @@ interface DropdownMenuProps {
     href: string;
     description?: string;
     icon: LucideIcon;
+  }>;
+  align?: 'left' | 'center' | 'right';
+  isMobile?: boolean;
+  setIsMobileMenuOpen?: (open: boolean) => void;
+}
+
+interface GroupedDropdownMenuProps {
+  label: string;
+  icon: LucideIcon;
+  groups: Array<{
+    label: string;
+    items: Array<{
+      title: string;
+      href: string;
+      description?: string;
+      icon: LucideIcon;
+    }>;
   }>;
   align?: 'left' | 'center' | 'right';
   isMobile?: boolean;
@@ -312,6 +337,163 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ label, icon: Icon, items, a
                   <div className="font-medium">{item.title}</div>
                 </div>
               </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const GroupedDropdownMenu: React.FC<GroupedDropdownMenuProps> = ({ label, icon: Icon, groups, align = 'left', isMobile = false, setIsMobileMenuOpen }) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const menuRef = React.useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+  const { navigate } = useUnifiedNavigation();
+
+  // Check if current path matches any of the dropdown items across all groups
+  const isActive = groups.some(group =>
+    group.items.some(item => {
+      const itemPath = item.href.split('?')[0]; // Remove query parameters
+      const decodedItemPath = decodeURIComponent(itemPath);
+      const encodedItemPath = encodeURIComponent(itemPath);
+
+      return pathname === item.href ||
+             pathname === itemPath ||
+             pathname === decodedItemPath ||
+             pathname === encodedItemPath ||
+             pathname.startsWith(itemPath + '/') ||
+             pathname.startsWith(decodedItemPath + '/') ||
+             pathname.startsWith(encodedItemPath + '/');
+    })
+  ) || (label === '공고' && pathname.startsWith('/notices'));
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  if (isMobile) {
+    return (
+      <div className="w-full py-2">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className={cn(
+            "flex items-center justify-between w-full px-4 py-2 transition-colors",
+            isOpen ? "bg-color-primary-hovered" : "hover:bg-color-primary-hovered",
+            isActive && "active"
+          )}
+        >
+          <div className="flex items-center gap-2">
+            <Icon className="h-4 w-4" />
+            <span>{label}</span>
+          </div>
+          <ChevronDown className={cn(
+            "h-4 w-4 transition-transform duration-200",
+            isOpen && "rotate-180"
+          )} />
+        </button>
+        {isOpen && (
+          <div className="w-full py-2">
+            {groups.map((group, groupIndex) => (
+              <div key={group.label}>
+                <div className="px-6 py-1 text-sm font-medium text-color-primary-muted">
+                  {group.label}
+                </div>
+                {group.items.map((item) => (
+                  <button
+                    key={item.href}
+                    onClick={() => {
+                      setIsOpen(false);
+                      if (setIsMobileMenuOpen && isMobile) {
+                        setIsMobileMenuOpen(false);
+                      }
+                      navigate(item.href);
+                    }}
+                    className={cn(
+                      "flex items-center gap-2 px-8 py-2 transition-colors hover:bg-color-primary-hovered w-full text-left",
+                      pathname === item.href && "bg-color-primary-hovered"
+                    )}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    <span>{item.title}</span>
+                  </button>
+                ))}
+                {groupIndex < groups.length - 1 && (
+                  <div className="mx-6 my-2 border-t border-color-primary-border" />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative" ref={menuRef}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={cn(
+          "flex items-center gap-2 px-4 py-2 transition-colors",
+          isOpen ? "bg-color-primary-hovered" : "hover:bg-color-primary-hovered",
+          isActive && "active"
+        )}
+      >
+        <Icon className="h-4 w-4" />
+        <span>{label}</span>
+        <ChevronDown className={cn(
+          "h-4 w-4 transition-transform duration-200",
+          isOpen && "rotate-180"
+        )} />
+      </button>
+      {isOpen && (
+        <div className={cn(
+          "absolute top-full mt-1 w-[400px] md:w-[500px] p-4 border shadow-lg z-[60]",
+          "bg-color-primary-background text-color-primary-foreground",
+          align === 'left' && "left-0",
+          align === 'center' && "left-1/2 -translate-x-1/2",
+          align === 'right' && "right-0"
+        )}>
+          <div className="space-y-4">
+            {groups.map((group, groupIndex) => (
+              <div key={group.label}>
+                <div className="mb-2 text-sm font-semibold text-color-primary-muted">
+                  {group.label}
+                </div>
+                <div className="grid gap-2">
+                  {group.items.map((item) => (
+                    <button
+                      key={item.href}
+                      onClick={() => {
+                        setIsOpen(false);
+                        navigate(item.href);
+                      }}
+                      className={cn(
+                        "flex items-start gap-4 transition-colors hover:bg-color-primary-hovered p-2 rounded-md w-full text-left",
+                        pathname === item.href && "bg-color-primary-hovered"
+                      )}
+                    >
+                      <item.icon className="h-5 w-5 mt-0.5" />
+                      <div>
+                        <div className="font-medium">{item.title}</div>
+                        {item.description && (
+                          <div className="text-sm text-color-primary-muted">{item.description}</div>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+                {groupIndex < groups.length - 1 && (
+                  <div className="my-4 border-t border-color-primary-border" />
+                )}
+              </div>
             ))}
           </div>
         </div>
@@ -560,7 +742,16 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
           </Link>
           <nav className="flex items-center gap-1 ml-12">
             {/* 공고 목록 - 모든 역할 접근 가능 */}
-            <DropdownMenu label="공고" icon={Star} items={notices} align="left" />
+            <GroupedDropdownMenu
+              label="공고"
+              icon={Star}
+              groups={[
+                { label: '관공서', items: govNotices },
+                { label: '나라장터', items: naraNotices },
+                { label: '', items: otherNotices }
+              ]}
+              align="left"
+            />
 
             {/* 입찰 관리 - 로그인한 사용자만 */}
             <PermissionBoundary roles={['user', 'manager', 'admin']} showMessage={false}>
@@ -634,7 +825,17 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
 
             <div className="flex flex-col divide-y">
               {/* 공고 목록 - 모든 역할 접근 가능 */}
-              <DropdownMenu label="공고 목록" icon={Star} items={notices} isMobile setIsMobileMenuOpen={setIsMobileMenuOpen} />
+              <GroupedDropdownMenu
+                label="공고 목록"
+                icon={Star}
+                groups={[
+                  { label: '관공서', items: govNotices },
+                  { label: '나라장터', items: naraNotices },
+                  { label: '', items: otherNotices }
+                ]}
+                isMobile
+                setIsMobileMenuOpen={setIsMobileMenuOpen}
+              />
 
               {/* 입찰 관리 - 로그인한 사용자만 */}
               <PermissionBoundary roles={['user', 'manager', 'admin']} showMessage={false}>

@@ -36,27 +36,27 @@ import type { LucideIcon } from 'lucide-react';
 const notices = [
   {
     title: '공사점검',
-    href: '/notices/공사점검?gap=1',
+    href: '/notices/gov/공사점검?gap=1',
     icon: BookmarkPlus,
   },
   {
     title: '성능평가',
-    href: '/notices/성능평가?gap=1',
+    href: '/notices/gov/성능평가?gap=1',
     icon: BookmarkPlus,
   },
   {
     title: '기타',
-    href: '/notices/기타?gap=1',
+    href: '/notices/gov/기타?gap=1',
     icon: BookmarkPlus,
   },
   {
     title: '관련없음',
-    href: '/notices/무관?gap=1',
+    href: '/notices/gov/무관?gap=1',
     icon: Bookmark,
   },
   {
     title: '제외',
-    href: '/notices/제외?gap=1',
+    href: '/notices/gov/제외?gap=1',
     icon: Archive,
   },
 ];
