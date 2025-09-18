@@ -137,15 +137,15 @@ const statistics = [
   },
 ];
 
-const channels = [
+const boardChannels = [
   {
-    title: '개발 관련 게시판',
+    title: '개발',
     href: '/channels/board/board_dev',
     description: '개발 관련 공지, 개선.수정 건의 및 요구사항',
     icon: Code,
   },
   {
-    title: '운영 관련 게시판',
+    title: '운영',
     href: '/channels/board/board_op',
     description: '운영(업무) 관련 공지, 기능 반영 및 요구 사항',
     icon: MessageSquare,
@@ -155,6 +155,40 @@ const channels = [
     href: '/channels/board/board_manual',
     description: '사이트 운영 지침 및 사용 설명서',
     icon: BookOpen,
+  },
+];
+
+const chatChannels = [
+  {
+    title: 'Slack',
+    href: '#',
+    description: 'Slack 워크스페이스 (비활성화)',
+    icon: MessageSquare,
+    disabled: true,
+  },
+  {
+    title: 'Discord',
+    href: '#',
+    description: 'Discord 서버 (비활성화)',
+    icon: MessageSquare,
+    disabled: true,
+  },
+];
+
+const bookmarkChannels = [
+  {
+    title: '나라장터',
+    href: '#',
+    description: '나라장터 바로가기 (비활성화)',
+    icon: BookOpen,
+    disabled: true,
+  },
+  {
+    title: 'NAS',
+    href: '#',
+    description: 'NAS 접속 (비활성화)',
+    icon: BookOpen,
+    disabled: true,
   },
 ];
 
@@ -187,6 +221,7 @@ interface DropdownMenuProps {
     href: string;
     description?: string;
     icon: LucideIcon;
+    disabled?: boolean;
   }>;
   align?: 'left' | 'center' | 'right';
   isMobile?: boolean;
@@ -203,6 +238,7 @@ interface GroupedDropdownMenuProps {
       href: string;
       description?: string;
       icon: LucideIcon;
+      disabled?: boolean;
     }>;
   }>;
   align?: 'left' | 'center' | 'right';
@@ -319,7 +355,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ label, icon: Icon, items, a
           align === 'center' && "left-1/2 -translate-x-1/2",
           align === 'right' && "right-0"
         )}>
-          <div className="grid gap-4">
+          <div className="grid gap-2">
             {items.map((item) => (
               <button
                 key={item.href}
@@ -410,15 +446,20 @@ const GroupedDropdownMenu: React.FC<GroupedDropdownMenuProps> = ({ label, icon: 
                   <button
                     key={item.href}
                     onClick={() => {
+                      if (item.disabled) return;
                       setIsOpen(false);
                       if (setIsMobileMenuOpen && isMobile) {
                         setIsMobileMenuOpen(false);
                       }
                       navigate(item.href);
                     }}
+                    disabled={item.disabled}
                     className={cn(
-                      "flex items-center gap-2 px-8 py-2 transition-colors hover:bg-color-primary-hovered w-full text-left",
-                      pathname === item.href && "bg-color-primary-hovered"
+                      "flex items-center gap-2 px-8 py-2 transition-colors w-full text-left",
+                      item.disabled
+                        ? "opacity-50 cursor-not-allowed"
+                        : "hover:bg-color-primary-hovered",
+                      pathname === item.href && !item.disabled && "bg-color-primary-hovered"
                     )}
                   >
                     <item.icon className="h-4 w-4" />
@@ -461,37 +502,39 @@ const GroupedDropdownMenu: React.FC<GroupedDropdownMenuProps> = ({ label, icon: 
           align === 'center' && "left-1/2 -translate-x-1/2",
           align === 'right' && "right-0"
         )}>
-          <div className="space-y-4">
+          <div className="space-y-2">
             {groups.map((group, groupIndex) => (
               <div key={group.label}>
-                <div className="mb-2 text-sm font-semibold text-color-primary-muted">
+                <div className="mb-1 text-sm font-semibold text-color-primary-muted">
                   {group.label}
                 </div>
-                <div className="grid gap-2">
+                <div className="grid gap-1">
                   {group.items.map((item) => (
                     <button
                       key={item.href}
                       onClick={() => {
+                        if (item.disabled) return;
                         setIsOpen(false);
                         navigate(item.href);
                       }}
+                      disabled={item.disabled}
                       className={cn(
-                        "flex items-start gap-4 transition-colors hover:bg-color-primary-hovered p-2 rounded-md w-full text-left",
-                        pathname === item.href && "bg-color-primary-hovered"
+                        "flex items-start gap-4 transition-colors p-2 rounded-md w-full text-left",
+                        item.disabled
+                          ? "opacity-50 cursor-not-allowed"
+                          : "hover:bg-color-primary-hovered",
+                        pathname === item.href && !item.disabled && "bg-color-primary-hovered"
                       )}
                     >
                       <item.icon className="h-5 w-5 mt-0.5" />
                       <div>
                         <div className="font-medium">{item.title}</div>
-                        {item.description && (
-                          <div className="text-sm text-color-primary-muted">{item.description}</div>
-                        )}
                       </div>
                     </button>
                   ))}
                 </div>
                 {groupIndex < groups.length - 1 && (
-                  <div className="my-4 border-t border-color-primary-border" />
+                  <div className="my-2 border-t border-color-primary-border" />
                 )}
               </div>
             ))}
@@ -765,7 +808,16 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
 
             {/* 채널 - user 이상 */}
             <PermissionBoundary roles={['user', 'manager', 'admin']} showMessage={false}>
-              <DropdownMenu label="채널" icon={MessageSquare} items={channels} align="center" />
+              <GroupedDropdownMenu
+                label="채널"
+                icon={MessageSquare}
+                groups={[
+                  { label: '게시판', items: boardChannels },
+                  { label: '채팅', items: chatChannels },
+                  { label: '즐겨찾기', items: bookmarkChannels }
+                ]}
+                align="center"
+              />
             </PermissionBoundary>
 
             {/* 설정 - manager 이상 */}
@@ -847,9 +899,19 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
                 <DropdownMenu label="통계" icon={BarChart2} items={statistics} isMobile setIsMobileMenuOpen={setIsMobileMenuOpen} />
               </PermissionBoundary>
 
-              {/* 게시판 - user 이상 */}
+              {/* 채널 - user 이상 */}
               <PermissionBoundary roles={['user', 'manager', 'admin']} showMessage={false}>
-                <DropdownMenu label="게시판" icon={MessageSquare} items={channels} isMobile setIsMobileMenuOpen={setIsMobileMenuOpen} />
+                <GroupedDropdownMenu
+                  label="채널"
+                  icon={MessageSquare}
+                  groups={[
+                    { label: '게시판', items: boardChannels },
+                    { label: '채팅', items: chatChannels },
+                    { label: '즐겨찾기', items: bookmarkChannels }
+                  ]}
+                  isMobile
+                  setIsMobileMenuOpen={setIsMobileMenuOpen}
+                />
               </PermissionBoundary>
 
               {/* 설정 - manager 이상 */}
