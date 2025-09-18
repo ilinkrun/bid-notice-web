@@ -12,7 +12,9 @@ import { useUnifiedLoading } from '@/components/providers/UnifiedLoadingProvider
 import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
-import { Edit, Eye, Save, HelpCircle } from 'lucide-react';
+import { Edit, Eye, Save, HelpCircle, Settings, Puzzle } from 'lucide-react';
+import { ButtonWithIcon } from '@/components/shared/FormComponents';
+import { SectionTitleHelp } from '@/components/shared/Help';
 import { Input } from '@/components/ui/input';
 import {
   Dialog,
@@ -315,165 +317,125 @@ export default function ScrappingDetailSettingsPage() {
       isActive={listSettings?.use}
       region={listSettings?.region}
     >
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <CardTitle className="text-lg">입찰공고 상세 스크랩 설정</CardTitle>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
-                onClick={() => setShowHelpModal(true)}
-                title="작성 가이드 보기"
-              >
-                <HelpCircle className="h-4 w-4 text-color-primary-muted-foreground hover:text-color-primary-foreground" />
-              </Button>
-            </div>
-            <div className="flex space-x-2">
-              {isEditMode ? (
-                <>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleViewMode}
-                  >
-                    <Eye className="h-4 w-4 mr-1" />
-                    보기
-                  </Button>
-                  <Button
-                    variant="default"
-                    size="sm"
-                    onClick={handleSave}
-                  >
-                    <Save className="h-4 w-4 mr-1" />
-                    저장
-                  </Button>
-                </>
-              ) : (
-                <Button
+      <div className="space-y-6">
+        {/* 기본 설정 */}
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Settings className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">기본 설정</h3>
+          </div>
+          <div className="border rounded-lg overflow-hidden" style={{ backgroundColor: 'transparent' }}>
+            <Table>
+              <TableBody>
+                <TableRow>
+                  <TableCell className="font-medium w-24">
+                    <span className="text-gray-500 text-sm">기관명</span>
+                  </TableCell>
+                  <TableCell className="break-all">
+                    <Input
+                      value={editData.orgName}
+                      onChange={(e) => handleInputChange('orgName', e.target.value)}
+                      className="w-full text-sm"
+                      style={{ color: 'var(--color-primary-foreground)' }}
+                      disabled={!isEditMode}
+                    />
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+
+        {/* 요소 설정 */}
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Puzzle className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">요소 설정</h3>
+          </div>
+          <div className="border rounded-lg overflow-hidden" style={{ backgroundColor: 'transparent' }}>
+            <Table>
+              <TableBody>
+                {[
+                  { key: '제목', field: 'title', target: 'text', callback: '' },
+                  { key: '본문', field: 'bodyHtml', target: 'html', callback: '' },
+                  { key: '파일이름', field: 'fileName', target: 'text', callback: '' },
+                  { key: '파일주소', field: 'fileUrl', target: 'href', callback: '' },
+                  { key: '미리보기', field: 'preview', target: 'text', callback: '' },
+                  { key: '공고구분', field: 'noticeDiv', target: 'text', callback: '' },
+                  { key: '공고번호', field: 'noticeNum', target: 'text', callback: '' },
+                  { key: '담당부서', field: 'orgDept', target: 'text', callback: '' },
+                  { key: '담당자', field: 'orgMan', target: 'text', callback: '' },
+                  { key: '연락처', field: 'orgTel', target: 'text', callback: '' }
+                ].map((element, index) => (
+                  <TableRow key={index}>
+                    <TableCell className="font-medium w-24">
+                      <span className="text-gray-500 text-sm">{element.key}</span>
+                    </TableCell>
+                    <TableCell>
+                      <Input
+                        value={editData[element.field as keyof typeof editData] || ''}
+                        onChange={(e) => handleInputChange(element.field, e.target.value)}
+                        className="w-full text-sm font-mono"
+                        style={{ color: 'var(--color-primary-foreground)' }}
+                        disabled={!isEditMode}
+                        placeholder={`${element.key} XPath`}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+                <TableRow>
+                  <TableCell className="font-medium w-24">
+                    <span className="text-gray-500 text-sm">샘플 URL</span>
+                  </TableCell>
+                  <TableCell>
+                    <Input
+                      value={editData.sampleUrl}
+                      onChange={(e) => handleInputChange('sampleUrl', e.target.value)}
+                      className="w-full text-sm"
+                      style={{ color: 'var(--color-primary-foreground)' }}
+                      disabled={!isEditMode}
+                      placeholder="테스트용 샘플 URL"
+                    />
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* 버튼 영역을 내용 박스 우측하단에 배치 */}
+          <div className="flex justify-end space-x-2 mt-6">
+            {isEditMode ? (
+              <>
+                <ButtonWithIcon
                   variant="outline"
                   size="sm"
-                  onClick={handleEditMode}
+                  icon={<Eye className="w-4 h-4" />}
+                  onClick={handleViewMode}
                 >
-                  <Edit className="h-4 w-4 mr-1" />
-                  편집
-                </Button>
-              )}
-            </div>
+                  보기
+                </ButtonWithIcon>
+                <ButtonWithIcon
+                  variant="default"
+                  size="sm"
+                  icon={<Save className="w-4 h-4" />}
+                  onClick={handleSave}
+                >
+                  저장
+                </ButtonWithIcon>
+              </>
+            ) : (
+              <ButtonWithIcon
+                variant="outline"
+                size="sm"
+                icon={<Edit className="w-4 h-4" />}
+                onClick={handleEditMode}
+              >
+                편집
+              </ButtonWithIcon>
+            )}
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            {/* 기본 설정 */}
-            <div className="mb-6">
-              <h4 className="text-sm font-medium mb-3 text-pink-900">📋 기본 설정</h4>
-              <div className="border rounded-lg overflow-hidden" style={{ backgroundColor: 'transparent' }}>
-                <Table>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell className="font-medium w-24">
-                        <span className="text-gray-500 text-sm">기관명</span>
-                      </TableCell>
-                      <TableCell className="break-all">
-                        <Input
-                          value={editData.orgName}
-                          onChange={(e) => handleInputChange('orgName', e.target.value)}
-                          className="w-full text-sm"
-                          style={{ color: 'var(--color-primary-foreground)' }}
-                          disabled={!isEditMode}
-                        />
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </div>
-            </div>
-
-            {/* 요소 설정 */}
-            <div className="mb-6">
-              <h4 className="text-sm font-medium mb-3 text-pink-900">🔧 요소 설정</h4>
-              <div className="border rounded-lg overflow-hidden" style={{ backgroundColor: 'transparent' }}>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-32">키</TableHead>
-                      <TableHead>Xpath</TableHead>
-                      <TableHead className="w-24">타겟</TableHead>
-                      <TableHead className="w-48">콜백</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {[
-                      { key: '제목', field: 'title', target: 'text', callback: '' },
-                      { key: '본문', field: 'bodyHtml', target: 'html', callback: '' },
-                      { key: '파일이름', field: 'fileName', target: 'text', callback: '' },
-                      { key: '파일주소', field: 'fileUrl', target: 'href', callback: '' },
-                      { key: '미리보기', field: 'preview', target: 'text', callback: '' },
-                      { key: '공고구분', field: 'noticeDiv', target: 'text', callback: '' },
-                      { key: '공고번호', field: 'noticeNum', target: 'text', callback: '' },
-                      { key: '담당부서', field: 'orgDept', target: 'text', callback: '' },
-                      { key: '담당자', field: 'orgMan', target: 'text', callback: '' },
-                      { key: '연락처', field: 'orgTel', target: 'text', callback: '' }
-                    ].map((element, index) => (
-                      <TableRow key={index}>
-                        <TableCell className="font-medium">
-                          <span className="text-gray-500 text-sm">{element.key}</span>
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            value={editData[element.field as keyof typeof editData] || ''}
-                            onChange={(e) => handleInputChange(element.field, e.target.value)}
-                            className="w-full text-sm font-mono"
-                            style={{ color: 'var(--color-primary-foreground)' }}
-                            disabled={!isEditMode}
-                            placeholder={`${element.key} XPath`}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            value={element.target || ''}
-                            onChange={(e) => handleInputChange(`${element.field}Target`, e.target.value)}
-                            className="w-full text-sm"
-                            style={{ color: 'var(--color-primary-foreground)' }}
-                            disabled={!isEditMode}
-                            placeholder="타겟"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            value={element.callback || ''}
-                            onChange={(e) => handleInputChange(`${element.field}Callback`, e.target.value)}
-                            className="w-full text-sm font-mono"
-                            style={{ color: 'var(--color-primary-foreground)' }}
-                            disabled={!isEditMode}
-                            placeholder="콜백"
-                          />
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                    <TableRow>
-                      <TableCell className="font-medium">
-                        <span className="text-gray-500 text-sm">샘플 URL</span>
-                      </TableCell>
-                      <TableCell colSpan={3}>
-                        <Input
-                          value={editData.sampleUrl}
-                          onChange={(e) => handleInputChange('sampleUrl', e.target.value)}
-                          className="w-full text-sm"
-                          style={{ color: 'var(--color-primary-foreground)' }}
-                          disabled={!isEditMode}
-                          placeholder="테스트용 샘플 URL"
-                        />
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* 저장 확인 모달 */}
       <Dialog open={showSaveModal} onOpenChange={setShowSaveModal}>
