@@ -650,7 +650,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-2">
+    <div className="container mx-auto px-4 py-6 space-y-5">
       {/* 입찰 정보 */}
       <div>
         <DropdownSectionHeader
@@ -690,111 +690,117 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                       <span>공고 상세정보를 불러오는 중...</span>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="flex flex-col gap-1">
-                        <span className="text-sm text-gray-500">공고명</span>
+                    <div className="space-y-3">
+                      {/* 공고명 */}
+                      <div className="flex items-center">
+                        <span className="text-sm w-20 flex-shrink-0 text-gray-500">공고명</span>
                         {isEditingNoticeDetails ? (
                           <Input
                             value={noticeDetailsFields.title || ''}
                             onChange={(e) => updateNoticeDetailsField('title', e.target.value)}
                             placeholder="공고명을 입력하세요"
-                            className="font-medium"
+                            className="flex-1" style={{color: 'var(--color-primary-foreground)'}}
                           />
                         ) : (
-                          <span className="font-medium">{noticeDetailsFields.title || bid.title || '-'}</span>
+                          <span className="flex-1" style={{color: 'var(--color-primary-foreground)'}}>{noticeDetailsFields.title || bid.title || '-'}</span>
                         )}
                       </div>
-                      <div className="flex flex-col gap-1">
-                        <span className="text-sm text-gray-500">공고번호</span>
+
+                      {/* 공고번호 */}
+                      <div className="flex items-center">
+                        <span className="text-sm w-20 flex-shrink-0 text-gray-500">공고번호</span>
                         {isEditingNoticeDetails ? (
                           <Input
                             value={noticeDetailsFields.notice_num || ''}
                             onChange={(e) => updateNoticeDetailsField('notice_num', e.target.value)}
                             placeholder="공고번호를 입력하세요"
-                            className="font-medium"
+                            className="flex-1" style={{color: 'var(--color-primary-foreground)'}}
                           />
                         ) : (
-                          <span className="font-medium">{noticeDetailsFields.notice_num || '-'}</span>
+                          <span className="flex-1" style={{color: 'var(--color-primary-foreground)'}}>{noticeDetailsFields.notice_num || '-'}</span>
                         )}
                       </div>
-                      <div className="flex flex-col gap-1">
-                        <span className="text-sm text-gray-500">담당부서</span>
+
+                      {/* 담당부서, 담당전화 */}
+                      <div className="flex items-center">
+                        <span className="text-sm w-20 flex-shrink-0 text-gray-500">담당부서</span>
                         {isEditingNoticeDetails ? (
                           <Input
                             value={noticeDetailsFields.org_dept || ''}
                             onChange={(e) => updateNoticeDetailsField('org_dept', e.target.value)}
                             placeholder="담당부서를 입력하세요"
-                            className="font-medium"
+                            className="w-40 mr-4" style={{color: 'var(--color-primary-foreground)'}}
                           />
                         ) : (
-                          <span className="font-medium">{noticeDetailsFields.org_dept || bid.orgName || '-'}</span>
+                          <span className="w-40 mr-4" style={{color: 'var(--color-primary-foreground)'}}>{noticeDetailsFields.org_dept || bid.orgName || '-'}</span>
                         )}
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <span className="text-sm text-gray-500">담당전화</span>
+                        <span className="text-sm w-20 flex-shrink-0 text-gray-500">담당전화</span>
                         {isEditingNoticeDetails ? (
                           <Input
                             value={noticeDetailsFields.org_tel || ''}
                             onChange={(e) => updateNoticeDetailsField('org_tel', e.target.value)}
                             placeholder="담당전화를 입력하세요"
-                            className="font-medium"
+                            className="w-40" style={{color: 'var(--color-primary-foreground)'}}
                           />
                         ) : (
-                          <span className="font-medium">{noticeDetailsFields.org_tel || '-'}</span>
+                          <span className="w-40" style={{color: 'var(--color-primary-foreground)'}}>{noticeDetailsFields.org_tel || '-'}</span>
                         )}
                       </div>
-                      <div className="flex flex-col gap-1">
-                        <span className="text-sm text-gray-500">업무구분</span>
+
+                      {/* 업무구분, 상세페이지 */}
+                      <div className="flex items-center">
+                        <span className="text-sm w-20 flex-shrink-0 text-gray-500">업무구분</span>
                         {isEditingNoticeDetails ? (
                           <Input
                             value={noticeDetailsFields.category || ''}
                             onChange={(e) => updateNoticeDetailsField('category', e.target.value)}
                             placeholder="업무구분을 입력하세요"
-                            className="font-medium"
+                            className="w-40 mr-4" style={{color: 'var(--color-primary-foreground)'}}
                           />
                         ) : (
-                          <span className="font-medium">{noticeDetailsFields.category || bid.category || '-'}</span>
+                          <span className="w-40 mr-4" style={{color: 'var(--color-primary-foreground)'}}>{noticeDetailsFields.category || bid.category || '-'}</span>
                         )}
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <span className="text-sm text-gray-500">상세페이지</span>
+                        <span className="text-sm w-20 flex-shrink-0 text-gray-500">상세페이지</span>
                         {isEditingNoticeDetails ? (
                           <Input
                             value={noticeDetailsFields.detail_url || ''}
                             onChange={(e) => updateNoticeDetailsField('detail_url', e.target.value)}
                             placeholder="상세페이지 URL을 입력하세요"
-                            className="font-medium"
+                            className="w-40" style={{color: 'var(--color-primary-foreground)'}}
                           />
                         ) : (
-                          <div className="font-medium">
+                          <div className="w-40">
                             {noticeDetailsFields.detail_url ? (
                               <a
                                 href={noticeDetailsFields.detail_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-blue-600 hover:text-blue-800 hover:underline"
+                                style={{color: 'var(--color-primary-foreground)'}}
                               >
                                 상세페이지 링크
                               </a>
                             ) : (
-                              <span>-</span>
+                              <span style={{color: 'var(--color-primary-foreground)'}}>-</span>
                             )}
                           </div>
                         )}
                       </div>
+
+                      {/* 공고본문 */}
                       {(noticeDetailsFields.body_html || isEditingNoticeDetails) && (
-                        <div className="col-span-1 md:col-span-2 flex flex-col gap-1">
-                          <span className="text-sm text-gray-500">공고본문</span>
+                        <div className="flex items-start">
+                          <span className="text-sm w-20 flex-shrink-0 mt-2 text-gray-500">공고본문</span>
                           {isEditingNoticeDetails ? (
                             <Textarea
                               value={noticeDetailsFields.body_html || ''}
                               onChange={(e) => updateNoticeDetailsField('body_html', e.target.value)}
                               placeholder="공고본문을 입력하세요"
                               rows={4}
-                              className="font-medium"
+                              className="flex-1" style={{color: 'var(--color-primary-foreground)'}}
                             />
                           ) : (
-                            <div className="font-medium max-h-32 overflow-y-auto text-sm  p-3 rounded">
+                            <div className="flex-1 max-h-32 overflow-y-auto text-sm p-3 border rounded" style={{color: 'var(--color-primary-foreground)'}}>
                               {noticeDetailsFields.body_html ? (
                                 <div dangerouslySetInnerHTML={{ __html: noticeDetailsFields.body_html }} />
                               ) : (
@@ -850,38 +856,69 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
             {infoActiveTab === 'bid' && (
               <div>
                 <TabContainer>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {Object.entries(noticeFields).map(([key, value]) => (
-                      <div key={key} className="flex flex-col gap-1">
-                        <span className="text-sm text-gray-500">{key}</span>
-                        {isEditingNotice ? (
-                          <Input
-                            value={noticeFields[key] || ''}
-                            onChange={(e) => updateNoticeField(key, e.target.value)}
-                            placeholder={`${key}을(를) 입력하세요`}
-                            className="font-medium"
-                          />
-                        ) : (
-                          <span className="font-medium">{value || '정보 없음'}</span>
-                        )}
-                      </div>
-                    ))}
+                  <div className="space-y-3">
+                    {(() => {
+                      const fields = Object.entries(noticeFields);
+                      const rows = [];
+
+                      // 2개씩 그룹화
+                      for (let i = 0; i < fields.length; i += 2) {
+                        const field1 = fields[i];
+                        const field2 = fields[i + 1];
+
+                        rows.push(
+                          <div key={`row-${i}`} className="flex items-center">
+                            {/* 첫 번째 필드 */}
+                            <span className="text-sm flex-shrink-0 text-gray-500" style={{width: '100px', minWidth: '100px'}}>{field1[0]}</span>
+                            {isEditingNotice ? (
+                              <Input
+                                value={noticeFields[field1[0]] || ''}
+                                onChange={(e) => updateNoticeField(field1[0], e.target.value)}
+                                placeholder={`${field1[0]}을(를) 입력하세요`}
+                                className="w-40 mr-4" style={{color: 'var(--color-primary-foreground)'}}
+                              />
+                            ) : (
+                              <span className="w-40 mr-4" style={{color: 'var(--color-primary-foreground)'}}>{field1[1] || '정보 없음'}</span>
+                            )}
+
+                            {/* 두 번째 필드 (있는 경우만) */}
+                            {field2 && (
+                              <>
+                                <span className="text-sm flex-shrink-0 text-gray-500" style={{width: '100px', minWidth: '100px'}}>{field2[0]}</span>
+                                {isEditingNotice ? (
+                                  <Input
+                                    value={noticeFields[field2[0]] || ''}
+                                    onChange={(e) => updateNoticeField(field2[0], e.target.value)}
+                                    placeholder={`${field2[0]}을(를) 입력하세요`}
+                                    className="w-40" style={{color: 'var(--color-primary-foreground)'}}
+                                  />
+                                ) : (
+                                  <span className="w-40" style={{color: 'var(--color-primary-foreground)'}}>{field2[1] || '정보 없음'}</span>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        );
+                      }
+
+                      return rows;
+                    })()}
                   </div>
                   
-                  {/* 메모 필드 추가 */}
+                  {/* 메모 필드 */}
                   <div className="border-t pt-4 mt-4">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-sm text-gray-500">메모</span>
+                    <div className="flex items-start">
+                      <span className="text-sm flex-shrink-0 mt-2 text-gray-500" style={{width: '100px', minWidth: '100px'}}>메모</span>
                       {isEditingNotice ? (
                         <Textarea
                           value={progressMemo}
                           onChange={(e) => setProgressMemo(e.target.value)}
                           placeholder="메모를 입력하세요"
                           rows={3}
-                          className="font-medium"
+                          className="flex-1" style={{color: 'var(--color-primary-foreground)'}}
                         />
                       ) : (
-                        <div className="font-medium p-3  rounded border min-h-[80px]">
+                        <div className="flex-1 p-3 border rounded min-h-[80px]" style={{color: 'var(--color-primary-foreground)'}}>
                           {progressMemo || '메모가 없습니다.'}
                         </div>
                       )}
