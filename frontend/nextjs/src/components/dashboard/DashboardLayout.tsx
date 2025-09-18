@@ -36,7 +36,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Sidebar */}
         <div
           className={cn(
-            "fixed inset-y-0 left-0 z-50 transition-all duration-300",
+            "transition-all duration-300 flex-shrink-0",
+            isMobile
+              ? "fixed inset-y-0 left-0 z-50"
+              : "relative",
             isMobile && sidebarCollapsed && "-translate-x-full",
             !isMobile && sidebarCollapsed ? "w-16" : "w-64"
           )}
@@ -59,7 +62,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <div
           className={cn(
             "flex-1 min-h-screen transition-all duration-300",
-            !isMobile && (sidebarCollapsed ? "ml-16" : "ml-64")
+            isMobile ? "w-full" : "flex-1"
           )}
         >
           <main className="p-6">

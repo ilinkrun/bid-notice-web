@@ -288,7 +288,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ label, icon: Icon, items, a
       </button>
       {isOpen && (
         <div className={cn(
-          "absolute top-full mt-1 w-[400px] md:w-[500px] p-4 border shadow-lg",
+          "absolute top-full mt-1 w-[400px] md:w-[500px] p-4 border shadow-lg z-[60]",
           "bg-color-primary-background text-color-primary-foreground",
           align === 'left' && "left-0",
           align === 'center' && "left-1/2 -translate-x-1/2",
@@ -480,7 +480,7 @@ const UserDropdown: React.FC = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-64 p-2 border shadow-lg rounded-md bg-color-primary-background text-color-primary-foreground">
+        <div className="absolute right-0 top-full mt-2 w-64 p-2 border shadow-lg rounded-md bg-color-primary-background text-color-primary-foreground z-[60]">
           {/* 사용자 정보 */}
           <div className="px-3 py-2 border-b mb-2">
             <div className="flex items-center gap-3">
@@ -552,7 +552,7 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-slate-200 dark:bg-slate-800 backdrop-blur supports-[backdrop-filter]:bg-slate-200/90 supports-[backdrop-filter]:dark:bg-slate-800/90">
+    <header className="sticky top-0 z-[60] w-full border-b bg-slate-200 dark:bg-slate-800 backdrop-blur supports-[backdrop-filter]:bg-slate-200/90 supports-[backdrop-filter]:dark:bg-slate-800/90">
       <div className="flex h-14 items-center" style={{ paddingLeft: 'var(--container-padding-x)', paddingRight: 'calc(var(--container-padding-x) - var(--scrollbar-width))' }}>
         <div className="mr-4 hidden md:flex">
           <Link href="/" className={cn("flex items-center space-x-2", pathname === '/' && "active")}>
@@ -623,7 +623,7 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
 
       {/* 모바일 메뉴 패널 */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 top-14 z-50 md:hidden border-t bg-color-primary-background text-color-primary-foreground">
+        <div className="fixed inset-0 top-14 z-[70] md:hidden border-t bg-color-primary-background text-color-primary-foreground">
           <nav className="py-4" style={{ paddingLeft: 'var(--container-padding-x)', paddingRight: 'calc(var(--container-padding-x) - var(--scrollbar-width))' }}>
             {/* 모바일 사용자 정보 (로그인 상태일 때만) */}
             {isAuthenticated && (
