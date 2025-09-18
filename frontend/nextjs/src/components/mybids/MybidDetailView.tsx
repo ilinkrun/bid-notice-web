@@ -9,11 +9,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
-import { 
-  FileText, 
-  Info, 
-  Clock, 
-  Edit3, 
+import {
+  FileText,
+  Info,
+  Clock,
+  Edit3,
   CheckSquare,
   Building,
   Calendar,
@@ -23,7 +23,12 @@ import {
   Download,
   ExternalLink,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  X,
+  Trophy,
+  XCircle,
+  RefreshCw,
+  ArrowRight
 } from 'lucide-react';
 import { useMutation, useQuery, gql } from '@apollo/client';
 import { useRouter } from 'next/navigation';
@@ -138,6 +143,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
   // 탭 상태
   const [infoActiveTab, setInfoActiveTab] = useState('notice');
   const [documentActiveTab, setDocumentActiveTab] = useState('files');
+  const [stageActiveTab, setStageActiveTab] = useState('응찰');
 
   // 파일 뷰어 함수
   const openFileViewer = (fileName: string, fileUrl: string) => {
@@ -440,6 +446,12 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
       setNoticeDetailsFields(noticeDetailsData.noticeDetails.details);
     }
   }, [noticeDetailsData]);
+
+  // 컴포넌트 마운트 시 기본 '응찰' 상태 데이터 로드
+  React.useEffect(() => {
+    setSelectedStatus('응찰');
+    loadStatusData('응찰');
+  }, []);
 
   // 선택된 상태가 변경될 때 기존 데이터로 폼 필드 초기화
   const loadStatusData = (status: string) => {
@@ -1182,7 +1194,7 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
           onClick={() => setIsStageExpanded(!isStageExpanded)}
         >
           <div className="flex items-center gap-2">
-            <CheckSquare className="w-5 h-5" />
+            <RefreshCw className="w-5 h-5" />
             <span className="font-semibold">단계 변경</span>
           </div>
           {isStageExpanded ? (
@@ -1193,39 +1205,79 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
         </button>
         {isStageExpanded && (
           <div className="mt-2 space-y-0">
-            <div className="border rounded-lg p-4 space-y-4" style={{borderColor: 'var(--color-primary-foreground)'}}>
-            <div className="flex flex-wrap gap-4">
-              {statusOptions.map((option) => (
-                <div key={option.value} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`status-${option.value}`}
-                    checked={selectedStatus === option.value}
-                    onCheckedChange={() => {
-                      setSelectedStatus(option.value);
-                      loadStatusData(option.value);
-                    }}
-                  />
-                  <Label htmlFor={`status-${option.value}`}>{option.label}</Label>
-                </div>
-              ))}
-            </div>
-            
-            {renderDynamicFields()}
-
-            {selectedStatus && (
-              <div className="flex justify-end pt-4">
-                <Button onClick={handleStatusChange} disabled={loading}>
-                  {loading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      처리 중...
-                    </>
-                  ) : (
-                    '단계 변경'
-                  )}
-                </Button>
+            {/* 탭 버튼 */}
+            <div className="flex border-b justify-between">
+              <div className="flex">
+                <button
+                  className={`tab-button px-4 py-2 font-medium text-sm flex items-center gap-2 ${
+                    stageActiveTab === '응찰'
+                      ? 'active'
+                      : 'text-color-primary-muted-foreground'
+                  }`}
+                  onClick={() => {
+                    setStageActiveTab('응찰');
+                    setSelectedStatus('응찰');
+                    loadStatusData('응찰');
+                  }}
+                >
+                  <CheckSquare className="w-4 h-4" />
+                  응찰
+                </button>
+                <button
+                  className={`tab-button px-4 py-2 font-medium text-sm flex items-center gap-2 ${
+                    stageActiveTab === '포기'
+                      ? 'active'
+                      : 'text-color-primary-muted-foreground'
+                  }`}
+                  onClick={() => {
+                    setStageActiveTab('포기');
+                    setSelectedStatus('포기');
+                    loadStatusData('포기');
+                  }}
+                >
+                  <X className="w-4 h-4" />
+                  포기
+                </button>
               </div>
-            )}
+              <div className="flex">
+                <button
+                  className="tab-button px-4 py-2 font-medium text-sm flex items-center gap-2 text-color-primary-muted-foreground cursor-not-allowed opacity-50"
+                  disabled
+                >
+                  <Trophy className="w-4 h-4" />
+                  낙찰
+                </button>
+                <button
+                  className="tab-button px-4 py-2 font-medium text-sm flex items-center gap-2 text-color-primary-muted-foreground cursor-not-allowed opacity-50"
+                  disabled
+                >
+                  <XCircle className="w-4 h-4" />
+                  패찰
+                </button>
+              </div>
+            </div>
+
+            <div className="border rounded-lg p-4 space-y-4" style={{borderColor: 'var(--color-primary-foreground)'}}>
+              {renderDynamicFields()}
+
+              {selectedStatus && (
+                <div className="flex justify-end pt-4 border-t">
+                  <ButtonWithIcon
+                    icon={<span className="mr-2"><ArrowRight className="h-4 w-4" /></span>}
+                    onClick={handleStatusChange}
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        처리 중...
+                      </>
+                    ) : (
+                      '단계 변경'
+                    )}
+                  </ButtonWithIcon>
+                </div>
+              )}
             </div>
           </div>
         )}
