@@ -78,11 +78,8 @@ export default function BidTable({ bids, currentStatus }) {
   const [pm, setPm] = useState('');
   const [giveupReason, setGiveupReason] = useState('');
 
-  // 출처 필터 상태 (진행 페이지에서만 사용)
-  const [sourceFilters, setSourceFilters] = useState({
-    '관공서': true,
-    '관공서': true,
-  });
+  // 출처 필터 상태 (모든 페이지에서 사용)
+  const [sourceFilters, setSourceFilters] = useState(['관공서', '나라장터']);
 
   // 기관명 URL 조회 및 생성 함수
   const getOrganizationUrl = async (orgName: string): Promise<string | null> => {
@@ -575,25 +572,17 @@ export default function BidTable({ bids, currentStatus }) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-        {/* 진행 페이지에서만 출처별 필터 표시 */}
-        {localStatus === 'progress' && (
-          <div className="flex items-center gap-2">
-            {Object.entries(sourceFilters).map(([source, checked]) => (
-              <label key={source} className="flex items-center gap-1">
-                <Checkbox
-                  checked={checked}
-                  onCheckedChange={(checked) =>
-                    setSourceFilters(prev => ({
-                      ...prev,
-                      [source]: checked === true
-                    }))
-                  }
-                />
-                <span className="text-sm">{source}</span>
-              </label>
-            ))}
-          </div>
-        )}
+        {/* 모든 페이지에서 출처별 필터 표시 */}
+        <div className="flex items-center">
+          <CheckButtonSet
+            options={[
+              { value: '관공서', label: '관공서' },
+              { value: '나라장터', label: '나라장터' }
+            ]}
+            values={sourceFilters}
+            onChange={setSourceFilters}
+          />
+        </div>
 
         {/* 종료 페이지에서만 상태별 필터 표시 */}
         {localStatus === 'ended' && (
