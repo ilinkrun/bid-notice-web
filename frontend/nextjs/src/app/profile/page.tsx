@@ -27,7 +27,7 @@ import {
   Camera
 } from 'lucide-react';
 import { PageContainer } from '@/components/shared/PageContainer';
-import { ButtonWithIcon } from '@/components/shared/FormComponents';
+import { ButtonWithIcon, ButtonWithColorIcon } from '@/components/shared/FormComponents';
 
 const UPDATE_PROFILE_MUTATION = gql`
   mutation UpdateUserProfile($token: String!, $input: UpdateUserInput!) {
@@ -453,33 +453,25 @@ export default function ProfilePage() {
 
               {/* 편집 모드 버튼들 */}
               {isEditingProfile && (
-                <div className="flex items-center gap-2 pt-4">
-                  <Button
-                    variant="outline"
-                    onClick={handleProfileSave}
-                    disabled={isLoading}
-                    className="flex items-center gap-2"
-                    style={{
-                      color: 'hsl(var(--color-secondary-active))',
-                      borderColor: 'hsl(var(--color-secondary-active))'
-                    }}
-                  >
-                    <Save className="h-4 w-4" />
-                    {isLoading ? '저장 중...' : '저장'}
-                  </Button>
-                  <Button
-                    variant="outline"
+                <div className="flex items-center justify-end gap-2 pt-4">
+                  <ButtonWithColorIcon
+                    icon={<X className="h-4 w-4" />}
                     onClick={handleProfileCancel}
                     disabled={isLoading}
-                    className="flex items-center gap-2"
-                    style={{
-                      color: 'hsl(var(--color-tertiary-base))',
-                      borderColor: 'hsl(var(--color-tertiary-base))'
-                    }}
+                    color="tertiary"
+                    mode="outline"
                   >
-                    <X className="h-4 w-4" />
                     취소
-                  </Button>
+                  </ButtonWithColorIcon>
+                  <ButtonWithColorIcon
+                    icon={<Save className="h-4 w-4" />}
+                    onClick={handleProfileSave}
+                    disabled={isLoading}
+                    color="secondary"
+                    mode="outline"
+                  >
+                    {isLoading ? '저장 중...' : '저장'}
+                  </ButtonWithColorIcon>
                 </div>
               )}
 
@@ -610,33 +602,25 @@ export default function ProfilePage() {
                 </div>
 
                 {/* 버튼들 */}
-                <div className="flex items-center gap-2 pt-4">
-                  <Button
-                    variant="outline"
-                    onClick={handlePasswordSave}
-                    disabled={isLoading}
-                    className="flex items-center gap-2"
-                    style={{
-                      color: 'hsl(var(--color-secondary-active))',
-                      borderColor: 'hsl(var(--color-secondary-active))'
-                    }}
-                  >
-                    <Save className="h-4 w-4" />
-                    {isLoading ? '변경 중...' : '비밀번호 변경'}
-                  </Button>
-                  <Button
-                    variant="outline"
+                <div className="flex items-center justify-end gap-2 pt-4">
+                  <ButtonWithColorIcon
+                    icon={<X className="h-4 w-4" />}
                     onClick={handlePasswordCancel}
                     disabled={isLoading}
-                    className="flex items-center gap-2"
-                    style={{
-                      color: 'hsl(var(--color-tertiary-base))',
-                      borderColor: 'hsl(var(--color-tertiary-base))'
-                    }}
+                    color="tertiary"
+                    mode="outline"
                   >
-                    <X className="h-4 w-4" />
                     취소
-                  </Button>
+                  </ButtonWithColorIcon>
+                  <ButtonWithColorIcon
+                    icon={<Save className="h-4 w-4" />}
+                    onClick={handlePasswordSave}
+                    disabled={isLoading}
+                    color="secondary"
+                    mode="outline"
+                  >
+                    {isLoading ? '변경 중...' : '비밀번호 변경'}
+                  </ButtonWithColorIcon>
                 </div>
               </CardContent>
             )}

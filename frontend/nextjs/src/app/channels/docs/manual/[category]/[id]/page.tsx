@@ -378,15 +378,17 @@ export default function ManualDetailPage({ params }: { params: Promise<any> }) {
   const handleEditStart = () => {
     setIsEditMode(true);
     setActionType('edit');
+    setEditorMode('markdown'); // 항상 마크다운 모드로 설정
     
-    // 현재 에디터 모드에 따라 적절한 데이터 설정
-    if (editorMode === 'markdown') {
-      // 마크다운 모드: 마크다운 원본 사용
-      setEditingMarkdown(originalMarkdownSource || manual?.markdown_source || '');
-    } else {
-      // HTML 모드: HTML 내용 사용
-      setEditingMarkdown(manual?.content || '');
-    }
+    // URL에 mode=edit&format=markdown 파라미터 추가
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set('mode', 'edit');
+    searchParams.set('format', 'markdown');
+    const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
+    window.history.replaceState({}, '', newUrl);
+    
+    // 마크다운 원본 사용
+    setEditingMarkdown(originalMarkdownSource || manual?.markdown_source || '');
   };
 
   // 편집 취소
@@ -395,6 +397,15 @@ export default function ManualDetailPage({ params }: { params: Promise<any> }) {
     setActionType(null);
     setEditingMarkdown(originalMarkdownSource);
     setIsSourceMode(false);
+    
+    // URL에서 mode와 format 파라미터 제거
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.delete('mode');
+    searchParams.delete('format');
+    const newUrl = searchParams.toString() 
+      ? `${window.location.pathname}?${searchParams.toString()}`
+      : window.location.pathname;
+    window.history.replaceState({}, '', newUrl);
   };
 
   // 매뉴얼 수정 저장
@@ -503,6 +514,15 @@ export default function ManualDetailPage({ params }: { params: Promise<any> }) {
       if (editorMode === 'markdown') {
         setOriginalMarkdownSource(editingMarkdown);
       }
+      
+      // URL에서 mode와 format 파라미터 제거
+      const searchParams = new URLSearchParams(window.location.search);
+      searchParams.delete('mode');
+      searchParams.delete('format');
+      const newUrl = searchParams.toString() 
+        ? `${window.location.pathname}?${searchParams.toString()}`
+        : window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
       
       finishLoading();
       
@@ -697,146 +717,70 @@ export default function ManualDetailPage({ params }: { params: Promise<any> }) {
                 <div>
                   <div className="flex justify-between items-center mb-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">에디터:</span>
-                      <Tabs value={editorMode} onValueChange={(value) => {
-                        const newFormat = value as 'html' | 'markdown';
-                        setEditorMode(newFormat);
-                        
-                        // 모드 변경 시 적절한 데이터로 전환
-                        if (newFormat === 'markdown') {
-                          // HTML -> 마크다운 모드로 변경
-                          if (editorMode === 'html') {
-                            const convertedMarkdown = convertHtmlToMarkdown(editingMarkdown);
-                            setEditingMarkdown(convertedMarkdown);
-                          } else {
-                            setEditingMarkdown(originalMarkdownSource || manual.markdown_source || '');
-                          }
-                        } else {
-                          // 마크다운 -> HTML 모드로 변경
-                          if (editorMode === 'markdown') {
-                            const convertedHtml = convertMarkdownToHtml(editingMarkdown);
-                            setEditingMarkdown(convertedHtml);
-                          } else {
-                            setEditingMarkdown(manual.content || '');
-                          }
-                        }
-                        
-                        // URL에 format 파라미터 추가
-                        const searchParams = new URLSearchParams(window.location.search);
-                        searchParams.set('format', newFormat);
-                        const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
-                        window.history.replaceState({}, '', newUrl);
-                      }}>
-                        <TabsList className="grid w-full grid-cols-2">
-                          <TabsTrigger value="html" className="flex items-center gap-1">
-                            <Code className="h-4 w-4" />
-                            HTML
-                          </TabsTrigger>
-                          <TabsTrigger value="markdown" className="flex items-center gap-1">
-                            <Hash className="h-4 w-4" />
-                            Markdown
-                          </TabsTrigger>
-                        </TabsList>
-                      </Tabs>
+                      <Hash className="h-4 w-4" />
+                      <span className="text-sm font-medium">마크다운 편집기</span>
                     </div>
                   </div>
 
-                  {editorMode === 'markdown' ? (
-                    <div className="space-y-2">
-                      <p className="text-sm text-color-primary-muted-foreground">
-                        마크다운 문법을 사용하여 편집하세요. 파일을 드래그 앤 드롭하거나 클립보드에서 붙여넣기할 수 있습니다.
-                      </p>
-                      {isUploading && (
-                        <div className="flex items-center gap-2 text-sm text-blue-600">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                          파일을 업로드하는 중...
-                        </div>
-                      )}
-                      <div>
-                        <div className="flex items-center gap-2 mb-2">
-                          <input
-                            type="file"
-                            multiple
-                            onChange={async (e) => {
-                              const files = Array.from(e.target.files || []);
-                              for (const file of files) {
-                                await uploadFile(file, setIsUploading, editingMarkdown, setEditingMarkdown, setManual, manual);
-                              }
-                            }}
-                            style={{ display: 'none' }}
-                            id="file-upload-edit"
-                          />
-                          <label 
-                            htmlFor="file-upload-edit" 
-                            className="inline-flex items-center px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer"
-                          >
-                            📎 파일 업로드
-                          </label>
-                          <span className="text-xs text-color-primary-muted-foreground">또는 파일을 드래그해서 놓으세요</span>
-                        </div>
-                        <div
-                          onDrop={async (event) => {
-                            event.preventDefault();
-                            const files = Array.from(event.dataTransfer?.files || []);
-                            
+                  <div className="space-y-2">
+                    <p className="text-sm text-color-primary-muted-foreground">
+                      마크다운 문법을 사용하여 편집하세요. 파일을 드래그 앤 드롭하거나 클립보드에서 붙여넣기할 수 있습니다.
+                    </p>
+                    {isUploading && (
+                      <div className="flex items-center gap-2 text-sm text-blue-600">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                        파일을 업로드하는 중...
+                      </div>
+                    )}
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <input
+                          type="file"
+                          multiple
+                          onChange={async (e) => {
+                            const files = Array.from(e.target.files || []);
                             for (const file of files) {
                               await uploadFile(file, setIsUploading, editingMarkdown, setEditingMarkdown, setManual, manual);
                             }
                           }}
-                          onDragOver={(event) => event.preventDefault()}
-                          onDragEnter={(event) => event.preventDefault()}
-                          onDragLeave={(event) => event.preventDefault()}
+                          style={{ display: 'none' }}
+                          id="file-upload-edit"
+                        />
+                        <label 
+                          htmlFor="file-upload-edit" 
+                          className="inline-flex items-center px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer"
                         >
-                          <MDEditor
-                            value={editingMarkdown || ''}
-                            onChange={(value) => {
-                              const newMarkdown = value || '';
-                              setEditingMarkdown(newMarkdown);
-                              console.log('✏️ Markdown content updated:', newMarkdown);
-                            }}
-                            data-color-mode="auto"
-                            height={400}
-                            preview="live"
-                          />
-                        </div>
+                          📎 파일 업로드
+                        </label>
+                        <span className="text-xs text-color-primary-muted-foreground">또는 파일을 드래그해서 놓으세요</span>
+                      </div>
+                      <div
+                        onDrop={async (event) => {
+                          event.preventDefault();
+                          const files = Array.from(event.dataTransfer?.files || []);
+                          
+                          for (const file of files) {
+                            await uploadFile(file, setIsUploading, editingMarkdown, setEditingMarkdown, setManual, manual);
+                          }
+                        }}
+                        onDragOver={(event) => event.preventDefault()}
+                        onDragEnter={(event) => event.preventDefault()}
+                        onDragLeave={(event) => event.preventDefault()}
+                      >
+                        <MDEditor
+                          value={editingMarkdown || ''}
+                          onChange={(value) => {
+                            const newMarkdown = value || '';
+                            setEditingMarkdown(newMarkdown);
+                            console.log('✏️ Markdown content updated:', newMarkdown);
+                          }}
+                          data-color-mode="auto"
+                          height={400}
+                          preview="live"
+                        />
                       </div>
                     </div>
-                  ) : (
-                    <>
-                      <div className="flex justify-end mb-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setIsSourceMode(!isSourceMode)}
-                          className="flex items-center gap-1"
-                        >
-                          {isSourceMode ? (
-                            <>
-                              <Eye className="h-4 w-4" />
-                              <span>미리보기</span>
-                            </>
-                          ) : (
-                            <>
-                              <Code className="h-4 w-4" />
-                              <span>HTML</span>
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                      {isSourceMode ? (
-                        <Textarea
-                          value={editingMarkdown}
-                          onChange={(e) => setEditingMarkdown(e.target.value)}
-                          className={`min-h-[300px] font-mono ${textareaClass}`}
-                          placeholder="HTML 내용을 입력하세요."
-                        />
-                      ) : (
-                        <div className="border rounded-md p-3 min-h-[300px]">
-                          <div dangerouslySetInnerHTML={{ __html: editingMarkdown || '' }} />
-                        </div>
-                      )}
-                    </>
-                  )}
+                  </div>
                 </div>
               ) : (
                 <div className="whitespace-pre-wrap">

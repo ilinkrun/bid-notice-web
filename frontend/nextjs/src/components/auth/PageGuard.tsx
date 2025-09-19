@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useAuth } from '@/contexts/AuthContext';
+import { ArrowLeft, Home } from 'lucide-react';
+import { ButtonWithIcon } from '@/components/shared/FormComponents';
 
 interface PageGuardProps {
   children: React.ReactNode;
@@ -65,9 +67,7 @@ export const PageGuard: React.FC<PageGuardProps> = ({ children }) => {
 
         // 접근 권한이 없고 리다이렉트가 필요한 경우
         if (!result.hasAccess && result.redirectTo) {
-          setTimeout(() => {
-            router.push(result.redirectTo!);
-          }, 1500); // 1.5초 후 리다이렉트
+          router.push(result.redirectTo!);
         }
       } catch (error) {
         console.error('Error checking page access:', error);
@@ -130,19 +130,21 @@ export const PageGuard: React.FC<PageGuardProps> = ({ children }) => {
             )}
           </div>
 
-          <div className="mt-6 space-x-4">
-            <button
+          <div className="mt-6 flex justify-center gap-4">
+            <ButtonWithIcon
+              icon={<ArrowLeft className="h-4 w-4" />}
               onClick={() => router.back()}
-              className="px-4 py-2 text-sm font-medium text-color-primary-foreground  rounded-md hover:bg-color-primary-hovered/80 transition-colors"
+              className="text-sm"
             >
               뒤로가기
-            </button>
-            <button
+            </ButtonWithIcon>
+            <ButtonWithIcon
+              icon={<Home className="h-4 w-4" />}
               onClick={() => router.push('/')}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+              className="text-sm"
             >
               홈으로
-            </button>
+            </ButtonWithIcon>
           </div>
         </div>
       </div>

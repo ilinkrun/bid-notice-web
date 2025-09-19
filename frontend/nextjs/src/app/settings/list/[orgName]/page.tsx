@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Edit, Eye, Save } from 'lucide-react';
+import { ButtonWithColorIcon } from '@/components/shared/FormComponents';
 import { useSearchParams } from 'next/navigation';
 import { useUnifiedLoading } from '@/components/providers/UnifiedLoadingProvider';
 import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
@@ -287,14 +288,24 @@ export default function SettingsListOrgPage({ params }: PageProps) {
                 </Button>
               ) : (
                 <>
-                  <Button variant="outline" size="sm" onClick={handleViewMode}>
-                    <Eye className="h-4 w-4 mr-1" />
+                  <ButtonWithColorIcon
+                    icon={<Eye className="h-4 w-4" />}
+                    onClick={handleViewMode}
+                    color="tertiary"
+                    mode="outline"
+                    className="text-sm px-3 py-1"
+                  >
                     보기
-                  </Button>
-                  <Button variant="default" size="sm" onClick={handleSave}>
-                    <Save className="h-4 w-4 mr-1" />
+                  </ButtonWithColorIcon>
+                  <ButtonWithColorIcon
+                    icon={<Save className="h-4 w-4" />}
+                    onClick={handleSave}
+                    color="secondary"
+                    mode="outline"
+                    className="text-sm px-3 py-1"
+                  >
                     저장
-                  </Button>
+                  </ButtonWithColorIcon>
                 </>
               )}
             </div>

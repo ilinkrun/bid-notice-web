@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
 import { Eye, EyeOff, Mail, Lock, User, UserPlus, Key } from 'lucide-react';
 import { InputWithIcon, ButtonWithColorIcon } from '@/components/shared/FormComponents';
 
@@ -137,8 +138,6 @@ export default function LoginPage() {
         } else {
           localStorage.removeItem('remember-email');
         }
-
-        showAlert('success', data.login.message);
 
         // 홈페이지로 즉시 리다이렉트
         router.push('/');
@@ -405,28 +404,25 @@ export default function LoginPage() {
                 )}
 
                 {/* 제출 버튼 */}
-                <ButtonWithColorIcon
-                  type="submit"
-                  className="w-full"
-                  disabled={isLoading}
-                  color={mode === 'login' ? 'blue' : mode === 'register' ? 'green' : 'orange'}
-                  mode="filled"
-                  icon={
-                    isLoading ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-                    ) : (
-                      mode === 'login' ? (
-                        <Lock className="h-4 w-4" />
-                      ) : mode === 'register' ? (
-                        <UserPlus className="h-4 w-4" />
-                      ) : (
-                        <Key className="h-4 w-4" />
-                      )
-                    )
-                  }
-                >
-                  {isLoading ? '처리중...' : (mode === 'login' ? '로그인' : mode === 'register' ? '회원가입' : '재설정 요청')}
-                </ButtonWithColorIcon>
+                {mode === 'login' ? (
+                  <ButtonWithColorIcon
+                    type="submit"
+                    color="secondary"
+                    mode="outline"
+                    className="w-full"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? '처리중...' : '로그인'}
+                  </ButtonWithColorIcon>
+                ) : (
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? '처리중...' : (mode === 'register' ? '회원가입' : '재설정 요청')}
+                  </Button>
+                )}
               </div>
             </form>
 

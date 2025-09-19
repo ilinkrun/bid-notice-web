@@ -13,7 +13,7 @@ import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { Edit, Eye, Save, ChevronLeft, HelpCircle, Settings, Puzzle, Wrench, List as ListIcon } from 'lucide-react';
-import { ButtonWithIcon, TabHeader, TabContainer } from '@/components/shared/FormComponents';
+import { ButtonWithIcon, ButtonWithColorIcon, TabHeader, TabContainer } from '@/components/shared/FormComponents';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -884,18 +884,22 @@ export default function ScrappingListSettingsPage() {
           <div className="flex justify-end space-x-2 mt-6 pt-4 border-t">
             {isEditMode ? (
               <>
-                <ButtonWithIcon
+                <ButtonWithColorIcon
                   icon={<Eye className="h-4 w-4" />}
                   onClick={handleViewMode}
+                  color="tertiary"
+                  mode="outline"
                 >
                   보기
-                </ButtonWithIcon>
-                <ButtonWithIcon
+                </ButtonWithColorIcon>
+                <ButtonWithColorIcon
                   icon={<Save className="h-4 w-4" />}
                   onClick={handleSave}
+                  color="secondary"
+                  mode="outline"
                 >
                   저장
-                </ButtonWithIcon>
+                </ButtonWithColorIcon>
               </>
             ) : (
               <ButtonWithIcon

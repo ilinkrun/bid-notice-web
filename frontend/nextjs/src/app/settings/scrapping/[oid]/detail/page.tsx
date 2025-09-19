@@ -13,7 +13,7 @@ import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { Edit, Eye, Save, HelpCircle, Settings, Puzzle } from 'lucide-react';
-import { ButtonWithIcon } from '@/components/shared/FormComponents';
+import { ButtonWithIcon, ButtonWithColorIcon } from '@/components/shared/FormComponents';
 import { SectionTitleHelp } from '@/components/shared/Help';
 import { Input } from '@/components/ui/input';
 import {
@@ -408,22 +408,22 @@ export default function ScrappingDetailSettingsPage() {
         <div className="flex justify-end space-x-2 mt-6">
           {isEditMode ? (
             <>
-              <ButtonWithIcon
-                variant="outline"
-                size="sm"
+              <ButtonWithColorIcon
                 icon={<Eye className="w-4 h-4" />}
                 onClick={handleViewMode}
+                color="tertiary"
+                mode="outline"
               >
                 보기
-              </ButtonWithIcon>
-              <ButtonWithIcon
-                variant="default"
-                size="sm"
+              </ButtonWithColorIcon>
+              <ButtonWithColorIcon
                 icon={<Save className="w-4 h-4" />}
                 onClick={handleSave}
+                color="secondary"
+                mode="outline"
               >
                 저장
-              </ButtonWithIcon>
+              </ButtonWithColorIcon>
             </>
           ) : (
             <ButtonWithIcon

@@ -83,8 +83,8 @@ interface ButtonWithColorIconProps {
   className?: string;
   disabled?: boolean;
   type?: 'button' | 'submit' | 'reset';
-  color?: string; // 주색상 (예: 'blue', 'red', 'green', 'secondary', 'tertiary')
-  mode?: 'outline' | 'filled' | 'active' | 'base'; // 버튼 스타일 모드
+  color?: string; // 기준 색상 (Tailwind 색상명 또는 CSS 커스텀 속성명)
+  mode?: 'outline' | 'filled'; // 버튼 스타일 모드
 }
 
 interface IsActiveProps {
@@ -584,9 +584,9 @@ export function ButtonWithIcon({
 
 /**
  * ButtonWithColorIcon 컴포넌트
- * 주색상을 받아 자동으로 색상 조정하는 버튼
- * outline 모드: 글자색/테두리색: 주색상-900, hover: 주색상-300, disabled: 주색상-400, active: 주색상-700
- * filled 모드: 배경색: 주색상-600, 글자색: white, hover: 주색상-700, disabled: 주색상-400
+ * 기준 색상을 받아 자동으로 색상 톤을 생성하는 버튼
+ * - 기준 색상에서 자동으로 hover, disabled, active 색상을 계산
+ * - Tailwind 색상 (blue, red, green 등) 및 CSS 커스텀 속성 (secondary, tertiary 등) 지원
  */
 export function ButtonWithColorIcon({
   icon,
@@ -598,220 +598,105 @@ export function ButtonWithColorIcon({
   color = 'blue',
   mode = 'outline'
 }: ButtonWithColorIconProps) {
-  const getColorClasses = (baseColor: string, buttonMode: string) => {
-    const colorMap: { [key: string]: {
-      outline: { text: string; border: string; bg: string; hover: string; disabled: string; active: string };
-      filled: { text: string; border: string; bg: string; hover: string; disabled: string; active: string };
-      active?: { text: string; border: string; bg: string; hover: string; disabled: string; active: string };
-      base?: { text: string; border: string; bg: string; hover: string; disabled: string; active: string };
-    } } = {
-      blue: {
-        outline: {
-          text: 'text-blue-900',
-          border: 'border-blue-900',
-          bg: 'bg-transparent',
-          hover: 'hover:bg-blue-300',
-          disabled: 'disabled:text-blue-400 disabled:border-blue-400',
-          active: 'active:bg-blue-700'
-        },
-        filled: {
-          text: 'text-white',
-          border: 'border-blue-600',
-          bg: 'bg-blue-600',
-          hover: 'hover:bg-blue-700',
-          disabled: 'disabled:bg-blue-400 disabled:border-blue-400',
-          active: 'active:bg-blue-800'
-        }
-      },
-      red: {
-        outline: {
-          text: 'text-red-900',
-          border: 'border-red-900',
-          bg: 'bg-transparent',
-          hover: 'hover:bg-red-300',
-          disabled: 'disabled:text-red-400 disabled:border-red-400',
-          active: 'active:bg-red-700'
-        },
-        filled: {
-          text: 'text-white',
-          border: 'border-red-600',
-          bg: 'bg-red-600',
-          hover: 'hover:bg-red-700',
-          disabled: 'disabled:bg-red-400 disabled:border-red-400',
-          active: 'active:bg-red-800'
-        },
-        active: {
-          text: 'text-white',
-          border: 'border-red-600',
-          bg: 'bg-red-600',
-          hover: 'hover:bg-red-700',
-          disabled: 'disabled:bg-red-400 disabled:border-red-400',
-          active: 'active:bg-red-800'
-        }
-      },
-      green: {
-        outline: {
-          text: 'text-green-900',
-          border: 'border-green-900',
-          bg: 'bg-transparent',
-          hover: 'hover:bg-green-300',
-          disabled: 'disabled:text-green-400 disabled:border-green-400',
-          active: 'active:bg-green-700'
-        },
-        filled: {
-          text: 'text-white',
-          border: 'border-green-600',
-          bg: 'bg-green-600',
-          hover: 'hover:bg-green-700',
-          disabled: 'disabled:bg-green-400 disabled:border-green-400',
-          active: 'active:bg-green-800'
-        },
-        active: {
-          text: 'text-white',
-          border: 'border-green-600',
-          bg: 'bg-green-600',
-          hover: 'hover:bg-green-700',
-          disabled: 'disabled:bg-green-400 disabled:border-green-400',
-          active: 'active:bg-green-800'
-        }
-      },
-      orange: {
-        outline: {
-          text: 'text-orange-900',
-          border: 'border-orange-900',
-          bg: 'bg-transparent',
-          hover: 'hover:bg-orange-300',
-          disabled: 'disabled:text-orange-400 disabled:border-orange-400',
-          active: 'active:bg-orange-700'
-        },
-        filled: {
-          text: 'text-white',
-          border: 'border-orange-600',
-          bg: 'bg-orange-600',
-          hover: 'hover:bg-orange-700',
-          disabled: 'disabled:bg-orange-400 disabled:border-orange-400',
-          active: 'active:bg-orange-800'
-        }
-      },
-      slate: {
-        outline: {
-          text: 'text-slate-900',
-          border: 'border-slate-900',
-          bg: 'bg-transparent',
-          hover: 'hover:bg-slate-300',
-          disabled: 'disabled:text-slate-400 disabled:border-slate-400',
-          active: 'active:bg-slate-700'
-        },
-        filled: {
-          text: 'text-white',
-          border: 'border-slate-600',
-          bg: 'bg-slate-600',
-          hover: 'hover:bg-slate-700',
-          disabled: 'disabled:bg-slate-400 disabled:border-slate-400',
-          active: 'active:bg-slate-800'
-        }
-      },
-      secondary: {
-        outline: {
-          text: 'text-color-primary-foreground',
-          border: 'border-color-primary-foreground',
-          bg: 'bg-transparent',
-          hover: 'hover:bg-color-primary-hovered',
-          disabled: 'disabled:text-color-primary-muted disabled:border-color-primary-muted',
-          active: 'active:bg-color-primary-hovered'
-        },
-        filled: {
-          text: 'text-white',
-          border: 'border-color-secondary-active',
-          bg: 'bg-color-secondary-active',
-          hover: 'hover:bg-color-secondary-active',
-          disabled: 'disabled:bg-color-primary-muted disabled:border-color-primary-muted',
-          active: 'active:bg-color-secondary-active'
-        },
-        active: {
-          text: 'text-white',
-          border: 'border-color-secondary-active',
-          bg: 'bg-color-secondary-active',
-          hover: 'hover:bg-color-secondary-active',
-          disabled: 'disabled:bg-color-primary-muted disabled:border-color-primary-muted',
-          active: 'active:bg-color-secondary-active'
-        },
-        base: {
-          text: 'text-color-primary-foreground',
-          border: 'border-color-primary-foreground',
-          bg: 'bg-transparent',
-          hover: 'hover:bg-color-primary-hovered',
-          disabled: 'disabled:text-color-primary-muted disabled:border-color-primary-muted',
-          active: 'active:bg-color-primary-hovered'
-        }
-      },
-      tertiary: {
-        outline: {
-          text: 'text-color-primary-foreground',
-          border: 'border-color-primary-foreground',
-          bg: 'bg-transparent',
-          hover: 'hover:bg-color-primary-hovered',
-          disabled: 'disabled:text-color-primary-muted disabled:border-color-primary-muted',
-          active: 'active:bg-color-primary-hovered'
-        },
-        filled: {
-          text: 'text-white',
-          border: 'border-color-tertiary-base',
-          bg: 'bg-color-tertiary-base',
-          hover: 'hover:bg-color-tertiary-base',
-          disabled: 'disabled:bg-color-primary-muted disabled:border-color-primary-muted',
-          active: 'active:bg-color-tertiary-base'
-        },
-        active: {
-          text: 'text-white',
-          border: 'border-color-tertiary-base',
-          bg: 'bg-color-tertiary-base',
-          hover: 'hover:bg-color-tertiary-base',
-          disabled: 'disabled:bg-color-primary-muted disabled:border-color-primary-muted',
-          active: 'active:bg-color-tertiary-base'
-        },
-        base: {
-          text: 'text-color-primary-foreground',
-          border: 'border-color-primary-foreground',
-          bg: 'bg-transparent',
-          hover: 'hover:bg-color-primary-hovered',
-          disabled: 'disabled:text-color-primary-muted disabled:border-color-primary-muted',
-          active: 'active:bg-color-primary-hovered'
-        }
+
+  // CSS 커스텀 속성인지 확인
+  const isCustomProperty = (colorName: string) => {
+    return ['secondary', 'tertiary', 'primary'].includes(colorName);
+  };
+
+  // Tailwind 색상인지 확인
+  const isTailwindColor = (colorName: string) => {
+    return ['blue', 'red', 'green', 'orange', 'slate', 'gray', 'purple', 'indigo', 'yellow', 'pink', 'cyan'].includes(colorName);
+  };
+
+  // 동적 스타일 생성
+  const getColorStyles = () => {
+    const baseColor = color || 'blue';
+
+    if (isCustomProperty(baseColor)) {
+      // CSS 커스텀 속성 처리
+      let customColorVar;
+      if (baseColor === 'primary') {
+        customColorVar = '--color-primary-foreground';
+      } else if (baseColor === 'secondary') {
+        customColorVar = '--color-secondary-active';
+      } else if (baseColor === 'tertiary') {
+        customColorVar = '--color-tertiary-base';
+      } else {
+        customColorVar = `--color-${baseColor}-base`;
       }
-    };
 
-    const colorSet = colorMap[baseColor] || colorMap.blue;
-    return colorSet[buttonMode as keyof typeof colorSet] || colorSet.outline;
+      if (mode === 'outline') {
+        return {
+          base: {
+            color: `hsl(var(${customColorVar}))`,
+            borderColor: `hsl(var(${customColorVar}))`,
+            backgroundColor: 'transparent',
+          },
+          hover: {
+            backgroundColor: `hsl(var(${customColorVar}) / 0.1)`,
+          },
+          disabled: {
+            color: 'hsl(var(--color-primary-muted))',
+            borderColor: 'hsl(var(--color-primary-muted))',
+          }
+        };
+      } else {
+        // filled mode
+        return {
+          base: {
+            color: 'white',
+            borderColor: `hsl(var(${customColorVar}))`,
+            backgroundColor: `hsl(var(${customColorVar}))`,
+          },
+          hover: {
+            backgroundColor: `hsl(var(${customColorVar}) / 0.9)`,
+          },
+          disabled: {
+            backgroundColor: 'hsl(var(--color-primary-muted))',
+            borderColor: 'hsl(var(--color-primary-muted))',
+          }
+        };
+      }
+    } else if (isTailwindColor(baseColor)) {
+      // Tailwind 색상 처리는 CSS 클래스 사용
+      return null; // CSS 클래스로 처리
+    } else {
+      // 기본값 (blue)
+      return null; // CSS 클래스로 처리
+    }
   };
 
-  const colorClasses = getColorClasses(color, mode);
+  // Tailwind 클래스 생성
+  const getTailwindClasses = () => {
+    const baseColor = color || 'blue';
 
-  // Helper function to get the base background color
-  const getBaseBackgroundColor = () => {
-    if (colorClasses.bg.includes('bg-transparent')) return 'transparent';
-    if (colorClasses.bg.includes('color-secondary-active')) return 'hsl(var(--color-secondary-active))';
-    if (colorClasses.bg.includes('color-tertiary-base')) return 'hsl(var(--color-tertiary-base))';
-    if (colorClasses.bg.includes('bg-slate-600')) return undefined; // Let CSS handle it
-    if (colorClasses.bg.includes('bg-blue-600')) return undefined; // Let CSS handle it
-    if (colorClasses.bg.includes('bg-red-600')) return undefined; // Let CSS handle it
-    if (colorClasses.bg.includes('bg-green-600')) return undefined; // Let CSS handle it
-    return undefined;
+    if (isCustomProperty(baseColor)) {
+      return ''; // 인라인 스타일로 처리
+    }
+
+    if (mode === 'outline') {
+      return cn(
+        `text-${baseColor}-700 border-${baseColor}-700 bg-transparent`,
+        `hover:bg-${baseColor}-100`,
+        `disabled:text-${baseColor}-400 disabled:border-${baseColor}-400`,
+        `active:bg-${baseColor}-200`
+      );
+    } else {
+      return cn(
+        `text-white border-${baseColor}-600 bg-${baseColor}-600`,
+        `hover:bg-${baseColor}-700`,
+        `disabled:bg-${baseColor}-400 disabled:border-${baseColor}-400`,
+        `active:bg-${baseColor}-800`
+      );
+    }
   };
 
-  // Helper function to get the hover background color
-  const getHoverBackgroundColor = () => {
-    if (colorClasses.hover.includes('color-primary-hovered')) return 'hsl(var(--color-primary-hovered))';
-    if (colorClasses.hover.includes('color-secondary-active')) return 'hsl(var(--color-secondary-active))';
-    if (colorClasses.hover.includes('color-tertiary-base')) return 'hsl(var(--color-tertiary-base))';
-    return null; // Let CSS handle standard colors
-  };
+  const colorStyles = getColorStyles();
+  const tailwindClasses = getTailwindClasses();
 
-  // Check if we need manual hover handling for CSS custom properties
-  const needsCustomHover = getHoverBackgroundColor() !== null;
-
-  if (needsCustomHover) {
-    // Use manual hover handling for CSS custom properties
+  // 커스텀 속성 사용 시 인라인 스타일과 이벤트 핸들러 사용
+  if (colorStyles) {
     return (
       <button
         type={type}
@@ -824,26 +709,17 @@ export function ButtonWithColorIcon({
           className
         )}
         style={{
-          color: colorClasses.text.includes('color-primary-foreground') ? 'hsl(var(--color-primary-foreground))' : undefined,
-          borderColor: colorClasses.border.includes('color-primary-foreground') ? 'hsl(var(--color-primary-foreground))' :
-                      colorClasses.border.includes('color-secondary-active') ? 'hsl(var(--color-secondary-active))' :
-                      colorClasses.border.includes('color-tertiary-base') ? 'hsl(var(--color-tertiary-base))' : undefined,
-          backgroundColor: getBaseBackgroundColor(),
+          ...colorStyles.base,
+          ...(disabled ? colorStyles.disabled : {})
         }}
         onMouseEnter={(e) => {
-          if (!disabled) {
-            const hoverColor = getHoverBackgroundColor();
-            if (hoverColor) {
-              e.currentTarget.style.backgroundColor = hoverColor;
-            }
+          if (!disabled && colorStyles.hover) {
+            Object.assign(e.currentTarget.style, colorStyles.hover);
           }
         }}
         onMouseLeave={(e) => {
           if (!disabled) {
-            const baseColor = getBaseBackgroundColor();
-            if (baseColor !== undefined) {
-              e.currentTarget.style.backgroundColor = baseColor;
-            }
+            Object.assign(e.currentTarget.style, colorStyles.base);
           }
         }}
       >
@@ -853,7 +729,7 @@ export function ButtonWithColorIcon({
     );
   }
 
-  // Use standard CSS classes for built-in colors
+  // Tailwind 색상 사용 시 CSS 클래스 사용
   return (
     <button
       type={type}
@@ -862,12 +738,7 @@ export function ButtonWithColorIcon({
       className={cn(
         "inline-flex items-center justify-center px-4 py-2 text-sm font-medium transition-colors",
         "border rounded-md gap-2",
-        colorClasses.text,
-        colorClasses.border,
-        colorClasses.bg,
-        colorClasses.hover,
-        colorClasses.disabled,
-        colorClasses.active,
+        tailwindClasses,
         "disabled:opacity-50 disabled:cursor-not-allowed",
         className
       )}
