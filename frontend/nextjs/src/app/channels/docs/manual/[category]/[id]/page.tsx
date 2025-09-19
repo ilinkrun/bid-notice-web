@@ -553,7 +553,7 @@ export default function ManualDetailPage({ params }: { params: Promise<any> }) {
       finishLoading();
       
       // 삭제 완료 후 목록 페이지로 이동
-      window.location.href = `/docs/manual/${category}`;
+      window.location.href = `/channels/docs/manual/${category}`;
 
     } catch (error) {
       console.error('매뉴얼 삭제 오류:', error);
@@ -564,7 +564,7 @@ export default function ManualDetailPage({ params }: { params: Promise<any> }) {
 
   // 목록으로 돌아가기
   const handleBackToList = () => {
-    navigate(`/docs/manual/${category}`);
+    navigate(`/channels/docs/manual/${category}`);
   };
 
   if (error) {

@@ -307,7 +307,7 @@ function NewManualContent() {
       finishLoading();
       
       // 저장 완료 후 목록 페이지로 이동
-      window.location.href = `/docs/manual/${category}`;
+      window.location.href = `/channels/docs/manual/${category}`;
       
     } catch (error) {
       console.error('매뉴얼 작성 오류:', error);
@@ -318,7 +318,7 @@ function NewManualContent() {
 
   // 취소 버튼
   const handleCancel = () => {
-    navigate(`/docs/manual/${category}`);
+    navigate(`/channels/docs/manual/${category}`);
   };
 
   if (error) {
@@ -327,7 +327,7 @@ function NewManualContent() {
         <Card className="border-0 shadow-none">
           <CardContent className="p-10 text-center">
             <div className="text-red-500 mb-4">{error}</div>
-            <Button onClick={() => navigate(`/docs/manual/${category}`)}>
+            <Button onClick={() => navigate(`/channels/docs/manual/${category}`)}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               목록으로 돌아가기
             </Button>
@@ -342,7 +342,7 @@ function NewManualContent() {
       <Card className="border-0 shadow-none">
         <CardContent className="p-0">
           <div className="mb-4 flex justify-between items-center">
-            <Button variant="outline" onClick={() => navigate(`/docs/manual/${category}`)}>
+            <Button variant="outline" onClick={() => navigate(`/channels/docs/manual/${category}`)}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               목록으로
             </Button>

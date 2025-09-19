@@ -497,7 +497,7 @@ export default function DocsManualPage({ params }: { params: Promise<any> }) {
       finishLoading();
 
       // 수정 완료 후 해당 매뉴얼 상세 페이지로 리다이렉트
-      const redirectUrl = `/docs/manual/${category}/${updatedManual.id}`;
+      const redirectUrl = `/channels/docs/manual/${category}/${updatedManual.id}`;
       window.location.href = redirectUrl;
     } catch (err) {
       console.error('매뉴얼 수정 오류:', err);
@@ -556,7 +556,7 @@ export default function DocsManualPage({ params }: { params: Promise<any> }) {
   const handleCategoryChange = (koCategory: string) => {
     const enCategory = convertKoToEn(koCategory);
     if (enCategory !== category) {
-      navigate(`/docs/manual/${enCategory}`);
+      navigate(`/channels/docs/manual/${enCategory}`);
     }
   };
 
@@ -620,8 +620,8 @@ export default function DocsManualPage({ params }: { params: Promise<any> }) {
     return {
       title: categoryInfo.label,
       breadcrumbs: [
-        { label: '문서', href: '/docs/manual/user_manual' },
-        { label: categoryInfo.name, href: `/docs/manual/${category}` }
+        { label: '문서', href: '/channels/docs/manual/user_manual' },
+        { label: categoryInfo.name, href: `/channels/docs/manual/${category}` }
       ]
     };
   };
@@ -654,7 +654,7 @@ export default function DocsManualPage({ params }: { params: Promise<any> }) {
               <ButtonWithIcon
                 icon={<Plus className="mr-2 h-4 w-4" />}
                 onClick={() => {
-                  navigate(`/docs/manual/${category}/new?format=markdown`);
+                  navigate(`/channels/docs/manual/${category}/new?format=markdown`);
                 }}
               >
                 글쓰기
@@ -692,7 +692,7 @@ export default function DocsManualPage({ params }: { params: Promise<any> }) {
                   <DataTableRow
                     key={manual.id}
                     onClick={() => {
-                      navigate(`/docs/manual/${category}/${manual.id}`);
+                      navigate(`/channels/docs/manual/${category}/${manual.id}`);
                     }}
                   >
                     <DataTableCell>{manual.id}</DataTableCell>
