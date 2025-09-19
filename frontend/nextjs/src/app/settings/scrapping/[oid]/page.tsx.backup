@@ -1,0 +1,1069 @@
+'use client';
+
+import { useQuery, useMutation } from '@apollo/client';
+import { getClient } from '@/lib/api/graphqlClient';
+import { gql } from '@apollo/client';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
+import { useUnifiedLoading } from '@/components/providers/UnifiedLoadingProvider';
+import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { List, FileText, Settings, ArrowLeft, Edit, Eye, Save, HelpCircle, Puzzle, Wrench, List as ListIcon } from 'lucide-react';
+import { DropdownSectionHeader, ButtonWithIcon, ButtonWithColorIcon, TabHeader, TabContainer } from '@/components/shared/FormComponents';
+import { ScrappingSettingsLayout } from '@/components/settings/ScrappingSettingsLayout';
+import { SectionTitleHelp } from '@/components/shared/Help';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+// GraphQL 쿼리들
+const GET_SETTINGS_LIST = gql`
+  query GetSettingsListByOid($oid: Int) {
+    settingListByOid(oid: $oid) {
+      oid
+      orgName
+      detailUrl
+      iframe
+      rowXpath
+      paging
+      startPage
+      endPage
+      login
+      elements {
+        key
+        xpath
+        target
+        callback
+      }
+      orgRegion
+      registration
+      use
+      companyInCharge
+      orgMan
+      exceptionRow
+    }
+  }
+`;
+
+const GET_SETTINGS_DETAIL = gql`
+  query GetSettingsDetailByOid($oid: Int!) {
+    settingsDetailByOid(oid: $oid) {
+      oid
+      orgName
+      title
+      bodyHtml
+      fileName
+      fileUrl
+      preview
+      noticeDiv
+      noticeNum
+      orgDept
+      orgMan
+      orgTel
+      use
+      sampleUrl
+      down
+    }
+  }
+`;
+
+// 목록 설정 업데이트 뮤테이션
+const UPDATE_SETTINGS_LIST = gql`
+  mutation UpsertSettingsListByOid($oid: Int!, $input: SettingsListInput!) {
+    upsertSettingsListByOid(oid: $oid, input: $input) {
+      oid
+      orgName
+      detailUrl
+      orgRegion
+      registration
+      use
+    }
+  }
+`;
+
+// 상세 설정 업데이트 뮤테이션
+const UPDATE_SETTINGS_DETAIL = gql`
+  mutation UpsertSettingsDetailByOid($oid: Int!, $input: SettingsNoticeDetailInput!) {
+    upsertSettingsDetailByOid(oid: $oid, input: $input) {
+      oid
+      orgName
+      use
+    }
+  }
+`;
+
+export default function ScrappingSettingsPage() {
+  const params = useParams();
+  const router = useRouter();
+  const { navigate } = useUnifiedNavigation();
+  const { startLoading, finishLoading } = useUnifiedLoading();
+
+  const oid = parseInt(params.oid as string);
+
+  // 드롭다운 상태 관리
+  const [isListExpanded, setIsListExpanded] = useState(true);
+  const [isDetailExpanded, setIsDetailExpanded] = useState(false);
+
+  // 편집 모드 상태
+  const [isListEditMode, setIsListEditMode] = useState(false);
+  const [isDetailEditMode, setIsDetailEditMode] = useState(false);
+
+  // 목록 설정 편집 데이터 (list 페이지와 동일)
+  const [listEditData, setListEditData] = useState({
+    orgName: '',
+    detailUrl: '',
+    paging: '',
+    startPage: '',
+    endPage: '',
+    iframe: '',
+    rowXpath: '',
+    orgRegion: '',
+    use: '',
+    orgMan: '',
+    companyInCharge: '',
+    exceptionRow: '',
+    elements: [] as any[]
+  });
+
+  // 목록 설정 원본 데이터
+  const [listOriginalData, setListOriginalData] = useState({
+    orgName: '',
+    detailUrl: '',
+    paging: '',
+    startPage: '',
+    endPage: '',
+    iframe: '',
+    rowXpath: '',
+    orgRegion: '',
+    use: '',
+    orgMan: '',
+    companyInCharge: '',
+    exceptionRow: '',
+    elements: [] as any[]
+  });
+
+  // 상세 설정 편집 데이터 (detail 페이지와 동일)
+  const [detailEditData, setDetailEditData] = useState({
+    orgName: '',
+    title: '',
+    bodyHtml: '',
+    fileName: '',
+    fileUrl: '',
+    preview: '',
+    noticeDiv: '',
+    noticeNum: '',
+    orgDept: '',
+    orgMan: '',
+    orgTel: '',
+    use: '',
+    sampleUrl: '',
+    down: ''
+  });
+
+  // 상세 설정 원본 데이터
+  const [detailOriginalData, setDetailOriginalData] = useState({
+    orgName: '',
+    title: '',
+    bodyHtml: '',
+    fileName: '',
+    fileUrl: '',
+    preview: '',
+    noticeDiv: '',
+    noticeNum: '',
+    orgDept: '',
+    orgMan: '',
+    orgTel: '',
+    use: '',
+    sampleUrl: '',
+    down: ''
+  });
+
+  // 모달 상태
+  const [showListSaveModal, setShowListSaveModal] = useState(false);
+  const [showDetailSaveModal, setShowDetailSaveModal] = useState(false);
+  const [listChanges, setListChanges] = useState<string[]>([]);
+  const [detailChanges, setDetailChanges] = useState<string[]>([]);
+
+  // 탭 상태 (목록 설정용)
+  const [activeSubTab, setActiveSubTab] = useState('all');
+
+  // 목록 스크랩 설정 쿼리
+  const { loading: loadingList, error: errorList, data: dataList } = useQuery(GET_SETTINGS_LIST, {
+    client: getClient(),
+    variables: { oid }
+  });
+
+  // 상세 스크랩 설정 쿼리
+  const { loading: loadingDetail, error: errorDetail, data: dataDetail } = useQuery(GET_SETTINGS_DETAIL, {
+    client: getClient(),
+    variables: { oid }
+  });
+
+  // 뮤테이션
+  const [updateSettingsList] = useMutation(UPDATE_SETTINGS_LIST, { client: getClient() });
+  const [updateSettingsDetail] = useMutation(UPDATE_SETTINGS_DETAIL, { client: getClient() });
+
+  // Handle data completion
+  useEffect(() => {
+    if (dataList && dataDetail) {
+      console.log('스크랩 설정 데이터 로드 완료');
+      finishLoading();
+    }
+  }, [dataList, dataDetail, finishLoading]);
+
+  // Handle errors
+  useEffect(() => {
+    if (errorList || errorDetail) {
+      console.error('스크랩 설정 데이터 로드 에러:', errorList || errorDetail);
+      finishLoading();
+    }
+  }, [errorList, errorDetail, finishLoading]);
+
+  // 목록 설정 데이터 초기화
+  useEffect(() => {
+    if (dataList?.settingListByOid) {
+      const settings = dataList.settingListByOid;
+      const dataState = {
+        orgName: settings.orgName || '',
+        detailUrl: settings.detailUrl || '',
+        paging: settings.paging || '',
+        startPage: settings.startPage?.toString() || '',
+        endPage: settings.endPage?.toString() || '',
+        iframe: settings.iframe || '',
+        rowXpath: settings.rowXpath || '',
+        orgRegion: settings.orgRegion || '',
+        use: settings.use?.toString() || '',
+        orgMan: settings.orgMan || '',
+        companyInCharge: settings.companyInCharge || '',
+        exceptionRow: settings.exceptionRow || '',
+        elements: settings.elements || []
+      };
+
+      setListEditData(dataState);
+      setListOriginalData(dataState);
+    }
+  }, [dataList]);
+
+  // 상세 설정 데이터 초기화
+  useEffect(() => {
+    if (dataDetail?.settingsDetailByOid) {
+      const settings = dataDetail.settingsDetailByOid;
+      const dataState = {
+        orgName: settings.orgName || '',
+        title: settings.title || '',
+        bodyHtml: settings.bodyHtml || '',
+        fileName: settings.fileName || '',
+        fileUrl: settings.fileUrl || '',
+        preview: settings.preview || '',
+        noticeDiv: settings.noticeDiv || '',
+        noticeNum: settings.noticeNum || '',
+        orgDept: settings.orgDept || '',
+        orgMan: settings.orgMan || '',
+        orgTel: settings.orgTel || '',
+        use: settings.use?.toString() || '',
+        sampleUrl: settings.sampleUrl || '',
+        down: settings.down || ''
+      };
+
+      setDetailEditData(dataState);
+      setDetailOriginalData(dataState);
+    }
+  }, [dataDetail]);
+
+  const listSettings = dataList?.settingListByOid;
+  const detailSettings = dataDetail?.settingsDetailByOid;
+
+  // 목록 설정 핸들러들
+  const handleListEditMode = () => {
+    setIsListEditMode(true);
+    setIsListExpanded(true);
+  };
+
+  const handleListViewMode = () => {
+    setListEditData({...listOriginalData});
+    setIsListEditMode(false);
+  };
+
+  const detectListChanges = () => {
+    const changes: string[] = [];
+
+    // 기본 설정 변경 검사
+    if (listEditData.detailUrl !== listOriginalData.detailUrl) {
+      changes.push(`- URL이 '${listEditData.detailUrl}'로 변경됨`);
+    }
+    if (listEditData.paging !== listOriginalData.paging) {
+      changes.push(`- 페이징이 '${listEditData.paging || '설정 없음'}'로 변경됨`);
+    }
+    if (listEditData.startPage !== listOriginalData.startPage) {
+      changes.push(`- 시작 페이지가 '${listEditData.startPage}'로 변경됨`);
+    }
+    if (listEditData.endPage !== listOriginalData.endPage) {
+      changes.push(`- 종료 페이지가 '${listEditData.endPage}'로 변경됨`);
+    }
+    if (listEditData.iframe !== listOriginalData.iframe) {
+      changes.push(`- iFrame이 '${listEditData.iframe || '없음'}'로 변경됨`);
+    }
+    if (listEditData.rowXpath !== listOriginalData.rowXpath) {
+      changes.push(`- 행 XPath가 '${listEditData.rowXpath}'로 변경됨`);
+    }
+
+    // 요소 설정 변경 검사
+    listEditData.elements.forEach((element, index) => {
+      const originalElement = listOriginalData.elements[index];
+      if (originalElement) {
+        if (element.xpath !== originalElement.xpath ||
+            element.target !== originalElement.target ||
+            element.callback !== originalElement.callback) {
+          changes.push(`- ${element.key}가 '${element.xpath}|${element.target || '-'}|${element.callback || '-'}'로 변경됨`);
+        }
+      }
+    });
+
+    return changes;
+  };
+
+  const handleListSave = () => {
+    const detectedChanges = detectListChanges();
+    if (detectedChanges.length === 0) {
+      setListChanges([]);
+      setShowListSaveModal(true);
+    } else {
+      setListChanges(detectedChanges);
+      setShowListSaveModal(true);
+    }
+  };
+
+  const handleListConfirmSave = async () => {
+    try {
+      await updateSettingsList({
+        variables: {
+          oid: oid,
+          input: {
+            oid: oid,
+            orgName: listEditData.orgName,
+            detailUrl: listEditData.detailUrl,
+            paging: listEditData.paging || null,
+            startPage: parseInt(listEditData.startPage) || 1,
+            endPage: parseInt(listEditData.endPage) || 1,
+            iframe: listEditData.iframe || null,
+            rowXpath: listEditData.rowXpath,
+            elements: listEditData.elements,
+            region: listEditData.orgRegion,
+            registration: 1,
+            use: parseInt(listEditData.use) || 1,
+            companyInCharge: listEditData.companyInCharge,
+            orgMan: listEditData.orgMan,
+            exceptionRow: listEditData.exceptionRow || null
+          }
+        }
+      });
+
+      setShowListSaveModal(false);
+      setIsListEditMode(false);
+      window.location.reload();
+    } catch (error) {
+      console.error('목록 설정 저장 중 오류 발생:', error);
+      setShowListSaveModal(false);
+    }
+  };
+
+  const handleListInputChange = (field: string, value: string) => {
+    setListEditData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleListElementChange = (index: number, field: string, value: string) => {
+    setListEditData(prev => ({
+      ...prev,
+      elements: prev.elements.map((element, i) =>
+        i === index ? { ...element, [field]: value } : element
+      )
+    }));
+  };
+
+  // 상세 설정 핸들러들
+  const handleDetailEditMode = () => {
+    setIsDetailEditMode(true);
+    setIsDetailExpanded(true);
+  };
+
+  const handleDetailViewMode = () => {
+    setDetailEditData({...detailOriginalData});
+    setIsDetailEditMode(false);
+  };
+
+  const detectDetailChanges = () => {
+    const changes: string[] = [];
+
+    if (detailEditData.title !== detailOriginalData.title) {
+      changes.push(`- 제목이 '${detailEditData.title}'로 변경됨`);
+    }
+    if (detailEditData.bodyHtml !== detailOriginalData.bodyHtml) {
+      changes.push(`- 본문 HTML이 '${detailEditData.bodyHtml}'로 변경됨`);
+    }
+    if (detailEditData.fileName !== detailOriginalData.fileName) {
+      changes.push(`- 파일명이 '${detailEditData.fileName}'로 변경됨`);
+    }
+    if (detailEditData.fileUrl !== detailOriginalData.fileUrl) {
+      changes.push(`- 파일 URL이 '${detailEditData.fileUrl}'로 변경됨`);
+    }
+
+    return changes;
+  };
+
+  const handleDetailSave = () => {
+    const detectedChanges = detectDetailChanges();
+    if (detectedChanges.length === 0) {
+      setDetailChanges([]);
+      setShowDetailSaveModal(true);
+    } else {
+      setDetailChanges(detectedChanges);
+      setShowDetailSaveModal(true);
+    }
+  };
+
+  const handleDetailConfirmSave = async () => {
+    try {
+      await updateSettingsDetail({
+        variables: {
+          oid: oid,
+          input: {
+            oid: oid,
+            orgName: detailEditData.orgName,
+            title: detailEditData.title,
+            bodyHtml: detailEditData.bodyHtml,
+            fileName: detailEditData.fileName,
+            fileUrl: detailEditData.fileUrl,
+            preview: detailEditData.preview,
+            noticeDiv: detailEditData.noticeDiv,
+            noticeNum: detailEditData.noticeNum,
+            orgDept: detailEditData.orgDept,
+            orgMan: detailEditData.orgMan,
+            orgTel: detailEditData.orgTel,
+            use: parseInt(detailEditData.use) || 1,
+            sampleUrl: detailEditData.sampleUrl,
+            down: detailEditData.down
+          }
+        }
+      });
+
+      setShowDetailSaveModal(false);
+      setIsDetailEditMode(false);
+      window.location.reload();
+    } catch (error) {
+      console.error('상세 설정 저장 중 오류 발생:', error);
+      setShowDetailSaveModal(false);
+    }
+  };
+
+  const handleDetailInputChange = (field: string, value: string) => {
+    setDetailEditData(prev => ({ ...prev, [field]: value }));
+  };
+
+  // 로딩 중인 경우 스켈레톤 표시
+  if (loadingList || loadingDetail) {
+    return (
+      <ScrappingSettingsLayout
+        orgName={listSettings?.orgName || `OID: ${oid}`}
+        isActive={false}
+        region=""
+      >
+        <div className="space-y-4">
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-32 w-full" />
+        </div>
+      </ScrappingSettingsLayout>
+    );
+  }
+
+  // 에러 상태
+  if (errorList || errorDetail) {
+    return (
+      <ScrappingSettingsLayout
+        orgName={listSettings?.orgName || `OID: ${oid}`}
+        isActive={false}
+        region=""
+      >
+        <Card>
+          <CardHeader>
+            <CardTitle>오류 발생</CardTitle>
+            <CardDescription>데이터를 불러오는 중 오류가 발생했습니다.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-red-500">{(errorList || errorDetail)?.message}</p>
+          </CardContent>
+        </Card>
+      </ScrappingSettingsLayout>
+    );
+  }
+
+  // 서브탭 구성 (목록 설정용)
+  const subTabs = [
+    {
+      id: 'all',
+      label: '전체 설정',
+      icon: <ListIcon className="h-4 w-4" />
+    },
+    {
+      id: 'basic',
+      label: '기본 설정',
+      icon: <Settings className="h-4 w-4" />
+    },
+    {
+      id: 'elements',
+      label: '요소 설정',
+      icon: <Puzzle className="h-4 w-4" />
+    },
+    {
+      id: 'additional',
+      label: '부가 설정',
+      icon: <Wrench className="h-4 w-4" />
+    }
+  ];
+
+  return (
+    <ScrappingSettingsLayout
+      orgName={listSettings?.orgName || `OID: ${oid}`}
+      isActive={listSettings?.use}
+      region={listSettings?.orgRegion}
+    >
+      <div className="space-y-6">
+        {/* 목록 스크랩 설정 섹션 */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <List className="h-5 w-5 text-gray-700" />
+            <h3 className="text-lg font-semibold text-gray-900">목록 스크랩 설정</h3>
+            <SectionTitleHelp
+              title="목록 스크랩 설정 도움말"
+              content={
+                <div className="space-y-4">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 className="text-sm font-medium text-blue-900 mb-2">목록 스크랩 설정 가이드</h4>
+                    <ul className="text-sm text-blue-800 space-y-1">
+                      <li>• <strong>기관명:</strong> 스크랩 대상 기관의 이름</li>
+                      <li>• <strong>URL:</strong> 입찰공고 목록 페이지 URL</li>
+                      <li>• <strong>행 XPath:</strong> 목록에서 각 공고 행을 선택하는 XPath</li>
+                      <li>• <strong>페이징:</strong> 다음 페이지로 이동하는 XPath 또는 URL 패턴</li>
+                    </ul>
+                  </div>
+                </div>
+              }
+            />
+          </div>
+
+          <div className="border border-gray-200 rounded-lg p-4">
+            {listSettings ? (
+              <div className="space-y-0">
+                {/* 서브탭 헤더 */}
+                <TabHeader
+                  tabs={subTabs}
+                  activeTab={activeSubTab}
+                  onTabChange={setActiveSubTab}
+                />
+
+                {/* 탭 컨텐츠 */}
+                <TabContainer className="p-0 mt-0">
+                    <div>
+                      {/* 전체 설정 탭 */}
+                      {activeSubTab === 'all' && (
+                        <div className="space-y-1">
+                          {/* 기본 설정 */}
+                          <div className="border rounded-lg overflow-hidden" style={{ backgroundColor: 'transparent' }}>
+                            <Table>
+                              <TableBody>
+                                <TableRow>
+                                  <TableCell className="font-medium w-24">
+                                    <span className="text-gray-500 text-sm">기관명</span>
+                                  </TableCell>
+                                  <TableCell className="break-all">
+                                    <Input
+                                      value={listEditData.orgName}
+                                      onChange={(e) => handleListInputChange('orgName', e.target.value)}
+                                      className="w-full text-sm"
+                                      style={{ color: 'var(--color-primary-foreground)' }}
+                                      disabled={!isListEditMode}
+                                    />
+                                  </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell className="font-medium w-24">
+                                    <span className="text-gray-500 text-sm">URL</span>
+                                  </TableCell>
+                                  <TableCell className="break-all">
+                                    <Input
+                                      value={listEditData.detailUrl}
+                                      onChange={(e) => handleListInputChange('detailUrl', e.target.value)}
+                                      className="w-full text-sm"
+                                      style={{ color: 'var(--color-primary-foreground)' }}
+                                      disabled={!isListEditMode}
+                                    />
+                                  </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell className="font-medium">
+                                    <span className="text-gray-500 text-sm">페이징</span>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Input
+                                      value={listEditData.paging}
+                                      onChange={(e) => handleListInputChange('paging', e.target.value)}
+                                      className="w-full text-sm font-mono"
+                                      style={{ color: 'var(--color-primary-foreground)' }}
+                                      placeholder="설정 없음"
+                                      disabled={!isListEditMode}
+                                    />
+                                  </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell className="font-medium">
+                                    <span className="text-gray-500 text-sm">시작 페이지</span>
+                                  </TableCell>
+                                  <TableCell className="flex items-center">
+                                    <div className="flex items-center" style={{ width: '160px' }}>
+                                      <Input
+                                        value={listEditData.startPage}
+                                        onChange={(e) => handleListInputChange('startPage', e.target.value)}
+                                        className="w-20 text-sm"
+                                        style={{ color: 'var(--color-primary-foreground)' }}
+                                        type="number"
+                                        disabled={!isListEditMode}
+                                      />
+                                    </div>
+                                    <div className="flex items-center">
+                                      <span className="text-gray-500 text-sm" style={{ width: '80px' }}>종료 페이지</span>
+                                      <Input
+                                        value={listEditData.endPage}
+                                        onChange={(e) => handleListInputChange('endPage', e.target.value)}
+                                        className="w-20 text-sm"
+                                        style={{ color: 'var(--color-primary-foreground)' }}
+                                        type="number"
+                                        disabled={!isListEditMode}
+                                      />
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell className="font-medium">
+                                    <span className="text-gray-500 text-sm">iFrame</span>
+                                  </TableCell>
+                                  <TableCell className="flex items-center">
+                                    <div className="flex items-center" style={{ width: '160px' }}>
+                                      <Input
+                                        value={listEditData.iframe}
+                                        onChange={(e) => handleListInputChange('iframe', e.target.value)}
+                                        className="w-32 text-sm"
+                                        style={{ color: 'var(--color-primary-foreground)' }}
+                                        placeholder="없음"
+                                        disabled={!isListEditMode}
+                                      />
+                                    </div>
+                                    <div className="flex items-center">
+                                      <span className="text-gray-500 text-sm" style={{ width: '80px' }}>제외항목</span>
+                                      <Input
+                                        value={listEditData.exceptionRow}
+                                        onChange={(e) => handleListInputChange('exceptionRow', e.target.value)}
+                                        className="w-48 text-sm font-mono"
+                                        style={{ color: 'var(--color-primary-foreground)' }}
+                                        placeholder="제외할 행 조건"
+                                        disabled={!isListEditMode}
+                                      />
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell className="font-medium">
+                                    <span className="text-gray-500 text-sm">행 XPath</span>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Input
+                                      value={listEditData.rowXpath}
+                                      onChange={(e) => handleListInputChange('rowXpath', e.target.value)}
+                                      className="w-full text-sm font-mono"
+                                      style={{ color: 'var(--color-primary-foreground)' }}
+                                      disabled={!isListEditMode}
+                                    />
+                                  </TableCell>
+                                </TableRow>
+                              </TableBody>
+                            </Table>
+                          </div>
+
+                          {/* 요소 설정 */}
+                          <div className="border rounded-lg overflow-hidden" style={{ backgroundColor: 'transparent' }}>
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead className="w-32 text-gray-500 text-sm">키</TableHead>
+                                  <TableHead className="text-gray-500 text-sm">Xpath</TableHead>
+                                  <TableHead className="w-24 text-gray-500 text-sm">타겟</TableHead>
+                                  <TableHead className="w-48 text-gray-500 text-sm">콜백</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {(isListEditMode ? listEditData.elements : listSettings.elements || []).length > 0 ? (
+                                  (isListEditMode ? listEditData.elements : listSettings.elements || []).map((element: any, index: number) => (
+                                    <TableRow key={index}>
+                                      <TableCell className="font-medium">
+                                        <span className="text-sm" style={{ color: 'var(--color-primary-foreground)' }}>{element.key}</span>
+                                      </TableCell>
+                                      <TableCell>
+                                        <Input
+                                          value={element.xpath || ''}
+                                          onChange={(e) => handleListElementChange(index, 'xpath', e.target.value)}
+                                          className="w-full text-sm font-mono"
+                                          style={{ color: 'var(--color-primary-foreground)' }}
+                                          disabled={!isListEditMode}
+                                        />
+                                      </TableCell>
+                                      <TableCell>
+                                        <Input
+                                          value={element.target || ''}
+                                          onChange={(e) => handleListElementChange(index, 'target', e.target.value)}
+                                          className="w-full text-sm"
+                                          style={{ color: 'var(--color-primary-foreground)' }}
+                                          disabled={!isListEditMode}
+                                        />
+                                      </TableCell>
+                                      <TableCell>
+                                        <Input
+                                          value={element.callback || ''}
+                                          onChange={(e) => handleListElementChange(index, 'callback', e.target.value)}
+                                          className="w-full text-sm font-mono"
+                                          style={{ color: 'var(--color-primary-foreground)' }}
+                                          disabled={!isListEditMode}
+                                        />
+                                      </TableCell>
+                                    </TableRow>
+                                  ))
+                                ) : (
+                                  <TableRow>
+                                    <TableCell colSpan={4} className="text-center py-8 text-color-primary-muted-foreground">
+                                      요소 설정이 없습니다.
+                                    </TableCell>
+                                  </TableRow>
+                                )}
+                              </TableBody>
+                            </Table>
+                          </div>
+
+                          {/* 부가 설정 */}
+                          <div className="border rounded-lg overflow-hidden" style={{ backgroundColor: 'transparent' }}>
+                            <Table>
+                              <TableBody>
+                                <TableRow>
+                                  <TableCell className="font-medium">
+                                    <span className="text-gray-500 text-sm">지역</span>
+                                  </TableCell>
+                                  <TableCell className="flex items-center">
+                                    <div className="flex items-center" style={{ width: '160px' }}>
+                                      <Input
+                                        value={listEditData.orgRegion}
+                                        onChange={(e) => handleListInputChange('orgRegion', e.target.value)}
+                                        className="w-32 text-sm"
+                                        style={{ color: 'var(--color-primary-foreground)' }}
+                                        disabled={!isListEditMode}
+                                      />
+                                    </div>
+                                    <div className="flex items-center">
+                                      <span className="text-gray-500 text-sm" style={{ width: '80px' }}>사용</span>
+                                      <Input
+                                        value={listEditData.use}
+                                        onChange={(e) => handleListInputChange('use', e.target.value)}
+                                        className="w-20 text-sm"
+                                        style={{ color: 'var(--color-primary-foreground)' }}
+                                        disabled={!isListEditMode}
+                                      />
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell className="font-medium">
+                                    <span className="text-gray-500 text-sm">담당업체</span>
+                                  </TableCell>
+                                  <TableCell className="flex items-center">
+                                    <div className="flex items-center" style={{ width: '160px' }}>
+                                      <Input
+                                        value={listEditData.companyInCharge}
+                                        onChange={(e) => handleListInputChange('companyInCharge', e.target.value)}
+                                        className="w-32 text-sm"
+                                        style={{ color: 'var(--color-primary-foreground)' }}
+                                        disabled={!isListEditMode}
+                                      />
+                                    </div>
+                                    <div className="flex items-center">
+                                      <span className="text-gray-500 text-sm" style={{ width: '80px' }}>담당자</span>
+                                      <Input
+                                        value={listEditData.orgMan}
+                                        onChange={(e) => handleListInputChange('orgMan', e.target.value)}
+                                        className="w-32 text-sm"
+                                        style={{ color: 'var(--color-primary-foreground)' }}
+                                        disabled={!isListEditMode}
+                                      />
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              </TableBody>
+                            </Table>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 다른 탭들도 동일한 구조로... */}
+                    </div>
+
+                    {/* 버튼 영역 - TabContainer 하단 우측 */}
+                    <div className="flex justify-end space-x-2 mt-6 pt-4 border-t">
+                      {isListEditMode ? (
+                        <>
+                          <ButtonWithColorIcon
+                            icon={<Eye className="h-4 w-4" />}
+                            onClick={handleListViewMode}
+                            color="tertiary"
+                            mode="outline"
+                          >
+                            보기
+                          </ButtonWithColorIcon>
+                          <ButtonWithColorIcon
+                            icon={<Save className="h-4 w-4" />}
+                            onClick={handleListSave}
+                            color="secondary"
+                            mode="outline"
+                          >
+                            저장
+                          </ButtonWithColorIcon>
+                        </>
+                      ) : (
+                        <ButtonWithIcon
+                          icon={<Edit className="h-4 w-4" />}
+                          onClick={handleListEditMode}
+                        >
+                          편집
+                        </ButtonWithIcon>
+                      )}
+                    </div>
+                  </TabContainer>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-color-primary-muted">목록 스크랩 설정이 없습니다.</p>
+                  <ButtonWithIcon
+                    icon={<Edit className="h-4 w-4" />}
+                    onClick={handleListEditMode}
+                    className="mt-4"
+                  >
+                    설정 추가하기
+                  </ButtonWithIcon>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* 상세 스크랩 설정 섹션 */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <FileText className="h-5 w-5 text-gray-700" />
+            <h3 className="text-lg font-semibold text-gray-900">상세 스크랩 설정</h3>
+            <SectionTitleHelp
+              title="상세 스크랩 설정 도움말"
+              content={
+                <div className="space-y-4">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 className="text-sm font-medium text-blue-900 mb-2">상세 스크랩 설정 가이드</h4>
+                    <ul className="text-sm text-blue-800 space-y-1">
+                      <li>• <strong>제목:</strong> 공고 제목을 추출할 XPath</li>
+                      <li>• <strong>본문:</strong> 공고 본문을 추출할 XPath</li>
+                      <li>• <strong>파일이름:</strong> 첨부파일 이름을 추출할 XPath</li>
+                      <li>• <strong>파일주소:</strong> 첨부파일 URL을 추출할 XPath</li>
+                      <li>• <strong>공고구분:</strong> 공고 유형을 추출할 XPath</li>
+                      <li>• <strong>담당부서:</strong> 담당 부서명을 추출할 XPath</li>
+                    </ul>
+                  </div>
+                </div>
+              }
+            />
+          </div>
+
+          <div className="border border-gray-200 rounded-lg p-4">
+            {detailSettings ? (
+              <div className="space-y-4">
+                  {/* 상세 설정 표 - detail 페이지와 동일한 구조 */}
+                  <div className="border rounded-lg overflow-hidden" style={{ backgroundColor: 'transparent' }}>
+                    <Table>
+                      <TableBody>
+                        {[
+                          { key: '제목', field: 'title', target: 'text', callback: '' },
+                          { key: '본문', field: 'bodyHtml', target: 'html', callback: '' },
+                          { key: '파일이름', field: 'fileName', target: 'text', callback: '' },
+                          { key: '파일주소', field: 'fileUrl', target: 'href', callback: '' },
+                          { key: '미리보기', field: 'preview', target: 'text', callback: '' },
+                          { key: '공고구분', field: 'noticeDiv', target: 'text', callback: '' },
+                          { key: '공고번호', field: 'noticeNum', target: 'text', callback: '' },
+                          { key: '담당부서', field: 'orgDept', target: 'text', callback: '' },
+                          { key: '담당자', field: 'orgMan', target: 'text', callback: '' },
+                          { key: '연락처', field: 'orgTel', target: 'text', callback: '' }
+                        ].map((item, index) => (
+                          <TableRow key={index}>
+                            <TableCell className="font-medium w-32">
+                              <span className="text-gray-500 text-sm">{item.key}</span>
+                            </TableCell>
+                            <TableCell>
+                              <Input
+                                value={detailEditData[item.field as keyof typeof detailEditData] || ''}
+                                onChange={(e) => handleDetailInputChange(item.field, e.target.value)}
+                                className="w-full text-sm font-mono"
+                                style={{ color: 'var(--color-primary-foreground)' }}
+                                disabled={!isDetailEditMode}
+                              />
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                  {/* 버튼 영역을 통합 박스 우측하단에 배치 */}
+                  <div className="flex justify-end space-x-2 mt-6">
+                    {isDetailEditMode ? (
+                      <>
+                        <ButtonWithColorIcon
+                          icon={<Eye className="w-4 h-4" />}
+                          onClick={handleDetailViewMode}
+                          color="tertiary"
+                          mode="outline"
+                        >
+                          보기
+                        </ButtonWithColorIcon>
+                        <ButtonWithColorIcon
+                          icon={<Save className="w-4 h-4" />}
+                          onClick={handleDetailSave}
+                          color="secondary"
+                          mode="outline"
+                        >
+                          저장
+                        </ButtonWithColorIcon>
+                      </>
+                    ) : (
+                      <ButtonWithIcon
+                        icon={<Edit className="w-4 h-4" />}
+                        onClick={handleDetailEditMode}
+                      >
+                        편집
+                      </ButtonWithIcon>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-color-primary-muted">상세 스크랩 설정이 없습니다.</p>
+                  <ButtonWithIcon
+                    icon={<Edit className="w-4 h-4" />}
+                    onClick={handleDetailEditMode}
+                    className="mt-4"
+                  >
+                    설정 추가하기
+                  </ButtonWithIcon>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 목록 설정 저장 확인 모달 */}
+      <Dialog open={showListSaveModal} onOpenChange={setShowListSaveModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {listChanges.length === 0 ? "변경 사항 없음" : "변경 사항 확인"}
+            </DialogTitle>
+            <DialogDescription>
+              {listChanges.length === 0 ? (
+                "변경된 값이 없습니다."
+              ) : (
+                <div className="space-y-2">
+                  <p>다음 항목들이 변경되었습니다:</p>
+                  <div className="p-3 rounded text-sm">
+                    {listChanges.map((change, index) => (
+                      <div key={index}>{change}</div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            {listChanges.length === 0 ? (
+              <Button onClick={() => setShowListSaveModal(false)}>
+                닫기
+              </Button>
+            ) : (
+              <>
+                <Button variant="outline" onClick={() => setShowListSaveModal(false)}>
+                  취소
+                </Button>
+                <Button onClick={handleListConfirmSave}>
+                  저장
+                </Button>
+              </>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 상세 설정 저장 확인 모달 */}
+      <Dialog open={showDetailSaveModal} onOpenChange={setShowDetailSaveModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {detailChanges.length === 0 ? "변경 사항 없음" : "변경 사항 확인"}
+            </DialogTitle>
+            <DialogDescription>
+              {detailChanges.length === 0 ? (
+                "변경된 값이 없습니다."
+              ) : (
+                <div className="space-y-2">
+                  <p>다음 항목들이 변경되었습니다:</p>
+                  <div className="p-3 rounded text-sm">
+                    {detailChanges.map((change, index) => (
+                      <div key={index}>{change}</div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            {detailChanges.length === 0 ? (
+              <Button onClick={() => setShowDetailSaveModal(false)}>
+                닫기
+              </Button>
+            ) : (
+              <>
+                <Button variant="outline" onClick={() => setShowDetailSaveModal(false)}>
+                  취소
+                </Button>
+                <Button onClick={handleDetailConfirmSave}>
+                  저장
+                </Button>
+              </>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </ScrappingSettingsLayout>
+  );
+}

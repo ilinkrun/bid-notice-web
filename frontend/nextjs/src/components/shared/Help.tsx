@@ -9,8 +9,8 @@ interface PageTitleHelpProps {
 }
 
 interface SectionTitleHelpProps {
-  isOpen: boolean;
-  onToggle: () => void;
+  isOpen?: boolean;
+  onToggle?: () => void;
 }
 
 export function PageTitleHelp({
@@ -61,11 +61,20 @@ export function PageTitleHelp({
   );
 }
 
-export function SectionTitleHelp({ isOpen, onToggle }: SectionTitleHelpProps) {
+export function SectionTitleHelp({
+  isOpen: externalIsOpen,
+  onToggle: externalOnToggle
+}: SectionTitleHelpProps) {
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+
+  // 외부에서 제어되는 경우와 내부에서 제어되는 경우를 구분
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+  const toggleOpen = externalOnToggle || (() => setInternalIsOpen(!internalIsOpen));
+
   return (
     <button
       className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:transition-colors"
-      onClick={onToggle}
+      onClick={toggleOpen}
       title="업무 가이드"
       style={{
         color: 'var(--color-primary-foreground)',

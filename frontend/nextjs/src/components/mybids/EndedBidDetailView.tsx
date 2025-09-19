@@ -5,6 +5,7 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { ButtonWithIcon, ButtonWithColorIcon, DropdownSectionHeader, TabHeader, TabContainer } from '@/components/shared/FormComponents';
 import { SectionTitleHelp } from '@/components/shared/Help';
+import { GuideSlide } from '@/components/shared/GuideSlide';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -122,24 +123,29 @@ export default function EndedBidDetailView({ bid }: EndedBidDetailViewProps) {
             accentColor="#10b981"
           />
           <SectionTitleHelp
+            title="[가이드]입찰 종료 상세 > 입찰 결과"
+            category="운영가이드"
             isOpen={isResultGuideOpen}
             onToggle={() => setIsResultGuideOpen(!isResultGuideOpen)}
           />
         </div>
 
         {/* 입찰 결과 업무 가이드 */}
-        {isResultGuideOpen && (
-          <div className="mt-2 bg-green-50 border border-green-200 p-4 rounded-lg">
-            <div className="max-w-full">
-              <h4 className="font-semibold text-green-800 mb-2">입찰 결과 업무 가이드</h4>
-              <div className="text-sm text-green-700 space-y-2">
+        <GuideSlide
+          isOpen={isResultGuideOpen}
+          title="[가이드]입찰 종료 상세 > 입찰 결과"
+          category="운영가이드"
+          defaultContent={
+            <div className="space-y-2">
+              <div className="text-sm text-green-700">
                 <p>• 결과 요약: 입찰의 최종 결과와 주요 정보를 확인할 수 있습니다.</p>
                 <p>• 낙찰/패찰 여부와 최종 순위를 확인할 수 있습니다.</p>
                 <p>• 입찰 과정에서의 주요 일정과 결과 내용을 종합적으로 검토할 수 있습니다.</p>
               </div>
             </div>
-          </div>
-        )}
+          }
+          className="bg-green-50 border-green-200"
+        />
 
         {isResultExpanded && (
           <div className="mt-2 space-y-0">
@@ -216,23 +222,28 @@ export default function EndedBidDetailView({ bid }: EndedBidDetailViewProps) {
             accentColor="#8b5cf6"
           />
           <SectionTitleHelp
+            title="[가이드]입찰 종료 상세 > 결과 분석"
+            category="운영가이드"
             isOpen={isAnalysisGuideOpen}
             onToggle={() => setIsAnalysisGuideOpen(!isAnalysisGuideOpen)}
           />
         </div>
 
         {/* 결과 분석 업무 가이드 */}
-        {isAnalysisGuideOpen && (
-          <div className="mt-2 bg-purple-50 border border-purple-200 p-4 rounded-lg">
-            <div className="max-w-full">
-              <h4 className="font-semibold text-purple-800 mb-2">결과 분석 업무 가이드</h4>
-              <div className="text-sm text-purple-700 space-y-2">
+        <GuideSlide
+          isOpen={isAnalysisGuideOpen}
+          title="[가이드]입찰 종료 상세 > 결과 분석"
+          category="운영가이드"
+          defaultContent={
+            <div className="space-y-2">
+              <div className="text-sm text-purple-700">
                 <p>• 업체별 응찰가: 참여 업체들의 입찰 금액과 순위를 확인할 수 있습니다.</p>
                 <p>• 경쟁업체 입찰 추이: 경쟁사들의 입찰 패턴과 경향을 분석할 수 있습니다.</p>
               </div>
             </div>
-          </div>
-        )}
+          }
+          className="bg-purple-50 border-purple-200"
+        />
 
         {isAnalysisExpanded && (
           <div className="mt-2 space-y-0">
