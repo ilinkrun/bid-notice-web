@@ -4,6 +4,7 @@ import { settingsResolvers } from './settings.js';
 import { logsResolvers } from './logs.js';
 import { mybidsResolvers } from './mybids.js';
 import { boardsResolvers } from './boards.js';
+import { docsResolvers } from './docs.js';
 import { spidersResolvers } from './spiders.js';
 import { databaseResolvers } from './database.js';
 import { authResolvers } from './auth.js';
@@ -16,6 +17,7 @@ export const resolvers = [
   logsResolvers,
   mybidsResolvers,
   boardsResolvers,
+  docsResolvers,
   spidersResolvers,
   databaseResolvers,
   authResolvers,

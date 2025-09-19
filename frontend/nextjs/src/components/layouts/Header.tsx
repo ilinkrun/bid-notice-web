@@ -149,13 +149,7 @@ const boardChannels = [
     href: '/channels/board/board_op',
     description: '운영(업무) 관련 공지, 기능 반영 및 요구 사항',
     icon: MessageSquare,
-  },
-  {
-    title: '매뉴얼',
-    href: '/channels/board/board_manual',
-    description: '사이트 운영 지침 및 사용 설명서',
-    icon: BookOpen,
-  },
+  }
 ];
 
 const chatChannels = [

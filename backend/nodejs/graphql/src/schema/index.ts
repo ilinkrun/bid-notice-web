@@ -4,6 +4,7 @@ import { settingsTypeDefs } from './settings.js';
 import { logsTypeDefs } from './logs.js';
 import { mybidsTypeDefs } from './mybids.js';
 import { boardsTypeDefs } from './boards.js';
+import { docsTypeDefs } from './docs.js';
 import { spidersTypeDefs } from './spiders.js';
 import { databaseTypeDefs } from './database.js';
 import { authTypeDefs } from './auth.js';
@@ -26,6 +27,7 @@ export const typeDefs = [
   logsTypeDefs,
   mybidsTypeDefs,
   boardsTypeDefs,
+  docsTypeDefs,
   spidersTypeDefs,
   databaseTypeDefs,
   authTypeDefs,
