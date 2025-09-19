@@ -7,12 +7,17 @@ import cors from 'cors';
 import http from 'http';
 import { typeDefs } from './schema/index.js';
 import { resolvers } from './resolvers/index.js';
+import { testConnection } from './lib/mysql.js';
 
 interface MyContext {
   token?: string;
 }
 
 async function startServer() {
+  // Test MySQL connection first
+  console.log('🔗 Testing MySQL connection...');
+  await testConnection();
+  
   const app = express();
   const httpServer = http.createServer(app);
 

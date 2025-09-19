@@ -170,6 +170,17 @@ const GET_CATEGORIES = `
   }
 `;
 
+const GET_LANG_MAPPINGS = `
+  query GetLangMappings($area: String!) {
+    mappingsLangByArea(area: $area) {
+      id
+      ko
+      en
+      isActive
+    }
+  }
+`;
+
 const SEARCH_MANUALS = `
   query SearchManuals($query: String!, $category: String, $limit: Int, $offset: Int) {
     docsManualSearch(query: $query, category: $category, limit: $limit, offset: $offset) {
@@ -210,6 +221,7 @@ export default function DocsManualPage({ params }: { params: Promise<any> }) {
   const [manuals, setManuals] = useState<any[]>([]);
   const [selectedManual, setSelectedManual] = useState<any>(null);
   const [categories, setCategories] = useState<string[]>([]);
+  const [langMappings, setLangMappings] = useState<any[]>([]);
 
   // 통합 로딩 관리
   const [error, setError] = useState<string | null>(null);
@@ -223,7 +235,7 @@ export default function DocsManualPage({ params }: { params: Promise<any> }) {
     content: '',
     markdown_source: null,
     format: 'markdown',
-    category: category || '사용자매뉴얼',
+    category: category || 'user_manual',
     writer: '',
     email: '',
     is_notice: false,
@@ -263,12 +275,54 @@ export default function DocsManualPage({ params }: { params: Promise<any> }) {
     fetchCategories();
   }, []);
 
+  // 언어 매핑 데이터 조회
+  useEffect(() => {
+    const fetchLangMappings = async () => {
+      try {
+        const graphqlUrl = process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql';
+        const response = await fetch(graphqlUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            query: GET_LANG_MAPPINGS,
+            variables: {
+              area: 'docs'
+            },
+          }),
+        });
+
+        const result = await response.json();
+        if (result.data?.mappingsLangByArea) {
+          setLangMappings(result.data.mappingsLangByArea);
+        }
+      } catch (err) {
+        console.error('언어 매핑 조회 오류:', err);
+        // 매핑 데이터를 가져올 수 없는 경우 기본값 사용
+        setLangMappings([
+          { ko: '운영가이드', en: 'op_guide' },
+          { ko: '시스템가이드', en: 'system_guide' }
+        ]);
+      }
+    };
+
+    fetchLangMappings();
+  }, []);
+
   // 매뉴얼 목록 조회
   useEffect(() => {
     const fetchManuals = async () => {
       try {
         setCustomMessage('매뉴얼 목록을 불러오는 중입니다...');
         setError(null);
+
+        const currentKoCategory = getCurrentCategoryKo();
+        console.log('🔍 매뉴얼 조회 시작:', {
+          urlCategory: category,
+          koCategory: currentKoCategory,
+          langMappings: langMappings.length
+        });
 
         const graphqlUrl = process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql';
 
@@ -281,11 +335,11 @@ export default function DocsManualPage({ params }: { params: Promise<any> }) {
             query: searchTerm ? SEARCH_MANUALS : GET_MANUALS,
             variables: searchTerm ? {
               query: searchTerm,
-              category: category,
+              category: currentKoCategory,
               limit: 100,
               offset: 0
             } : {
-              category: category,
+              category: currentKoCategory,
               limit: 100,
               offset: 0
             },
@@ -297,6 +351,11 @@ export default function DocsManualPage({ params }: { params: Promise<any> }) {
         }
 
         const result = await response.json();
+
+        console.log('📊 GraphQL 응답:', {
+          data: result.data,
+          errors: result.errors
+        });
 
         if (result.errors) {
           console.error('GraphQL 에러:', result.errors);
@@ -318,8 +377,11 @@ export default function DocsManualPage({ params }: { params: Promise<any> }) {
       }
     };
 
-    fetchManuals();
-  }, [category, searchTerm, finishLoading, setCustomMessage]);
+    // langMappings가 로드된 후에만 실행
+    if (langMappings.length > 0) {
+      fetchManuals();
+    }
+  }, [category, searchTerm, langMappings, finishLoading, setCustomMessage]);
 
   // 수정 모드 토글
   const handleEditToggle = () => {
@@ -490,10 +552,11 @@ export default function DocsManualPage({ params }: { params: Promise<any> }) {
     }
   };
 
-  // 카테고리 변경
-  const handleCategoryChange = (newCategory: string) => {
-    if (newCategory !== category) {
-      navigate(`/docs/manual/${newCategory}`);
+  // 카테고리 변경 (한글 -> 영어로 변환 후 네비게이션)
+  const handleCategoryChange = (koCategory: string) => {
+    const enCategory = convertKoToEn(koCategory);
+    if (enCategory !== category) {
+      navigate(`/docs/manual/${enCategory}`);
     }
   };
 
@@ -513,8 +576,22 @@ export default function DocsManualPage({ params }: { params: Promise<any> }) {
     return `${year}-${month}-${day}`;
   };
 
+  // URL 파라미터(영어)를 한글로 변환
+  const getCurrentCategoryKo = () => {
+    const mapping = langMappings.find(m => m.en === category);
+    return mapping ? mapping.ko : category;
+  };
+
+  // 한글 카테고리명을 영어로 변환
+  const convertKoToEn = (koCategory: string) => {
+    const mapping = langMappings.find(m => m.ko === koCategory);
+    return mapping ? mapping.en : koCategory;
+  };
+
   // 카테고리명 매핑
   const getCategoryInfo = () => {
+    const currentKo = getCurrentCategoryKo();
+    
     const categoryMap = {
       '사용자매뉴얼': { label: '사용자 매뉴얼', name: '사용자' },
       '개발자매뉴얼': { label: '개발자 매뉴얼', name: '개발자' },
@@ -523,12 +600,12 @@ export default function DocsManualPage({ params }: { params: Promise<any> }) {
       '시스템가이드': { label: '시스템 가이드', name: '시스템' }
     };
 
-    const categoryInfo = categoryMap[category as keyof typeof categoryMap] || { label: '매뉴얼', name: category };
+    const categoryInfo = categoryMap[currentKo as keyof typeof categoryMap] || { label: '매뉴얼', name: currentKo };
 
     return {
       title: categoryInfo.label,
       breadcrumbs: [
-        { label: '문서', href: '/docs/manual/사용자매뉴얼' },
+        { label: '문서', href: '/docs/manual/user_manual' },
         { label: categoryInfo.name, href: `/docs/manual/${category}` }
       ]
     };
@@ -538,33 +615,19 @@ export default function DocsManualPage({ params }: { params: Promise<any> }) {
 
   return (
     <PageContainer>
-      <div className="mb-4">
-        <h1 className="text-2xl font-bold">{title}</h1>
-        <div className="text-sm text-color-primary-muted-foreground">
-          {breadcrumbs.map((crumb, index) => (
-            <span key={index}>
-              {index > 0 && ' > '}
-              <a href={crumb.href} className="hover:text-primary">{crumb.label}</a>
-            </span>
-          ))}
-        </div>
-      </div>
-
       <Tabs value={activeTab} onValueChange={setActiveTab} className="gap-0.5">
         <div className="flex justify-between items-center mb-0.5">
           {activeTab === 'list' && (
             <>
               <div className="flex items-center space-x-4">
-                <Select value={category} onValueChange={handleCategoryChange}>
-                  <SelectTrigger className="w-[200px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((cat) => (
-                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <RadioButtonSet
+                  options={langMappings.map(mapping => ({
+                    value: mapping.ko,
+                    label: mapping.ko
+                  }))}
+                  value={getCurrentCategoryKo()}
+                  onChange={handleCategoryChange}
+                />
                 <div className="w-[300px]">
                   <InputWithIcon
                     placeholder="제목 또는 작성자로 검색"
@@ -576,16 +639,10 @@ export default function DocsManualPage({ params }: { params: Promise<any> }) {
               <ButtonWithIcon
                 icon={<Plus className="mr-2 h-4 w-4" />}
                 onClick={() => {
-                  setNewManual({
-                    ...newManual,
-                    category: category,
-                    email: user?.email || '',
-                    writer: user?.name || ''
-                  });
-                  setIsCreateDialogOpen(true);
+                  navigate(`/docs/manual/${category}/new?format=markdown`);
                 }}
               >
-                매뉴얼 작성
+                글쓰기
               </ButtonWithIcon>
             </>
           )}

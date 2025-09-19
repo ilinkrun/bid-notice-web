@@ -9,6 +9,7 @@ import { spidersResolvers } from './spiders.js';
 import { databaseResolvers } from './database.js';
 import { authResolvers } from './auth.js';
 import { permissionsResolvers } from './permissions.js';
+import { mappingsResolvers } from './mappings.js';
 
 export const resolvers = [
   baseResolvers,
@@ -22,4 +23,5 @@ export const resolvers = [
   databaseResolvers,
   authResolvers,
   permissionsResolvers,
+  mappingsResolvers,
 ];

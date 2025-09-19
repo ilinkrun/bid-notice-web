@@ -1,14 +1,72 @@
-import axios from 'axios';
+import { executeQuery } from '../lib/mysql.js';
 
-// Docs API 클라이언트 설정
-const DOCS_API_BASE_URL = process.env.DOCS_API_BASE_URL || 'http://localhost:11308';
+// 간단한 메모리 캐시 구현 (mappings.ts와 동일한 패턴)
+interface CacheItem {
+  data: any;
+  timestamp: number;
+  ttl: number;
+}
 
-const docsApiClient = axios.create({
-  baseURL: DOCS_API_BASE_URL,
-  timeout: 30000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+class SimpleCache {
+  private cache = new Map<string, CacheItem>();
+  private defaultTTL = 5 * 60 * 1000; // 5분
+
+  set(key: string, data: any, ttl?: number): void {
+    this.cache.set(key, {
+      data,
+      timestamp: Date.now(),
+      ttl: ttl || this.defaultTTL
+    });
+  }
+
+  get(key: string): any | null {
+    const item = this.cache.get(key);
+    if (!item) return null;
+
+    const now = Date.now();
+    if (now - item.timestamp > item.ttl) {
+      this.cache.delete(key);
+      return null;
+    }
+
+    return item.data;
+  }
+
+  delete(key: string): void {
+    this.cache.delete(key);
+  }
+
+  clear(): void {
+    this.cache.clear();
+  }
+
+  clearByPrefix(prefix: string): void {
+    for (const key of this.cache.keys()) {
+      if (key.startsWith(prefix)) {
+        this.cache.delete(key);
+      }
+    }
+  }
+}
+
+const cache = new SimpleCache();
+
+// 데이터베이스 결과를 GraphQL 형식으로 변환
+const formatDocsManual = (row: any) => ({
+  id: row.id,
+  email: row.email || null,
+  title: row.title,
+  content: row.content,
+  markdown_source: row.markdown_source || null,
+  format: row.format || 'markdown',
+  category: row.category,
+  file_path: row.file_path || null,
+  writer: row.writer,
+  created_at: row.created_at,
+  updated_at: row.updated_at,
+  is_visible: Boolean(row.is_visible),
+  is_notice: Boolean(row.is_notice),
+  is_private: Boolean(row.is_private),
 });
 
 export interface DocsManualInput {
@@ -30,83 +88,88 @@ export interface DocsManualDeleteInput {
   id: number;
 }
 
-export interface ApiResponse<T = unknown> {
-  data?: T;
-  success?: boolean;
-  message?: string;
-}
-
-export interface ErrorWithResponse {
-  message?: string;
-  response?: {
-    data?: unknown;
-    status?: number;
-  };
-  config?: {
-    url?: string;
-    method?: string;
-    baseURL?: string;
-  };
-}
-
 export const docsResolvers = {
   Query: {
     docsManualAll: async (
       _parent: unknown,
       args: { category?: string; limit?: number; offset?: number }
     ) => {
-      try {
-        console.log('📚 docsManualAll 요청:', args);
+      const cacheKey = `docs_manual_all_${args.category || 'all'}_${args.limit || 100}_${args.offset || 0}`;
+      let result = cache.get(cacheKey);
+      
+      if (!result) {
+        try {
+          console.log('📚 docsManualAll 요청:', args);
 
-        const params = new URLSearchParams();
-        if (args.category) params.append('category', args.category);
-        if (args.limit !== undefined) params.append('limit', args.limit.toString());
-        if (args.offset !== undefined) params.append('offset', args.offset.toString());
+          let query = 'SELECT * FROM docs_manual WHERE is_visible = 1';
+          const queryParams: any[] = [];
 
-        const url = `/docs/manual?${params.toString()}`;
-        console.log('📚 요청 URL:', url);
+          if (args.category) {
+            query += ' AND category = ?';
+            queryParams.push(args.category);
+          }
 
-        const response = await docsApiClient.get(url);
-        console.log('📚 API 응답:', response.data);
+          // 총 개수 조회
+          const countQuery = query.replace('SELECT *', 'SELECT COUNT(*) as total');
+          const countResult = await executeQuery(countQuery, queryParams) as any[];
+          const totalCount = countResult[0]?.total || 0;
 
-        return {
-          manuals: response.data.manuals || [],
-          total_count: response.data.total_count || 0,
-          page: response.data.page || 1,
-          limit: response.data.limit || 100,
-        };
-      } catch (error) {
-        const err = error as ErrorWithResponse;
-        console.error('📚 docsManualAll 오류:', {
-          message: err.message,
-          status: err.response?.status,
-          data: err.response?.data,
-          url: err.config?.url,
-        });
-        throw new Error(`매뉴얼 목록 조회 실패: ${err.message}`);
+          // 정렬 및 페이징 추가
+          query += ' ORDER BY created_at DESC';
+          
+          if (args.limit !== undefined) {
+            query += ' LIMIT ?';
+            queryParams.push(args.limit);
+          }
+          
+          if (args.offset !== undefined) {
+            query += ' OFFSET ?';
+            queryParams.push(args.offset);
+          }
+
+          console.log('📚 실행 쿼리:', query, queryParams);
+
+          const rows = await executeQuery(query, queryParams) as any[];
+          const manuals = rows.map(formatDocsManual);
+
+          result = {
+            manuals,
+            total_count: totalCount,
+            page: Math.floor((args.offset || 0) / (args.limit || 100)) + 1,
+            limit: args.limit || 100,
+          };
+
+          cache.set(cacheKey, result);
+          console.log('📚 조회 결과:', { count: manuals.length, total: totalCount });
+        } catch (error) {
+          console.error('📚 docsManualAll 오류:', error);
+          throw new Error(`매뉴얼 목록 조회 실패: ${error}`);
+        }
       }
+      
+      return result;
     },
 
     docsManualOne: async (_parent: unknown, args: { id: number }) => {
       try {
         console.log('📚 docsManualOne 요청:', args);
 
-        const response = await docsApiClient.get(`/docs/manual/${args.id}`);
-        console.log('📚 단일 매뉴얼 응답:', response.data);
+        const rows = await executeQuery(
+          'SELECT * FROM docs_manual WHERE id = ?',
+          [args.id]
+        ) as any[];
 
-        return response.data;
-      } catch (error) {
-        const err = error as ErrorWithResponse;
-        console.error('📚 docsManualOne 오류:', {
-          message: err.message,
-          status: err.response?.status,
-          data: err.response?.data,
-        });
-
-        if (err.response?.status === 404) {
+        if (rows.length === 0) {
           throw new Error('매뉴얼을 찾을 수 없습니다');
         }
-        throw new Error(`매뉴얼 조회 실패: ${err.message}`);
+
+        const manual = formatDocsManual(rows[0]);
+        console.log('📚 단일 매뉴얼 조회 완료:', manual.id);
+        
+        return manual;
+      } catch (error) {
+        console.error('📚 docsManualOne 오류:', error);
+        throw new Error(`매뉴얼 조회 실패: ${error}`);
       }
     },
 
@@ -114,53 +177,93 @@ export const docsResolvers = {
       _parent: unknown,
       args: { query: string; category?: string; limit?: number; offset?: number }
     ) => {
-      try {
-        console.log('📚 docsManualSearch 요청:', args);
+      const cacheKey = `docs_manual_search_${args.query}_${args.category || 'all'}_${args.limit || 100}_${args.offset || 0}`;
+      let result = cache.get(cacheKey);
+      
+      if (!result) {
+        try {
+          console.log('📚 docsManualSearch 요청:', args);
 
-        const params = new URLSearchParams();
-        params.append('q', args.query);
-        if (args.category) params.append('category', args.category);
-        if (args.limit !== undefined) params.append('limit', args.limit.toString());
-        if (args.offset !== undefined) params.append('offset', args.offset.toString());
+          let query = 'SELECT * FROM docs_manual WHERE is_visible = 1 AND (title LIKE ? OR content LIKE ?)';
+          const queryParams: any[] = [`%${args.query}%`, `%${args.query}%`];
 
-        const url = `/docs/search?${params.toString()}`;
-        console.log('📚 검색 URL:', url);
+          if (args.category) {
+            query += ' AND category = ?';
+            queryParams.push(args.category);
+          }
 
-        const response = await docsApiClient.get(url);
-        console.log('📚 검색 응답:', response.data);
+          // 총 개수 조회
+          const countQuery = query.replace('SELECT *', 'SELECT COUNT(*) as total');
+          const countResult = await executeQuery(countQuery, queryParams) as any[];
+          const totalCount = countResult[0]?.total || 0;
 
-        return {
-          manuals: response.data.manuals || [],
-          total_count: response.data.total_count || 0,
-          page: response.data.page || 1,
-          limit: response.data.limit || 100,
-          query: response.data.query || args.query,
-        };
-      } catch (error) {
-        const err = error as ErrorWithResponse;
-        console.error('📚 docsManualSearch 오류:', err.message);
-        throw new Error(`매뉴얼 검색 실패: ${err.message}`);
+          // 정렬 및 페이징 추가
+          query += ' ORDER BY created_at DESC';
+          
+          if (args.limit !== undefined) {
+            query += ' LIMIT ?';
+            queryParams.push(args.limit);
+          }
+          
+          if (args.offset !== undefined) {
+            query += ' OFFSET ?';
+            queryParams.push(args.offset);
+          }
+
+          console.log('📚 검색 쿼리:', query, queryParams);
+
+          const rows = await executeQuery(query, queryParams) as any[];
+          const manuals = rows.map(formatDocsManual);
+
+          result = {
+            manuals,
+            total_count: totalCount,
+            page: Math.floor((args.offset || 0) / (args.limit || 100)) + 1,
+            limit: args.limit || 100,
+            query: args.query,
+          };
+
+          cache.set(cacheKey, result);
+          console.log('📚 검색 결과:', { count: manuals.length, total: totalCount });
+        } catch (error) {
+          console.error('📚 docsManualSearch 오류:', error);
+          throw new Error(`매뉴얼 검색 실패: ${error}`);
+        }
       }
+      
+      return result;
     },
 
     docsCategories: async () => {
-      try {
-        console.log('📚 docsCategories 요청');
+      const cacheKey = 'docs_categories';
+      let result = cache.get(cacheKey);
+      
+      if (!result) {
+        try {
+          console.log('📚 docsCategories 요청');
 
-        const response = await docsApiClient.get('/docs/categories');
-        console.log('📚 카테고리 응답:', response.data);
+          const rows = await executeQuery(
+            'SELECT DISTINCT category FROM docs_manual WHERE is_visible = 1 AND category IS NOT NULL ORDER BY category'
+          ) as any[];
 
-        return {
-          categories: response.data.categories || [],
-        };
-      } catch (error) {
-        const err = error as ErrorWithResponse;
-        console.error('📚 docsCategories 오류:', err.message);
-        // 기본 카테고리 반환
-        return {
-          categories: ['사용자매뉴얼', '개발자매뉴얼', '운영매뉴얼', '운영가이드', '시스템가이드'],
-        };
+          const categories = rows.map(row => row.category);
+          
+          result = {
+            categories: categories.length > 0 ? categories : ['사용자매뉴얼', '개발자매뉴얼', '운영매뉴얼', '운영가이드', '시스템가이드'],
+          };
+
+          cache.set(cacheKey, result);
+          console.log('📚 카테고리 조회 완료:', result.categories);
+        } catch (error) {
+          console.error('📚 docsCategories 오류:', error);
+          // 기본 카테고리 반환
+          result = {
+            categories: ['사용자매뉴얼', '개발자매뉴얼', '운영매뉴얼', '운영가이드', '시스템가이드'],
+          };
+        }
       }
+      
+      return result;
     },
   },
 
@@ -169,36 +272,48 @@ export const docsResolvers = {
       try {
         console.log('📚 docsManualCreate 요청:', args.input);
 
-        const formData = new URLSearchParams();
-        formData.append('title', args.input.title);
-        formData.append('content', args.input.content);
-        formData.append('category', args.input.category);
-        formData.append('writer', args.input.writer);
-        formData.append('format_type', args.input.format);
+        const { title, content, category, writer, format, email, is_notice, is_private, markdown_source, file_path } = args.input;
 
-        if (args.input.email) formData.append('email', args.input.email);
-        if (args.input.is_notice !== undefined) formData.append('is_notice', args.input.is_notice.toString());
-        if (args.input.is_private !== undefined) formData.append('is_private', args.input.is_private.toString());
+        const result = await executeQuery(
+          `INSERT INTO docs_manual 
+           (title, content, category, writer, format, email, is_notice, is_private, markdown_source, file_path, is_visible) 
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            title,
+            content,
+            category,
+            writer,
+            format || 'markdown',
+            email || null,
+            is_notice ? 1 : 0,
+            is_private ? 1 : 0,
+            markdown_source || null,
+            file_path || null,
+            1 // is_visible 기본값
+          ]
+        ) as any;
 
-        const response = await docsApiClient.post('/docs/manual', formData, {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-        });
-
-        console.log('📚 생성 응답:', response.data);
+        // 캐시 초기화
+        cache.clearByPrefix('docs_manual');
+        cache.clearByPrefix('docs_categories');
 
         // 생성된 매뉴얼 조회
-        const newManual = await docsApiClient.get(`/docs/manual/${response.data.id}`);
-        return newManual.data;
+        const rows = await executeQuery(
+          'SELECT * FROM docs_manual WHERE id = ?',
+          [result.insertId]
+        ) as any[];
+
+        if (rows.length === 0) {
+          throw new Error('생성된 매뉴얼을 찾을 수 없습니다');
+        }
+
+        const newManual = formatDocsManual(rows[0]);
+        console.log('📚 매뉴얼 생성 완료:', newManual.id);
+        
+        return newManual;
       } catch (error) {
-        const err = error as ErrorWithResponse;
-        console.error('📚 docsManualCreate 오류:', {
-          message: err.message,
-          status: err.response?.status,
-          data: err.response?.data,
-        });
-        throw new Error(`매뉴얼 생성 실패: ${err.message}`);
+        console.error('📚 docsManualCreate 오류:', error);
+        throw new Error(`매뉴얼 생성 실패: ${error}`);
       }
     },
 
@@ -210,40 +325,83 @@ export const docsResolvers = {
           throw new Error('매뉴얼 ID가 필요합니다');
         }
 
-        const updateData: Record<string, any> = {};
-        if (args.input.title !== undefined) updateData.title = args.input.title;
-        if (args.input.content !== undefined) updateData.content = args.input.content;
-        if (args.input.category !== undefined) updateData.category = args.input.category;
-        if (args.input.writer !== undefined) updateData.writer = args.input.writer;
-        if (args.input.email !== undefined) updateData.email = args.input.email;
-        if (args.input.format !== undefined) updateData.format_type = args.input.format;
-        if (args.input.is_notice !== undefined) updateData.is_notice = args.input.is_notice;
-        if (args.input.is_private !== undefined) updateData.is_private = args.input.is_private;
+        // 업데이트할 필드들을 동적으로 구성
+        const updateFields = [];
+        const updateValues = [];
 
-        const formData = new URLSearchParams();
-        Object.entries(updateData).forEach(([key, value]) => {
-          formData.append(key, value.toString());
-        });
+        if (args.input.title !== undefined) {
+          updateFields.push('title = ?');
+          updateValues.push(args.input.title);
+        }
+        if (args.input.content !== undefined) {
+          updateFields.push('content = ?');
+          updateValues.push(args.input.content);
+        }
+        if (args.input.category !== undefined) {
+          updateFields.push('category = ?');
+          updateValues.push(args.input.category);
+        }
+        if (args.input.writer !== undefined) {
+          updateFields.push('writer = ?');
+          updateValues.push(args.input.writer);
+        }
+        if (args.input.email !== undefined) {
+          updateFields.push('email = ?');
+          updateValues.push(args.input.email);
+        }
+        if (args.input.format !== undefined) {
+          updateFields.push('format = ?');
+          updateValues.push(args.input.format);
+        }
+        if (args.input.is_notice !== undefined) {
+          updateFields.push('is_notice = ?');
+          updateValues.push(args.input.is_notice ? 1 : 0);
+        }
+        if (args.input.is_private !== undefined) {
+          updateFields.push('is_private = ?');
+          updateValues.push(args.input.is_private ? 1 : 0);
+        }
+        if (args.input.markdown_source !== undefined) {
+          updateFields.push('markdown_source = ?');
+          updateValues.push(args.input.markdown_source);
+        }
+        if (args.input.file_path !== undefined) {
+          updateFields.push('file_path = ?');
+          updateValues.push(args.input.file_path);
+        }
 
-        const response = await docsApiClient.put(`/docs/manual/${args.input.id}`, formData, {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-        });
+        if (updateFields.length === 0) {
+          throw new Error('업데이트할 필드가 없습니다');
+        }
 
-        console.log('📚 수정 응답:', response.data);
+        updateValues.push(args.input.id);
+
+        await executeQuery(
+          `UPDATE docs_manual SET ${updateFields.join(', ')} WHERE id = ?`,
+          updateValues
+        );
+
+        // 캐시 초기화
+        cache.clearByPrefix('docs_manual');
+        cache.clearByPrefix('docs_categories');
 
         // 수정된 매뉴얼 조회
-        const updatedManual = await docsApiClient.get(`/docs/manual/${args.input.id}`);
-        return updatedManual.data;
+        const rows = await executeQuery(
+          'SELECT * FROM docs_manual WHERE id = ?',
+          [args.input.id]
+        ) as any[];
+
+        if (rows.length === 0) {
+          throw new Error('매뉴얼을 찾을 수 없습니다');
+        }
+
+        const updatedManual = formatDocsManual(rows[0]);
+        console.log('📚 매뉴얼 수정 완료:', updatedManual.id);
+        
+        return updatedManual;
       } catch (error) {
-        const err = error as ErrorWithResponse;
-        console.error('📚 docsManualUpdate 오류:', {
-          message: err.message,
-          status: err.response?.status,
-          data: err.response?.data,
-        });
-        throw new Error(`매뉴얼 수정 실패: ${err.message}`);
+        console.error('📚 docsManualUpdate 오류:', error);
+        throw new Error(`매뉴얼 수정 실패: ${error}`);
       }
     },
 
@@ -252,25 +410,33 @@ export const docsResolvers = {
         console.log('📚 docsManualDelete 요청:', args.input);
 
         // 삭제 전 매뉴얼 정보 조회
-        const manualToDelete = await docsApiClient.get(`/docs/manual/${args.input.id}`);
+        const rows = await executeQuery(
+          'SELECT * FROM docs_manual WHERE id = ?',
+          [args.input.id]
+        ) as any[];
 
-        // 소프트 삭제 실행
-        const response = await docsApiClient.delete(`/docs/manual/${args.input.id}`);
-        console.log('📚 삭제 응답:', response.data);
-
-        return manualToDelete.data;
-      } catch (error) {
-        const err = error as ErrorWithResponse;
-        console.error('📚 docsManualDelete 오류:', {
-          message: err.message,
-          status: err.response?.status,
-          data: err.response?.data,
-        });
-
-        if (err.response?.status === 404) {
+        if (rows.length === 0) {
           throw new Error('매뉴얼을 찾을 수 없습니다');
         }
-        throw new Error(`매뉴얼 삭제 실패: ${err.message}`);
+
+        const manualToDelete = formatDocsManual(rows[0]);
+
+        // 소프트 삭제 실행 (is_visible = 0으로 변경)
+        await executeQuery(
+          'UPDATE docs_manual SET is_visible = 0 WHERE id = ?',
+          [args.input.id]
+        );
+
+        // 캐시 초기화
+        cache.clearByPrefix('docs_manual');
+        cache.clearByPrefix('docs_categories');
+
+        console.log('📚 매뉴얼 삭제 완료:', args.input.id);
+        
+        return manualToDelete;
+      } catch (error) {
+        console.error('📚 docsManualDelete 오류:', error);
+        throw new Error(`매뉴얼 삭제 실패: ${error}`);
       }
     },
   },

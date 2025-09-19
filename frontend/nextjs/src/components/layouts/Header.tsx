@@ -152,24 +152,23 @@ const boardChannels = [
   }
 ];
 
-const chatChannels = [
+const docsChannels = [
   {
-    title: 'Slack',
-    href: '#',
-    description: 'Slack 워크스페이스 (비활성화)',
-    icon: MessageSquare,
-    disabled: true,
+    title: '운영가이드',
+    href: '/docs/manual/운영가이드',
+    description: '운영 가이드 매뉴얼',
+    icon: BookOpen,
   },
   {
-    title: 'Discord',
+    title: '시스템가이드',
     href: '#',
-    description: 'Discord 서버 (비활성화)',
-    icon: MessageSquare,
+    description: '시스템 가이드 매뉴얼 (비활성화)',
+    icon: BookOpen,
     disabled: true,
   },
 ];
 
-const bookmarkChannels = [
+const favoriteChannels = [
   {
     title: '나라장터',
     href: '#',
@@ -807,8 +806,8 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
                 icon={MessageSquare}
                 groups={[
                   { label: '게시판', items: boardChannels },
-                  { label: '채팅', items: chatChannels },
-                  { label: '즐겨찾기', items: bookmarkChannels }
+                  { label: '문서', items: docsChannels },
+                  { label: '즐겨찾기', items: favoriteChannels }
                 ]}
                 align="center"
               />
@@ -900,8 +899,8 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
                   icon={MessageSquare}
                   groups={[
                     { label: '게시판', items: boardChannels },
-                    { label: '채팅', items: chatChannels },
-                    { label: '즐겨찾기', items: bookmarkChannels }
+                    { label: '문서', items: docsChannels },
+                    { label: '즐겨찾기', items: favoriteChannels }
                   ]}
                   isMobile
                   setIsMobileMenuOpen={setIsMobileMenuOpen}

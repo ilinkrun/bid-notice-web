@@ -733,7 +733,6 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
     const channelMap = {
       'dev': { label: '개발 채널', name: '개발' },
       'op': { label: '운영 채널', name: '운영' },
-      'manual': { label: '매뉴얼 채널', name: '매뉴얼' }
     };
 
     const channelInfo = channelMap[channelName as keyof typeof channelMap] || { label: '채널', name: channelName };
@@ -760,7 +759,6 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                       options={[
                         { value: 'dev', label: '개발' },
                         { value: 'op', label: '운영' },
-                        { value: 'manual', label: '매뉴얼' }
                       ]}
                       value={board.replace('board_', '')}
                       onChange={handleChannelChange}
