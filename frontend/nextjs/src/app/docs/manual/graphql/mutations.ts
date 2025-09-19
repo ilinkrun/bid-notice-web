@@ -48,3 +48,24 @@ export const DOCS_MANUAL_DELETE = `
     }
   }
 `;
+
+export const DOCS_MANUAL_ONE = `
+  query GetManual($id: Int!) {
+    docsManualOne(id: $id) {
+      id
+      title
+      content
+      markdown_source
+      format
+      category
+      file_path
+      writer
+      email
+      created_at
+      updated_at
+      is_visible
+      is_notice
+      is_private
+    }
+  }
+`;

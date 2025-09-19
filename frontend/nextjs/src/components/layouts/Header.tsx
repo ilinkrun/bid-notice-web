@@ -155,14 +155,14 @@ const boardChannels = [
 const docsChannels = [
   {
     title: '운영가이드',
-    href: '/docs/manual/운영가이드',
-    description: '운영 가이드 매뉴얼',
+    href: '/docs/manual/op_guide',
+    description: '운영 가이드',
     icon: BookOpen,
   },
   {
     title: '시스템가이드',
-    href: '#',
-    description: '시스템 가이드 매뉴얼 (비활성화)',
+    href: '/docs/manual/system_guide',
+    description: '시스템 가이드 (비활성화)',
     icon: BookOpen,
     disabled: true,
   },

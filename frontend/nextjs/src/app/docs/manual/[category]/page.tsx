@@ -569,11 +569,26 @@ export default function DocsManualPage({ params }: { params: Promise<any> }) {
 
   // 날짜 포맷팅
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    if (!dateString) return '-';
+    
+    try {
+      // ISO 형식 날짜 처리
+      const date = new Date(dateString);
+      
+      // 유효한 날짜인지 확인
+      if (isNaN(date.getTime())) {
+        console.warn('Invalid date:', dateString);
+        return dateString; // 원본 문자열 반환
+      }
+      
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    } catch (error) {
+      console.error('Date formatting error:', error);
+      return dateString;
+    }
   };
 
   // URL 파라미터(영어)를 한글로 변환
@@ -677,8 +692,7 @@ export default function DocsManualPage({ params }: { params: Promise<any> }) {
                   <DataTableRow
                     key={manual.id}
                     onClick={() => {
-                      setSelectedManual(manual);
-                      setActiveTab('detail');
+                      navigate(`/docs/manual/${category}/${manual.id}`);
                     }}
                   >
                     <DataTableCell>{manual.id}</DataTableCell>
