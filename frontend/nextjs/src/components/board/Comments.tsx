@@ -408,7 +408,7 @@ export default function Comments({ board, postId, onCommentCountChange }: Commen
 
       {/* 댓글 작성 폼 */}
       {isWriting && user && (
-        <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-800 dark:border-gray-600">
+        <div className="guide-content-container">
           <form onSubmit={(e) => {
             e.preventDefault();
             handleCreateComment();
@@ -459,7 +459,7 @@ export default function Comments({ board, postId, onCommentCountChange }: Commen
           </div>
         ) : (
           comments.map((comment) => (
-            <div key={comment.id} className="border rounded-lg p-4">
+            <div key={comment.id} className="guide-content-container">
               <div className="flex justify-between items-start mb-2">
                 <div className="flex items-center gap-2">
                   <span className="font-medium">{comment.writer}</span>
@@ -469,26 +469,26 @@ export default function Comments({ board, postId, onCommentCountChange }: Commen
                   </span>
                 </div>
                 <div className="flex gap-1">
-                  {user && user.email === comment.email && (
+                  {user && user.email === comment.email && editingCommentId !== comment.id && (
                     <>
-                      <Button
+                      <ButtonWithIcon
+                        icon={<Edit className="h-3 w-3" />}
+                        onClick={() => handleEditClick(comment)}
                         size="sm"
                         variant="ghost"
-                        onClick={() => handleEditClick(comment)}
-                        className="h-8 px-2 text-xs text-gray-600 hover:text-gray-800"
-                        title="수정"
+                        className="h-8 px-2 text-xs"
                       >
                         수정
-                      </Button>
-                      <Button
+                      </ButtonWithIcon>
+                      <ButtonWithIcon
+                        icon={<Trash2 className="h-3 w-3" />}
+                        onClick={() => handleDeleteClick(comment)}
                         size="sm"
                         variant="ghost"
-                        onClick={() => handleDeleteClick(comment)}
                         className="h-8 px-2 text-xs text-red-600 hover:text-red-800"
-                        title="삭제"
                       >
                         삭제
-                      </Button>
+                      </ButtonWithIcon>
                     </>
                   )}
                 </div>
@@ -501,23 +501,28 @@ export default function Comments({ board, postId, onCommentCountChange }: Commen
                     rows={3}
                   />
                   <div className="flex justify-end gap-2">
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
+                    <ButtonWithColorIcon
+                      icon={<X className="h-4 w-4" />}
+                      color="tertiary"
+                      mode="outline"
                       onClick={() => setEditingCommentId(null)}
                     >
                       취소
-                    </Button>
-                    <Button 
-                      size="sm"
+                    </ButtonWithColorIcon>
+                    <ButtonWithColorIcon
+                      icon={<Save className="h-4 w-4" />}
+                      color="secondary"
+                      mode="outline"
                       onClick={() => handleUpdateComment(comment.id, editContent)}
                     >
                       저장
-                    </Button>
+                    </ButtonWithColorIcon>
                   </div>
                 </div>
               ) : (
-                <p className="whitespace-pre-wrap">{comment.content}</p>
+                <div className="guide-content">
+                  <p className="whitespace-pre-wrap">{comment.content}</p>
+                </div>
               )}
             </div>
           ))

@@ -561,7 +561,7 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
 
   // 수정 취소
   const handleCancelEdit = () => {
-    navigate(`/channels/board/${board}/${id}`);
+    navigate(`/channels/board/${board}/${id}?mode=view`);
   };
 
   // 날짜 포맷팅
@@ -841,42 +841,26 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
                         />
                       ) : (
                         <div className="border rounded-md p-3 min-h-[300px]">
-                          <div dangerouslySetInnerHTML={{ __html: post.content || '' }} />
+                          <div className="guide-content-container">
+                            <div
+                              className="guide-content"
+                              dangerouslySetInnerHTML={{ __html: post.content || '' }}
+                            />
+                          </div>
                         </div>
                       )}
                     </>
                   )}
                 </div>
               ) : (
-                <div className="min-h-[300px] p-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-                  {post.format === 'markdown' ? (
-                    <div className="prose max-w-none dark:prose-invert">
-                      {originalMarkdownSource && originalMarkdownSource.trim() ? (
-                        <MarkdownPreview
-                          source={originalMarkdownSource}
-                          data-color-mode="auto"
-                          wrapperElement={{
-                            "data-color-mode": "auto"
-                          }}
-                        />
-                      ) : post.content && post.content.trim() ? (
-                        <div dangerouslySetInnerHTML={{ __html: post.content }} />
-                      ) : (
-                        <div className="text-color-primary-muted-foreground italic">내용이 없습니다.</div>
-                      )}
-                    </div>
-                  ) : (
-                    <>
-                      {post.content && post.content.trim() ? (
-                        <div
-                          className="whitespace-pre-wrap break-words"
-                          dangerouslySetInnerHTML={{ __html: post.content }}
-                        />
-                      ) : (
-                        <div className="text-color-primary-muted-foreground italic">내용이 없습니다.</div>
-                      )}
-                    </>
-                  )}
+                <div className="guide-content-container">
+                  <div className="guide-content">
+                    {post.content && post.content.trim() ? (
+                      <div dangerouslySetInnerHTML={{ __html: post.content || '' }} />
+                    ) : (
+                      <div className="text-color-primary-muted-foreground italic">내용이 없습니다.</div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>

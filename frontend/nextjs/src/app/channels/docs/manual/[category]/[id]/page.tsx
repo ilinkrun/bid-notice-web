@@ -783,18 +783,10 @@ export default function ManualDetailPage({ params }: { params: Promise<any> }) {
                   </div>
                 </div>
               ) : (
-                <div className="whitespace-pre-wrap">
-                  {manual.format === 'markdown' ? (
-                    <div className="prose max-w-none">
-                      {manual.markdown_source ? (
-                        <MarkdownPreview source={manual.markdown_source} />
-                      ) : (
-                        <div dangerouslySetInnerHTML={{ __html: manual.content || '' }} />
-                      )}
-                    </div>
-                  ) : (
+                <div className="guide-content-container">
+                  <div className="guide-content">
                     <div dangerouslySetInnerHTML={{ __html: manual.content || '' }} />
-                  )}
+                  </div>
                 </div>
               )}
             </div>

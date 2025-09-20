@@ -10,6 +10,8 @@ import { marked } from 'marked';
 import MDEditor from '@uiw/react-md-editor';
 import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
+import rehypeRaw from 'rehype-raw';
+import { useEffect, useRef } from 'react';
 
 interface GuideSlideProps {
   isOpen: boolean;
@@ -23,7 +25,7 @@ interface GuideSlideProps {
 const convertMarkdownToHtml = (markdown: string): string => {
   try {
     marked.setOptions({
-      breaks: false, // 줄바꿈을 <br>로 변환하지 않음 (줄간격 최적화)
+      breaks: true, // 줄바꿈을 <br>로 변환하여 편집창 줄바꿈이 HTML에 반영되도록 함
       gfm: true, // GitHub Flavored Markdown 사용
       headerIds: false, // 헤더 ID 생성 안함
       mangle: false, // 이메일 주소 인코딩 안함
@@ -32,12 +34,13 @@ const convertMarkdownToHtml = (markdown: string): string => {
     let result = marked(markdown || '');
 
     if (typeof result === 'string') {
-      // 불필요한 빈 줄과 공백 제거
-      result = result
-        .replace(/\n\s*\n\s*\n/g, '\n\n') // 연속된 빈 줄을 최대 1개로 제한
-        .replace(/^\s+|\s+$/g, '') // 앞뒤 공백 제거
-        .trim();
+      // 앞뒤 공백만 제거 (줄바꿈은 유지)
+      result = result.trim();
     }
+
+    // 디버깅용 로그 (나중에 제거)
+    console.log('Original markdown:', markdown);
+    console.log('Final HTML:', result);
 
     return typeof result === 'string' ? result : markdown || '';
   } catch (error) {
@@ -46,6 +49,83 @@ const convertMarkdownToHtml = (markdown: string): string => {
   }
 };
 
+// 저장 전 마크다운 후처리 함수 - 줄바꿈을 강제로 <br>로 변환
+const postProcessMarkdown = (markdown: string): string => {
+  if (!markdown) return '';
+
+  console.log('=== POST PROCESSING START ===');
+  console.log('Original markdown:', JSON.stringify(markdown));
+
+  try {
+    // 매우 간단한 접근: 모든 단일 줄바꿈을 <br>로 변환
+    let processedText = markdown
+      // 단일 줄바꿈을 <br>로 변환 (클래스 없이)
+      .replace(/\n/g, '<br>\n')
+      // 시작과 끝의 불필요한 <br> 제거
+      .replace(/^<br>\n/, '')
+      .replace(/<br>\n$/, '');
+
+    console.log('Processed markdown:', JSON.stringify(processedText));
+    console.log('=== POST PROCESSING END ===');
+
+    return processedText;
+  } catch (error) {
+    console.error('Markdown post-processing error:', error);
+    return markdown;
+  }
+};
+
+// 빈 줄 간격 조정 함수
+const adjustEmptyLineSpacing = (container: HTMLElement) => {
+  try {
+    // 모든 br 태그 찾기
+    const brTags = container.querySelectorAll('br');
+
+    brTags.forEach((br, index) => {
+      // 이전 br 태그와의 거리 확인
+      const prevBr = brTags[index - 1];
+      if (prevBr) {
+        const distance = br.offsetTop - prevBr.offsetTop;
+        // 거리가 매우 가까우면 빈 줄로 간주
+        if (distance < 30) { // 30px 이하면 빈 줄로 간주
+          br.style.height = '0.05em';
+          br.style.lineHeight = '0.05';
+          br.style.margin = '0';
+          br.style.fontSize = '0.5em';
+        }
+      }
+
+      // 다음 요소까지의 텍스트 내용 확인
+      let nextElement = br.nextSibling;
+      let hasContent = false;
+
+      while (nextElement && nextElement !== brTags[index + 1]) {
+        if (nextElement.nodeType === Node.TEXT_NODE && nextElement.textContent?.trim()) {
+          hasContent = true;
+          break;
+        }
+        if (nextElement.nodeType === Node.ELEMENT_NODE && (nextElement as Element).textContent?.trim()) {
+          hasContent = true;
+          break;
+        }
+        nextElement = nextElement.nextSibling;
+      }
+
+      // 내용이 없는 줄이면 간격 줄이기
+      if (!hasContent) {
+        br.style.height = '0.03em';
+        br.style.lineHeight = '0.03';
+        br.style.margin = '0';
+        br.style.fontSize = '0.3em';
+        br.style.display = 'block';
+      }
+    });
+
+    console.log('Applied empty line spacing adjustment to', brTags.length, 'br tags');
+  } catch (error) {
+    console.error('Error adjusting empty line spacing:', error);
+  }
+};
 
 // 파일 업로드 헬퍼 함수
 const uploadFile = async (
@@ -106,6 +186,7 @@ export function GuideSlide({
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   // GraphQL 훅들
   const { data, loading, error, refetch } = useQuery(GET_HELP_DOCUMENT, {
@@ -122,6 +203,18 @@ export function GuideSlide({
   const dbDocument = data?.docsManualSearch?.manuals?.[0];
   const hasDbContent = dbDocument && data?.docsManualSearch?.total_count > 0;
 
+  // 가이드 컨텐츠가 렌더링될 때마다 빈 줄 간격 조정
+  useEffect(() => {
+    if (contentRef.current && hasDbContent && !isEditing) {
+      // DOM이 완전히 렌더링된 후 실행하기 위해 timeout 사용
+      setTimeout(() => {
+        if (contentRef.current) {
+          adjustEmptyLineSpacing(contentRef.current);
+        }
+      }, 100);
+    }
+  }, [hasDbContent, isEditing, data]);
+
   // 편집 모드 시작
   const handleEdit = () => {
     if (hasDbContent) {
@@ -135,13 +228,22 @@ export function GuideSlide({
   // 저장 처리
   const handleSave = async () => {
     try {
-      const contentToSave = convertMarkdownToHtml(editContent);
+      // 마크다운 후처리 적용
+      console.log('=== SAVE PROCESS START ===');
+      console.log('Edit content before processing:', JSON.stringify(editContent));
+
+      const processedMarkdown = postProcessMarkdown(editContent);
+      console.log('Processed markdown in save:', JSON.stringify(processedMarkdown));
+
+      const contentToSave = convertMarkdownToHtml(processedMarkdown);
+      console.log('Final HTML content:', contentToSave);
+
       const writerName = user?.name || user?.email || '시스템';
 
       const input = {
         title,
         content: contentToSave, // HTML로 변환된 내용
-        markdown_source: editContent, // 원본 마크다운
+        markdown_source: processedMarkdown, // 후처리된 마크다운
         format: 'markdown',
         category,
         writer: writerName,
@@ -198,6 +300,7 @@ export function GuideSlide({
         <div className="space-y-4">
           <div className="guide-content-container">
             <div
+              ref={contentRef}
               className="guide-content"
               dangerouslySetInnerHTML={{ __html: dbDocument.content }}
             />
@@ -303,7 +406,8 @@ export function GuideSlide({
                     height={300}
                     preview="live"
                     previewOptions={{
-                      remarkPlugins: [remarkBreaks, remarkGfm]
+                      remarkPlugins: [remarkBreaks, remarkGfm],
+                      rehypePlugins: [rehypeRaw]
                     }}
                   />
                 </div>
