@@ -47,6 +47,8 @@ import { PageContainer } from '@/components/shared/PageContainer';
 import { Button } from '@/components/ui/button';
 import { ButtonWithIcon, ButtonWithColorIcon } from '@/components/shared/FormComponents';
 import { Input } from '@/components/ui/input';
+import { SectionWithGuide } from '@/components/shared/SectionWithGuide';
+import { FileText, Info } from 'lucide-react';
 import { DOCS_MANUAL_UPDATE, DOCS_MANUAL_DELETE, DOCS_MANUAL_ONE } from '../../graphql/mutations';
 import { MAPPINGS_LANG_BY_AREA } from '../../graphql/queries';
 
@@ -711,16 +713,24 @@ export default function ManualDetailPage({ params }: { params: Promise<any> }) {
               </div>
             </div>
 
-            {/* 내용 */}
-            <div className="min-h-[300px] mb-4">
-              {isEditMode ? (
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <div className="flex items-center gap-2">
-                      <Hash className="h-4 w-4" />
-                      <span className="text-sm font-medium">마크다운 편집기</span>
+            {/* 매뉴얼 내용 섹션 */}
+            <SectionWithGuide
+              title="매뉴얼 내용"
+              icon={<FileText className="w-5 h-5" />}
+              accentColor="#3b82f6"
+              category="운영가이드"
+              pageTitle="매뉴얼 상세"
+              guideClassName="bg-blue-50 border-blue-200"
+            >
+              <div className="min-h-[300px] mb-4">
+                {isEditMode ? (
+                  <div>
+                    <div className="flex justify-between items-center mb-2">
+                      <div className="flex items-center gap-2">
+                        <Hash className="h-4 w-4" />
+                        <span className="text-sm font-medium">마크다운 편집기</span>
+                      </div>
                     </div>
-                  </div>
 
                   <div className="space-y-2">
                     <p className="text-sm text-color-primary-muted-foreground">
@@ -781,15 +791,49 @@ export default function ManualDetailPage({ params }: { params: Promise<any> }) {
                       </div>
                     </div>
                   </div>
-                </div>
-              ) : (
-                <div className="guide-content-container">
-                  <div className="guide-content">
-                    <div dangerouslySetInnerHTML={{ __html: manual.content || '' }} />
+                  </div>
+                ) : (
+                  <div className="guide-content-container">
+                    <div className="guide-content">
+                      <div dangerouslySetInnerHTML={{ __html: manual.content || '' }} />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </SectionWithGuide>
+
+            {/* 매뉴얼 정보 섹션 */}
+            <SectionWithGuide
+              title="매뉴얼 정보"
+              icon={<Info className="w-5 h-5" />}
+              accentColor="#10b981"
+              category="운영가이드"
+              pageTitle="매뉴얼 상세"
+              guideClassName="bg-green-50 border-green-200"
+            >
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <span className="font-medium">카테고리:</span> {getCurrentCategoryKo()}
+                  </div>
+                  <div>
+                    <span className="font-medium">포맷:</span> {manual.format}
+                  </div>
+                  <div>
+                    <span className="font-medium">작성자:</span> {manual.writer}
+                  </div>
+                  <div>
+                    <span className="font-medium">이메일:</span> {manual.email || '없음'}
+                  </div>
+                  <div>
+                    <span className="font-medium">작성일:</span> {formatDate(manual.created_at)}
+                  </div>
+                  <div>
+                    <span className="font-medium">수정일:</span> {formatDate(manual.updated_at)}
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
+            </SectionWithGuide>
 
             {/* 편집 모드 버튼 */}
             {isEditMode && (
