@@ -125,7 +125,6 @@ export default function EndedBidDetailView({ bid }: EndedBidDetailViewProps) {
         pageTitle={pageTitle}
         isExpanded={isResultExpanded}
         onToggle={setIsResultExpanded}
-        guideClassName="bg-green-50 border-green-200"
       >
         <TabContainer>
           <div className="space-y-6">
@@ -196,7 +195,6 @@ export default function EndedBidDetailView({ bid }: EndedBidDetailViewProps) {
         pageTitle={pageTitle}
         isExpanded={isAnalysisExpanded}
         onToggle={setIsAnalysisExpanded}
-        guideClassName="bg-purple-50 border-purple-200"
       >
         <TabHeader
           tabs={[

@@ -18,7 +18,6 @@ interface GuideSlideProps {
   title: string;
   category?: string;
   defaultContent?: React.ReactNode;
-  className?: string;
 }
 
 // 마크다운을 HTML로 변환하는 함수
@@ -179,8 +178,7 @@ export function GuideSlide({
   isOpen,
   title,
   category = "운영가이드",
-  defaultContent,
-  className = ""
+  defaultContent
 }: GuideSlideProps) {
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
@@ -315,8 +313,12 @@ export function GuideSlide({
       return defaultContent;
     } else {
       return (
-        <div className="text-muted-foreground">
-          도움말 문서가 없습니다. 새로 생성해주세요.
+        <div className="space-y-4">
+          <div className="guide-content-container">
+            <div className="guide-content text-muted-foreground">
+              도움말 문서가 없습니다. 새로 생성해주세요.
+            </div>
+          </div>
         </div>
       );
     }
@@ -325,7 +327,7 @@ export function GuideSlide({
   if (!isOpen) return null;
 
   return (
-    <div className={`mt-2 bg-card border border-border rounded-lg ${className}`}>
+    <div className="mt-2 bg-card border border-border rounded-lg">
       {isEditing ? (
         <div className="p-4 space-y-4">
           <div className="flex items-center justify-between">

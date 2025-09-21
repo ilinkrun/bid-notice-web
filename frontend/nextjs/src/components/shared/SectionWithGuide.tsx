@@ -15,8 +15,6 @@ interface SectionWithGuideProps {
   onToggle?: (expanded: boolean) => void;
   children: React.ReactNode;
   className?: string;
-  defaultContent?: React.ReactNode;
-  guideClassName?: string;
 }
 
 export function SectionWithGuide({
@@ -28,9 +26,7 @@ export function SectionWithGuide({
   isExpanded: controlledExpanded,
   onToggle,
   children,
-  className = "",
-  defaultContent,
-  guideClassName = ""
+  className = ""
 }: SectionWithGuideProps) {
   const [internalExpanded, setInternalExpanded] = useState(true);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
@@ -75,16 +71,6 @@ export function SectionWithGuide({
         isOpen={isGuideOpen}
         title={guideTitle}
         category={category}
-        defaultContent={
-          defaultContent || (
-            <div className="space-y-2">
-              <div className="text-sm text-gray-700">
-                <p>운영가이드가 없습니다</p>
-              </div>
-            </div>
-          )
-        }
-        className={guideClassName}
       />
 
       {/* 섹션 내용 */}

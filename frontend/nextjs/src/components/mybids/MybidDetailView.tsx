@@ -5,6 +5,7 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { ButtonWithIcon, ButtonWithColorIcon, DropdownSectionHeader, TabHeader, TabContainer } from '@/components/shared/FormComponents';
 import { SectionTitleHelp } from '@/components/shared/Help';
+import { SectionWithGuide } from '@/components/shared/SectionWithGuide';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -147,6 +148,9 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
   const [isInfoGuideOpen, setIsInfoGuideOpen] = useState(false);
   const [isDocumentGuideOpen, setIsDocumentGuideOpen] = useState(false);
   const [isStageGuideOpen, setIsStageGuideOpen] = useState(false);
+
+  // 페이지 타이틀
+  const pageTitle = "입찰 진행 상세";
   
   // 탭 상태
   const [infoActiveTab, setInfoActiveTab] = useState('notice');
@@ -1010,67 +1014,35 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
       </div>
 
       {/* 입찰 문서 */}
-      <div>
-        <div className="flex items-center gap-2">
-          <DropdownSectionHeader
-            title="입찰 문서"
-            icon={<FileText className="w-5 h-5" />}
-            isExpanded={isDocumentExpanded}
-            onToggle={() => setIsDocumentExpanded(!isDocumentExpanded)}
-            accentColor="#10b981"
-          />
-          <SectionTitleHelp
-            isOpen={isDocumentGuideOpen}
-            onToggle={() => setIsDocumentGuideOpen(!isDocumentGuideOpen)}
-          />
-        </div>
-
-        {/* 입찰 문서 업무 가이드 */}
-        {isDocumentGuideOpen && (
-          <div className="mt-2 bg-green-50 border border-green-200 p-4 rounded-lg">
-            <div className="max-w-full">
-              <h4 className="font-semibold text-green-800 mb-2">입찰 문서 업무 가이드</h4>
-              <div className="text-sm text-green-700 space-y-2">
-                <p>• 공고 문서: 입찰 공고에 첨부된 문서들을 확인하고 다운로드할 수 있습니다.</p>
-                <p>• 문서 작성: 입찰서, 사업계획서 등 필요한 서류를 작성할 수 있습니다.</p>
-                <p>• 다운로드 체크박스를 사용하여 필요한 파일들을 선택하여 일괄 다운로드할 수 있습니다.</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {isDocumentExpanded && (
-          <div className="mt-2 space-y-0">
-            {/* 탭 버튼 */}
-            <div className="flex border-b">
-              <button
-                className={`tab-button px-4 py-2 font-medium text-sm flex items-center gap-2 ${
-                  documentActiveTab === 'files'
-                    ? 'active'
-                    : 'text-color-primary-muted-foreground'
-                }`}
-                onClick={() => setDocumentActiveTab('files')}
-              >
-                <FileText className="w-4 h-4" />
-                공고 문서
-              </button>
-              <button
-                className={`tab-button px-4 py-2 font-medium text-sm flex items-center gap-2 ${
-                  documentActiveTab === 'write'
-                    ? 'active'
-                    : 'text-color-primary-muted-foreground'
-                }`}
-                onClick={() => setDocumentActiveTab('write')}
-              >
-                <Edit3 className="w-4 h-4" />
-                문서 작성
-              </button>
-            </div>
+      <SectionWithGuide
+        title="입찰 문서"
+        icon={<FileText className="w-5 h-5" />}
+        accentColor="#10b981"
+        category="운영가이드"
+        pageTitle={pageTitle}
+        isExpanded={isDocumentExpanded}
+        onToggle={setIsDocumentExpanded}
+      >
+        <TabHeader
+          tabs={[
+            {
+              id: 'files',
+              label: '공고 문서',
+              icon: <FileText className="w-4 h-4" />
+            },
+            {
+              id: 'write',
+              label: '문서 작성',
+              icon: <Edit3 className="w-4 h-4" />
+            }
+          ]}
+          activeTab={documentActiveTab}
+          onTabChange={setDocumentActiveTab}
+        />
             
             {/* 공고 문서 탭 */}
             {documentActiveTab === 'files' && (
-              <div>
-            <div className="border rounded-lg p-4 space-y-3" style={{borderColor: 'var(--color-primary-foreground)'}}>
+              <TabContainer>
               {filesLoading ? (
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="w-6 h-6 animate-spin" />
@@ -1229,14 +1201,12 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
                       다운
                     </ButtonWithIcon>
                   </div>
-                </div>
-              </div>
+              </TabContainer>
             )}
 
             {/* 문서 작성 탭 */}
             {documentActiveTab === 'write' && (
-              <div>
-                <TabContainer>
+              <TabContainer>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Button variant="outline" className="h-20 flex flex-col gap-2">
                   <FileText className="w-6 h-6" />
@@ -1258,13 +1228,9 @@ export default function BidDetailView({ bid }: BidDetailViewProps) {
               <div className="text-sm text-color-primary-muted-foreground">
                 입찰 마감일까지 모든 필수 서류를 제출해야 합니다.
               </div>
-                </TabContainer>
-              </div>
+              </TabContainer>
             )}
-          </div>
-        )}
-
-      </div>
+      </SectionWithGuide>
 
       {/* 단계 변경 */}
       <div>
