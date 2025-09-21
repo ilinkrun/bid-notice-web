@@ -73,6 +73,14 @@ export default function EndedBidDetailView({ bid }: EndedBidDetailViewProps) {
   const [isResultGuideOpen, setIsResultGuideOpen] = useState(false);
   const [isAnalysisGuideOpen, setIsAnalysisGuideOpen] = useState(false);
 
+  // 동적 타이틀 생성
+  const pageTitle = "입찰 종료 상세";
+  const resultSectionTitle = "입찰 결과";
+  const analysisSectionTitle = "결과 분석";
+  
+  const resultGuideTitle = `[가이드]${pageTitle} > ${resultSectionTitle}`;
+  const analysisGuideTitle = `[가이드]${pageTitle} > ${analysisSectionTitle}`;
+
   // Tab states
   const [analysisActiveTab, setAnalysisActiveTab] = useState('bids');
 
@@ -123,7 +131,7 @@ export default function EndedBidDetailView({ bid }: EndedBidDetailViewProps) {
             accentColor="#10b981"
           />
           <SectionTitleHelp
-            title="[가이드]입찰 종료 상세 > 입찰 결과"
+            title={resultGuideTitle}
             category="운영가이드"
             isOpen={isResultGuideOpen}
             onToggle={() => setIsResultGuideOpen(!isResultGuideOpen)}
@@ -133,14 +141,12 @@ export default function EndedBidDetailView({ bid }: EndedBidDetailViewProps) {
         {/* 입찰 결과 업무 가이드 */}
         <GuideSlide
           isOpen={isResultGuideOpen}
-          title="[가이드]입찰 종료 상세 > 입찰 결과"
+          title={resultGuideTitle}
           category="운영가이드"
           defaultContent={
             <div className="space-y-2">
               <div className="text-sm text-green-700">
-                <p>• 결과 요약: 입찰의 최종 결과와 주요 정보를 확인할 수 있습니다.</p>
-                <p>• 낙찰/패찰 여부와 최종 순위를 확인할 수 있습니다.</p>
-                <p>• 입찰 과정에서의 주요 일정과 결과 내용을 종합적으로 검토할 수 있습니다.</p>
+                <p>운영가이드가 없습니다</p>
               </div>
             </div>
           }
@@ -222,7 +228,7 @@ export default function EndedBidDetailView({ bid }: EndedBidDetailViewProps) {
             accentColor="#8b5cf6"
           />
           <SectionTitleHelp
-            title="[가이드]입찰 종료 상세 > 결과 분석"
+            title={analysisGuideTitle}
             category="운영가이드"
             isOpen={isAnalysisGuideOpen}
             onToggle={() => setIsAnalysisGuideOpen(!isAnalysisGuideOpen)}
@@ -232,13 +238,12 @@ export default function EndedBidDetailView({ bid }: EndedBidDetailViewProps) {
         {/* 결과 분석 업무 가이드 */}
         <GuideSlide
           isOpen={isAnalysisGuideOpen}
-          title="[가이드]입찰 종료 상세 > 결과 분석"
+          title={analysisGuideTitle}
           category="운영가이드"
           defaultContent={
             <div className="space-y-2">
               <div className="text-sm text-purple-700">
-                <p>• 업체별 응찰가: 참여 업체들의 입찰 금액과 순위를 확인할 수 있습니다.</p>
-                <p>• 경쟁업체 입찰 추이: 경쟁사들의 입찰 패턴과 경향을 분석할 수 있습니다.</p>
+                <p>운영가이드가 없습니다</p>
               </div>
             </div>
           }

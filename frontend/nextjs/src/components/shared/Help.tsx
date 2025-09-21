@@ -9,6 +9,8 @@ interface PageTitleHelpProps {
 }
 
 interface SectionTitleHelpProps {
+  title: string;
+  category?: string;
   isOpen?: boolean;
   onToggle?: () => void;
 }
@@ -62,6 +64,8 @@ export function PageTitleHelp({
 }
 
 export function SectionTitleHelp({
+  title,
+  category = "운영가이드",
   isOpen: externalIsOpen,
   onToggle: externalOnToggle
 }: SectionTitleHelpProps) {
