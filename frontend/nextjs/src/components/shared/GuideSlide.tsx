@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Edit, Save, X, Plus } from 'lucide-react';
 import { useQuery, useMutation } from '@apollo/client';
 import { getClient } from '@/lib/api/graphqlClient';
-import { GET_HELP_DOCUMENT, CREATE_HELP_DOCUMENT, UPDATE_HELP_DOCUMENT } from '@/lib/graphql/docs';
+import { GET_HELP_DOCUMENT, GET_HELP_DOCUMENT_BY_SCOPE, CREATE_HELP_DOCUMENT, UPDATE_HELP_DOCUMENT } from '@/lib/graphql/docs';
 import { useAuth } from '@/contexts/AuthContext';
 import { marked } from 'marked';
 import MDEditor from '@uiw/react-md-editor';
@@ -17,6 +17,8 @@ interface GuideSlideProps {
   isOpen: boolean;
   title: string;
   category?: string;
+  scope?: 'application' | 'domain' | 'page' | 'section' | 'component';
+  scopeHierarchy?: string;
   defaultContent?: React.ReactNode;
 }
 
@@ -178,6 +180,8 @@ export function GuideSlide({
   isOpen,
   title,
   category = "운영가이드",
+  scope = "section",
+  scopeHierarchy,
   defaultContent
 }: GuideSlideProps) {
   const { user } = useAuth();
@@ -186,20 +190,28 @@ export function GuideSlide({
   const [isUploading, setIsUploading] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // GraphQL 훅들
-  const { data, loading, error, refetch } = useQuery(GET_HELP_DOCUMENT, {
-    client: getClient(),
-    variables: { category, title },
-    skip: !isOpen, // 열릴 때만 쿼리 실행
-    fetchPolicy: 'cache-and-network'
-  });
+  // GraphQL 훅들 - scope가 있으면 scope 쿼리, 없으면 기존 쿼리 사용
+  const shouldUseScope = scope && scopeHierarchy;
+
+  const { data, loading, error, refetch } = useQuery(
+    shouldUseScope ? GET_HELP_DOCUMENT_BY_SCOPE : GET_HELP_DOCUMENT,
+    {
+      client: getClient(),
+      variables: shouldUseScope
+        ? { scope, scopeHierarchy }
+        : { category, title },
+      skip: !isOpen, // 열릴 때만 쿼리 실행
+      fetchPolicy: 'cache-and-network'
+    }
+  );
 
   const [createDocument] = useMutation(CREATE_HELP_DOCUMENT, { client: getClient() });
   const [updateDocument] = useMutation(UPDATE_HELP_DOCUMENT, { client: getClient() });
 
   // 데이터베이스에서 가져온 문서가 있는지 확인
-  const dbDocument = data?.docsManualSearch?.manuals?.[0];
-  const hasDbContent = dbDocument && data?.docsManualSearch?.total_count > 0;
+  const searchResult = shouldUseScope ? data?.docsManualSearchByScope : data?.docsManualSearch;
+  const dbDocument = searchResult?.manuals?.[0];
+  const hasDbContent = dbDocument && searchResult?.total_count > 0;
 
   // 가이드 컨텐츠가 렌더링될 때마다 빈 줄 간격 조정
   useEffect(() => {
@@ -244,6 +256,9 @@ export function GuideSlide({
         markdown_source: processedMarkdown, // 후처리된 마크다운
         format: 'markdown',
         category,
+        scope,
+        scope_hierarchy: scopeHierarchy,
+        parent_scope_id: null, // 필요시 나중에 구현
         writer: writerName,
         is_visible: true,
         is_notice: false,

@@ -11,6 +11,8 @@ interface SectionWithGuideProps {
   accentColor?: string;
   category?: string;
   pageTitle?: string;
+  scope?: 'application' | 'domain' | 'page' | 'section' | 'component';
+  scopeHierarchy?: string;
   isExpanded?: boolean;
   onToggle?: (expanded: boolean) => void;
   children: React.ReactNode;
@@ -23,6 +25,8 @@ export function SectionWithGuide({
   accentColor,
   category = "운영가이드",
   pageTitle = "",
+  scope = "section",
+  scopeHierarchy,
   isExpanded: controlledExpanded,
   onToggle,
   children,
@@ -71,6 +75,8 @@ export function SectionWithGuide({
         isOpen={isGuideOpen}
         title={guideTitle}
         category={category}
+        scope={scope}
+        scopeHierarchy={scopeHierarchy}
       />
 
       {/* 섹션 내용 */}

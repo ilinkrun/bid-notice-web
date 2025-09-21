@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
-import { PageTitleHelp } from './Help';
+import { PageGuide } from './PageGuide';
 
 interface BreadcrumbItem {
   label: string;
@@ -14,11 +14,12 @@ interface PageHeaderProps {
   title: string;
   breadcrumbs: BreadcrumbItem[];
   helpTooltip?: string;
-  helpContent?: string;
+  helpContent?: string; // deprecated, 호환성을 위해 유지
+  scopeHierarchy?: string; // 새로운 scope 기반 시스템
   action?: React.ReactNode;
 }
 
-export function PageHeader({ title, breadcrumbs, helpTooltip, helpContent, action }: PageHeaderProps) {
+export function PageHeader({ title, breadcrumbs, helpTooltip, helpContent, scopeHierarchy, action }: PageHeaderProps) {
   return (
     <div className="relative w-full mb-1">
       <div className="flex items-end justify-between w-full">
@@ -29,7 +30,12 @@ export function PageHeader({ title, breadcrumbs, helpTooltip, helpContent, actio
           </h1>
 
           {/* 도움말 아이콘 - 8px 간격 */}
-          <PageTitleHelp helpTooltip={helpTooltip} helpContent={helpContent} />
+          <PageGuide
+            pageTitle={title}
+            scopeHierarchy={scopeHierarchy}
+            helpTooltip={helpTooltip}
+            helpContent={helpContent}
+          />
         </div>
 
         {/* 우측 영역: 브레드크럼과 액션 버튼 */}

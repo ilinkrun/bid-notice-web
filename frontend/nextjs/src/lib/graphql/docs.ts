@@ -11,6 +11,35 @@ export const GET_HELP_DOCUMENT = gql`
         markdown_source
         format
         category
+        scope
+        scope_hierarchy
+        parent_scope_id
+        writer
+        created_at
+        updated_at
+        is_visible
+        is_notice
+        is_private
+      }
+      total_count
+    }
+  }
+`;
+
+// 계층적 scope로 Help 문서 조회 (scope_hierarchy로 검색)
+export const GET_HELP_DOCUMENT_BY_SCOPE = gql`
+  query GetHelpDocumentByScope($scope: String!, $scopeHierarchy: String!) {
+    docsManualSearchByScope(scope: $scope, scope_hierarchy: $scopeHierarchy, limit: 1) {
+      manuals {
+        id
+        title
+        content
+        markdown_source
+        format
+        category
+        scope
+        scope_hierarchy
+        parent_scope_id
         writer
         created_at
         updated_at
@@ -33,6 +62,9 @@ export const CREATE_HELP_DOCUMENT = gql`
       markdown_source
       format
       category
+      scope
+      scope_hierarchy
+      parent_scope_id
       writer
       created_at
       updated_at
@@ -53,6 +85,9 @@ export const UPDATE_HELP_DOCUMENT = gql`
       markdown_source
       format
       category
+      scope
+      scope_hierarchy
+      parent_scope_id
       writer
       created_at
       updated_at

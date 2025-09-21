@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { ButtonWithIcon, ButtonWithColorIcon, DropdownSectionHeader, TabHeader, TabContainer } from '@/components/shared/FormComponents';
-import { SectionTitleHelp } from '@/components/shared/Help';
+import { ButtonWithIcon, ButtonWithColorIcon, TabHeader, TabContainer } from '@/components/shared/FormComponents';
+import { SectionWithGuide } from '@/components/shared/SectionWithGuide';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -80,11 +80,8 @@ export default function BiddingDetailView({ bid }: BiddingDetailViewProps) {
   const [isDocumentExpanded, setIsDocumentExpanded] = useState(true);
   const [isStageExpanded, setIsStageExpanded] = useState(true);
 
-  // Guide states
-  const [isBidInfoGuideOpen, setIsBidInfoGuideOpen] = useState(false);
-  const [isAnalysisGuideOpen, setIsAnalysisGuideOpen] = useState(false);
-  const [isDocumentGuideOpen, setIsDocumentGuideOpen] = useState(false);
-  const [isStageGuideOpen, setIsStageGuideOpen] = useState(false);
+  // 페이지 타이틀
+  const pageTitle = "입찰 진행 상세";
 
   // Tab states
   const [bidInfoActiveTab, setBidInfoActiveTab] = useState('bidding');
@@ -248,36 +245,15 @@ export default function BiddingDetailView({ bid }: BiddingDetailViewProps) {
       />
 
       {/* 응찰 정보 */}
-      <div>
-        <div className="flex items-center gap-2">
-          <DropdownSectionHeader
-            title="응찰 정보"
-            icon={<Target className="w-5 h-5" />}
-            isExpanded={isBidInfoExpanded}
-            onToggle={() => setIsBidInfoExpanded(!isBidInfoExpanded)}
-            accentColor="#10b981"
-          />
-          <SectionTitleHelp
-            isOpen={isBidInfoGuideOpen}
-            onToggle={() => setIsBidInfoGuideOpen(!isBidInfoGuideOpen)}
-          />
-        </div>
-
-        {/* 응찰 정보 업무 가이드 */}
-        {isBidInfoGuideOpen && (
-          <div className="mt-2 bg-green-50 border border-green-200 p-4 rounded-lg">
-            <div className="max-w-full">
-              <h4 className="font-semibold text-green-800 mb-2">응찰 정보 업무 가이드</h4>
-              <div className="text-sm text-green-700 space-y-2">
-                <p>• 응찰 상세정보: 응찰과 관련된 세부 사항을 입력하고 관리할 수 있습니다.</p>
-                <p>• 입찰 상세정보: 입찰 공고의 기본 정보를 확인할 수 있습니다.</p>
-                <p>• 공고 상세정보: 입찰 공고의 상세 내용을 확인할 수 있습니다.</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {isBidInfoExpanded && (
+      <SectionWithGuide
+        title="응찰 정보"
+        icon={<Target className="w-5 h-5" />}
+        accentColor="#10b981"
+        category="운영가이드"
+        pageTitle={pageTitle}
+        isExpanded={isBidInfoExpanded}
+        onToggle={setIsBidInfoExpanded}
+      >
           <div className="mt-2 space-y-0">
             <TabHeader
               tabs={[
@@ -390,39 +366,18 @@ export default function BiddingDetailView({ bid }: BiddingDetailViewProps) {
               </div>
             )}
           </div>
-        )}
-      </div>
+      </SectionWithGuide>
 
       {/* 입찰 분석 */}
-      <div>
-        <div className="flex items-center gap-2">
-          <DropdownSectionHeader
-            title="입찰 분석"
-            icon={<BarChart3 className="w-5 h-5" />}
-            isExpanded={isAnalysisExpanded}
-            onToggle={() => setIsAnalysisExpanded(!isAnalysisExpanded)}
-            accentColor="#8b5cf6"
-          />
-          <SectionTitleHelp
-            isOpen={isAnalysisGuideOpen}
-            onToggle={() => setIsAnalysisGuideOpen(!isAnalysisGuideOpen)}
-          />
-        </div>
-
-        {/* 입찰 분석 업무 가이드 */}
-        {isAnalysisGuideOpen && (
-          <div className="mt-2 bg-purple-50 border border-purple-200 p-4 rounded-lg">
-            <div className="max-w-full">
-              <h4 className="font-semibold text-purple-800 mb-2">입찰 분석 업무 가이드</h4>
-              <div className="text-sm text-purple-700 space-y-2">
-                <p>• 응찰업체 분석: 경쟁사 정보와 입찰 현황을 분석할 수 있습니다.</p>
-                <p>• 용역내용 분석: 프로젝트 요구사항과 기술 분석을 확인할 수 있습니다.</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {isAnalysisExpanded && (
+      <SectionWithGuide
+        title="입찰 분석"
+        icon={<BarChart3 className="w-5 h-5" />}
+        accentColor="#8b5cf6"
+        category="운영가이드"
+        pageTitle={pageTitle}
+        isExpanded={isAnalysisExpanded}
+        onToggle={setIsAnalysisExpanded}
+      >
           <div className="mt-2 space-y-0">
             <TabHeader
               tabs={[
@@ -487,39 +442,18 @@ export default function BiddingDetailView({ bid }: BiddingDetailViewProps) {
               </div>
             )}
           </div>
-        )}
-      </div>
+      </SectionWithGuide>
 
       {/* 관련 문서 */}
-      <div>
-        <div className="flex items-center gap-2">
-          <DropdownSectionHeader
-            title="관련 문서"
-            icon={<FileText className="w-5 h-5" />}
-            isExpanded={isDocumentExpanded}
-            onToggle={() => setIsDocumentExpanded(!isDocumentExpanded)}
-            accentColor="#f59e0b"
-          />
-          <SectionTitleHelp
-            isOpen={isDocumentGuideOpen}
-            onToggle={() => setIsDocumentGuideOpen(!isDocumentGuideOpen)}
-          />
-        </div>
-
-        {/* 관련 문서 업무 가이드 */}
-        {isDocumentGuideOpen && (
-          <div className="mt-2 bg-amber-50 border border-amber-200 p-4 rounded-lg">
-            <div className="max-w-full">
-              <h4 className="font-semibold text-amber-800 mb-2">관련 문서 업무 가이드</h4>
-              <div className="text-sm text-amber-700 space-y-2">
-                <p>• 응찰문서: 제출한 입찰서류들을 확인하고 다운로드할 수 있습니다.</p>
-                <p>• 공고문서: 입찰 공고에 첨부된 문서들을 확인할 수 있습니다.</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {isDocumentExpanded && (
+      <SectionWithGuide
+        title="관련 문서"
+        icon={<FileText className="w-5 h-5" />}
+        accentColor="#f59e0b"
+        category="운영가이드"
+        pageTitle={pageTitle}
+        isExpanded={isDocumentExpanded}
+        onToggle={setIsDocumentExpanded}
+      >
           <div className="mt-2 space-y-0">
             <TabHeader
               tabs={[
@@ -581,40 +515,18 @@ export default function BiddingDetailView({ bid }: BiddingDetailViewProps) {
               </div>
             )}
           </div>
-        )}
-      </div>
+      </SectionWithGuide>
 
       {/* 단계 변경 */}
-      <div>
-        <div className="flex items-center gap-2">
-          <DropdownSectionHeader
-            title="단계 변경"
-            icon={<RefreshCw className="w-5 h-5" />}
-            isExpanded={isStageExpanded}
-            onToggle={() => setIsStageExpanded(!isStageExpanded)}
-            accentColor="#ef4444"
-          />
-          <SectionTitleHelp
-            isOpen={isStageGuideOpen}
-            onToggle={() => setIsStageGuideOpen(!isStageGuideOpen)}
-          />
-        </div>
-
-        {/* 단계 변경 업무 가이드 */}
-        {isStageGuideOpen && (
-          <div className="mt-2 bg-red-50 border border-red-200 p-4 rounded-lg">
-            <div className="max-w-full">
-              <h4 className="font-semibold text-red-800 mb-2">단계 변경 업무 가이드</h4>
-              <div className="text-sm text-red-700 space-y-2">
-                <p>• 낙찰: 입찰에 성공한 경우 선택합니다.</p>
-                <p>• 패찰: 입찰에 실패한 경우 선택합니다.</p>
-                <p>• 포기: 입찰을 포기하는 경우 선택합니다.</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {isStageExpanded && (
+      <SectionWithGuide
+        title="단계 변경"
+        icon={<RefreshCw className="w-5 h-5" />}
+        accentColor="#ef4444"
+        category="운영가이드"
+        pageTitle={pageTitle}
+        isExpanded={isStageExpanded}
+        onToggle={setIsStageExpanded}
+      >
           <div className="mt-2 space-y-0">
             {/* 탭 버튼 */}
             <div className="flex border-b justify-between">
@@ -690,8 +602,7 @@ export default function BiddingDetailView({ bid }: BiddingDetailViewProps) {
               )}
             </div>
           </div>
-        )}
-      </div>
+      </SectionWithGuide>
     </div>
   );
 }

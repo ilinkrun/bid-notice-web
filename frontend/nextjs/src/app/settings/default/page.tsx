@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { HardDrive, Palette, Settings, Clock, Database, FolderOpen, Monitor, Cog } from 'lucide-react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { IsActive, RadioButtonSet, OutlineSelectBox, OutlineSelectItem, DropdownSectionHeader, TabHeader, TabContainer } from '@/components/shared/FormComponents';
-import { SectionTitleHelp } from '@/components/shared/Help';
+import { IsActive, RadioButtonSet, OutlineSelectBox, OutlineSelectItem, TabHeader, TabContainer } from '@/components/shared/FormComponents';
+import { SectionWithGuide } from '@/components/shared/SectionWithGuide';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 const SETTINGS_DEFAULT_QUERY = `
@@ -64,15 +64,10 @@ export default function DefaultSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 섹션 접힘/펼침 상태
+  // 섹션 접힘/펼침 상태 (SectionWithGuide에서 내부적으로 관리)
   const [isNasExpanded, setIsNasExpanded] = useState(true);
   const [isUiExpanded, setIsUiExpanded] = useState(true);
   const [isScrapExpanded, setIsScrapExpanded] = useState(true);
-
-  // 업무 가이드 표시 상태
-  const [isNasGuideOpen, setIsNasGuideOpen] = useState(false);
-  const [isUiGuideOpen, setIsUiGuideOpen] = useState(false);
-  const [isScrapGuideOpen, setIsScrapGuideOpen] = useState(false);
 
   // 탭 상태
   const [nasActiveTab, setNasActiveTab] = useState('folder');
@@ -194,41 +189,24 @@ export default function DefaultSettingsPage() {
           { label: '설정', href: '/settings' },
           { label: '앱 기본값 설정', href: '/settings/default' }
         ]}
+        scopeHierarchy="application.settings.default"
         helpTooltip="앱 기본값 설정 도움말"
         helpContent="시스템의 기본 설정을 관리할 수 있습니다. NAS 설정, UI 설정, 스크랩 설정을 통해 애플리케이션의 동작을 사용자 환경에 맞게 조정할 수 있습니다."
       />
 
       {/* NAS 설정 섹션 */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2">
-          <DropdownSectionHeader
-            title="NAS 설정"
-            icon={<HardDrive className="w-5 h-5" />}
-            isExpanded={isNasExpanded}
-            onToggle={() => setIsNasExpanded(!isNasExpanded)}
-            accentColor="#6366f1"
-          />
-          <SectionTitleHelp
-            isOpen={isNasGuideOpen}
-            onToggle={() => setIsNasGuideOpen(!isNasGuideOpen)}
-          />
-        </div>
-
-        {/* NAS 설정 업무 가이드 */}
-        {isNasGuideOpen && (
-          <div className="mt-2 bg-blue-50 border border-blue-200 p-4 rounded-lg">
-            <div className="max-w-full">
-              <h4 className="font-semibold text-blue-800 mb-2">NAS 설정 업무 가이드</h4>
-              <div className="text-sm text-blue-700 space-y-2">
-                <p>• NAS 폴더: 파일 저장을 위한 네트워크 드라이브 경로를 설정합니다.</p>
-                <p>• NAS 정보: 연결된 NAS 장비의 상태와 정보를 확인할 수 있습니다.</p>
-                <p>• 경로 설정 시 올바른 네트워크 경로와 접근 권한을 확인하세요.</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {isNasExpanded && (
+      <SectionWithGuide
+        title="NAS 설정"
+        icon={<HardDrive className="w-5 h-5" />}
+        accentColor="#6366f1"
+        category="운영가이드"
+        pageTitle="앱 기본값 설정"
+        scope="section"
+        scopeHierarchy="application.settings.default.nas"
+        isExpanded={isNasExpanded}
+        onToggle={setIsNasExpanded}
+        className="mb-6"
+      >
           <div className="mt-2 space-y-0">
             {/* 탭 버튼 */}
             <TabHeader
@@ -320,40 +298,21 @@ export default function DefaultSettingsPage() {
               </div>
             )}
           </div>
-        )}
-      </div>
+      </SectionWithGuide>
 
       {/* UI 설정 섹션 */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2">
-          <DropdownSectionHeader
-            title="UI 설정"
-            icon={<Settings className="w-5 h-5" />}
-            isExpanded={isUiExpanded}
-            onToggle={() => setIsUiExpanded(!isUiExpanded)}
-            accentColor="#10b981"
-          />
-          <SectionTitleHelp
-            isOpen={isUiGuideOpen}
-            onToggle={() => setIsUiGuideOpen(!isUiGuideOpen)}
-          />
-        </div>
-
-        {/* UI 설정 업무 가이드 */}
-        {isUiGuideOpen && (
-          <div className="mt-2 bg-green-50 border border-green-200 p-4 rounded-lg">
-            <div className="max-w-full">
-              <h4 className="font-semibold text-green-800 mb-2">UI 설정 업무 가이드</h4>
-              <div className="text-sm text-green-700 space-y-2">
-                <p>• 테마 모드: 라이트 모드와 다크 모드 중 선택할 수 있습니다.</p>
-                <p>• 테마 색상: 각 화면별로 적용할 색상 테마를 설정할 수 있습니다.</p>
-                <p>• 설정한 테마는 즉시 적용되며, 브라우저에 저장됩니다.</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {isUiExpanded && (
+      <SectionWithGuide
+        title="UI 설정"
+        icon={<Settings className="w-5 h-5" />}
+        accentColor="#10b981"
+        category="운영가이드"
+        pageTitle="앱 기본값 설정"
+        scope="section"
+        scopeHierarchy="application.settings.default.ui"
+        isExpanded={isUiExpanded}
+        onToggle={setIsUiExpanded}
+        className="mb-6"
+      >
           <div className="mt-2 space-y-0">
             {/* 탭 버튼 */}
             <TabHeader
@@ -447,40 +406,21 @@ export default function DefaultSettingsPage() {
               </div>
             )}
           </div>
-        )}
-      </div>
+      </SectionWithGuide>
 
       {/* 스크랩 설정 섹션 */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2">
-          <DropdownSectionHeader
-            title="스크랩 설정"
-            icon={<Clock className="w-5 h-5" />}
-            isExpanded={isScrapExpanded}
-            onToggle={() => setIsScrapExpanded(!isScrapExpanded)}
-            accentColor="#f59e0b"
-          />
-          <SectionTitleHelp
-            isOpen={isScrapGuideOpen}
-            onToggle={() => setIsScrapGuideOpen(!isScrapGuideOpen)}
-          />
-        </div>
-
-        {/* 스크랩 설정 업무 가이드 */}
-        {isScrapGuideOpen && (
-          <div className="mt-2 bg-orange-50 border border-orange-200 p-4 rounded-lg">
-            <div className="max-w-full">
-              <h4 className="font-semibold text-orange-800 mb-2">스크랩 설정 업무 가이드</h4>
-              <div className="text-sm text-orange-700 space-y-2">
-                <p>• cron 설정: 자동 스크랩 실행을 위한 cron 표현식을 설정합니다.</p>
-                <p>• 스크랩 주기: 스크랩 실행 시간과 주기를 관리할 수 있습니다.</p>
-                <p>• 시간 형식은 HH:MM으로 입력하며, 여러 시간대는 쉼표로 구분합니다.</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {isScrapExpanded && (
+      <SectionWithGuide
+        title="스크랩 설정"
+        icon={<Clock className="w-5 h-5" />}
+        accentColor="#f59e0b"
+        category="운영가이드"
+        pageTitle="앱 기본값 설정"
+        scope="section"
+        scopeHierarchy="application.settings.default.scraping"
+        isExpanded={isScrapExpanded}
+        onToggle={setIsScrapExpanded}
+        className="mb-6"
+      >
           <div className="mt-2 space-y-0">
             {/* 탭 버튼 */}
             <TabHeader
@@ -574,8 +514,7 @@ export default function DefaultSettingsPage() {
               </div>
             )}
           </div>
-        )}
-      </div>
+      </SectionWithGuide>
     </PageContainer>
   );
 } 

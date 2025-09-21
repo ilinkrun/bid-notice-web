@@ -14,7 +14,6 @@ import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { Edit, Eye, Save, HelpCircle, Settings, Puzzle } from 'lucide-react';
 import { ButtonWithIcon, ButtonWithColorIcon } from '@/components/shared/FormComponents';
-import { SectionTitleHelp } from '@/components/shared/Help';
 import { Input } from '@/components/ui/input';
 import {
   Dialog,
