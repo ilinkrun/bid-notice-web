@@ -38,7 +38,7 @@ export function ScrappingSettingsLayout({ children, orgName }: ScrappingSettings
   };
 
   // 현재 활성 탭 확인
-  const activeTab = pathname.endsWith('/list') ? 'list' : pathname.endsWith('/detail') ? 'detail' : 'list';
+  const activeTab = pathname.endsWith('/list') ? 'list' : pathname.endsWith('/detail') ? 'detail' : null;
 
   // 설정 페이지 정보 생성
   const getPageInfo = () => {
@@ -87,6 +87,13 @@ export function ScrappingSettingsLayout({ children, orgName }: ScrappingSettings
 
         {/* 상세 스크랩 설정 섹션 */}
         {activeTab === 'detail' && (
+          <div>
+            {children}
+          </div>
+        )}
+
+        {/* 통합 페이지 - 섹션 래퍼 없이 직접 렌더링 */}
+        {activeTab === null && (
           <div>
             {children}
           </div>
