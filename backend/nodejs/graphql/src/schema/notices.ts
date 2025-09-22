@@ -24,6 +24,7 @@ export const noticesTypeDefs = `#graphql
 
   extend type Query {
     noticesByCategory(category: String!, gap: Int): [Notice!]!
+    noticesByCategories(categories: [String!]!, gap: Int): [Notice!]!
     notices(category: String, gap: Int): [Notice!]!
     noticesStatistics(gap: Int): [NoticeStatistics]!
     noticesRegionStatistics(gap: Int): [NoticeRegionStatistics]!

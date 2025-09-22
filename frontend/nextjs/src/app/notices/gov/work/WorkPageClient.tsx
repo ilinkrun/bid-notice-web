@@ -6,24 +6,22 @@ import { Notice } from '@/types/notice';
 import { useUnifiedLoading } from '@/components/providers/UnifiedLoadingProvider';
 import { PageContainer } from '@/components/shared/PageContainer';
 
-interface CategoryPageClientProps {
+interface WorkPageClientProps {
   notices: Notice[];
-  category: string;
+  categories: string[];
   gap: number;
   sort?: string;
   order?: string;
 }
 
-// 통계 페이지 기반으로 통일된 테마 사용
-
-export default function CategoryPageClient({ notices, category, gap, sort, order }: CategoryPageClientProps) {
+export default function WorkPageClient({ notices, categories, gap, sort, order }: WorkPageClientProps) {
   const { finishLoading } = useUnifiedLoading();
 
   // 공고 데이터 로딩 완료 감지: undefined에서 배열(빈 배열 포함)로 변경되면 로딩 완료
   useEffect(() => {
     if (notices !== undefined) {
       // 데이터 로딩 완료 (비어있는 배열도 유효한 결과)
-      console.log(`[CategoryPageClient] 데이터 로딩 완료: ${notices.length}개 공고`);
+      console.log(`[WorkPageClient] 데이터 로딩 완료: ${notices.length}개 공고`);
       // UI 렌더링이 완료되도록 짧은 지연 후 로딩 완료
       setTimeout(() => {
         finishLoading();
@@ -33,15 +31,16 @@ export default function CategoryPageClient({ notices, category, gap, sort, order
 
   return (
     <PageContainer>
-      <div className="category-page statistics-cell">
+      <div className="work-page statistics-cell">
         <NoticeTable
           notices={notices}
-          currentCategory={category}
+          currentCategories={categories}
           gap={gap}
           sort={sort}
           order={order}
+          isWorkPage={true}
         />
       </div>
     </PageContainer>
   );
-} 
+}

@@ -257,6 +257,63 @@ def find_notice_list_by_category(category, day_gap=2, is_selected=0):
     return []
 
 
+def find_notice_list_by_categories(categories, day_gap=2, is_selected=0):
+  """
+  여러 카테고리로 notices를 검색하는 함수
+  Args:
+      categories (list): 카테고리명 리스트 ['공사점검', '성능평가', '기타']
+      day_gap (int): 현재 시간으로부터 몇 일 전까지의 notices를 검색할지 (기본값: 2일)
+      is_selected (int): 선택 상태 (기본값: 0)
+  Returns:
+      list: [{"nid": "", "title": "", "detail_url": "", "posted_date": "YYYY-mm-dd", "posted_by": "", "org_name": "", "org_region": "", "registration": ""}, ...]
+  """
+  mysql = Mysql()
+  try:
+    # 카테고리 조건 생성
+    if '제외' in categories:
+      # 제외가 포함된 경우
+      other_categories = [cat for cat in categories if cat != '제외']
+      if other_categories:
+        category_conditions = "(" + " OR ".join([f"category = '{cat}'" for cat in other_categories]) + ")"
+        category_conditions += " OR is_selected = -1"
+        search_str = f"WHERE ({category_conditions}) AND is_selected IN ({is_selected}, -1)"
+      else:
+        search_str = f"WHERE is_selected = -1"
+    else:
+      # 일반 카테고리들만 있는 경우
+      category_conditions = " OR ".join([f"category = '{cat}'" for cat in categories])
+      search_str = f"WHERE ({category_conditions}) AND is_selected = {is_selected}"
+
+    if day_gap > 0:
+      search_str += f" AND STR_TO_DATE(`posted_date`, '%Y-%m-%d') >= '{get_gap_date(day_gap)}' ORDER BY `posted_date` DESC"
+
+    fields = [
+        "nid", "title", "detail_url", "posted_date", "posted_by", "org_name",
+        "category"
+    ]
+    notices = mysql.find("notice_list", fields=fields, addStr=search_str)
+
+    # 튜플 리스트를 딕셔너리 리스트로 변환하고 posted_date 형식 변환
+    result = []
+    for notice in notices:
+      notice_dict = dict(zip(fields, notice))
+      if notice_dict["posted_date"]:
+        try:
+          # datetime.date 객체를 'YYYY-mm-dd' 형식으로 변환
+          notice_dict["posted_date"] = notice_dict["posted_date"].strftime(
+              '%Y-%m-%d')
+        except (AttributeError, ValueError):
+          # 날짜 형식이 다른 경우 원본 유지
+          pass
+      # 'org_region'과 'registration' 값 추가
+      add_settings_to_notice(notice_dict)
+      result.append(notice_dict)
+    return result
+  except Exception as e:
+    print(f"카테고리들 {categories} notices 검색 중 오류 발생: {str(e)}")
+    return []
+
+
 def update_category_batch(category, delta_hours=DELTA_HOURS, start_time=None):
   """
   카테고리별로 notices를 검색하고 category 필드를 업데이트하는 함수

@@ -6,10 +6,10 @@ import { gql } from '@apollo/client';
 import { Notice } from '@/types/notice';
 import '../../../themes.css';
 import { redirect } from 'next/navigation';
-import CategoryPageClient from './CategoryPageClient';
+import ExcludedPageClient from './ExcludedPageClient';
 
 interface PageProps {
-  params: Promise<{ category: string }>;
+  params: Promise<{}>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
@@ -62,45 +62,42 @@ async function getNoticesByCategory(category: string, gap: number): Promise<Noti
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   try {
-    const resolvedParams = await Promise.resolve(params);
-    const category = decodeURIComponent(resolvedParams.category);
-    const title = `${category} 입찰공고`;
+    const title = `관공서 공고(제외)`;
 
     return {
       title: `${title} | ILMAC BID`,
-      description: `${title} 목록입니다.`,
+      description: `업무에서 제외된 입찰공고 목록입니다.`,
     };
   } catch (error) {
     console.error('Error generating metadata:', error);
     return {
-      title: '입찰공고 | ILMAC BID',
-      description: '입찰공고 목록입니다.',
+      title: '관공서 공고(제외) | ILMAC BID',
+      description: '업무에서 제외된 입찰공고 목록입니다.',
     };
   }
 }
 
-export default async function CategoryPage({ params, searchParams }: PageProps) {
-  const resolvedParams = await Promise.resolve(params);
+export default async function ExcludedPage({ params, searchParams }: PageProps) {
   const resolvedSearchParams = await Promise.resolve(searchParams);
-  const category = decodeURIComponent(resolvedParams.category);
-  
+
   // gap 파라미터가 없으면 리디렉션
   if (!resolvedSearchParams.gap) {
-    redirect(`/notices/${category}?gap=${process.env.NEXT_PUBLIC_DAY_GAP || '1'}`);
+    redirect(`/notices/gov/excluded?gap=${process.env.NEXT_PUBLIC_DAY_GAP || '1'}`);
   }
 
   try {
     const gap = parseInt(resolvedSearchParams.gap as string || process.env.NEXT_PUBLIC_DAY_GAP || '1', 10);
     const sort = resolvedSearchParams.sort as string || '';
     const order = resolvedSearchParams.order as string || 'asc';
-    const notices = await getNoticesByCategory(category, gap);
+
+    const notices = await getNoticesByCategory('제외', gap);
 
     return (
       <div>
         <Suspense fallback={<NoticeTableSkeleton />}>
-          <CategoryPageClient
+          <ExcludedPageClient
             notices={notices}
-            category={category}
+            category="제외"
             gap={gap}
             sort={sort}
             order={order}
@@ -109,7 +106,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
       </div>
     );
   } catch (error) {
-    console.error('Error in CategoryPage:', error);
+    console.error('Error in ExcludedPage:', error);
     return (
       <div className="container">
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
@@ -120,4 +117,4 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
       </div>
     );
   }
-} 
+}

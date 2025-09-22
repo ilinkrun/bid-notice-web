@@ -56,38 +56,41 @@ const LOGOUT_MUTATION = gql`
 const govNotices = [
   {
     title: '업무',
-    href: '/notices/gov/공사점검?gap=1',
+    href: '/notices/gov/work?category=공사점검&gap=1',
     icon: BookmarkPlus,
     description: '공사점검, 성능평가, 기타 통합 페이지',
   },
   {
     title: '무관',
-    href: '/notices/gov/무관?gap=1',
+    href: '/notices/gov/irrelevant?gap=1',
     icon: Bookmark,
+  },
+  {
+    title: '제외',
+    href: '/notices/gov/excluded?gap=1',
+    icon: Archive,
   },
 ];
 
 const naraNotices = [
   {
     title: '업무',
-    href: '/notices/nara/공사점검?gap=1',
+    href: '/notices/nara/work?category=공사점검&gap=1',
     icon: BookmarkPlus,
     description: '공사점검, 성능평가, 기타 통합 페이지',
   },
   {
     title: '무관',
-    href: '/notices/nara/무관?gap=1',
+    href: '/notices/nara/irrelevant?gap=1',
     icon: Bookmark,
   },
-];
-
-const otherNotices = [
   {
     title: '제외',
-    href: '/notices/gov/제외?gap=1',
+    href: '/notices/nara/excluded?gap=1',
     icon: Archive,
   },
 ];
+
 
 const bids = [
   {
@@ -253,17 +256,17 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ label, icon: Icon, items, a
     const encodedItemPath = encodeURIComponent(itemPath);
 
     return pathname === item.href ||
-           pathname === itemPath ||
-           pathname === decodedItemPath ||
-           pathname === encodedItemPath ||
-           pathname.startsWith(itemPath + '/') ||
-           pathname.startsWith(decodedItemPath + '/') ||
-           pathname.startsWith(encodedItemPath + '/');
+      pathname === itemPath ||
+      pathname === decodedItemPath ||
+      pathname === encodedItemPath ||
+      pathname.startsWith(itemPath + '/') ||
+      pathname.startsWith(decodedItemPath + '/') ||
+      pathname.startsWith(encodedItemPath + '/');
   }) || (label === '공고' && pathname.startsWith('/notices')) ||
-       (label === '입찰' && pathname.startsWith('/mybids')) ||
-       (label === '통계' && pathname.startsWith('/statistics')) ||
-       (label === '채널' && pathname.startsWith('/channels')) ||
-       (label === '설정' && pathname.startsWith('/settings'));
+    (label === '입찰' && pathname.startsWith('/mybids')) ||
+    (label === '통계' && pathname.startsWith('/statistics')) ||
+    (label === '채널' && pathname.startsWith('/channels')) ||
+    (label === '설정' && pathname.startsWith('/settings'));
 
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -388,12 +391,12 @@ const GroupedDropdownMenu: React.FC<GroupedDropdownMenuProps> = ({ label, icon: 
       const encodedItemPath = encodeURIComponent(itemPath);
 
       return pathname === item.href ||
-             pathname === itemPath ||
-             pathname === decodedItemPath ||
-             pathname === encodedItemPath ||
-             pathname.startsWith(itemPath + '/') ||
-             pathname.startsWith(decodedItemPath + '/') ||
-             pathname.startsWith(encodedItemPath + '/');
+        pathname === itemPath ||
+        pathname === decodedItemPath ||
+        pathname === encodedItemPath ||
+        pathname.startsWith(itemPath + '/') ||
+        pathname.startsWith(decodedItemPath + '/') ||
+        pathname.startsWith(encodedItemPath + '/');
     })
   ) || (label === '공고' && pathname.startsWith('/notices'));
 
@@ -783,8 +786,7 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
               icon={Star}
               groups={[
                 { label: '관공서', items: govNotices },
-                { label: '나라장터', items: naraNotices },
-                { label: '', items: otherNotices }
+                { label: '나라장터', items: naraNotices }
               ]}
               align="left"
             />

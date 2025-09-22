@@ -13,7 +13,7 @@ import { UnifiedSelect } from '@/components/shared/UnifiedSelect';
 import { useNoticeFilterStore } from '@/store/noticeFilterStore';
 import { filterNotices } from '@/lib/utils/filterNotices';
 import { AdvancedSearchModal } from '../notices/AdvancedSearchModal';
-import { InputWithIcon, IconButton, OutlineSelectBox, OutlineSelectItem, ButtonWithColorIcon, RadioButtonSet } from '@/components/shared/FormComponents';
+import { InputWithIcon, IconButton, OutlineSelectBox, OutlineSelectItem, ButtonWithColorIcon, RadioButtonSet, CheckButtonSet } from '@/components/shared/FormComponents';
 import { NumberInput } from '@/components/shared/NumberInput';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { useSettingsStore } from '@/store/settingsStore';
@@ -68,9 +68,13 @@ type SortOrder = 'asc' | 'desc';
 interface NoticeTableProps {
   notices: Notice[];
   currentCategory?: string;
+  currentCategories?: string[];
   gap?: number;
   sort?: string;
   order?: string;
+  isWorkPage?: boolean;
+  isIrrelevantPage?: boolean;
+  isExcludedPage?: boolean;
 }
 
 const CATEGORIES = [
@@ -91,7 +95,7 @@ const BID_STAGES = [
 // DAY_GAP 환경변수 가져오기
 const DEFAULT_GAP = process.env.NEXT_PUBLIC_DAY_GAP || '1';
 
-export default function NoticeTable({ notices, currentCategory, gap: initialGap, sort: initialSort, order: initialOrder }: NoticeTableProps) {
+export default function NoticeTable({ notices, currentCategory, currentCategories, gap: initialGap, sort: initialSort, order: initialOrder, isWorkPage = false, isIrrelevantPage = false, isExcludedPage = false }: NoticeTableProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { navigate } = useUnifiedNavigation();
@@ -118,6 +122,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap,
   const [isCategoryEditModalOpen, setIsCategoryEditModalOpen] = useState(false);
   const [isBidProcessModalOpen, setIsBidProcessModalOpen] = useState(false);
   const [localCategory, setLocalCategory] = useState(currentCategory || '공사점검');
+  const [localCategories, setLocalCategories] = useState(currentCategories || ['공사점검']);
   const [selectedBidStage, setSelectedBidStage] = useState<string>(currentCategory === '무관' ? '무관' : '관심');
   const [isComposing, setIsComposing] = useState(false);
   const [progressLoading, setProgressLoading] = useState(false);
@@ -304,9 +309,22 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap,
       // 1. UI 상태 즉시 업데이트
       setLocalCategory(value);
 
-      // 2. URL 업데이트 준비
+      // 2. URL 업데이트 준비 - 새로운 영어 슬러그 사용
       const newSearchParams = new URLSearchParams(window.location.search);
-      const newUrl = `/notices/gov/${encodeURIComponent(value)}?${newSearchParams.toString()}`;
+      let newUrl: string;
+
+      if (value === '무관') {
+        newUrl = `/notices/gov/irrelevant?${newSearchParams.toString()}`;
+      } else if (value === '제외') {
+        newUrl = `/notices/gov/excluded?${newSearchParams.toString()}`;
+      } else {
+        // 공사점검, 성능평가, 기타 -> work 페이지로 이동
+        newSearchParams.delete('category');
+        const otherParams = newSearchParams.toString();
+        const categoryParam = `category=${value}`;
+        const queryString = otherParams ? `${categoryParam}&${otherParams}` : categoryParam;
+        newUrl = `/notices/gov/work?${queryString}`;
+      }
 
       // 3. URL 히스토리 업데이트 (페이지 새로고침 없이)
       navigate(newUrl);
@@ -315,6 +333,40 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap,
       setIsLoading(false);
       // 에러 발생 시 원래 상태로 복구
       setLocalCategory(currentCategory || '공사점검');
+    }
+  };
+
+  // 다중 카테고리 변경 핸들러 (업무 페이지용)
+  const handleCategoriesChange = async (values: string[]) => {
+    try {
+      // 1. UI 상태 즉시 업데이트
+      setLocalCategories(values);
+
+      // 2. URL 업데이트 준비 - 쉼표를 인코딩하지 않도록 수동으로 구성
+      const currentParams = new URLSearchParams(window.location.search);
+
+      // category 파라미터 제거
+      currentParams.delete('category');
+
+      // 카테고리를 쉼표로 구분하여 설정 (URL 인코딩 방지)
+      const categoryValue = values.length > 0 ? values.join(',') : '공사점검';
+
+      // 기존 파라미터들과 새 category 파라미터를 결합
+      const otherParams = currentParams.toString();
+      const categoryParam = `category=${categoryValue}`;
+
+      const queryString = otherParams
+        ? `${categoryParam}&${otherParams}`
+        : categoryParam;
+
+      // 3. URL 히스토리 업데이트 (페이지 새로고침 없이)
+      const newUrl = `/notices/gov/work?${queryString}`;
+      navigate(newUrl);
+    } catch (error) {
+      console.error('카테고리 변경 중 오류 발생:', error);
+      setIsLoading(false);
+      // 에러 발생 시 원래 상태로 복구
+      setLocalCategories(currentCategories || ['공사점검']);
     }
   };
 
@@ -591,7 +643,20 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap,
 
         // 변경된 카테고리 페이지로 이동
         const currentSearchParams = new URLSearchParams(window.location.search);
-        const newUrl = `/notices/gov/${encodeURIComponent(localCategory)}?${currentSearchParams.toString()}`;
+        let newUrl: string;
+
+        if (localCategory === '무관') {
+          newUrl = `/notices/gov/irrelevant?${currentSearchParams.toString()}`;
+        } else if (localCategory === '제외') {
+          newUrl = `/notices/gov/excluded?${currentSearchParams.toString()}`;
+        } else {
+          // 공사점검, 성능평가, 기타 -> work 페이지로 이동
+          currentSearchParams.delete('category');
+          const otherParams = currentSearchParams.toString();
+          const categoryParam = `category=${localCategory}`;
+          const queryString = otherParams ? `${categoryParam}&${otherParams}` : categoryParam;
+          newUrl = `/notices/gov/work?${queryString}`;
+        }
         navigate(newUrl);
       } else {
         throw new Error(data?.updateNoticeCategory?.message || '유형 변경에 실패했습니다.');
@@ -633,7 +698,7 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap,
 
         // 제외 페이지로 이동
         const currentSearchParams = new URLSearchParams(window.location.search);
-        const newUrl = `/notices/gov/${encodeURIComponent('제외')}?${currentSearchParams.toString()}`;
+        const newUrl = `/notices/gov/excluded?${currentSearchParams.toString()}`;
         navigate(newUrl);
       } else {
         throw new Error(data?.excludeNotices?.message || '제외 처리에 실패했습니다.');
@@ -705,12 +770,38 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap,
 
   // 카테고리별 페이지 타이틀과 브레드크럼 생성
   const getPageInfo = () => {
-    const categoryLabel = CATEGORIES.find(cat => cat.value === currentCategory)?.label || currentCategory || '공사점검';
+    let pageTitle: string;
+    let finalBreadcrumb: string;
+    let href: string;
+
+    if (isWorkPage) {
+      pageTitle = '관공서 공고(업무)';
+      finalBreadcrumb = '업무';
+      href = '/notices/gov/work?category=공사점검';
+    } else if (isIrrelevantPage) {
+      pageTitle = '관공서 공고(무관)';
+      finalBreadcrumb = '무관';
+      href = '/notices/gov/irrelevant';
+    } else if (isExcludedPage) {
+      pageTitle = '관공서 공고(제외)';
+      finalBreadcrumb = '제외';
+      href = '/notices/gov/excluded';
+    } else {
+      // Fallback for legacy routes
+      const categoryLabel = CATEGORIES.find(cat => cat.value === currentCategory)?.label || currentCategory || '공사점검';
+      pageTitle = `관공서 공고(${categoryLabel})`;
+      finalBreadcrumb = categoryLabel;
+      href = currentCategory === '무관' ? '/notices/gov/irrelevant' :
+            currentCategory === '제외' ? '/notices/gov/excluded' :
+            `/notices/gov/work?category=${encodeURIComponent(currentCategory || '공사점검')}`;
+    }
+
     return {
-      title: `${categoryLabel} 공고`,
+      title: pageTitle,
       breadcrumbs: [
-        { label: '공고', href: '/notices/gov/공사점검' },
-        { label: categoryLabel, href: `/notices/gov/${encodeURIComponent(currentCategory || '공사점검')}` }
+        { label: '공고', href: '/notices/gov/work?category=공사점검' },
+        { label: '관공서', href: '/notices/gov/work?category=공사점검' },
+        { label: finalBreadcrumb, href }
       ]
     };
   };
@@ -776,15 +867,27 @@ export default function NoticeTable({ notices, currentCategory, gap: initialGap,
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <RadioButtonSet
-              options={[
-                { value: '공사점검', label: '공사점검' },
-                { value: '성능평가', label: '성능평가' },
-                { value: '기타', label: '기타' }
-              ]}
-              value={localCategory}
-              onChange={handleCategoryChange}
-            />
+            {isWorkPage ? (
+              <CheckButtonSet
+                options={[
+                  { value: '공사점검', label: '공사점검' },
+                  { value: '성능평가', label: '성능평가' },
+                  { value: '기타', label: '기타' }
+                ]}
+                values={localCategories}
+                onChange={handleCategoriesChange}
+              />
+            ) : (!isIrrelevantPage && !isExcludedPage) ? (
+              <RadioButtonSet
+                options={[
+                  { value: '공사점검', label: '공사점검' },
+                  { value: '성능평가', label: '성능평가' },
+                  { value: '기타', label: '기타' }
+                ]}
+                value={localCategory}
+                onChange={handleCategoryChange}
+              />
+            ) : null}
             <div className="flex items-center gap-2">
             {currentCategory === '제외' ? (
               <IconButton

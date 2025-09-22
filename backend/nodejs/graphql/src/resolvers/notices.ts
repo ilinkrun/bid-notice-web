@@ -64,6 +64,27 @@ export const noticesResolvers = {
       }
     },
 
+    noticesByCategories: async (_: unknown, { categories, gap }: { categories: string[]; gap?: number }) => {
+      try {
+        // Join categories with comma for the API call
+        const categoryParam = categories.join(',');
+        const response = await apiClient.get(`/notice_list_categories/${categoryParam}`, { params: { gap: gap || 15 } });
+        return response.data.map((notice: NoticeData) => ({
+          nid: parseInt(notice.nid),
+          title: notice.title,
+          orgName: notice.org_name,
+          postedAt: notice.posted_date,
+          detailUrl: notice.detail_url,
+          category: notice.category || notice.카테고리 || "",
+          region: notice.org_region || "미지정",
+          registration: notice.registration
+        }));
+      } catch (error) {
+        console.error('Error fetching notices by categories:', error);
+        return [];
+      }
+    },
+
     noticesStatistics: async (_: unknown, { gap }: { gap: number }) => {
       try {
         const response = await apiClient.get('/notice_list_statistics', { params: { gap } });

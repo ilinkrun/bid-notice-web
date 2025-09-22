@@ -24,7 +24,7 @@ from mysql.mysql_settings import (
     get_keyword_weight_list, get_search_weight, filter_by_not)
 
 from mysql.mysql_notice import (find_notice_list_with_category, find_last_notice,
-                          find_notice_list_by_category,
+                          find_notice_list_by_category, find_notice_list_by_categories,
                           find_notice_list_for_statistics, search_notice_list,
                           upsert_notice_list, find_my_bids, find_my_bids_by_status, find_my_bid_by_nid, update_all_category,
                           update_notice_category_by_nids, exclude_notices_by_nids, restore_notices_by_nids)
@@ -448,6 +448,33 @@ def get_notice_list_gap_category(
     for item in result:
       add_settings_to_notice(item)
 
+    return result
+  except Exception as e:
+    raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/notice_list_categories/{categories}")
+def get_notice_list_gap_categories(
+    categories: str,
+    gap: int = Query(
+        None,
+        description="몇 일 전까지의 공고를 가져올지 지정합니다. 지정하지 않으면 DAY_GAP 값을 사용합니다.")):
+  """
+  여러 카테고리의 공고 목록을 반환합니다. 카테고리는 쉼표로 구분됩니다.
+  예: /notice_list_categories/공사점검,성능평가,기타
+  """
+  try:
+    # gap이 None이면 DAY_GAP 사용
+    if gap is None:
+      gap = int(DAY_GAP)
+
+    # 쉼표로 구분된 카테고리 문자열을 리스트로 변환
+    category_list = [cat.strip() for cat in categories.split(',')]
+    result = find_notice_list_by_categories(category_list, day_gap=gap)
+
+    # 각 row의 org_name에 해당하는 'org_region', 'registration' 필드값을 가져오기
+    for item in result:
+      add_settings_to_notice(item)
     return result
   except Exception as e:
     raise HTTPException(status_code=500, detail=str(e))
