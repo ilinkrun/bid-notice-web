@@ -22,6 +22,7 @@ interface GuideSlideProps {
   scope?: 'application' | 'domain' | 'page' | 'section' | 'component';
   scopeHierarchy?: string;
   defaultContent?: React.ReactNode;
+  helpContent?: string; // 레거시 지원을 위한 prop
 }
 
 // 마크다운을 HTML로 변환하는 함수
@@ -278,7 +279,8 @@ export function GuideSlide({
   category = "운영가이드",
   scope = "section",
   scopeHierarchy,
-  defaultContent
+  defaultContent,
+  helpContent
 }: GuideSlideProps) {
   const { user } = useAuth();
   const pathname = usePathname();
@@ -287,8 +289,8 @@ export function GuideSlide({
   const [isUploading, setIsUploading] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // 일단 기존 쿼리만 사용하고, mutation에서만 scope 필드 전송
-  const shouldUseScope = false; // scope && scopeHierarchy;
+  // scope="page"일 때는 반드시 scope 기반 쿼리 사용 (page 가이드는 scope=page에서만 검색)
+  const shouldUseScope = scope === "page" ? true : (scope && scopeHierarchy);
 
   const { data, loading, error, refetch } = useQuery(
     shouldUseScope ? GET_HELP_DOCUMENT_BY_SCOPE : GET_HELP_DOCUMENT,
@@ -472,12 +474,28 @@ export function GuideSlide({
     } else if (defaultContent) {
       // props로 전달된 정적 콘텐츠 사용
       return defaultContent;
+    } else if (helpContent) {
+      // 레거시 helpContent 지원
+      return (
+        <div className="space-y-4">
+          <div className="guide-content-container">
+            <div className="guide-content text-foreground text-sm">
+              {helpContent}
+            </div>
+          </div>
+        </div>
+      );
     } else {
+      // scope="page"일 때 특별한 기본 메시지 표시
+      const defaultMessage = scope === "page"
+        ? "이 페이지에 대한 가이드가 아직 작성되지 않았습니다."
+        : "도움말 문서가 없습니다. 새로 생성해주세요.";
+
       return (
         <div className="space-y-4">
           <div className="guide-content-container">
             <div className="guide-content text-muted-foreground">
-              도움말 문서가 없습니다. 새로 생성해주세요.
+              {defaultMessage}
             </div>
           </div>
         </div>

@@ -15,6 +15,7 @@ import { useParams, useSearchParams } from 'next/navigation';
 import { Edit, Eye, Save, HelpCircle, Settings, Puzzle, FileText, List } from 'lucide-react';
 import { ButtonWithIcon, ButtonWithColorIcon, TabHeader, TabContainer } from '@/components/shared/FormComponents';
 import { Input } from '@/components/ui/input';
+import { CONVERT_KO_TO_EN } from '@/lib/graphql/mappings';
 import {
   Dialog,
   DialogContent,
@@ -124,6 +125,78 @@ export default function ScrappingDetailSettingsPage() {
 
   // 탭 상태
   const [activeSubTab, setActiveSubTab] = useState('all');
+
+  // 동적 scope_hierarchy 생성
+  const [sectionScopeHierarchy, setSectionScopeHierarchy] = useState<string>('');
+
+  // scope_hierarchy 생성 함수
+  const generateScopeHierarchy = async () => {
+    try {
+      const pathname = window.location.pathname;
+      const pathParts = pathname.split('/').filter(part => part !== '');
+      let hierarchy = 'application';
+
+      // URL 경로 매핑
+      for (const part of pathParts) {
+        try {
+          const { data } = await getClient().query({
+            query: CONVERT_KO_TO_EN,
+            variables: {
+              scope: 'section',
+              ko: part
+            },
+            fetchPolicy: 'cache-first'
+          });
+
+          if (data?.mappingsLangKoToEn) {
+            hierarchy += `.${data.mappingsLangKoToEn}`;
+          } else {
+            hierarchy += `.${part}`;
+          }
+        } catch (error) {
+          hierarchy += `.${part}`;
+        }
+      }
+
+      // 섹션 타이틀 매핑
+      const sectionTitle = '상세 스크래핑 설정';
+      try {
+        const { data } = await getClient().query({
+          query: CONVERT_KO_TO_EN,
+          variables: {
+            scope: 'section',
+            ko: sectionTitle
+          },
+          fetchPolicy: 'cache-first'
+        });
+
+        if (data?.mappingsLangKoToEn) {
+          hierarchy += `.${data.mappingsLangKoToEn}`;
+        } else {
+          hierarchy += `.${sectionTitle.replace(/\s+/g, '_')}`;
+        }
+      } catch (error) {
+        hierarchy += `.${sectionTitle.replace(/\s+/g, '_')}`;
+      }
+
+      console.log('=== SECTION SCOPE HIERARCHY DEBUG ===');
+      console.log('Generated hierarchy:', hierarchy);
+
+      setSectionScopeHierarchy(hierarchy);
+    } catch (error) {
+      console.error('Error generating section scope hierarchy:', error);
+      // 폴백
+      const pathname = window.location.pathname;
+      const pathParts = pathname.split('/').filter(part => part !== '');
+      const fallback = ['application', ...pathParts, '상세_스크래핑_설정'].join('.');
+      setSectionScopeHierarchy(fallback);
+    }
+  };
+
+  // 커포너트 마운트 시 scope_hierarchy 생성
+  useEffect(() => {
+    generateScopeHierarchy();
+  }, []);
 
   // 상세 스크랩 설정 쿼리
   const { loading: loadingDetail, error: errorDetail, data: dataDetail } = useQuery(GET_SETTINGS_DETAIL, {
@@ -320,13 +393,15 @@ export default function ScrappingDetailSettingsPage() {
       region={listSettings?.region}
     >
       {/* 상세 스크래핑 설정 메인 섹션 */}
-      <SectionWithGuide
-        title="상세 스크래핑 설정"
-        icon={<FileText className="w-5 h-5" />}
-        accentColor="#6366f1"
-        category="운영가이드"
-        pageTitle={`${orgName} 상세 스크래핑 설정`}
-      >
+      {sectionScopeHierarchy && (
+        <SectionWithGuide
+          title="상세 스크래핑 설정"
+          icon={<FileText className="w-5 h-5" />}
+          accentColor="#6366f1"
+          category="운영가이드"
+          pageTitle={params.oid ? '스크래핑 설정' : `${orgName} 상세 스크래핑 설정`}
+          scopeHierarchy={sectionScopeHierarchy}
+        >
         <div className="space-y-0">
           {/* 서브탭 헤더 */}
           <TabHeader
@@ -556,6 +631,7 @@ export default function ScrappingDetailSettingsPage() {
           </TabContainer>
         </div>
       </SectionWithGuide>
+      )}
 
       {/* 저장 확인 모달 */}
       <Dialog open={showSaveModal} onOpenChange={setShowSaveModal}>

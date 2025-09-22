@@ -187,9 +187,9 @@ const favoriteChannels = [
 
 const settings = [
   {
-    title: '스크랩 설정',
+    title: '스크래핑 설정',
     href: '/settings/scrapping',
-    description: '입찰공고 스크랩 설정 관리',
+    description: '입찰공고 스크래핑 설정 관리',
     icon: Settings,
   },
   {

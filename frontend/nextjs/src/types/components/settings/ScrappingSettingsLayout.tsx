@@ -57,7 +57,7 @@ export function ScrappingSettingsLayout({ children, orgName }: ScrappingSettings
                 )}
               >
                 <List className="h-4 w-4" />
-                목록 스크랩 설정
+                목록 스크래핑 설정
               </button>
               <button
                 onClick={() => handleTabClick('detail')}

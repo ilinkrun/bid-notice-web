@@ -269,8 +269,8 @@ export default function SettingsListOrgPage({ params }: PageProps) {
                 <CardTitle>{isCreateMode ? '새 설정 추가' : '목록페이지 스크랩 설정'}</CardTitle>
                 <CardDescription>
                   {isCreateMode
-                    ? '새로운 목록 스크랩 설정을 추가합니다'
-                    : `${orgName} 목록 스크랩 설정 정보`
+                    ? '새로운 목록 스크래핑 설정을 추가합니다'
+                    : `${orgName} 목록 스크래핑 설정 정보`
                   }
                 </CardDescription>
               </div>

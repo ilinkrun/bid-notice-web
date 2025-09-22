@@ -123,7 +123,7 @@ export default function ScrappingListSettingsPage() {
   // 탭 상태
   const [activeSubTab, setActiveSubTab] = useState('all');
 
-  // 목록 스크랩 설정 쿼리
+  // 목록 스크래핑 설정 쿼리
   const { loading, error, data } = useQuery(GET_SETTINGS_LIST, {
     client: getClient(),
     variables: { oid }
@@ -869,7 +869,7 @@ export default function ScrappingListSettingsPage() {
             </div>
           ) : (
             <div className="text-center py-8">
-              <p className="text-color-primary-muted-foreground">목록 스크랩 설정이 없습니다.</p>
+              <p className="text-color-primary-muted-foreground">목록 스크래핑 설정이 없습니다.</p>
               <ButtonWithIcon
                 icon={<Edit className="h-4 w-4" />}
                 onClick={handleEditMode}
@@ -958,7 +958,7 @@ export default function ScrappingListSettingsPage() {
       <Dialog open={showHelpModal} onOpenChange={setShowHelpModal}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-lg font-semibold">📖 입찰공고 목록 스크랩 설정 가이드</DialogTitle>
+            <DialogTitle className="text-lg font-semibold">📖 입찰공고 목록 스크래핑 설정 가이드</DialogTitle>
             <DialogDescription>
               각 설정 항목에 대한 자세한 설명과 예시를 확인하세요.
             </DialogDescription>

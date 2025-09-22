@@ -25,7 +25,8 @@ export function ScrappingSettingsLayout({ children, orgName }: ScrappingSettings
   const [isListExpanded, setIsListExpanded] = useState(true);
 
   // 페이지 타이틀
-  const pageTitle = `${orgName} 스크래핑 설정`;
+  const hasOidParam = !!params.oid;
+  const pageTitle = hasOidParam ? '스크래핑 설정' : `${orgName} 스크래핑 설정`;
 
   const handleTabClick = (tab: 'list' | 'detail') => {
     // oid 파라미터가 있으면 oid 기반으로, 없으면 orgName 기반으로 처리
@@ -41,8 +42,12 @@ export function ScrappingSettingsLayout({ children, orgName }: ScrappingSettings
 
   // 설정 페이지 정보 생성
   const getPageInfo = () => {
+    // oid 파라미터가 있는 경우 (숫자 ID로 접근하는 경우) 조직명 없이 "스크래핑 설정"만 표시
+    const hasOidParam = !!params.oid;
+    const title = hasOidParam ? '스크래핑 설정' : `${orgName} 스크래핑 설정`;
+
     return {
-      title: `${orgName} 스크래핑 설정`,
+      title,
       breadcrumbs: [
         { label: '설정', href: '/settings' },
         { label: '스크래핑 설정', href: '/settings/scrapping' },
@@ -61,13 +66,12 @@ export function ScrappingSettingsLayout({ children, orgName }: ScrappingSettings
           title={title}
           breadcrumbs={breadcrumbs}
           helpTooltip="스크래핑 설정 방법을 확인하세요"
-          helpContent="스크래핑 설정에서는 공고 목록과 상세 정보를 수집하는 규칙을 설정할 수 있습니다. 목록 설정과 상세 설정을 각각 구성하세요."
         />
 
-        {/* 목록 스크랩 설정 섹션 */}
+        {/* 목록 스크래핑 설정 섹션 */}
         {activeTab === 'list' && (
           <SectionWithGuide
-            title="목록 스크랩 설정"
+            title="목록 스크래핑 설정"
             icon={<List className="w-5 h-5" />}
             accentColor="#6366f1"
             category="운영가이드"

@@ -196,7 +196,7 @@ export default function ScrappingSettingsPage() {
   // 탭 상태 (목록 설정용)
   const [activeSubTab, setActiveSubTab] = useState('all');
 
-  // 목록 스크랩 설정 쿼리
+  // 목록 스크래핑 설정 쿼리
   const { loading: loadingList, error: errorList, data: dataList } = useQuery(GET_SETTINGS_LIST, {
     client: getClient(),
     variables: { oid }
@@ -541,17 +541,17 @@ export default function ScrappingSettingsPage() {
       region={listSettings?.orgRegion}
     >
       <div className="space-y-6">
-        {/* 목록 스크랩 설정 섹션 */}
+        {/* 목록 스크래핑 설정 섹션 */}
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <List className="h-5 w-5 text-gray-700" />
-            <h3 className="text-lg font-semibold text-gray-900">목록 스크랩 설정</h3>
+            <h3 className="text-lg font-semibold text-gray-900">목록 스크래핑 설정</h3>
             <SectionTitleHelp
-              title="목록 스크랩 설정 도움말"
+              title="목록 스크래핑 설정 도움말"
               content={
                 <div className="space-y-4">
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <h4 className="text-sm font-medium text-blue-900 mb-2">목록 스크랩 설정 가이드</h4>
+                    <h4 className="text-sm font-medium text-blue-900 mb-2">목록 스크래핑 설정 가이드</h4>
                     <ul className="text-sm text-blue-800 space-y-1">
                       <li>• <strong>기관명:</strong> 스크랩 대상 기관의 이름</li>
                       <li>• <strong>URL:</strong> 입찰공고 목록 페이지 URL</li>
@@ -858,7 +858,7 @@ export default function ScrappingSettingsPage() {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <p className="text-color-primary-muted">목록 스크랩 설정이 없습니다.</p>
+                  <p className="text-color-primary-muted">목록 스크래핑 설정이 없습니다.</p>
                   <ButtonWithIcon
                     icon={<Edit className="h-4 w-4" />}
                     onClick={handleListEditMode}

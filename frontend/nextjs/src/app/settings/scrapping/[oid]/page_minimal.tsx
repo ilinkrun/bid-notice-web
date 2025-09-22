@@ -12,9 +12,9 @@ export default function ScrappingSettingsPage() {
       region="서울"
     >
       <div className="space-y-6">
-        {/* 목록 스크랩 설정 섹션 */}
+        {/* 목록 스크래핑 설정 섹션 */}
         <SectionWithGuide
-          title="목록 스크랩 설정"
+          title="목록 스크래핑 설정"
           icon={<List className="w-5 h-5" />}
           accentColor="#6366f1"
           category="운영가이드"
