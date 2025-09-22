@@ -56,7 +56,7 @@ export function SettingsListTable({ initialData }: SettingsListTableProps) {
   }, [finishLoading]);
 
   const handleRowClick = (oid: number) => {
-    navigate(`/settings/scrapping/${oid}/list`);
+    navigate(`/settings/scrapping/${oid}`);
   };
 
   const handleSort = (key: keyof SettingsListTableProps['initialData'][0]) => {

@@ -118,8 +118,11 @@ export default function ScrappingSettingsPage() {
   const { finishLoading } = useUnifiedLoading();
 
   const oid = parseInt(params.oid as string);
-  const mode = searchParams.get('mode') || 'view';
-  const isEditMode = mode === 'edit';
+  const isNewEntry = isNaN(oid); // 새로운 항목 추가인지 확인
+
+  // 각 섹션별 독립적인 편집 모드 상태 (새 항목인 경우 기본적으로 편집 모드)
+  const [isListEditMode, setIsListEditMode] = useState(isNewEntry);
+  const [isDetailEditMode, setIsDetailEditMode] = useState(isNewEntry);
 
   // List settings state
   const [listEditData, setListEditData] = useState({
@@ -169,19 +172,22 @@ export default function ScrappingSettingsPage() {
   // Get basic organization info
   const { loading, error, data } = useQuery(GET_BASIC_INFO, {
     client: getClient(),
-    variables: { oid }
+    variables: { oid },
+    skip: isNewEntry // 새 항목인 경우 쿼리 건너뛰기
   });
 
   // Get list settings
   const { loading: listLoading, data: listData } = useQuery(GET_SETTINGS_LIST, {
     client: getClient(),
-    variables: { oid }
+    variables: { oid },
+    skip: isNewEntry // 새 항목인 경우 쿼리 건너뛰기
   });
 
   // Get detail settings
-  const { loading: detailLoading, data: detailData } = useQuery(GET_SETTINGS_DETAIL, {
+  const { loading: detailLoading, data: detailData, refetch: refetchDetailData } = useQuery(GET_SETTINGS_DETAIL, {
     client: getClient(),
-    variables: { oid }
+    variables: { oid },
+    skip: isNewEntry // 새 항목인 경우 쿼리 건너뛰기
   });
 
   // Mutations
@@ -196,51 +202,106 @@ export default function ScrappingSettingsPage() {
 
   // Initialize list edit data
   useEffect(() => {
-    if (listData?.settingListByOid) {
-      const settings = listData.settingListByOid;
-      setListEditData({
-        orgName: settings.orgName || '',
-        detailUrl: settings.detailUrl || '',
-        paging: settings.paging || '',
-        startPage: settings.startPage?.toString() || '1',
-        endPage: settings.endPage?.toString() || '1',
-        iframe: settings.iframe || '',
-        rowXpath: settings.rowXpath || '',
-        orgRegion: settings.orgRegion || '',
-        use: settings.use?.toString() || '1',
-        orgMan: settings.orgMan || '',
-        companyInCharge: settings.companyInCharge || '',
-        exceptionRow: settings.exceptionRow || '',
-        elements: settings.elements || []
-      });
-    }
-  }, [listData]);
+    // 목록 설정 데이터가 있든 없든 항상 빈 폼을 표시하도록 초기화
+    const settings = listData?.settingListByOid;
+    const orgName = isNewEntry ? '' : (data?.settingListByOid?.orgName || `Organization ${oid}`);
 
-  // Initialize detail edit data
+    // 기본 elements 구조 생성
+    const defaultElements = settings?.elements && settings.elements.length > 0
+      ? settings.elements
+      : [
+          { key: '공고번호', xpath: '', target: 'text', callback: '' },
+          { key: '분류', xpath: '', target: 'text', callback: '' },
+          { key: '공고명', xpath: '', target: 'text', callback: '' },
+          { key: '수요기관', xpath: '', target: 'text', callback: '' },
+          { key: '계약방법', xpath: '', target: 'text', callback: '' },
+          { key: '입찰마감일시', xpath: '', target: 'text', callback: '' },
+          { key: '공고기관', xpath: '', target: 'text', callback: '' },
+          { key: '링크', xpath: '', target: 'href', callback: '' },
+        ];
+
+    setListEditData({
+      orgName: settings?.orgName || orgName,
+      detailUrl: settings?.detailUrl || '',
+      paging: settings?.paging || '',
+      startPage: settings?.startPage?.toString() || '1',
+      endPage: settings?.endPage?.toString() || '1',
+      iframe: settings?.iframe || '',
+      rowXpath: settings?.rowXpath || '',
+      orgRegion: settings?.orgRegion || '',
+      use: settings?.use?.toString() || '1',
+      orgMan: settings?.orgMan || '',
+      companyInCharge: settings?.companyInCharge || '',
+      exceptionRow: settings?.exceptionRow || '',
+      elements: defaultElements
+    });
+  }, [listData, data, oid, isNewEntry]);
+
+  // Initialize detail edit data and create record if not exists
   useEffect(() => {
-    if (detailData?.settingsDetailByOid) {
-      const settings = detailData.settingsDetailByOid;
+    const initializeDetailData = async () => {
+      const settings = detailData?.settingsDetailByOid;
+      const orgName = isNewEntry ? '' : (data?.settingListByOid?.orgName || `Organization ${oid}`);
+
+      // 상세 설정이 없고 기본 정보가 있는 경우 자동으로 기본 레코드 생성 (새 항목이 아닌 경우만)
+      if (!settings && data?.settingListByOid && !detailLoading && !isNewEntry) {
+        try {
+          console.log(`[DetailSettings] Creating default detail settings for oid: ${oid}, orgName: ${orgName}`);
+
+          await updateSettingsDetail({
+            variables: {
+              oid,
+              input: {
+                orgName: orgName,
+                title: '',
+                bodyHtml: '',
+                fileName: '',
+                fileUrl: '',
+                preview: '',
+                noticeDiv: '',
+                noticeNum: '',
+                orgDept: '',
+                orgMan: '',
+                orgTel: '',
+                use: 1,
+                sampleUrl: '',
+                down: ''
+              }
+            }
+          });
+
+          console.log(`[DetailSettings] Default detail settings created successfully for oid: ${oid}`);
+
+          // 새로 생성된 데이터를 가져오기 위해 refetch
+          await refetchDetailData();
+        } catch (error) {
+          console.error('Failed to create default detail settings:', error);
+        }
+      }
+
       setDetailEditData({
-        orgName: settings.orgName || '',
-        title: settings.title || '',
-        bodyHtml: settings.bodyHtml || '',
-        fileName: settings.fileName || '',
-        fileUrl: settings.fileUrl || '',
-        preview: settings.preview || '',
-        noticeDiv: settings.noticeDiv || '',
-        noticeNum: settings.noticeNum || '',
-        orgDept: settings.orgDept || '',
-        orgMan: settings.orgMan || '',
-        orgTel: settings.orgTel || '',
-        use: settings.use?.toString() || '1',
-        sampleUrl: settings.sampleUrl || '',
-        down: settings.down || ''
+        orgName: settings?.orgName || orgName,
+        title: settings?.title || '',
+        bodyHtml: settings?.bodyHtml || '',
+        fileName: settings?.fileName || '',
+        fileUrl: settings?.fileUrl || '',
+        preview: settings?.preview || '',
+        noticeDiv: settings?.noticeDiv || '',
+        noticeNum: settings?.noticeNum || '',
+        orgDept: settings?.orgDept || '',
+        orgMan: settings?.orgMan || '',
+        orgTel: settings?.orgTel || '',
+        use: settings?.use?.toString() || '1',
+        sampleUrl: settings?.sampleUrl || '',
+        down: settings?.down || ''
       });
-    }
-  }, [detailData]);
+    };
+
+    initializeDetailData();
+  }, [detailData, data, oid, detailLoading, updateSettingsDetail, refetchDetailData, isNewEntry]);
 
   const orgInfo = data?.settingListByOid;
-  const orgName = orgInfo?.orgName || `Organization ${oid}`;
+  const orgName = isNewEntry ? '추가' : (orgInfo?.orgName || `Organization ${oid}`);
 
   if (loading) {
     return (
@@ -300,15 +361,22 @@ export default function ScrappingSettingsPage() {
     }));
   };
 
-  // 편집 모드 전환 함수들
-  const handleEditMode = () => {
-    const currentParams = new URLSearchParams(window.location.search);
-    currentParams.set('mode', 'edit');
-    navigate(`${window.location.pathname}?${currentParams.toString()}`);
+  // 목록 스크래핑 설정 편집 모드 전환 함수들
+  const handleListEditMode = () => {
+    setIsListEditMode(true);
   };
 
-  const handleViewMode = () => {
-    window.location.href = `/settings/scrapping/${oid}`;
+  const handleListViewMode = () => {
+    setIsListEditMode(false);
+  };
+
+  // 상세 스크래핑 설정 편집 모드 전환 함수들
+  const handleDetailEditMode = () => {
+    setIsDetailEditMode(true);
+  };
+
+  const handleDetailViewMode = () => {
+    setIsDetailEditMode(false);
   };
 
   const handleListElementChange = (index: number, field: string, value: string) => {
@@ -367,10 +435,9 @@ export default function ScrappingSettingsPage() {
 
             {/* 탭 컨텐츠 */}
             <TabContainer className="p-0 mt-0">
-              {listData?.settingListByOid ? (
-                <div>
-                  {/* 전체 설정 탭 */}
-                  {activeListTab === 'all' && (
+              <div>
+                {/* 전체 설정 탭 */}
+                {activeListTab === 'all' && (
                     <div className="space-y-1">
                       {/* 기본 설정 */}
                       <div className="border rounded-lg overflow-hidden" style={{ backgroundColor: 'transparent' }}>
@@ -386,7 +453,7 @@ export default function ScrappingSettingsPage() {
                                   onChange={(e) => handleListInputChange('orgName', e.target.value)}
                                   className="w-full text-sm"
                                   style={{ color: 'var(--color-primary-foreground)' }}
-                                  disabled={!isEditMode}
+                                  disabled={!isListEditMode}
                                 />
                               </TableCell>
                             </TableRow>
@@ -400,7 +467,7 @@ export default function ScrappingSettingsPage() {
                                   onChange={(e) => handleListInputChange('detailUrl', e.target.value)}
                                   className="w-full text-sm"
                                   style={{ color: 'var(--color-primary-foreground)' }}
-                                  disabled={!isEditMode}
+                                  disabled={!isListEditMode}
                                 />
                               </TableCell>
                             </TableRow>
@@ -415,7 +482,7 @@ export default function ScrappingSettingsPage() {
                                   className="w-full text-sm font-mono"
                                   style={{ color: 'var(--color-primary-foreground)' }}
                                   placeholder="설정 없음"
-                                  disabled={!isEditMode}
+                                  disabled={!isListEditMode}
                                 />
                               </TableCell>
                             </TableRow>
@@ -431,7 +498,7 @@ export default function ScrappingSettingsPage() {
                                     className="w-20 text-sm"
                                     style={{ color: 'var(--color-primary-foreground)' }}
                                     type="number"
-                                    disabled={!isEditMode}
+                                    disabled={!isListEditMode}
                                   />
                                 </div>
                                 <div className="flex items-center">
@@ -442,7 +509,7 @@ export default function ScrappingSettingsPage() {
                                     className="w-20 text-sm"
                                     style={{ color: 'var(--color-primary-foreground)' }}
                                     type="number"
-                                    disabled={!isEditMode}
+                                    disabled={!isListEditMode}
                                   />
                                 </div>
                               </TableCell>
@@ -459,7 +526,7 @@ export default function ScrappingSettingsPage() {
                                     className="w-32 text-sm"
                                     style={{ color: 'var(--color-primary-foreground)' }}
                                     placeholder="없음"
-                                    disabled={!isEditMode}
+                                    disabled={!isListEditMode}
                                   />
                                 </div>
                                 <div className="flex items-center">
@@ -470,7 +537,7 @@ export default function ScrappingSettingsPage() {
                                     className="w-48 text-sm font-mono"
                                     style={{ color: 'var(--color-primary-foreground)' }}
                                     placeholder="제외할 행 조건"
-                                    disabled={!isEditMode}
+                                    disabled={!isListEditMode}
                                   />
                                 </div>
                               </TableCell>
@@ -485,7 +552,7 @@ export default function ScrappingSettingsPage() {
                                   onChange={(e) => handleListInputChange('rowXpath', e.target.value)}
                                   className="w-full text-sm font-mono"
                                   style={{ color: 'var(--color-primary-foreground)' }}
-                                  disabled={!isEditMode}
+                                  disabled={!isListEditMode}
                                 />
                               </TableCell>
                             </TableRow>
@@ -505,8 +572,8 @@ export default function ScrappingSettingsPage() {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {(isEditMode ? listEditData.elements : listData.settingListByOid.elements || []).length > 0 ? (
-                              (isEditMode ? listEditData.elements : listData.settingListByOid.elements || []).map((element: any, index: number) => (
+                            {listEditData.elements.length > 0 ? (
+                              listEditData.elements.map((element: any, index: number) => (
                                 <TableRow key={index}>
                                   <TableCell className="font-medium">
                                     <span className="text-sm" style={{ color: 'var(--color-primary-foreground)' }}>{element.key}</span>
@@ -517,7 +584,7 @@ export default function ScrappingSettingsPage() {
                                       onChange={(e) => handleListElementChange(index, 'xpath', e.target.value)}
                                       className="w-full text-sm font-mono"
                                       style={{ color: 'var(--color-primary-foreground)' }}
-                                      disabled={!isEditMode}
+                                      disabled={!isListEditMode}
                                     />
                                   </TableCell>
                                   <TableCell>
@@ -526,7 +593,7 @@ export default function ScrappingSettingsPage() {
                                       onChange={(e) => handleListElementChange(index, 'target', e.target.value)}
                                       className="w-full text-sm"
                                       style={{ color: 'var(--color-primary-foreground)' }}
-                                      disabled={!isEditMode}
+                                      disabled={!isListEditMode}
                                     />
                                   </TableCell>
                                   <TableCell>
@@ -535,7 +602,7 @@ export default function ScrappingSettingsPage() {
                                       onChange={(e) => handleListElementChange(index, 'callback', e.target.value)}
                                       className="w-full text-sm font-mono"
                                       style={{ color: 'var(--color-primary-foreground)' }}
-                                      disabled={!isEditMode}
+                                      disabled={!isListEditMode}
                                     />
                                   </TableCell>
                                 </TableRow>
@@ -566,7 +633,7 @@ export default function ScrappingSettingsPage() {
                                     onChange={(e) => handleListInputChange('orgRegion', e.target.value)}
                                     className="w-32 text-sm"
                                     style={{ color: 'var(--color-primary-foreground)' }}
-                                    disabled={!isEditMode}
+                                    disabled={!isListEditMode}
                                   />
                                 </div>
                                 <div className="flex items-center">
@@ -576,7 +643,7 @@ export default function ScrappingSettingsPage() {
                                     onChange={(e) => handleListInputChange('use', e.target.value)}
                                     className="w-20 text-sm"
                                     style={{ color: 'var(--color-primary-foreground)' }}
-                                    disabled={!isEditMode}
+                                    disabled={!isListEditMode}
                                   />
                                 </div>
                               </TableCell>
@@ -592,7 +659,7 @@ export default function ScrappingSettingsPage() {
                                     onChange={(e) => handleListInputChange('companyInCharge', e.target.value)}
                                     className="w-32 text-sm"
                                     style={{ color: 'var(--color-primary-foreground)' }}
-                                    disabled={!isEditMode}
+                                    disabled={!isListEditMode}
                                   />
                                 </div>
                                 <div className="flex items-center">
@@ -602,7 +669,7 @@ export default function ScrappingSettingsPage() {
                                     onChange={(e) => handleListInputChange('orgMan', e.target.value)}
                                     className="w-32 text-sm"
                                     style={{ color: 'var(--color-primary-foreground)' }}
-                                    disabled={!isEditMode}
+                                    disabled={!isListEditMode}
                                   />
                                 </div>
                               </TableCell>
@@ -628,7 +695,7 @@ export default function ScrappingSettingsPage() {
                                 onChange={(e) => handleListInputChange('orgName', e.target.value)}
                                 className="w-full text-sm"
                                 style={{ color: 'var(--color-primary-foreground)' }}
-                                disabled={!isEditMode}
+                                disabled={!isListEditMode}
                               />
                             </TableCell>
                           </TableRow>
@@ -642,7 +709,7 @@ export default function ScrappingSettingsPage() {
                                 onChange={(e) => handleListInputChange('detailUrl', e.target.value)}
                                 className="w-full text-sm"
                                 style={{ color: 'var(--color-primary-foreground)' }}
-                                disabled={!isEditMode}
+                                disabled={!isListEditMode}
                               />
                             </TableCell>
                           </TableRow>
@@ -657,7 +724,7 @@ export default function ScrappingSettingsPage() {
                                 className="w-full text-sm font-mono"
                                 style={{ color: 'var(--color-primary-foreground)' }}
                                 placeholder="설정 없음"
-                                disabled={!isEditMode}
+                                disabled={!isListEditMode}
                               />
                             </TableCell>
                           </TableRow>
@@ -673,7 +740,7 @@ export default function ScrappingSettingsPage() {
                                   className="w-20 text-sm"
                                   style={{ color: 'var(--color-primary-foreground)' }}
                                   type="number"
-                                  disabled={!isEditMode}
+                                  disabled={!isListEditMode}
                                 />
                               </div>
                               <div className="flex items-center">
@@ -684,7 +751,7 @@ export default function ScrappingSettingsPage() {
                                   className="w-20 text-sm"
                                   style={{ color: 'var(--color-primary-foreground)' }}
                                   type="number"
-                                  disabled={!isEditMode}
+                                  disabled={!isListEditMode}
                                 />
                               </div>
                             </TableCell>
@@ -701,7 +768,7 @@ export default function ScrappingSettingsPage() {
                                   className="w-32 text-sm"
                                   style={{ color: 'var(--color-primary-foreground)' }}
                                   placeholder="없음"
-                                  disabled={!isEditMode}
+                                  disabled={!isListEditMode}
                                 />
                               </div>
                               <div className="flex items-center">
@@ -712,7 +779,7 @@ export default function ScrappingSettingsPage() {
                                   className="w-48 text-sm font-mono"
                                   style={{ color: 'var(--color-primary-foreground)' }}
                                   placeholder="제외할 행 조건"
-                                  disabled={!isEditMode}
+                                  disabled={!isListEditMode}
                                 />
                               </div>
                             </TableCell>
@@ -727,7 +794,7 @@ export default function ScrappingSettingsPage() {
                                 onChange={(e) => handleListInputChange('rowXpath', e.target.value)}
                                 className="w-full text-sm font-mono"
                                 style={{ color: 'var(--color-primary-foreground)' }}
-                                disabled={!isEditMode}
+                                disabled={!isListEditMode}
                               />
                             </TableCell>
                           </TableRow>
@@ -749,8 +816,8 @@ export default function ScrappingSettingsPage() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {(isEditMode ? listEditData.elements : listData.settingListByOid.elements || []).length > 0 ? (
-                            (isEditMode ? listEditData.elements : listData.settingListByOid.elements || []).map((element: any, index: number) => (
+                          {listEditData.elements.length > 0 ? (
+                            listEditData.elements.map((element: any, index: number) => (
                               <TableRow key={index}>
                                 <TableCell className="font-medium">
                                   <span className="text-sm" style={{ color: 'var(--color-primary-foreground)' }}>{element.key}</span>
@@ -761,7 +828,7 @@ export default function ScrappingSettingsPage() {
                                     onChange={(e) => handleListElementChange(index, 'xpath', e.target.value)}
                                     className="w-full text-sm font-mono"
                                     style={{ color: 'var(--color-primary-foreground)' }}
-                                    disabled={!isEditMode}
+                                    disabled={!isListEditMode}
                                   />
                                 </TableCell>
                                 <TableCell>
@@ -770,7 +837,7 @@ export default function ScrappingSettingsPage() {
                                     onChange={(e) => handleListElementChange(index, 'target', e.target.value)}
                                     className="w-full text-sm"
                                     style={{ color: 'var(--color-primary-foreground)' }}
-                                    disabled={!isEditMode}
+                                    disabled={!isListEditMode}
                                   />
                                 </TableCell>
                                 <TableCell>
@@ -779,7 +846,7 @@ export default function ScrappingSettingsPage() {
                                     onChange={(e) => handleListElementChange(index, 'callback', e.target.value)}
                                     className="w-full text-sm font-mono"
                                     style={{ color: 'var(--color-primary-foreground)' }}
-                                    disabled={!isEditMode}
+                                    disabled={!isListEditMode}
                                   />
                                 </TableCell>
                               </TableRow>
@@ -812,7 +879,7 @@ export default function ScrappingSettingsPage() {
                                   onChange={(e) => handleListInputChange('orgRegion', e.target.value)}
                                   className="w-32 text-sm"
                                   style={{ color: 'var(--color-primary-foreground)' }}
-                                  disabled={!isEditMode}
+                                  disabled={!isListEditMode}
                                 />
                               </div>
                               <div className="flex items-center">
@@ -822,7 +889,7 @@ export default function ScrappingSettingsPage() {
                                   onChange={(e) => handleListInputChange('use', e.target.value)}
                                   className="w-20 text-sm"
                                   style={{ color: 'var(--color-primary-foreground)' }}
-                                  disabled={!isEditMode}
+                                  disabled={!isListEditMode}
                                 />
                               </div>
                             </TableCell>
@@ -838,7 +905,7 @@ export default function ScrappingSettingsPage() {
                                   onChange={(e) => handleListInputChange('companyInCharge', e.target.value)}
                                   className="w-32 text-sm"
                                   style={{ color: 'var(--color-primary-foreground)' }}
-                                  disabled={!isEditMode}
+                                  disabled={!isListEditMode}
                                 />
                               </div>
                               <div className="flex items-center">
@@ -848,7 +915,7 @@ export default function ScrappingSettingsPage() {
                                   onChange={(e) => handleListInputChange('orgMan', e.target.value)}
                                   className="w-32 text-sm"
                                   style={{ color: 'var(--color-primary-foreground)' }}
-                                  disabled={!isEditMode}
+                                  disabled={!isListEditMode}
                                 />
                               </div>
                             </TableCell>
@@ -858,26 +925,14 @@ export default function ScrappingSettingsPage() {
                     </div>
                   )}
                 </div>
-              ) : (
-                <div className="text-center py-8">
-                  <p className="text-color-primary-muted-foreground">목록 스크래핑 설정이 없습니다.</p>
-                  <ButtonWithIcon
-                    icon={<Edit className="h-4 w-4" />}
-                    onClick={handleEditMode}
-                    className="mt-4"
-                  >
-                    설정 추가하기
-                  </ButtonWithIcon>
-                </div>
-              )}
 
               {/* 버튼 영역 - TabContainer 하단 우측 */}
               <div className="flex justify-end space-x-2 mt-6 pt-4 border-t">
-                {isEditMode ? (
+                {isListEditMode ? (
                   <>
                     <ButtonWithColorIcon
                       icon={<Eye className="h-4 w-4" />}
-                      onClick={handleViewMode}
+                      onClick={handleListViewMode}
                       color="tertiary"
                       mode="outline"
                     >
@@ -895,7 +950,7 @@ export default function ScrappingSettingsPage() {
                 ) : (
                   <ButtonWithIcon
                     icon={<Edit className="h-4 w-4" />}
-                    onClick={handleEditMode}
+                    onClick={handleListEditMode}
                   >
                     편집
                   </ButtonWithIcon>
@@ -939,10 +994,9 @@ export default function ScrappingSettingsPage() {
 
             {/* 탭 컨텐츠 */}
             <TabContainer className="p-0 mt-0">
-              {detailData?.settingsDetailByOid ? (
-                <div>
-                  {/* 전체 설정 탭 */}
-                  {activeDetailTab === 'all' && (
+              <div>
+                {/* 전체 설정 탭 */}
+                {activeDetailTab === 'all' && (
                     <div className="space-y-1">
                       {/* 기본 설정 */}
                       <div className="border rounded-lg overflow-hidden" style={{ backgroundColor: 'transparent' }}>
@@ -958,7 +1012,7 @@ export default function ScrappingSettingsPage() {
                                   onChange={(e) => handleDetailInputChange('orgName', e.target.value)}
                                   className="w-full text-sm"
                                   style={{ color: 'var(--color-primary-foreground)' }}
-                                  disabled={!isEditMode}
+                                  disabled={!isDetailEditMode}
                                 />
                               </TableCell>
                             </TableRow>
@@ -992,7 +1046,7 @@ export default function ScrappingSettingsPage() {
                                     onChange={(e) => handleDetailInputChange(element.field, e.target.value)}
                                     className="w-full text-sm font-mono"
                                     style={{ color: 'var(--color-primary-foreground)' }}
-                                    disabled={!isEditMode}
+                                    disabled={!isDetailEditMode}
                                     placeholder={`${element.key} XPath`}
                                   />
                                 </TableCell>
@@ -1008,7 +1062,7 @@ export default function ScrappingSettingsPage() {
                                   onChange={(e) => handleDetailInputChange('sampleUrl', e.target.value)}
                                   className="w-full text-sm"
                                   style={{ color: 'var(--color-primary-foreground)' }}
-                                  disabled={!isEditMode}
+                                  disabled={!isDetailEditMode}
                                   placeholder="테스트용 샘플 URL"
                                 />
                               </TableCell>
@@ -1034,7 +1088,7 @@ export default function ScrappingSettingsPage() {
                                 onChange={(e) => handleDetailInputChange('orgName', e.target.value)}
                                 className="w-full text-sm"
                                 style={{ color: 'var(--color-primary-foreground)' }}
-                                disabled={!isEditMode}
+                                disabled={!isDetailEditMode}
                               />
                             </TableCell>
                           </TableRow>
@@ -1070,7 +1124,7 @@ export default function ScrappingSettingsPage() {
                                   onChange={(e) => handleDetailInputChange(element.field, e.target.value)}
                                   className="w-full text-sm font-mono"
                                   style={{ color: 'var(--color-primary-foreground)' }}
-                                  disabled={!isEditMode}
+                                  disabled={!isDetailEditMode}
                                   placeholder={`${element.key} XPath`}
                                 />
                               </TableCell>
@@ -1086,7 +1140,7 @@ export default function ScrappingSettingsPage() {
                                 onChange={(e) => handleDetailInputChange('sampleUrl', e.target.value)}
                                 className="w-full text-sm"
                                 style={{ color: 'var(--color-primary-foreground)' }}
-                                disabled={!isEditMode}
+                                disabled={!isDetailEditMode}
                                 placeholder="테스트용 샘플 URL"
                               />
                             </TableCell>
@@ -1096,26 +1150,14 @@ export default function ScrappingSettingsPage() {
                     </div>
                   )}
                 </div>
-              ) : (
-                <div className="text-center py-8">
-                  <p className="text-color-primary-muted-foreground">상세 스크래핑 설정이 없습니다.</p>
-                  <ButtonWithIcon
-                    icon={<Edit className="h-4 w-4" />}
-                    onClick={handleEditMode}
-                    className="mt-4"
-                  >
-                    설정 추가하기
-                  </ButtonWithIcon>
-                </div>
-              )}
 
               {/* 버튼 영역 - TabContainer 하단 우측 */}
               <div className="flex justify-end space-x-2 mt-6 pt-4 border-t">
-                {isEditMode ? (
+                {isDetailEditMode ? (
                   <>
                     <ButtonWithColorIcon
                       icon={<Eye className="h-4 w-4" />}
-                      onClick={handleViewMode}
+                      onClick={handleDetailViewMode}
                       color="tertiary"
                       mode="outline"
                     >
@@ -1133,7 +1175,7 @@ export default function ScrappingSettingsPage() {
                 ) : (
                   <ButtonWithIcon
                     icon={<Edit className="h-4 w-4" />}
-                    onClick={handleEditMode}
+                    onClick={handleDetailEditMode}
                   >
                     편집
                   </ButtonWithIcon>

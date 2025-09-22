@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { HardDrive, Palette, Settings, Clock, Database, FolderOpen, Monitor, Cog } from 'lucide-react';
+import { HardDrive, Palette, Settings, Clock, Database, FolderOpen, Monitor, Cog, Map, Languages, FileText, Table2 } from 'lucide-react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { IsActive, RadioButtonSet, OutlineSelectBox, OutlineSelectItem, TabHeader, TabContainer } from '@/components/shared/FormComponents';
@@ -24,6 +24,31 @@ const SETTINGS_DEFAULT_QUERY = `
       description
       category
     }
+    mappingsLangAll {
+      id
+      area
+      scope
+      ko
+      en
+      remark
+      isActive
+      createdAt
+      updatedAt
+    }
+    docsManualAll(limit: 100) {
+      manuals {
+        id
+        title
+        content
+        category
+        writer
+        created_at
+        updated_at
+        is_visible
+        is_notice
+      }
+      total_count
+    }
   }
 `;
 
@@ -40,6 +65,30 @@ interface NasInfo {
   model: string;
   version: string;
   status: string;
+}
+
+interface LangMapping {
+  id: number;
+  area: string;
+  scope: string;
+  ko: string;
+  en: string;
+  remark?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface DocsManual {
+  id: number;
+  title: string;
+  content: string;
+  category: string;
+  writer: string;
+  created_at: string;
+  updated_at: string;
+  is_visible: boolean;
+  is_notice: boolean;
 }
 
 export default function DefaultSettingsPage() {
@@ -61,16 +110,20 @@ export default function DefaultSettingsPage() {
     lastRun: null,
     nextRun: null
   });
+  const [langMappings, setLangMappings] = useState<LangMapping[]>([]);
+  const [docsManuals, setDocsManuals] = useState<DocsManual[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // 섹션 접힘/펼침 상태 (SectionWithGuide에서 내부적으로 관리)
   const [isNasExpanded, setIsNasExpanded] = useState(true);
+  const [isMappingExpanded, setIsMappingExpanded] = useState(true);
   const [isUiExpanded, setIsUiExpanded] = useState(true);
   const [isScrapExpanded, setIsScrapExpanded] = useState(true);
 
   // 탭 상태
   const [nasActiveTab, setNasActiveTab] = useState('folder');
+  const [mappingActiveTab, setMappingActiveTab] = useState('lang');
   const [uiActiveTab, setUiActiveTab] = useState('theme');
   const [scrapActiveTab, setScrapActiveTab] = useState('cron');
 
@@ -99,20 +152,22 @@ export default function DefaultSettingsPage() {
       const data = result.data;
       if (data) {
         setNasSettings(data.settingsNasPathAll || []);
-        
+        setLangMappings(data.mappingsLangAll || []);
+        setDocsManuals(data.docsManualAll?.manuals || []);
+
         // 앱 기본값에서 UI 설정 추출 (예시)
         const appDefaults = data.settingsAppDefaultAll || [];
         const uiDefaults = appDefaults.filter(item => item.category === 'ui');
         const themeDefaults = appDefaults.filter(item => item.category === 'theme');
         const scrapingDefaults = appDefaults.filter(item => item.category === 'scraping');
-        
+
         // 기본값 설정 (실제 값이 없으면 초기값 사용)
         setUiSettings({
           darkMode: uiDefaults.find(item => item.settingKey === 'darkMode')?.settingValue === 'true' || false,
           language: uiDefaults.find(item => item.settingKey === 'language')?.settingValue || 'ko',
           timezone: uiDefaults.find(item => item.settingKey === 'timezone')?.settingValue || 'Asia/Seoul'
         });
-        
+
         setThemeSettings({
           defaultTheme: themeDefaults.find(item => item.settingKey === 'defaultTheme')?.settingValue || 'gray',
           noticeTheme: themeDefaults.find(item => item.settingKey === 'noticeTheme')?.settingValue || 'green',
@@ -294,6 +349,157 @@ export default function DefaultSettingsPage() {
                       NAS 정보를 불러올 수 없습니다.
                     </div>
                   )}
+                </TabContainer>
+              </div>
+            )}
+          </div>
+      </SectionWithGuide>
+
+      {/* 매핑 설정 섹션 */}
+      <SectionWithGuide
+        title="매핑 설정"
+        icon={<Map className="w-5 h-5" />}
+        accentColor="#8b5cf6"
+        category="운영가이드"
+        pageTitle="앱 기본값 설정"
+        scope="section"
+        scopeHierarchy="application.settings.default.mapping"
+        isExpanded={isMappingExpanded}
+        onToggle={setIsMappingExpanded}
+        className="mb-6"
+      >
+          <div className="mt-2 space-y-0">
+            {/* 탭 버튼 */}
+            <TabHeader
+              tabs={[
+                {
+                  id: 'lang',
+                  label: '한영 용어 매핑',
+                  icon: <Languages className="w-4 h-4" />
+                },
+                {
+                  id: 'docs',
+                  label: '문서 매핑',
+                  icon: <FileText className="w-4 h-4" />
+                },
+                {
+                  id: 'mysql',
+                  label: 'MySQL 필드 매핑',
+                  icon: <Table2 className="w-4 h-4" />
+                }
+              ]}
+              activeTab={mappingActiveTab}
+              onTabChange={setMappingActiveTab}
+            />
+
+            {/* 한영 용어 매핑 탭 */}
+            {mappingActiveTab === 'lang' && (
+              <div>
+                <TabContainer>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[80px]">ID</TableHead>
+                        <TableHead className="w-[100px]">영역</TableHead>
+                        <TableHead className="w-[100px]">범위</TableHead>
+                        <TableHead className="w-[150px]">한국어</TableHead>
+                        <TableHead className="w-[150px]">영어</TableHead>
+                        <TableHead className="w-[80px]">활성화</TableHead>
+                        <TableHead className="w-auto">비고</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {langMappings.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={7} className="h-[100px] text-center text-color-primary-muted-foreground">
+                            한영 용어 매핑 데이터가 없습니다.
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        langMappings.map((mapping) => (
+                          <TableRow key={mapping.id}>
+                            <TableCell className="w-[80px]">{mapping.id}</TableCell>
+                            <TableCell className="w-[100px]">{mapping.area}</TableCell>
+                            <TableCell className="w-[100px]">{mapping.scope}</TableCell>
+                            <TableCell className="w-[150px]">{mapping.ko}</TableCell>
+                            <TableCell className="w-[150px]">{mapping.en}</TableCell>
+                            <TableCell className="w-[80px]">
+                              <IsActive value={mapping.isActive} />
+                            </TableCell>
+                            <TableCell className="w-auto">{mapping.remark || '-'}</TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </TabContainer>
+              </div>
+            )}
+
+            {/* 문서 매핑 탭 */}
+            {mappingActiveTab === 'docs' && (
+              <div>
+                <TabContainer>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[80px]">ID</TableHead>
+                        <TableHead className="w-[200px]">제목</TableHead>
+                        <TableHead className="w-[120px]">카테고리</TableHead>
+                        <TableHead className="w-[100px]">작성자</TableHead>
+                        <TableHead className="w-[80px]">공개</TableHead>
+                        <TableHead className="w-[80px]">공지</TableHead>
+                        <TableHead className="w-auto">생성일</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {docsManuals.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={7} className="h-[100px] text-center text-color-primary-muted-foreground">
+                            문서 매핑 데이터가 없습니다.
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        docsManuals.map((doc) => (
+                          <TableRow key={doc.id}>
+                            <TableCell className="w-[80px]">{doc.id}</TableCell>
+                            <TableCell className="w-[200px]" title={doc.title}>
+                              {doc.title.length > 30 ? `${doc.title.substring(0, 30)}...` : doc.title}
+                            </TableCell>
+                            <TableCell className="w-[120px]">{doc.category}</TableCell>
+                            <TableCell className="w-[100px]">{doc.writer}</TableCell>
+                            <TableCell className="w-[80px]">
+                              <IsActive value={doc.is_visible} />
+                            </TableCell>
+                            <TableCell className="w-[80px]">
+                              <IsActive value={doc.is_notice} />
+                            </TableCell>
+                            <TableCell className="w-auto">
+                              {new Date(doc.created_at).toLocaleDateString('ko-KR')}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </TabContainer>
+              </div>
+            )}
+
+            {/* MySQL 필드 매핑 탭 */}
+            {mappingActiveTab === 'mysql' && (
+              <div>
+                <TabContainer>
+                  <div className="text-center py-8 text-color-primary-muted-foreground">
+                    <Table2 className="w-12 h-12 mx-auto mb-4 text-color-primary-muted-foreground" />
+                    <p className="text-lg font-medium mb-2">MySQL 필드 매핑</p>
+                    <p className="text-sm">
+                      mappings_lang 테이블을 기반으로 MySQL 필드 매핑 기능을 구현할 예정입니다.
+                    </p>
+                    <p className="text-sm mt-2">
+                      현재 데이터베이스 필드: {langMappings.length}개의 매핑 항목
+                    </p>
+                  </div>
                 </TabContainer>
               </div>
             )}
