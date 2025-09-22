@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { HelpCircle } from 'lucide-react';
 import { useQuery } from '@apollo/client';
 import { getClient } from '@/lib/api/graphqlClient';
-import { GET_HELP_DOCUMENT_BY_SCOPE } from '@/lib/graphql/docs';
+import { GET_HELP_DOCUMENT, GET_HELP_DOCUMENT_BY_SCOPE } from '@/lib/graphql/docs';
 
 interface PageGuideProps {
   pageTitle: string;
@@ -26,20 +26,26 @@ export function PageGuide({
   // scope_hierarchy가 제공되지 않은 경우 pageTitle로 자동 생성
   const defaultScopeHierarchy = scopeHierarchy || `application.${pageTitle.toLowerCase().replace(/\s+/g, '_')}`;
 
+  // 현재는 scope_hierarchy 지원이 완전하지 않으므로 기본 쿼리 사용
+  const shouldUseScope = false; // scopeHierarchy && scopeHierarchy.includes('.');
+
   // MySQL에서 페이지 가이드 조회
-  const { data, loading, error } = useQuery(GET_HELP_DOCUMENT_BY_SCOPE, {
-    client: getClient(),
-    variables: {
-      scope: 'page',
-      scopeHierarchy: defaultScopeHierarchy
-    },
-    skip: !showDropdown, // 드롭다운이 열릴 때만 쿼리 실행
-    fetchPolicy: 'cache-and-network'
-  });
+  const { data, loading, error } = useQuery(
+    shouldUseScope ? GET_HELP_DOCUMENT_BY_SCOPE : GET_HELP_DOCUMENT,
+    {
+      client: getClient(),
+      variables: shouldUseScope
+        ? { scope: 'page', scopeHierarchy: defaultScopeHierarchy }
+        : { category: '운영가이드', title: `[가이드]${pageTitle}` },
+      skip: !showDropdown, // 드롭다운이 열릴 때만 쿼리 실행
+      fetchPolicy: 'cache-and-network'
+    }
+  );
 
   // 데이터베이스에서 가져온 문서가 있는지 확인
-  const dbDocument = data?.docsManualSearchByScope?.manuals?.[0];
-  const hasDbContent = dbDocument && data?.docsManualSearchByScope?.total_count > 0;
+  const searchResult = shouldUseScope ? data?.docsManualSearchByScope : data?.docsManualSearch;
+  const dbDocument = searchResult?.manuals?.[0];
+  const hasDbContent = dbDocument && searchResult?.total_count > 0;
 
   const renderContent = () => {
     if (loading) {

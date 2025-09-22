@@ -43,7 +43,7 @@ export function PageHeader({ title, breadcrumbs, helpTooltip, helpContent, scope
           {/* 브레드크럼 */}
           <nav className="flex items-center space-x-1 text-sm">
             {breadcrumbs.map((item, index) => (
-              <React.Fragment key={item.href}>
+              <React.Fragment key={`${item.href}-${index}`}>
                 {index > 0 && (
                   <ChevronRight className="h-4 w-4 text-color-primary-muted" />
                 )}

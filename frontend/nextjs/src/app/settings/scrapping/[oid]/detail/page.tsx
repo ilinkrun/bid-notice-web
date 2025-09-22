@@ -12,8 +12,8 @@ import { useUnifiedLoading } from '@/components/providers/UnifiedLoadingProvider
 import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
-import { Edit, Eye, Save, HelpCircle, Settings, Puzzle } from 'lucide-react';
-import { ButtonWithIcon, ButtonWithColorIcon } from '@/components/shared/FormComponents';
+import { Edit, Eye, Save, HelpCircle, Settings, Puzzle, FileText, List } from 'lucide-react';
+import { ButtonWithIcon, ButtonWithColorIcon, TabHeader, TabContainer } from '@/components/shared/FormComponents';
 import { Input } from '@/components/ui/input';
 import {
   Dialog,
@@ -24,6 +24,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ScrappingSettingsLayout } from '@/components/settings/ScrappingSettingsLayout';
+import { SectionWithGuide } from '@/components/shared/SectionWithGuide';
 
 // GraphQL 쿼리 정의
 const GET_SETTINGS_DETAIL = gql`
@@ -119,8 +120,10 @@ export default function ScrappingDetailSettingsPage() {
 
   // 모달 상태
   const [showSaveModal, setShowSaveModal] = useState(false);
-  const [showHelpModal, setShowHelpModal] = useState(false);
   const [changes, setChanges] = useState<string[]>([]);
+
+  // 탭 상태
+  const [activeSubTab, setActiveSubTab] = useState('all');
 
   // 상세 스크랩 설정 쿼리
   const { loading: loadingDetail, error: errorDetail, data: dataDetail } = useQuery(GET_SETTINGS_DETAIL, {
@@ -316,126 +319,243 @@ export default function ScrappingDetailSettingsPage() {
       isActive={listSettings?.use}
       region={listSettings?.region}
     >
-      {/* 상세 스크랩 설정 통합 박스 */}
-      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
-        {/* 기본 설정 섹션 */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <Settings className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">기본 설정</h3>
-          </div>
-          <div className="border rounded-lg overflow-hidden" style={{ backgroundColor: 'transparent' }}>
-            <Table>
-              <TableBody>
-                <TableRow>
-                  <TableCell className="font-medium w-24">
-                    <span className="text-gray-500 text-sm">기관명</span>
-                  </TableCell>
-                  <TableCell className="break-all">
-                    <Input
-                      value={editData.orgName}
-                      onChange={(e) => handleInputChange('orgName', e.target.value)}
-                      className="w-full text-sm"
-                      style={{ color: 'var(--color-primary-foreground)' }}
-                      disabled={!isEditMode}
-                    />
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </div>
-        </div>
+      {/* 상세 스크래핑 설정 메인 섹션 */}
+      <SectionWithGuide
+        title="상세 스크래핑 설정"
+        icon={<FileText className="w-5 h-5" />}
+        accentColor="#6366f1"
+        category="운영가이드"
+        pageTitle={`${orgName} 상세 스크래핑 설정`}
+      >
+        <div className="space-y-0">
+          {/* 서브탭 헤더 */}
+          <TabHeader
+            tabs={[
+              {
+                id: 'all',
+                label: '전체 설정',
+                icon: <List className="h-4 w-4" />
+              },
+              {
+                id: 'basic',
+                label: '기본 설정',
+                icon: <Settings className="h-4 w-4" />
+              },
+              {
+                id: 'elements',
+                label: '요소 설정',
+                icon: <Puzzle className="h-4 w-4" />
+              }
+            ]}
+            activeTab={activeSubTab}
+            onTabChange={setActiveSubTab}
+          />
 
-        {/* 요소 설정 섹션 */}
-        <div className="mb-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Puzzle className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">요소 설정</h3>
-          </div>
-          <div className="border rounded-lg overflow-hidden" style={{ backgroundColor: 'transparent' }}>
-            <Table>
-              <TableBody>
-                {[
-                  { key: '제목', field: 'title', target: 'text', callback: '' },
-                  { key: '본문', field: 'bodyHtml', target: 'html', callback: '' },
-                  { key: '파일이름', field: 'fileName', target: 'text', callback: '' },
-                  { key: '파일주소', field: 'fileUrl', target: 'href', callback: '' },
-                  { key: '미리보기', field: 'preview', target: 'text', callback: '' },
-                  { key: '공고구분', field: 'noticeDiv', target: 'text', callback: '' },
-                  { key: '공고번호', field: 'noticeNum', target: 'text', callback: '' },
-                  { key: '담당부서', field: 'orgDept', target: 'text', callback: '' },
-                  { key: '담당자', field: 'orgMan', target: 'text', callback: '' },
-                  { key: '연락처', field: 'orgTel', target: 'text', callback: '' }
-                ].map((element, index) => (
-                  <TableRow key={index}>
-                    <TableCell className="font-medium w-24">
-                      <span className="text-gray-500 text-sm">{element.key}</span>
-                    </TableCell>
-                    <TableCell>
-                      <Input
-                        value={editData[element.field as keyof typeof editData] || ''}
-                        onChange={(e) => handleInputChange(element.field, e.target.value)}
-                        className="w-full text-sm font-mono"
-                        style={{ color: 'var(--color-primary-foreground)' }}
-                        disabled={!isEditMode}
-                        placeholder={`${element.key} XPath`}
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))}
-                <TableRow>
-                  <TableCell className="font-medium w-24">
-                    <span className="text-gray-500 text-sm">샘플 URL</span>
-                  </TableCell>
-                  <TableCell>
-                    <Input
-                      value={editData.sampleUrl}
-                      onChange={(e) => handleInputChange('sampleUrl', e.target.value)}
-                      className="w-full text-sm"
-                      style={{ color: 'var(--color-primary-foreground)' }}
-                      disabled={!isEditMode}
-                      placeholder="테스트용 샘플 URL"
-                    />
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </div>
-        </div>
+          {/* 탭 컨텐츠 */}
+          <TabContainer className="p-0 mt-0">
+            {detailSettings ? (
+              <div>
+                {/* 전체 설정 탭 */}
+                {activeSubTab === 'all' && (
+                  <div className="space-y-1">
+                    {/* 기본 설정 */}
+                    <div className="border rounded-lg overflow-hidden" style={{ backgroundColor: 'transparent' }}>
+                      <Table>
+                        <TableBody>
+                          <TableRow>
+                            <TableCell className="font-medium w-24">
+                              <span className="text-gray-500 text-sm">기관명</span>
+                            </TableCell>
+                            <TableCell className="break-all">
+                              <Input
+                                value={editData.orgName}
+                                onChange={(e) => handleInputChange('orgName', e.target.value)}
+                                className="w-full text-sm"
+                                style={{ color: 'var(--color-primary-foreground)' }}
+                                disabled={!isEditMode}
+                              />
+                            </TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </div>
 
-        {/* 버튼 영역을 통합 박스 우측하단에 배치 */}
-        <div className="flex justify-end space-x-2 mt-6">
-          {isEditMode ? (
-            <>
-              <ButtonWithColorIcon
-                icon={<Eye className="w-4 h-4" />}
-                onClick={handleViewMode}
-                color="tertiary"
-                mode="outline"
-              >
-                보기
-              </ButtonWithColorIcon>
-              <ButtonWithColorIcon
-                icon={<Save className="w-4 h-4" />}
-                onClick={handleSave}
-                color="secondary"
-                mode="outline"
-              >
-                저장
-              </ButtonWithColorIcon>
-            </>
-          ) : (
-            <ButtonWithIcon
-              variant="outline"
-              size="sm"
-              icon={<Edit className="w-4 h-4" />}
-              onClick={handleEditMode}
-            >
-              편집
-            </ButtonWithIcon>
-          )}
+                    {/* 요소 설정 */}
+                    <div className="border rounded-lg overflow-hidden" style={{ backgroundColor: 'transparent' }}>
+                      <Table>
+                        <TableBody>
+                          {[
+                            { key: '제목', field: 'title', target: 'text', callback: '' },
+                            { key: '본문', field: 'bodyHtml', target: 'html', callback: '' },
+                            { key: '파일이름', field: 'fileName', target: 'text', callback: '' },
+                            { key: '파일주소', field: 'fileUrl', target: 'href', callback: '' },
+                            { key: '미리보기', field: 'preview', target: 'text', callback: '' },
+                            { key: '공고구분', field: 'noticeDiv', target: 'text', callback: '' },
+                            { key: '공고번호', field: 'noticeNum', target: 'text', callback: '' },
+                            { key: '담당부서', field: 'orgDept', target: 'text', callback: '' },
+                            { key: '담당자', field: 'orgMan', target: 'text', callback: '' },
+                            { key: '연락처', field: 'orgTel', target: 'text', callback: '' }
+                          ].map((element, index) => (
+                            <TableRow key={index}>
+                              <TableCell className="font-medium w-24">
+                                <span className="text-gray-500 text-sm">{element.key}</span>
+                              </TableCell>
+                              <TableCell>
+                                <Input
+                                  value={editData[element.field as keyof typeof editData] || ''}
+                                  onChange={(e) => handleInputChange(element.field, e.target.value)}
+                                  className="w-full text-sm font-mono"
+                                  style={{ color: 'var(--color-primary-foreground)' }}
+                                  disabled={!isEditMode}
+                                  placeholder={`${element.key} XPath`}
+                                />
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                          <TableRow>
+                            <TableCell className="font-medium w-24">
+                              <span className="text-gray-500 text-sm">샘플 URL</span>
+                            </TableCell>
+                            <TableCell>
+                              <Input
+                                value={editData.sampleUrl}
+                                onChange={(e) => handleInputChange('sampleUrl', e.target.value)}
+                                className="w-full text-sm"
+                                style={{ color: 'var(--color-primary-foreground)' }}
+                                disabled={!isEditMode}
+                                placeholder="테스트용 샘플 URL"
+                              />
+                            </TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div>
+                )}
+
+                {/* 기본 설정 탭 */}
+                {activeSubTab === 'basic' && (
+                  <div className="border rounded-lg overflow-hidden" style={{ backgroundColor: 'transparent' }}>
+                    <Table>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell className="font-medium w-24">
+                            <span className="text-gray-500 text-sm">기관명</span>
+                          </TableCell>
+                          <TableCell className="break-all">
+                            <Input
+                              value={editData.orgName}
+                              onChange={(e) => handleInputChange('orgName', e.target.value)}
+                              className="w-full text-sm"
+                              style={{ color: 'var(--color-primary-foreground)' }}
+                              disabled={!isEditMode}
+                            />
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+
+                {/* 요소 설정 탭 */}
+                {activeSubTab === 'elements' && (
+                  <div className="border rounded-lg overflow-hidden" style={{ backgroundColor: 'transparent' }}>
+                    <Table>
+                      <TableBody>
+                        {[
+                          { key: '제목', field: 'title', target: 'text', callback: '' },
+                          { key: '본문', field: 'bodyHtml', target: 'html', callback: '' },
+                          { key: '파일이름', field: 'fileName', target: 'text', callback: '' },
+                          { key: '파일주소', field: 'fileUrl', target: 'href', callback: '' },
+                          { key: '미리보기', field: 'preview', target: 'text', callback: '' },
+                          { key: '공고구분', field: 'noticeDiv', target: 'text', callback: '' },
+                          { key: '공고번호', field: 'noticeNum', target: 'text', callback: '' },
+                          { key: '담당부서', field: 'orgDept', target: 'text', callback: '' },
+                          { key: '담당자', field: 'orgMan', target: 'text', callback: '' },
+                          { key: '연락처', field: 'orgTel', target: 'text', callback: '' }
+                        ].map((element, index) => (
+                          <TableRow key={index}>
+                            <TableCell className="font-medium w-24">
+                              <span className="text-gray-500 text-sm">{element.key}</span>
+                            </TableCell>
+                            <TableCell>
+                              <Input
+                                value={editData[element.field as keyof typeof editData] || ''}
+                                onChange={(e) => handleInputChange(element.field, e.target.value)}
+                                className="w-full text-sm font-mono"
+                                style={{ color: 'var(--color-primary-foreground)' }}
+                                disabled={!isEditMode}
+                                placeholder={`${element.key} XPath`}
+                              />
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                        <TableRow>
+                          <TableCell className="font-medium w-24">
+                            <span className="text-gray-500 text-sm">샘플 URL</span>
+                          </TableCell>
+                          <TableCell>
+                            <Input
+                              value={editData.sampleUrl}
+                              onChange={(e) => handleInputChange('sampleUrl', e.target.value)}
+                              className="w-full text-sm"
+                              style={{ color: 'var(--color-primary-foreground)' }}
+                              disabled={!isEditMode}
+                              placeholder="테스트용 샘플 URL"
+                            />
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-color-primary-muted-foreground">상세 스크래핑 설정이 없습니다.</p>
+                <ButtonWithIcon
+                  icon={<Edit className="h-4 w-4" />}
+                  onClick={handleEditMode}
+                  className="mt-4"
+                >
+                  설정 추가하기
+                </ButtonWithIcon>
+              </div>
+            )}
+
+            {/* 버튼 영역 - TabContainer 하단 우측 */}
+            <div className="flex justify-end space-x-2 mt-6 pt-4 border-t">
+              {isEditMode ? (
+                <>
+                  <ButtonWithColorIcon
+                    icon={<Eye className="w-4 h-4" />}
+                    onClick={handleViewMode}
+                    color="tertiary"
+                    mode="outline"
+                  >
+                    보기
+                  </ButtonWithColorIcon>
+                  <ButtonWithColorIcon
+                    icon={<Save className="w-4 h-4" />}
+                    onClick={handleSave}
+                    color="secondary"
+                    mode="outline"
+                  >
+                    저장
+                  </ButtonWithColorIcon>
+                </>
+              ) : (
+                <ButtonWithIcon
+                  icon={<Edit className="w-4 h-4" />}
+                  onClick={handleEditMode}
+                >
+                  편집
+                </ButtonWithIcon>
+              )}
+            </div>
+          </TabContainer>
         </div>
-      </div>
+      </SectionWithGuide>
 
       {/* 저장 확인 모달 */}
       <Dialog open={showSaveModal} onOpenChange={setShowSaveModal}>
@@ -478,78 +598,6 @@ export default function ScrappingDetailSettingsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* 도움말 모달 */}
-      <Dialog open={showHelpModal} onOpenChange={setShowHelpModal}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>입찰공고 상세 스크랩 설정 가이드</DialogTitle>
-          </DialogHeader>
-
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-blue-900 mb-2">작성 가이드</h4>
-            <ul className="text-sm text-blue-800 space-y-1">
-              <li>• <strong>키:</strong> 데이터를 식별하는 고유 이름 (예: title, content, file_url)</li>
-              <li>• <strong>XPath:</strong> HTML에서 해당 데이터를 추출할 경로</li>
-              <li>• <strong>타겟:</strong> 추출할 속성 (text, href, src 등)</li>
-              <li>• <strong>콜백:</strong> 추출 후 적용할 변환 함수</li>
-            </ul>
-          </div>
-
-          <div className="space-y-6">
-            {/* 기본 설정 가이드 */}
-            <div>
-              <h5 className="text-sm font-medium text-blue-900 mb-2">📋 기본 설정</h5>
-              <ul className="text-sm text-blue-800 space-y-1">
-                <li>• <strong>기관명:</strong> 스크랩 대상 기관의 이름</li>
-                <li className="ml-4 text-blue-700">- 예: 강북구청, 서울시청 등</li>
-              </ul>
-            </div>
-
-            {/* 요소 설정 가이드 */}
-            <div>
-              <h5 className="text-sm font-medium text-blue-900 mb-2">🔧 요소 설정</h5>
-              <ul className="text-sm text-blue-800 space-y-1">
-                <li>• <strong>제목:</strong> 공고 제목을 추출할 XPath</li>
-                <li className="ml-4 text-blue-700">- 예: //h3[@class="title"]/text()</li>
-                <li>• <strong>본문:</strong> 공고 본문을 추출할 XPath</li>
-                <li className="ml-4 text-blue-700">- 예: //div[@class="content"]</li>
-                <li>• <strong>파일이름:</strong> 첨부파일 이름을 추출할 XPath</li>
-                <li className="ml-4 text-blue-700">- 예: //a[@class="file"]/text()</li>
-                <li>• <strong>파일주소:</strong> 첨부파일 URL을 추출할 XPath</li>
-                <li className="ml-4 text-blue-700">- 예: //a[@class="file"]/@href</li>
-                <li>• <strong>미리보기:</strong> 미리보기 링크를 추출할 XPath</li>
-                <li>• <strong>공고구분:</strong> 공고 유형을 추출할 XPath</li>
-                <li className="ml-4 text-blue-700">- 예: //span[@class="category"]/text()</li>
-                <li>• <strong>공고번호:</strong> 공고 번호를 추출할 XPath</li>
-                <li>• <strong>담당부서:</strong> 담당 부서명을 추출할 XPath</li>
-                <li>• <strong>담당자:</strong> 담당자명을 추출할 XPath</li>
-                <li>• <strong>연락처:</strong> 연락처를 추출할 XPath</li>
-                <li>• <strong>샘플 URL:</strong> 테스트용 상세 페이지 URL</li>
-                <li className="ml-4 text-blue-700">- 실제 공고 페이지 URL을 입력하여 XPath 테스트에 사용</li>
-              </ul>
-            </div>
-
-            {/* XPath 작성 가이드 */}
-            <div>
-              <h5 className="text-sm font-medium text-blue-900 mb-2">📝 XPath 작성 가이드</h5>
-              <ul className="text-sm text-blue-800 space-y-1">
-                <li>• <strong>텍스트 추출:</strong> //element/text()</li>
-                <li>• <strong>속성 추출:</strong> //element/@attribute</li>
-                <li>• <strong>HTML 추출:</strong> //element (전체 HTML)</li>
-                <li>• <strong>클래스 선택:</strong> //div[@class="classname"]</li>
-                <li>• <strong>ID 선택:</strong> //div[@id="elementid"]</li>
-                <li>• <strong>n번째 요소:</strong> (//element)[n]</li>
-              </ul>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button onClick={() => setShowHelpModal(false)}>
-              닫기
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </ScrappingSettingsLayout>
   );
 }

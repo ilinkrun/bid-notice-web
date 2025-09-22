@@ -1,6 +1,6 @@
 import { gql } from '@apollo/client';
 
-// Help 문서 조회 쿼리 (category와 title로 특정 문서 조회)
+// Help 문서 조회 쿼리 (category와 title로 특정 문서 조회) - 단계적 테스트
 export const GET_HELP_DOCUMENT = gql`
   query GetHelpDocument($category: String!, $title: String!) {
     docsManualSearch(query: $title, category: $category, limit: 1) {
@@ -12,9 +12,10 @@ export const GET_HELP_DOCUMENT = gql`
         format
         category
         scope
-        scope_hierarchy
         parent_scope_id
+        scope_hierarchy
         writer
+        email
         created_at
         updated_at
         is_visible
@@ -66,6 +67,7 @@ export const CREATE_HELP_DOCUMENT = gql`
       scope_hierarchy
       parent_scope_id
       writer
+      email
       created_at
       updated_at
       is_visible
@@ -89,6 +91,7 @@ export const UPDATE_HELP_DOCUMENT = gql`
       scope_hierarchy
       parent_scope_id
       writer
+      email
       created_at
       updated_at
       is_visible

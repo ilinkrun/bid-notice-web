@@ -55,6 +55,7 @@ const cache = new SimpleCache();
 const formatLangMapping = (row: any) => ({
   id: row.id,
   area: row.area,
+  scope: row.scope,
   ko: row.ko,
   en: row.en,
   remark: row.remark || null,
@@ -125,18 +126,41 @@ export const mappingsResolvers = {
       }
     },
 
-    // 한글->영어 변환 (활성 데이터만)
-    mappingsLangKoToEn: async (_: unknown, { area, ko }: { area: string; ko: string }) => {
-      const cacheKey = `lang_mapping_ko_to_en_${area}_${ko}_active`;
+    // scope별 매핑 데이터 조회 (활성 데이터만)
+    mappingsLangByScope: async (_: unknown, { scope }: { scope: string }) => {
+      const cacheKey = `lang_mappings_scope_${scope}_active`;
       let result = cache.get(cacheKey);
-      
+
+      if (!result) {
+        try {
+          const rows = await executeQuery(
+            'SELECT * FROM mappings_lang WHERE scope = ? AND is_active = 1 ORDER BY ko',
+            [scope]
+          ) as any[];
+
+          result = rows.map(formatLangMapping);
+          cache.set(cacheKey, result);
+        } catch (error) {
+          console.error('Error fetching lang mappings by scope:', error);
+          throw new Error('Failed to fetch language mappings by scope');
+        }
+      }
+
+      return result;
+    },
+
+    // 한글->영어 변환 (scope 기반, 활성 데이터만)
+    mappingsLangKoToEn: async (_: unknown, { scope, ko }: { scope: string; ko: string }) => {
+      const cacheKey = `lang_mapping_ko_to_en_${scope}_${ko}_active`;
+      let result = cache.get(cacheKey);
+
       if (result === null) {
         try {
           const rows = await executeQuery(
-            'SELECT en FROM mappings_lang WHERE area = ? AND ko = ? AND is_active = 1',
-            [area, ko]
+            'SELECT en FROM mappings_lang WHERE scope = ? AND ko = ? AND is_active = 1',
+            [scope, ko]
           ) as any[];
-          
+
           result = rows.length > 0 ? rows[0].en : null;
           cache.set(cacheKey, result);
         } catch (error) {
@@ -144,20 +168,20 @@ export const mappingsResolvers = {
           throw new Error('Failed to convert Korean to English');
         }
       }
-      
+
       return result;
     },
 
-    // 영어->한글 변환 (활성 데이터만)
-    mappingsLangEnToKo: async (_: unknown, { area, en }: { area: string; en: string }) => {
-      const cacheKey = `lang_mapping_en_to_ko_${area}_${en}_active`;
+    // 영어->한글 변환 (scope 기반, 활성 데이터만)
+    mappingsLangEnToKo: async (_: unknown, { scope, en }: { scope: string; en: string }) => {
+      const cacheKey = `lang_mapping_en_to_ko_${scope}_${en}_active`;
       let result = cache.get(cacheKey);
       
       if (result === null) {
         try {
           const rows = await executeQuery(
-            'SELECT ko FROM mappings_lang WHERE area = ? AND en = ? AND is_active = 1',
-            [area, en]
+            'SELECT ko FROM mappings_lang WHERE scope = ? AND en = ? AND is_active = 1',
+            [scope, en]
           ) as any[];
           
           result = rows.length > 0 ? rows[0].ko : null;

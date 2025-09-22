@@ -5,6 +5,7 @@ import { Edit, Save, X, Plus } from 'lucide-react';
 import { useQuery, useMutation } from '@apollo/client';
 import { getClient } from '@/lib/api/graphqlClient';
 import { GET_HELP_DOCUMENT, GET_HELP_DOCUMENT_BY_SCOPE, CREATE_HELP_DOCUMENT, UPDATE_HELP_DOCUMENT } from '@/lib/graphql/docs';
+import { CONVERT_KO_TO_EN } from '@/lib/graphql/mappings';
 import { useAuth } from '@/contexts/AuthContext';
 import { marked } from 'marked';
 import MDEditor from '@uiw/react-md-editor';
@@ -12,6 +13,7 @@ import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
 import rehypeRaw from 'rehype-raw';
 import { useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 
 interface GuideSlideProps {
   isOpen: boolean;
@@ -39,9 +41,6 @@ const convertMarkdownToHtml = (markdown: string): string => {
       result = result.trim();
     }
 
-    // 디버깅용 로그 (나중에 제거)
-    console.log('Original markdown:', markdown);
-    console.log('Final HTML:', result);
 
     return typeof result === 'string' ? result : markdown || '';
   } catch (error) {
@@ -54,8 +53,6 @@ const convertMarkdownToHtml = (markdown: string): string => {
 const postProcessMarkdown = (markdown: string): string => {
   if (!markdown) return '';
 
-  console.log('=== POST PROCESSING START ===');
-  console.log('Original markdown:', JSON.stringify(markdown));
 
   try {
     // 매우 간단한 접근: 모든 단일 줄바꿈을 <br>로 변환
@@ -66,8 +63,6 @@ const postProcessMarkdown = (markdown: string): string => {
       .replace(/^<br>\n/, '')
       .replace(/<br>\n$/, '');
 
-    console.log('Processed markdown:', JSON.stringify(processedText));
-    console.log('=== POST PROCESSING END ===');
 
     return processedText;
   } catch (error) {
@@ -122,9 +117,113 @@ const adjustEmptyLineSpacing = (container: HTMLElement) => {
       }
     });
 
-    console.log('Applied empty line spacing adjustment to', brTags.length, 'br tags');
   } catch (error) {
     console.error('Error adjusting empty line spacing:', error);
+  }
+};
+
+// URL 기반 scope_hierarchy 생성 함수 (정적 fallback용)
+const generateScopeHierarchyFallback = (pathname: string, sectionTitle: string): string => {
+  // URL을 경로별로 분해
+  const pathParts = pathname.split('/').filter(part => part !== '');
+
+  // 기본 구조: application.domain.page[.section]
+  let hierarchy = 'application';
+
+  if (pathParts.length > 0) {
+    // 첫 번째 경로는 도메인 (예: mybids, settings)
+    hierarchy += `.${pathParts[0]}`;
+
+    if (pathParts.length > 1) {
+      // 두 번째 경로는 페이지 (예: bidding, default)
+      hierarchy += `.${pathParts[1]}`;
+    }
+  }
+
+  // 섹션 타이틀에서 실제 섹션명 추출
+  const sectionName = sectionTitle.includes(' > ')
+    ? sectionTitle.split(' > ').pop()?.trim()
+    : sectionTitle.replace('[가이드]', '').trim();
+
+  if (sectionName) {
+    // 기본 변환 (공백을 언더스코어로, 소문자로)
+    const fallbackSection = sectionName.toLowerCase().replace(/\s+/g, '_');
+    hierarchy += `.${fallbackSection}`;
+  }
+
+  return hierarchy;
+};
+
+// 동적 scope_hierarchy 생성 함수 (mappings_lang 활용)
+const generateScopeHierarchyWithMapping = async (
+  pathname: string,
+  sectionTitle: string,
+  apolloClient: any
+): Promise<string> => {
+  try {
+    // URL을 경로별로 분해
+    const pathParts = pathname.split('/').filter(part => part !== '');
+
+    // 기본 구조: application.domain.page[.section]
+    let hierarchy = 'application';
+
+    if (pathParts.length > 0) {
+      // 첫 번째 경로는 도메인 (예: mybids, settings)
+      hierarchy += `.${pathParts[0]}`;
+
+      if (pathParts.length > 1) {
+        // 두 번째 경로는 페이지 (예: bidding, default)
+        hierarchy += `.${pathParts[1]}`;
+      }
+    }
+
+    // 섹션 타이틀에서 실제 섹션명 추출
+    const sectionName = sectionTitle.includes(' > ')
+      ? sectionTitle.split(' > ').pop()?.trim()
+      : sectionTitle.replace('[가이드]', '').trim();
+
+    if (sectionName) {
+      try {
+        console.log('=== MAPPING QUERY DEBUG ===');
+        console.log('Querying mapping for sectionName:', sectionName);
+        console.log('Query variables:', { scope: 'section', ko: sectionName });
+
+        // mappings_lang에서 한글->영어 변환 시도
+        const { data } = await apolloClient.query({
+          query: CONVERT_KO_TO_EN,
+          variables: { scope: 'section', ko: sectionName },
+          fetchPolicy: 'network-only' // 캐시 무시하고 최신 데이터 조회
+        });
+
+        console.log('Mapping query response data:', data);
+
+        const englishSection = data?.mappingsLangKoToEn;
+        console.log('English section mapping result:', englishSection);
+
+        if (englishSection) {
+          hierarchy += `.${englishSection}`;
+          console.log('Using mapped section:', englishSection);
+        } else {
+          // 매핑이 없으면 fallback 변환
+          const fallbackSection = sectionName.toLowerCase().replace(/\s+/g, '_');
+          hierarchy += `.${fallbackSection}`;
+          console.log('No mapping found, using fallback:', fallbackSection);
+        }
+      } catch (error) {
+        console.error('Error fetching mapping for section:', sectionName, error);
+        console.error('Full error object:', error);
+        // 에러 시 fallback 변환
+        const fallbackSection = sectionName.toLowerCase().replace(/\s+/g, '_');
+        hierarchy += `.${fallbackSection}`;
+        console.log('Error occurred, using fallback:', fallbackSection);
+      }
+    }
+
+    return hierarchy;
+  } catch (error) {
+    console.error('Error generating scope hierarchy:', error);
+    // 전체 에러 시 fallback 함수 사용
+    return generateScopeHierarchyFallback(pathname, sectionTitle);
   }
 };
 
@@ -137,7 +236,6 @@ const uploadFile = async (
 ) => {
   setIsUploading(true);
   try {
-    console.log('🚀 파일 업로드 시작:', file.name, file.size, file.type);
 
     const formData = new FormData();
     formData.append('file', file);
@@ -153,7 +251,6 @@ const uploadFile = async (
     }
 
     const result = await response.json();
-    console.log('✅ 업로드 성공:', result);
 
     // 이미지 파일인 경우 이미지 마크다운, 그 외는 링크 마크다운
     let fileMarkdown;
@@ -166,7 +263,6 @@ const uploadFile = async (
     const newValue = `${editingMarkdown}\n\n${fileMarkdown}`;
     setEditingMarkdown(newValue);
 
-    console.log(`✅ 파일 업로드 완료: ${result.filename || file.name}`);
 
   } catch (error) {
     console.error('파일 업로드 오류:', error);
@@ -185,13 +281,14 @@ export function GuideSlide({
   defaultContent
 }: GuideSlideProps) {
   const { user } = useAuth();
+  const pathname = usePathname();
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // GraphQL 훅들 - scope가 있으면 scope 쿼리, 없으면 기존 쿼리 사용
-  const shouldUseScope = scope && scopeHierarchy;
+  // 일단 기존 쿼리만 사용하고, mutation에서만 scope 필드 전송
+  const shouldUseScope = false; // scope && scopeHierarchy;
 
   const { data, loading, error, refetch } = useQuery(
     shouldUseScope ? GET_HELP_DOCUMENT_BY_SCOPE : GET_HELP_DOCUMENT,
@@ -201,7 +298,7 @@ export function GuideSlide({
         ? { scope, scopeHierarchy }
         : { category, title },
       skip: !isOpen, // 열릴 때만 쿼리 실행
-      fetchPolicy: 'cache-and-network'
+      fetchPolicy: 'cache-and-network',
     }
   );
 
@@ -209,9 +306,10 @@ export function GuideSlide({
   const [updateDocument] = useMutation(UPDATE_HELP_DOCUMENT, { client: getClient() });
 
   // 데이터베이스에서 가져온 문서가 있는지 확인
-  const searchResult = shouldUseScope ? data?.docsManualSearchByScope : data?.docsManualSearch;
+  const searchResult = data?.docsManualSearch; // 기존 쿼리만 사용
   const dbDocument = searchResult?.manuals?.[0];
   const hasDbContent = dbDocument && searchResult?.total_count > 0;
+
 
   // 가이드 컨텐츠가 렌더링될 때마다 빈 줄 간격 조정
   useEffect(() => {
@@ -239,16 +337,29 @@ export function GuideSlide({
   const handleSave = async () => {
     try {
       // 마크다운 후처리 적용
-      console.log('=== SAVE PROCESS START ===');
-      console.log('Edit content before processing:', JSON.stringify(editContent));
-
       const processedMarkdown = postProcessMarkdown(editContent);
-      console.log('Processed markdown in save:', JSON.stringify(processedMarkdown));
-
       const contentToSave = convertMarkdownToHtml(processedMarkdown);
-      console.log('Final HTML content:', contentToSave);
 
-      const writerName = user?.name || user?.email || '시스템';
+      // 사용자 email을 우선적으로 사용 (email이 없으면 name으로 대체)
+      const writerEmail = user?.email || user?.name || '시스템';
+
+      // scope_hierarchy 동적 생성 (mappings_lang 활용)
+      let generatedScopeHierarchy = scopeHierarchy;
+
+      if (!scopeHierarchy) {
+        try {
+          generatedScopeHierarchy = await generateScopeHierarchyWithMapping(pathname, title, getClient());
+        } catch (error) {
+          console.error('Error generating dynamic scope hierarchy:', error);
+          generatedScopeHierarchy = generateScopeHierarchyFallback(pathname, title);
+        }
+      }
+
+      console.log('=== SCOPE HIERARCHY DEBUG ===');
+      console.log('pathname:', pathname);
+      console.log('title:', title);
+      console.log('scopeHierarchy prop:', scopeHierarchy);
+      console.log('generated scope_hierarchy:', generatedScopeHierarchy);
 
       const input = {
         title,
@@ -256,27 +367,48 @@ export function GuideSlide({
         markdown_source: processedMarkdown, // 후처리된 마크다운
         format: 'markdown',
         category,
-        scope,
-        scope_hierarchy: scopeHierarchy,
-        parent_scope_id: null, // 필요시 나중에 구현
-        writer: writerName,
+        scope: scope || 'section', // 기본값으로 'section' 사용
+        scope_hierarchy: generatedScopeHierarchy,
+        parent_scope_id: null, // 기본값으로 null 사용
+        writer: writerEmail,
+        email: user?.email || '', // email 필드 별도 추가
         is_visible: true,
         is_notice: false,
         is_private: false
       };
 
+
+
       if (hasDbContent) {
-        // 수정
+        // 수정 - 기존 writer가 비어있거나 '시스템'이면 현재 사용자 email로 업데이트
+        const currentWriter = dbDocument.writer;
+        const currentEmail = dbDocument.email;
+        const shouldUpdateWriter = !currentWriter || currentWriter === '시스템' || currentWriter.trim() === '';
+        const shouldUpdateEmail = !currentEmail || currentEmail.trim() === '';
+
+        const finalWriter = shouldUpdateWriter ? writerEmail : currentWriter;
+        const finalEmail = shouldUpdateEmail ? (user?.email || '') : currentEmail;
+
+        const updateInput = {
+          ...input,
+          id: dbDocument.id,
+          writer: finalWriter,
+          email: finalEmail,
+          // scope 관련 필드들 업데이트 (기존 값이 없으면 현재 값으로 설정)
+          scope: dbDocument.scope || input.scope,
+          scope_hierarchy: dbDocument.scope_hierarchy || input.scope_hierarchy,
+          parent_scope_id: dbDocument.parent_scope_id || input.parent_scope_id
+        };
+
+
         await updateDocument({
           variables: {
-            input: {
-              ...input,
-              id: dbDocument.id
-            }
+            input: updateInput
           }
         });
       } else {
         // 생성
+
         await createDocument({
           variables: { input }
         });
@@ -287,7 +419,21 @@ export function GuideSlide({
       alert('저장이 완료되었습니다.');
     } catch (error) {
       console.error('Help 문서 저장 실패:', error);
-      alert('저장에 실패했습니다.');
+      console.error('Error details:', {
+        message: error.message,
+        graphQLErrors: error.graphQLErrors,
+        networkError: error.networkError,
+        extraInfo: error.extraInfo
+      });
+
+      let errorMessage = '저장에 실패했습니다.';
+      if (error.graphQLErrors && error.graphQLErrors.length > 0) {
+        errorMessage += ` (${error.graphQLErrors[0].message})`;
+      } else if (error.networkError) {
+        errorMessage += ` (네트워크 오류: ${error.networkError.message})`;
+      }
+
+      alert(errorMessage);
     }
   };
 

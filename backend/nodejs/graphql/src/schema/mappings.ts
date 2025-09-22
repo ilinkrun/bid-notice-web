@@ -4,6 +4,7 @@ export const mappingsTypeDefs = gql`
   type LangMapping {
     id: Int!
     area: String!
+    scope: String!
     ko: String!
     en: String!
     remark: String
@@ -14,6 +15,7 @@ export const mappingsTypeDefs = gql`
 
   input LangMappingInput {
     area: String!
+    scope: String!
     ko: String!
     en: String!
     remark: String
@@ -23,6 +25,7 @@ export const mappingsTypeDefs = gql`
   input LangMappingUpdateInput {
     id: Int!
     area: String
+    scope: String
     ko: String
     en: String
     remark: String
@@ -35,15 +38,18 @@ export const mappingsTypeDefs = gql`
     
     # 영역별 매핑 데이터 조회
     mappingsLangByArea(area: String!): [LangMapping!]!
-    
+
+    # scope별 매핑 데이터 조회
+    mappingsLangByScope(scope: String!): [LangMapping!]!
+
     # 특정 매핑 데이터 조회
     mappingsLangById(id: Int!): LangMapping
-    
-    # 한글->영어 변환
-    mappingsLangKoToEn(area: String!, ko: String!): String
-    
-    # 영어->한글 변환
-    mappingsLangEnToKo(area: String!, en: String!): String
+
+    # 한글->영어 변환 (scope 포함)
+    mappingsLangKoToEn(scope: String!, ko: String!): String
+
+    # 영어->한글 변환 (scope 포함)
+    mappingsLangEnToKo(scope: String!, en: String!): String
   }
 
   extend type Mutation {

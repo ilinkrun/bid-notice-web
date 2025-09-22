@@ -14,6 +14,9 @@ export const docsTypeDefs = `#graphql
     is_visible: Boolean
     is_notice: Boolean
     is_private: Boolean
+    scope: String
+    parent_scope_id: Int
+    scope_hierarchy: String
   }
 
   type DocsManualResponse {
@@ -48,6 +51,9 @@ export const docsTypeDefs = `#graphql
     is_visible: Boolean
     is_notice: Boolean
     is_private: Boolean
+    scope: String
+    parent_scope_id: Int
+    scope_hierarchy: String
   }
 
   input DocsManualDeleteInput {
@@ -66,6 +72,13 @@ export const docsTypeDefs = `#graphql
     docsManualSearch(
       query: String!
       category: String
+      limit: Int = 100
+      offset: Int = 0
+    ): DocsManualSearchResponse
+
+    docsManualSearchByScope(
+      scope: String!
+      scope_hierarchy: String!
       limit: Int = 100
       offset: Int = 0
     ): DocsManualSearchResponse

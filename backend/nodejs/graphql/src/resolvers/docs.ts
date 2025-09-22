@@ -67,6 +67,9 @@ const formatDocsManual = (row: any) => ({
   is_visible: Boolean(row.is_visible),
   is_notice: Boolean(row.is_notice),
   is_private: Boolean(row.is_private),
+  scope: row.scope || null,
+  parent_scope_id: row.parent_scope_id || null,
+  scope_hierarchy: row.scope_hierarchy || null,
 });
 
 export interface DocsManualInput {
@@ -82,6 +85,9 @@ export interface DocsManualInput {
   is_visible?: boolean;
   is_notice?: boolean;
   is_private?: boolean;
+  scope?: string;
+  parent_scope_id?: number;
+  scope_hierarchy?: string;
 }
 
 export interface DocsManualDeleteInput {
@@ -234,10 +240,66 @@ export const docsResolvers = {
       return result;
     },
 
+    docsManualSearchByScope: async (
+      _parent: unknown,
+      args: { scope: string; scope_hierarchy: string; limit?: number; offset?: number }
+    ) => {
+      const cacheKey = `docs_manual_search_scope_${args.scope}_${args.scope_hierarchy}_${args.limit || 100}_${args.offset || 0}`;
+      let result = cache.get(cacheKey);
+
+      if (!result) {
+        try {
+          console.log('📚 docsManualSearchByScope 요청:', args);
+
+          let query = 'SELECT * FROM docs_manual WHERE is_visible = 1 AND scope = ? AND scope_hierarchy = ?';
+          const queryParams: any[] = [args.scope, args.scope_hierarchy];
+
+          // 총 개수 조회
+          const countQuery = query.replace('SELECT *', 'SELECT COUNT(*) as total');
+          const countResult = await executeQuery(countQuery, queryParams) as any[];
+          const totalCount = countResult[0]?.total || 0;
+
+          // 정렬 및 페이징 추가
+          query += ' ORDER BY created_at DESC';
+
+          if (args.limit !== undefined) {
+            query += ' LIMIT ?';
+            queryParams.push(args.limit);
+          }
+
+          if (args.offset !== undefined) {
+            query += ' OFFSET ?';
+            queryParams.push(args.offset);
+          }
+
+          console.log('📚 scope 검색 쿼리:', query, queryParams);
+
+          const rows = await executeQuery(query, queryParams) as any[];
+          const manuals = rows.map(formatDocsManual);
+
+          result = {
+            manuals,
+            total_count: totalCount,
+            page: Math.floor((args.offset || 0) / (args.limit || 100)) + 1,
+            limit: args.limit || 100,
+            query: `${args.scope}:${args.scope_hierarchy}`,
+          };
+
+          cache.set(cacheKey, result);
+          console.log('📚 scope 검색 결과:', { count: manuals.length, total: totalCount });
+        } catch (error) {
+          console.error('📚 docsManualSearchByScope 오류:', error);
+          throw new Error(`scope 기반 매뉴얼 검색 실패: ${error}`);
+        }
+      }
+
+      return result;
+    },
+
     docsCategories: async () => {
       const cacheKey = 'docs_categories';
       let result = cache.get(cacheKey);
-      
+
       if (!result) {
         try {
           console.log('📚 docsCategories 요청');
@@ -247,7 +309,7 @@ export const docsResolvers = {
           ) as any[];
 
           const categories = rows.map(row => row.category);
-          
+
           result = {
             categories: categories.length > 0 ? categories : ['사용자매뉴얼', '개발자매뉴얼', '운영매뉴얼', '운영가이드', '시스템가이드'],
           };
@@ -262,7 +324,7 @@ export const docsResolvers = {
           };
         }
       }
-      
+
       return result;
     },
   },
@@ -272,12 +334,16 @@ export const docsResolvers = {
       try {
         console.log('📚 docsManualCreate 요청:', args.input);
 
-        const { title, content, category, writer, format, email, is_notice, is_private, markdown_source, file_path } = args.input;
+        const {
+          title, content, category, writer, format, email, is_notice, is_private,
+          markdown_source, file_path, scope, parent_scope_id, scope_hierarchy
+        } = args.input;
 
         const result = await executeQuery(
-          `INSERT INTO docs_manual 
-           (title, content, category, writer, format, email, is_notice, is_private, markdown_source, file_path, is_visible) 
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO docs_manual
+           (title, content, category, writer, format, email, is_notice, is_private,
+            markdown_source, file_path, is_visible, scope, parent_scope_id, scope_hierarchy)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             title,
             content,
@@ -289,7 +355,10 @@ export const docsResolvers = {
             is_private ? 1 : 0,
             markdown_source || null,
             file_path || null,
-            1 // is_visible 기본값
+            1, // is_visible 기본값
+            scope || 'section', // scope 기본값
+            parent_scope_id || null,
+            scope_hierarchy || null
           ]
         ) as any;
 
@@ -368,6 +437,18 @@ export const docsResolvers = {
         if (args.input.file_path !== undefined) {
           updateFields.push('file_path = ?');
           updateValues.push(args.input.file_path);
+        }
+        if (args.input.scope !== undefined) {
+          updateFields.push('scope = ?');
+          updateValues.push(args.input.scope);
+        }
+        if (args.input.parent_scope_id !== undefined) {
+          updateFields.push('parent_scope_id = ?');
+          updateValues.push(args.input.parent_scope_id);
+        }
+        if (args.input.scope_hierarchy !== undefined) {
+          updateFields.push('scope_hierarchy = ?');
+          updateValues.push(args.input.scope_hierarchy);
         }
 
         if (updateFields.length === 0) {
