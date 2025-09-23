@@ -1,0 +1,84 @@
+{
+  "info": {
+    "name": "G2B 해석정보 목록 조회",
+    "description": "G2B(나라장터) 해석정보 목록을 조회하는 API 요청",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Interpretation Info List",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "type": "text"
+          },
+          {
+            "key": "User-Agent",
+            "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            "type": "text"
+          },
+          {
+            "key": "Referer",
+            "value": "https://www.g2b.go.kr",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "pageIndex",
+              "value": "1",
+              "description": "페이지 인덱스",
+              "type": "text"
+            },
+            {
+              "key": "recordCountPerPage",
+              "value": "10",
+              "description": "페이지당 레코드 수",
+              "type": "text"
+            },
+            {
+              "key": "searchCondition",
+              "value": "",
+              "description": "검색 조건",
+              "type": "text"
+            },
+            {
+              "key": "searchKeyword",
+              "value": "",
+              "description": "검색 키워드",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "https://www.g2b.go.kr/fi/fii/fiib/IntpInfo/selectIntpInfoList.do",
+          "protocol": "https",
+          "host": [
+            "www",
+            "g2b",
+            "go",
+            "kr"
+          ],
+          "path": [
+            "fi",
+            "fii",
+            "fiib",
+            "IntpInfo",
+            "selectIntpInfoList.do"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

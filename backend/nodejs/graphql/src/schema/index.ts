@@ -1,5 +1,6 @@
 import { gql } from 'graphql-tag';
 import { noticesTypeDefs } from './notices.js';
+import { noticesNaraTypeDefs } from './noticesNara.js';
 import { settingsTypeDefs } from './settings.js';
 import { logsTypeDefs } from './logs.js';
 import { mybidsTypeDefs } from './mybids.js';
@@ -24,6 +25,7 @@ const baseTypeDefs = gql`
 export const typeDefs = [
   baseTypeDefs,
   noticesTypeDefs,
+  noticesNaraTypeDefs,
   settingsTypeDefs,
   logsTypeDefs,
   mybidsTypeDefs,

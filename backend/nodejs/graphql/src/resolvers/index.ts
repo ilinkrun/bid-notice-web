@@ -1,5 +1,6 @@
 import { baseResolvers } from './base.js';
 import { noticesResolvers } from './notices.js';
+import { noticesNaraResolvers } from './noticesNara.js';
 import { settingsResolvers } from './settings.js';
 import { logsResolvers } from './logs.js';
 import { mybidsResolvers } from './mybids.js';
@@ -14,6 +15,7 @@ import { mappingsResolvers } from './mappings.js';
 export const resolvers = [
   baseResolvers,
   noticesResolvers,
+  noticesNaraResolvers,
   settingsResolvers,
   logsResolvers,
   mybidsResolvers,

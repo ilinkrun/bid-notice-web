@@ -313,17 +313,20 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
       const newSearchParams = new URLSearchParams(window.location.search);
       let newUrl: string;
 
+      const isNaraPage = pathname.includes('/notices/nara');
+      const baseUrl = isNaraPage ? '/notices/nara' : '/notices/gov';
+      
       if (value === '무관') {
-        newUrl = `/notices/gov/irrelevant?${newSearchParams.toString()}`;
+        newUrl = `${baseUrl}/irrelevant?${newSearchParams.toString()}`;
       } else if (value === '제외') {
-        newUrl = `/notices/gov/excluded?${newSearchParams.toString()}`;
+        newUrl = `${baseUrl}/excluded?${newSearchParams.toString()}`;
       } else {
         // 공사점검, 성능평가, 기타 -> work 페이지로 이동
         newSearchParams.delete('category');
         const otherParams = newSearchParams.toString();
         const categoryParam = `category=${value}`;
         const queryString = otherParams ? `${categoryParam}&${otherParams}` : categoryParam;
-        newUrl = `/notices/gov/work?${queryString}`;
+        newUrl = `${baseUrl}/work?${queryString}`;
       }
 
       // 3. URL 히스토리 업데이트 (페이지 새로고침 없이)
@@ -360,7 +363,9 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
         : categoryParam;
 
       // 3. URL 히스토리 업데이트 (페이지 새로고침 없이)
-      const newUrl = `/notices/gov/work?${queryString}`;
+      const isNaraPage = pathname.includes('/notices/nara');
+      const baseUrl = isNaraPage ? '/notices/nara' : '/notices/gov';
+      const newUrl = `${baseUrl}/work?${queryString}`;
       navigate(newUrl);
     } catch (error) {
       console.error('카테고리 변경 중 오류 발생:', error);
@@ -645,17 +650,20 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
         const currentSearchParams = new URLSearchParams(window.location.search);
         let newUrl: string;
 
+        const isNaraPage = pathname.includes('/notices/nara');
+        const baseUrl = isNaraPage ? '/notices/nara' : '/notices/gov';
+        
         if (localCategory === '무관') {
-          newUrl = `/notices/gov/irrelevant?${currentSearchParams.toString()}`;
+          newUrl = `${baseUrl}/irrelevant?${currentSearchParams.toString()}`;
         } else if (localCategory === '제외') {
-          newUrl = `/notices/gov/excluded?${currentSearchParams.toString()}`;
+          newUrl = `${baseUrl}/excluded?${currentSearchParams.toString()}`;
         } else {
           // 공사점검, 성능평가, 기타 -> work 페이지로 이동
           currentSearchParams.delete('category');
           const otherParams = currentSearchParams.toString();
           const categoryParam = `category=${localCategory}`;
           const queryString = otherParams ? `${categoryParam}&${otherParams}` : categoryParam;
-          newUrl = `/notices/gov/work?${queryString}`;
+          newUrl = `${baseUrl}/work?${queryString}`;
         }
         navigate(newUrl);
       } else {
@@ -698,7 +706,9 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
 
         // 제외 페이지로 이동
         const currentSearchParams = new URLSearchParams(window.location.search);
-        const newUrl = `/notices/gov/excluded?${currentSearchParams.toString()}`;
+        const isNaraPage = pathname.includes('/notices/nara');
+        const baseUrl = isNaraPage ? '/notices/nara' : '/notices/gov';
+        const newUrl = `${baseUrl}/excluded?${currentSearchParams.toString()}`;
         navigate(newUrl);
       } else {
         throw new Error(data?.excludeNotices?.message || '제외 처리에 실패했습니다.');
@@ -775,32 +785,46 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
     let href: string;
 
     if (isWorkPage) {
-      pageTitle = '관공서 공고(업무)';
+      const isNaraPage = pathname.includes('/notices/nara');
+      pageTitle = isNaraPage ? '나라장터(업무)' : '관공서 공고(업무)';
       finalBreadcrumb = '업무';
-      href = '/notices/gov/work?category=공사점검';
+      href = isNaraPage ? '/notices/nara/work?category=공사점검' : '/notices/gov/work?category=공사점검';
     } else if (isIrrelevantPage) {
-      pageTitle = '관공서 공고(무관)';
+      const isNaraPage = pathname.includes('/notices/nara');
+      pageTitle = isNaraPage ? '나라장터(무관)' : '관공서 공고(무관)';
       finalBreadcrumb = '무관';
-      href = '/notices/gov/irrelevant';
+      href = isNaraPage ? '/notices/nara/irrelevant' : '/notices/gov/irrelevant';
     } else if (isExcludedPage) {
-      pageTitle = '관공서 공고(제외)';
+      const isNaraPage = pathname.includes('/notices/nara');
+      pageTitle = isNaraPage ? '나라장터(제외)' : '관공서 공고(제외)';
       finalBreadcrumb = '제외';
-      href = '/notices/gov/excluded';
+      href = isNaraPage ? '/notices/nara/excluded' : '/notices/gov/excluded';
     } else {
       // Fallback for legacy routes
+      const isNaraPage = pathname.includes('/notices/nara');
       const categoryLabel = CATEGORIES.find(cat => cat.value === currentCategory)?.label || currentCategory || '공사점검';
-      pageTitle = `관공서 공고(${categoryLabel})`;
+      pageTitle = isNaraPage ? `나라장터(${categoryLabel})` : `관공서 공고(${categoryLabel})`;
       finalBreadcrumb = categoryLabel;
-      href = currentCategory === '무관' ? '/notices/gov/irrelevant' :
-            currentCategory === '제외' ? '/notices/gov/excluded' :
-            `/notices/gov/work?category=${encodeURIComponent(currentCategory || '공사점검')}`;
+      if (isNaraPage) {
+        href = currentCategory === '무관' ? '/notices/nara/irrelevant' :
+              currentCategory === '제외' ? '/notices/nara/excluded' :
+              `/notices/nara/work?category=${encodeURIComponent(currentCategory || '공사점검')}`;
+      } else {
+        href = currentCategory === '무관' ? '/notices/gov/irrelevant' :
+              currentCategory === '제외' ? '/notices/gov/excluded' :
+              `/notices/gov/work?category=${encodeURIComponent(currentCategory || '공사점검')}`;
+      }
     }
 
+    const isNaraPage = pathname.includes('/notices/nara');
+    const baseHref = isNaraPage ? '/notices/nara/work?category=공사점검' : '/notices/gov/work?category=공사점검';
+    const baseLabel = isNaraPage ? '나라장터' : '관공서';
+    
     return {
       title: pageTitle,
       breadcrumbs: [
-        { label: '공고', href: '/notices/gov/work?category=공사점검' },
-        { label: '관공서', href: '/notices/gov/work?category=공사점검' },
+        { label: '공고', href: baseHref },
+        { label: baseLabel, href: baseHref },
         { label: finalBreadcrumb, href }
       ]
     };
@@ -895,7 +919,7 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
                 onClick={handleRestore}
                 title="업무에 복원"
               />
-            ) : currentCategory !== '무관' && (
+            ) : currentCategory !== '무관' && !(pathname.includes('/notices/nara') && isIrrelevantPage) && (
               <IconButton
                 icon={<Minus className="h-4 w-4" />}
                 onClick={handleExclude}
@@ -907,7 +931,7 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
               onClick={handleCategoryEdit}
               title="유형 변경"
             />
-            {currentCategory !== '무관' && currentCategory !== '제외' && (
+            {currentCategory !== '무관' && currentCategory !== '제외' && !(pathname.includes('/notices/nara') && isIrrelevantPage) && (
               <IconButton
                 icon={<Star className="h-4 w-4" />}
                 onClick={handleBidProcess}
@@ -976,20 +1000,22 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
                 >
                   지역
                 </TableHead>
-                <TableHead
-                  className="w-[60px] cursor-pointer"
-                  data-sortable="true"
-                  data-sort-active={sortConfig.field === 'registration'}
-                  onClick={() => toggleSort('registration')}
-                >
-                  등록
-                </TableHead>
+                {!(pathname.includes('/notices/nara') && (isIrrelevantPage || isWorkPage || isExcludedPage)) && (
+                  <TableHead
+                    className="w-[60px] cursor-pointer"
+                    data-sortable="true"
+                    data-sort-active={sortConfig.field === 'registration'}
+                    onClick={() => toggleSort('registration')}
+                  >
+                    등록
+                  </TableHead>
+                )}
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedNotices.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-[300px]" />
+                  <TableCell colSpan={pathname.includes('/notices/nara') && (isIrrelevantPage || isWorkPage || isExcludedPage) ? 6 : 7} className="h-[300px]" />
                 </TableRow>
               ) : (
                 paginatedNotices.map((notice) => (
@@ -1061,9 +1087,11 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
                     <TableCell className="w-[80px] whitespace-nowrap">
                       {notice.지역}
                     </TableCell>
-                    <TableCell className="w-[60px] whitespace-nowrap">
-                      {notice.등록}
-                    </TableCell>
+                    {!(pathname.includes('/notices/nara') && (isIrrelevantPage || isWorkPage || isExcludedPage)) && (
+                      <TableCell className="w-[60px] whitespace-nowrap">
+                        {notice.등록}
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))
               )}
