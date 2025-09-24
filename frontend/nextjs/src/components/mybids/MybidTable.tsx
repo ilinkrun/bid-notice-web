@@ -55,6 +55,16 @@ export default function BidTable({ bids, currentStatus }) {
   const { navigate } = useUnifiedNavigation();
   const pathname = usePathname();
   const [localStatus, setLocalStatus] = useState(currentStatus);
+  
+  // 현재 경로에서 source (gov/nara) 추출
+  const getSource = () => {
+    const pathSegments = pathname.split('/');
+    if (pathSegments.includes('gov')) return 'gov';
+    if (pathSegments.includes('nara')) return 'nara';
+    return 'gov'; // 기본값
+  };
+  
+  const source = getSource();
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -196,7 +206,7 @@ export default function BidTable({ bids, currentStatus }) {
       // 1. UI 상태 즉시 업데이트
       // 2. URL 업데이트 준비
       const newSearchParams = new URLSearchParams(window.location.search);
-      const newUrl = `/mybids/${encodeURIComponent(value)}?${newSearchParams.toString()}`;
+      const newUrl = `/mybids/${source}/${encodeURIComponent(value)}?${newSearchParams.toString()}`;
       
       // 3. URL 히스토리 업데이트 (페이지 새로고침 없이)
       navigate(newUrl);
@@ -508,11 +518,13 @@ export default function BidTable({ bids, currentStatus }) {
 
     const currentStatusInfo = statusMap[localStatus] || { label: '진행', path: 'progress' };
 
+    const sourceLabel = source === 'gov' ? '관공서' : '나라장터';
+    
     return {
-      title: `${currentStatusInfo.label} 입찰`,
+      title: `${sourceLabel} ${currentStatusInfo.label} 입찰`,
       breadcrumbs: [
-        { label: '입찰', href: '/mybids/progress' },
-        { label: currentStatusInfo.label, href: `/mybids/${currentStatusInfo.path}` }
+        { label: '입찰', href: `/mybids/${source}/progress` },
+        { label: `${sourceLabel} ${currentStatusInfo.label}`, href: `/mybids/${source}/${currentStatusInfo.path}` }
       ]
     };
   };
@@ -678,11 +690,11 @@ export default function BidTable({ bids, currentStatus }) {
                 <TableRow
                   key={bid.mid}
                   onClick={() => {
-                    window.location.href = `/mybids/${localStatus}/${bid.nid}`;
+                    window.location.href = `/mybids/${source}/${localStatus}/${bid.nid}`;
                   }}
                 >
                   <TableCell className="w-[80px] whitespace-nowrap">
-                    관공서
+                    {source === 'gov' ? '관공서' : '나라장터'}
                   </TableCell>
                   <TableCell className="w-auto max-w-0">
                   <div className="flex items-center gap-2">

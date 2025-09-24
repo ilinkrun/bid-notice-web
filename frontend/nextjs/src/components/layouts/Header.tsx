@@ -92,22 +92,43 @@ const naraNotices = [
 ];
 
 
-const bids = [
+const govBids = [
   {
     title: '진행',
-    href: '/mybids/progress',
+    href: '/mybids/gov/progress',
     description: '응찰 준비중인 입찰 목록',
     icon: Clock,
   },
   {
     title: '응찰',
-    href: '/mybids/bidding',
+    href: '/mybids/gov/bidding',
     description: '응찰한 공고(종료전) 목록',
     icon: Target,
   },
   {
     title: '종료',
-    href: '/mybids/ended',
+    href: '/mybids/gov/ended',
+    description: '낙찰/패찰/포기된 공고 목록',
+    icon: CheckCircle,
+  },
+];
+
+const naraBids = [
+  {
+    title: '진행',
+    href: '/mybids/nara/progress',
+    description: '응찰 준비중인 입찰 목록',
+    icon: Clock,
+  },
+  {
+    title: '응찰',
+    href: '/mybids/nara/bidding',
+    description: '응찰한 공고(종료전) 목록',
+    icon: Target,
+  },
+  {
+    title: '종료',
+    href: '/mybids/nara/ended',
     description: '낙찰/패찰/포기된 공고 목록',
     icon: CheckCircle,
   },
@@ -793,7 +814,15 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
 
             {/* 입찰 관리 - 로그인한 사용자만 */}
             <PermissionBoundary roles={['user', 'manager', 'admin']} showMessage={false}>
-              <DropdownMenu label="입찰" icon={Cog} items={bids} align="center" />
+              <GroupedDropdownMenu
+                label="입찰"
+                icon={Cog}
+                groups={[
+                  { label: '관공서', items: govBids },
+                  { label: '나라장터', items: naraBids }
+                ]}
+                align="center"
+              />
             </PermissionBoundary>
 
             {/* 통계 - viewer 이상 */}
@@ -877,8 +906,7 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
                 icon={Star}
                 groups={[
                   { label: '관공서', items: govNotices },
-                  { label: '나라장터', items: naraNotices },
-                  { label: '', items: otherNotices }
+                  { label: '나라장터', items: naraNotices }
                 ]}
                 isMobile
                 setIsMobileMenuOpen={setIsMobileMenuOpen}
@@ -886,7 +914,16 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
 
               {/* 입찰 관리 - 로그인한 사용자만 */}
               <PermissionBoundary roles={['user', 'manager', 'admin']} showMessage={false}>
-                <DropdownMenu label="입찰 관리" icon={Cog} items={bids} isMobile setIsMobileMenuOpen={setIsMobileMenuOpen} />
+                <GroupedDropdownMenu
+                  label="입찰 관리"
+                  icon={Cog}
+                  groups={[
+                    { label: '관공서', items: govBids },
+                    { label: '나라장터', items: naraBids }
+                  ]}
+                  isMobile
+                  setIsMobileMenuOpen={setIsMobileMenuOpen}
+                />
               </PermissionBoundary>
 
               {/* 통계 - viewer 이상 */}
