@@ -4,6 +4,7 @@ import codecs
 import html
 import re
 import urllib
+import json
 from utils.utils_data import valid_str, fix_encoding, decode_html_text, _now
 from utils.utils_mysql import Mysql, _where_like_unit, _where_eq_unit
 # Import from separated mysql modules

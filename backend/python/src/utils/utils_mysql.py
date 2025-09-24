@@ -46,8 +46,12 @@ def _keyStr(key):
 
 def _valStr(val):
   """값을 MySQL 쿼리에서 사용할 수 있는 형식으로 변환"""
-  return "'" + val.replace("'", "\\'").replace(
-      '"', '\\"') + "'" if type(val) is str else val
+  if type(val) is str:
+    # 더 안전한 문자열 이스케이프 처리
+    escaped = val.replace("\\", "\\\\").replace("'", "\\'").replace('"', '\\"').replace('\n', '\\n').replace('\r', '\\r').replace('\t', '\\t')
+    return f"'{escaped}'"
+  else:
+    return val
 
 
 def _keyValStr(key, val):
