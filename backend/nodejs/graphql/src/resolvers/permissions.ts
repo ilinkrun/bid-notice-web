@@ -90,9 +90,18 @@ const getUserByToken = (token: string): User | null => {
 
 // 경로 매칭 함수
 const matchPath = (pattern: string, path: string): boolean => {
+  // /** 패턴은 모든 경로에 매칭
+  if (pattern === '/**') {
+    return true;
+  }
+  
   // ** 와일드카드 처리
   if (pattern.includes('**')) {
     const basePattern = pattern.replace('/**', '');
+    // 빈 base 패턴이면 모든 경로 매칭
+    if (basePattern === '') {
+      return true;
+    }
     return path === basePattern || path.startsWith(basePattern + '/');
   }
   
