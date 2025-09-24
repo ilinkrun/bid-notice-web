@@ -131,19 +131,16 @@ def create_post(data: dict, table_name: str = 'board_dev'):
           "올바르지 않은 format입니다. 'text', 'markdown', 'html' 중 하나여야 합니다.")
 
     try:
-      # insert 함수 직접 호출 대신 exec 사용
+      # 파라미터화된 쿼리 사용으로 SQL 인젝션 방지 및 문자 이스케이프 문제 해결
       fields = ', '.join(insert_data.keys())
-      values = ', '.join([
-          f"'{str(v)}'" if isinstance(v, str) and v is not None
-          else 'NULL' if v is None
-          else str(v)
-          for v in insert_data.values()
-      ])
-      sql = f"INSERT INTO {table_name} ({fields}) VALUES ({values})"
+      placeholders = ', '.join(['%s'] * len(insert_data))
+      sql = f"INSERT INTO {table_name} ({fields}) VALUES ({placeholders})"
+      values = list(insert_data.values())
 
       print(f"Executing SQL: {sql}")  # 디버깅용
+      print(f"With values: {values}")  # 디버깅용
 
-      mysql.exec(sql)
+      mysql.exec(sql, values)
 
       # 마지막 삽입된 ID 가져오기
       result = mysql.fetch("SELECT LAST_INSERT_ID()")

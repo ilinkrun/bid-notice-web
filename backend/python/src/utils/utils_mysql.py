@@ -180,15 +180,20 @@ class Mysql(object):
     return curs.fetchall() if limit == 0 else curs.fetchone(
     ) if limit == 1 else curs.fetchmany(limit)
 
-  def exec(self, sql, close=False):
+  def exec(self, sql, params=None, close=False):
     """
     SQL 쿼리를 실행합니다.
 
     Args:
         sql (str): 실행할 SQL 쿼리
+        params (tuple/list): SQL 매개변수 (선택사항)
         close (bool): 쿼리 실행 후 연결 종료 여부
     """
-    self.conn.cursor().execute(sql)
+    cursor = self.conn.cursor()
+    if params:
+      cursor.execute(sql, params)
+    else:
+      cursor.execute(sql)
     self.conn.commit()
     if close:
       self.conn.close()
