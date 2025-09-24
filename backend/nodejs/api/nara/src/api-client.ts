@@ -13,6 +13,12 @@ export interface ApiRequestParams {
   inqryBgnDt?: string;
   inqryEndDt?: string;
   type?: 'xml' | 'json';
+  bidNtceNm?: string;          // 공고명 검색
+  srvceDivNm?: string;         // 용역구분 (일반용역/기술용역)
+  prtcptLmtRgnCd?: string;     // 참가제한지역코드
+  prtcptLmtRgnNm?: string;     // 참가제한지역명
+  indstrytyCd?: string;        // 업종코드
+  indstrytyNm?: string;        // 업종명
 }
 
 export interface ApiResponse<T = any> {
@@ -100,11 +106,12 @@ export class DataGoKrApiClient {
   }
 
   /**
-   * Get bid announcement list
-   * 입찰공고 목록 조회
+   * Get bid announcement list with search capabilities
+   * 입찰공고 목록 조회 (검색 기능 포함)
    */
   async getBidPblancListInfoServc(params: ApiRequestParams = {}): Promise<BidNoticeRawItem[]> {
-    const endpoint = `${this.baseUrl}/getBidPblancListInfoServc`;
+    // Use the search endpoint which supports regional filtering
+    const endpoint = `${this.baseUrl}/getBidPblancListInfoServcPPSSrch`;
 
     const requestParams = {
       serviceKey: this.serviceKey,

@@ -29,6 +29,7 @@ database/
 *.mp4
 uploads/
 images/
+responses/
 
 # zip, tar
 *.zip
