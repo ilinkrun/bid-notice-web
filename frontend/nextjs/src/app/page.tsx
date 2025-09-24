@@ -32,24 +32,40 @@ const GET_ERROR_SCRAPINGS = gql`
   }
 `;
 
-const processNoticeStatistics = (notices: any[] = []): any[] => {
+const GET_NOTICE_CATEGORIES = gql`
+  query GetNoticeCategories {
+    noticeCategoriesActive {
+      sn
+      category
+      keywords
+      nots
+      minPoint
+      creator
+      use
+    }
+  }
+`;
+
+const processNoticeStatistics = (notices: any[] = [], categoryLabels: string[] = ['공사점검', '성능평가', '기타']): any[] => {
   const groupedByDate = notices.reduce((acc: any, curr) => {
     const date = curr.postedAt.split('T')[0];
     if (!acc[date]) {
       acc[date] = {
         date,
         dayOfWeek: new Date(date).toLocaleDateString('ko-KR', { weekday: 'short' }),
-        construction: 0,
-        performance: 0,
-        etc: 0,
         subtotal: 0,
         total: 0,
       };
+      // 동적으로 카테고리 필드 초기화
+      categoryLabels.forEach(category => {
+        acc[date][category] = 0;
+      });
     }
 
-    if (curr.category === '공사점검') acc[date].construction++;
-    else if (curr.category === '성능평가') acc[date].performance++;
-    else if (curr.category === '기타') acc[date].etc++;
+    // 카테고리별 카운트
+    if (curr.category && categoryLabels.includes(curr.category)) {
+      acc[date][curr.category]++;
+    }
 
     acc[date].subtotal++;
     acc[date].total++;
@@ -77,6 +93,7 @@ async function getDashboardData() {
   // 개별적으로 데이터 가져오기
   let noticesStatistics: any[] = [];
   let errorScrapings: ErrorScraping[] = [];
+  let categories: any[] = [];
   
   try {
     const noticesResult = await client.query({
@@ -101,10 +118,22 @@ async function getDashboardData() {
   } catch (error) {
     console.error('Failed to fetch error scrapings:', error);
   }
+
+  try {
+    const categoriesResult = await client.query({
+      query: GET_NOTICE_CATEGORIES,
+      fetchPolicy: 'no-cache',
+      errorPolicy: 'all'
+    });
+    categories = categoriesResult.data?.noticeCategoriesActive || [];
+  } catch (error) {
+    console.error('Failed to fetch notice categories:', error);
+  }
   
   return {
     noticesStatistics,
-    errorScrapings
+    errorScrapings,
+    categories
   };
 }
 
@@ -122,7 +151,10 @@ const notices = [
 
 export default async function Home() {
   const data = await getDashboardData();
-  const processedStatistics = data?.noticesStatistics ? processNoticeStatistics(data.noticesStatistics) : [];
+  
+  // 카테고리 라벨 추출
+  const categoryLabels = data?.categories?.map((cat: any) => cat.category) || ['공사점검', '성능평가', '기타'];
+  const processedStatistics = data?.noticesStatistics ? processNoticeStatistics(data.noticesStatistics, categoryLabels) : [];
 
   // 통계 계산
   const totalNotices = data?.noticesStatistics?.length || 0;
@@ -137,6 +169,9 @@ export default async function Home() {
     acc[curr.category] = (acc[curr.category] || 0) + 1;
     return acc;
   }, {}) || {};
+
+  // 첫 번째 카테고리 이름 (카드 제목용)
+  const firstCategoryName = categoryLabels[0] || '공사점검';
 
   return (
     <DashboardLayout>
@@ -172,9 +207,9 @@ export default async function Home() {
                 trend={{ value: 5, isPositive: false }}
               />
               <DashboardCard
-                title="공사점검"
-                value={(categoryStats['공사점검'] || 0).toLocaleString()}
-                description="공사점검 공고"
+                title={firstCategoryName}
+                value={(categoryStats[firstCategoryName] || 0).toLocaleString()}
+                description={`${firstCategoryName} 공고`}
                 icon={<Users className="h-4 w-4" />}
               />
             </div>
@@ -189,7 +224,11 @@ export default async function Home() {
               >
                 <div className="h-[400px] mt-4">
                   {processedStatistics.length > 0 && (
-                    <NoticeStatisticsChart data={processedStatistics} type="category" />
+                    <NoticeStatisticsChart 
+                      data={processedStatistics} 
+                      type="category" 
+                      categoryLabels={categoryLabels}
+                    />
                   )}
                 </div>
               </DashboardCard>

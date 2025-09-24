@@ -60,9 +60,21 @@ interface RegionChartData {
 interface NoticeStatisticsChartProps {
   data: CategoryChartData[] | RegionChartData[];
   type: 'category' | 'region';
+  categoryLabels?: string[];
 }
 
-export function NoticeStatisticsChart({ data, type }: NoticeStatisticsChartProps) {
+export function NoticeStatisticsChart({ data, type, categoryLabels = ['공사점검', '성능평가', '기타'] }: NoticeStatisticsChartProps) {
+  // 동적 색상 배열
+  const colors = [
+    process.env.NEXT_PUBLIC_PINK || 'rgba(255, 99, 132, 0.5)',
+    process.env.NEXT_PUBLIC_GREEN || 'rgba(54, 162, 235, 0.5)', 
+    process.env.NEXT_PUBLIC_BLUE || 'rgba(255, 206, 86, 0.5)',
+    'rgba(75, 192, 192, 0.5)',
+    'rgba(153, 102, 255, 0.5)',
+    'rgba(255, 159, 64, 0.5)',
+    'rgba(199, 199, 199, 0.5)',
+    'rgba(83, 166, 157, 0.5)'
+  ];
   // 선택된 항목 상태 관리
   const [selectedItem, setSelectedItem] = useState<string>('전체');
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -171,12 +183,8 @@ export function NoticeStatisticsChart({ data, type }: NoticeStatisticsChartProps
         const regionMax = Object.values(region.dates).reduce((rMax: number, date: any) => {
           if (selectedItem === '전체') {
             return Math.max(rMax, date.total);
-          } else if (selectedItem === '공사점검') {
-            return Math.max(rMax, date.construction);
-          } else if (selectedItem === '성능평가') {
-            return Math.max(rMax, date.performance);
-          } else if (selectedItem === '기타') {
-            return Math.max(rMax, date.etc);
+          } else if (categoryLabels.includes(selectedItem)) {
+            return Math.max(rMax, date[selectedItem] || 0);
           }
           return rMax;
         }, 0);
@@ -206,36 +214,18 @@ export function NoticeStatisticsChart({ data, type }: NoticeStatisticsChartProps
   const chartData = {
     labels: allDates.map(formatDate),
     datasets: type === 'category' ? [
-      {
-        label: process.env.NEXT_PUBLIC_CONSTRUCTION_TYPE || '공사점검',
-        data: allDates.map(date => (data as CategoryChartData[]).find(item => item.date === date)?.construction || 0),
-        backgroundColor: process.env.NEXT_PUBLIC_PINK,
-        borderColor: process.env.NEXT_PUBLIC_PINK?.replace(/[\d.]+\)$/, '1)'),
+      // 동적 카테고리 데이터셋
+      ...categoryLabels.map((label, index) => ({
+        label: label,
+        data: allDates.map(date => (data as CategoryChartData[]).find(item => item.date === date)?.[label] || 0),
+        backgroundColor: colors[index % colors.length],
+        borderColor: colors[index % colors.length]?.replace(/[\d.]+\)$/, '1)'),
         borderWidth: 1,
         stack: 'stack1',
         barPercentage: 1,
         categoryPercentage: 0.8,
-      },
-      {
-        label: process.env.NEXT_PUBLIC_PERFORMANCE_TYPE || '성능평가',
-        data: allDates.map(date => (data as CategoryChartData[]).find(item => item.date === date)?.performance || 0),
-        backgroundColor: process.env.NEXT_PUBLIC_GREEN,
-        borderColor: process.env.NEXT_PUBLIC_GREEN?.replace(/[\d.]+\)$/, '1)'),
-        borderWidth: 1,
-        stack: 'stack1',
-        barPercentage: 1,
-        categoryPercentage: 0.8,
-      },
-      {
-        label: process.env.NEXT_PUBLIC_ETC_TYPE || '기타',
-        data: allDates.map(date => (data as CategoryChartData[]).find(item => item.date === date)?.etc || 0),
-        backgroundColor: process.env.NEXT_PUBLIC_BLUE,
-        borderColor: process.env.NEXT_PUBLIC_BLUE?.replace(/[\d.]+\)$/, '1)'),
-        borderWidth: 1,
-        stack: 'stack1',
-        barPercentage: 1,
-        categoryPercentage: 0.8,
-      },
+      })),
+      // 전체 데이터셋
       {
         label: '전체',
         data: allDates.map(date => (data as CategoryChartData[]).find(item => item.date === date)?.total || 0),
@@ -255,12 +245,8 @@ export function NoticeStatisticsChart({ data, type }: NoticeStatisticsChartProps
         
         if (selectedItem === '전체') {
           return dateData.total;
-        } else if (selectedItem === '공사점검') {
-          return dateData.construction;
-        } else if (selectedItem === '성능평가') {
-          return dateData.performance;
-        } else if (selectedItem === '기타') {
-          return dateData.etc;
+        } else if (categoryLabels.includes(selectedItem)) {
+          return dateData[selectedItem] || 0;
         }
         return 0;
       }),
@@ -385,9 +371,11 @@ export function NoticeStatisticsChart({ data, type }: NoticeStatisticsChartProps
               <SelectValue placeholder="항목 선택" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="공사점검">공사점검</SelectItem>
-              <SelectItem value="성능평가">성능평가</SelectItem>
-              <SelectItem value="기타">기타</SelectItem>
+              {categoryLabels.map((label) => (
+                <SelectItem key={label} value={label}>
+                  {label}
+                </SelectItem>
+              ))}
               <SelectItem value="전체">전체</SelectItem>
             </SelectContent>
           </Select>

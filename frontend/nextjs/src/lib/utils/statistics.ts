@@ -5,7 +5,7 @@ export const getDayOfWeek = (date: string) => {
 };
 
 export const processNoticeStatistics = {
-  category: (data: any[], cutoffDays: number = 14) => {
+  category: (data: any[], cutoffDays: number = 14, categoryLabels: string[] = ['공사점검', '성능평가', '기타']) => {
     // 날짜별, 지역별로 데이터 그룹화
     const groupedByDate = data.reduce((acc, item) => {
       const date = item.postedAt.split('T')[0];
@@ -13,21 +13,25 @@ export const processNoticeStatistics = {
       
       if (!acc[date]) {
         acc[date] = {
-          construction: 0,
-          performance: 0,
-          etc: 0,
           total: 0,
-          regions: {}
+          regions: {},
+          categories: {}
         };
+        // 동적으로 카테고리 필드 초기화
+        categoryLabels.forEach(category => {
+          acc[date].categories[category] = 0;
+        });
       }
 
       if (!acc[date].regions[region]) {
         acc[date].regions[region] = {
-          construction: 0,
-          performance: 0,
-          etc: 0,
-          total: 0
+          total: 0,
+          categories: {}
         };
+        // 동적으로 카테고리 필드 초기화
+        categoryLabels.forEach(category => {
+          acc[date].regions[region].categories[category] = 0;
+        });
       }
 
       // 전체 카운트 증가
@@ -35,15 +39,9 @@ export const processNoticeStatistics = {
       acc[date].regions[region].total++;
 
       // 카테고리별 카운트
-      if (item.category === '공사점검') {
-        acc[date].construction++;
-        acc[date].regions[region].construction++;
-      } else if (item.category === '성능평가') {
-        acc[date].performance++;
-        acc[date].regions[region].performance++;
-      } else if (item.category === '기타') {
-        acc[date].etc++;
-        acc[date].regions[region].etc++;
+      if (item.category && categoryLabels.includes(item.category)) {
+        acc[date].categories[item.category]++;
+        acc[date].regions[region].categories[item.category]++;
       }
 
       return acc;
@@ -56,31 +54,42 @@ export const processNoticeStatistics = {
 
     return Object.entries(groupedByDate)
       .map(([date, stats]) => {
-        const regions = Object.entries((stats as { regions: Record<string, { construction: number; performance: number; etc: number; total?: number }> }).regions).map(([region, regionStats]) => ({
-          region,
-          construction: regionStats.construction,
-          performance: regionStats.performance,
-          etc: regionStats.etc,
-          subtotal: regionStats.construction + regionStats.performance + regionStats.etc,
-          total: regionStats.total || (regionStats.construction + regionStats.performance + regionStats.etc)
-        }));
+        const regions = Object.entries((stats as any).regions).map(([region, regionStats]: [string, any]) => {
+          const regionData: any = {
+            region,
+            total: regionStats.total
+          };
+          // 동적으로 카테고리 데이터 추가
+          categoryLabels.forEach(category => {
+            regionData[category] = regionStats.categories[category] || 0;
+          });
+          // 소계 계산
+          regionData.subtotal = categoryLabels.reduce((sum, category) => sum + (regionStats.categories[category] || 0), 0);
+          return regionData;
+        });
 
-        return {
+        const result: any = {
           date,
           dayOfWeek: getDayOfWeek(date),
           regions,
-          construction: (stats as any).construction,
-          performance: (stats as any).performance,
-          etc: (stats as any).etc,
-          subtotal: (stats as any).construction + (stats as any).performance + (stats as any).etc,
-          total: (stats as any).total,
+          total: (stats as any).total
         };
+        
+        // 동적으로 카테고리 데이터 추가
+        categoryLabels.forEach(category => {
+          result[category] = (stats as any).categories[category] || 0;
+        });
+        
+        // 소계 계산
+        result.subtotal = categoryLabels.reduce((sum, category) => sum + ((stats as any).categories[category] || 0), 0);
+        
+        return result;
       })
       .filter(stat => new Date(stat.date) >= cutoffDate)
       .sort((a, b) => b.date.localeCompare(a.date));
   },
 
-  region: (data: any[]) => {
+  region: (data: any[], categoryLabels: string[] = ['공사점검', '성능평가', '기타']) => {
     // 날짜별, 지역별로 데이터 그룹화
     const groupedByDateAndRegion = data.reduce((acc: any, item) => {
       const date = item.postedAt.split('T')[0];
@@ -92,23 +101,21 @@ export const processNoticeStatistics = {
       
       if (!acc[date][region]) {
         acc[date][region] = {
-          construction: 0,
-          performance: 0,
-          etc: 0,
           total: 0,
+          categories: {}
         };
+        // 동적으로 카테고리 필드 초기화
+        categoryLabels.forEach(category => {
+          acc[date][region].categories[category] = 0;
+        });
       }
 
       // 전체 카운트 증가
       acc[date][region].total++;
 
       // 카테고리별 카운트
-      if (item.category === '공사점검') {
-        acc[date][region].construction++;
-      } else if (item.category === '성능평가') {
-        acc[date][region].performance++;
-      } else if (item.category === '기타') {
-        acc[date][region].etc++;
+      if (item.category && categoryLabels.includes(item.category)) {
+        acc[date][region].categories[item.category]++;
       }
 
       return acc;
@@ -129,34 +136,46 @@ export const processNoticeStatistics = {
       const dateData = groupedByDateAndRegion[date];
       const regions = Array.from(allRegions).map(region => {
         const regionData = dateData[region] || {
-          construction: 0,
-          performance: 0,
-          etc: 0,
           total: 0,
+          categories: {}
         };
 
-        return {
+        const regionResult: any = {
           date,
           region,
-          construction: regionData.construction,
-          performance: regionData.performance,
-          etc: regionData.etc,
-          subtotal: regionData.construction + regionData.performance + regionData.etc,
           total: regionData.total,
         };
+
+        // 동적으로 카테고리 데이터 추가
+        categoryLabels.forEach(category => {
+          regionResult[category] = regionData.categories?.[category] || 0;
+        });
+
+        // 소계 계산
+        regionResult.subtotal = categoryLabels.reduce((sum, category) => sum + (regionData.categories?.[category] || 0), 0);
+
+        return regionResult;
       });
 
       // 날짜별 합계 계산
-      const dateTotal = regions.reduce(
-        (acc, curr) => ({
-          construction: acc.construction + curr.construction,
-          performance: acc.performance + curr.performance,
-          etc: acc.etc + curr.etc,
-          subtotal: acc.subtotal + curr.subtotal,
-          total: acc.total + curr.total,
-        }),
-        { construction: 0, performance: 0, etc: 0, subtotal: 0, total: 0 }
-      );
+      const dateTotal: any = {
+        total: 0,
+        subtotal: 0
+      };
+
+      // 동적으로 카테고리 합계 초기화
+      categoryLabels.forEach(category => {
+        dateTotal[category] = 0;
+      });
+
+      // 합계 계산
+      regions.forEach(region => {
+        dateTotal.total += region.total;
+        dateTotal.subtotal += region.subtotal;
+        categoryLabels.forEach(category => {
+          dateTotal[category] += region[category];
+        });
+      });
 
       return {
         date,
@@ -169,57 +188,75 @@ export const processNoticeStatistics = {
     return statistics;
   },
 
-  organization: (data: any[]) => {
+  organization: (data: any[], categoryLabels: string[] = ['공사점검', '성능평가', '기타']) => {
     // 기관별로 데이터 그룹화
     const groupedByOrg = data.reduce((acc, item) => {
       const orgName = item.orgName || '미지정';
       if (!acc[orgName]) {
         acc[orgName] = {
-          construction: 0,
-          performance: 0,
-          etc: 0,
           total: 0,
+          categories: {}
         };
+        // 동적으로 카테고리 필드 초기화
+        categoryLabels.forEach(category => {
+          acc[orgName].categories[category] = 0;
+        });
       }
 
       // 전체 카운트 증가
       acc[orgName].total++;
 
       // 카테고리별 카운트
-      if (item.category === '공사점검') {
-        acc[orgName].construction++;
-      } else if (item.category === '성능평가') {
-        acc[orgName].performance++;
-      } else {
-        // "기타", "무관" 및 기타 모든 카테고리는 etc로 분류
-        acc[orgName].etc++;
+      if (item.category && categoryLabels.includes(item.category)) {
+        acc[orgName].categories[item.category]++;
       }
 
       return acc;
     }, {} as any);
 
     return Object.entries(groupedByOrg)
-      .map(([orgName, stats]) => ({
-        orgName,
-        construction: (stats as any).construction,
-        performance: (stats as any).performance,
-        etc: (stats as any).etc,
-        subtotal: (stats as any).construction + (stats as any).performance + (stats as any).etc,
-        total: (stats as any).total,
-      }))
+      .map(([orgName, stats]: [string, any]) => {
+        const result: any = {
+          orgName,
+          total: stats.total,
+        };
+
+        // 동적으로 카테고리 데이터 추가
+        categoryLabels.forEach(category => {
+          result[category] = stats.categories[category] || 0;
+        });
+
+        // 소계 계산
+        result.subtotal = categoryLabels.reduce((sum, category) => sum + (stats.categories[category] || 0), 0);
+
+        return result;
+      })
       .sort((a, b) => b.total - a.total);
   },
 
-  calculateTotals: (data: any[]) => {
-    return data.reduce(
-      (acc, curr) => ({
-        construction: acc.construction + curr.construction,
-        performance: acc.performance + curr.performance,
-        etc: acc.etc + curr.etc,
-        subtotal: acc.subtotal + (curr.subtotal || 0),
-        total: acc.total + curr.total,
-      }),
-      { construction: 0, performance: 0, etc: 0, subtotal: 0, total: 0 }
-    );
+  calculateTotals: (data: any[], categoryLabels: string[] = ['공사점검', '성능평가', '기타']) => {
+    if (data.length === 0) {
+      const result: any = { subtotal: 0, total: 0 };
+      categoryLabels.forEach(category => {
+        result[category] = 0;
+      });
+      return result;
+    }
+
+    return data.reduce((acc, curr) => {
+      if (!acc.subtotal) acc.subtotal = 0;
+      if (!acc.total) acc.total = 0;
+
+      // 동적으로 카테고리 합계 계산
+      categoryLabels.forEach(category => {
+        if (!acc[category]) acc[category] = 0;
+        acc[category] += curr[category] || 0;
+      });
+
+      acc.subtotal += curr.subtotal || 0;
+      acc.total += curr.total || 0;
+
+      return acc;
+    }, {});
   }
 };

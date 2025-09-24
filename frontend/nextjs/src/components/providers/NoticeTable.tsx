@@ -21,7 +21,7 @@ import { NoticeDetailModal } from '../notices/NoticeDetailModal';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
-import { useMutation } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import { gql } from '@apollo/client';
 
 // GraphQL mutation 정의
@@ -61,6 +61,20 @@ const RESTORE_NOTICES = gql`
   }
 `;
 
+const GET_NOTICE_CATEGORIES = gql`
+  query GetNoticeCategories {
+    noticeCategoriesActive {
+      sn
+      category
+      keywords
+      nots
+      minPoint
+      creator
+      use
+    }
+  }
+`;
+
 
 type SortField = '제목' | '기관명' | '작성일' | '지역' | '등록' | 'category' | 'region' | 'registration';
 type SortOrder = 'asc' | 'desc';
@@ -77,7 +91,8 @@ interface NoticeTableProps {
   isExcludedPage?: boolean;
 }
 
-const CATEGORIES = [
+// 기본 카테고리 (GraphQL 데이터가 로딩되지 않은 경우 사용)
+const DEFAULT_CATEGORIES = [
   { value: '공사점검', label: '공사점검' },
   { value: '성능평가', label: '성능평가' },
   { value: '기타', label: '기타' },
@@ -104,6 +119,9 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
   const [updateNoticeCategory] = useMutation(UPDATE_NOTICE_CATEGORY);
   const [excludeNotices] = useMutation(EXCLUDE_NOTICES);
   const [restoreNotices] = useMutation(RESTORE_NOTICES);
+  
+  // GraphQL 쿼리로 카테고리 데이터 가져오기
+  const { data: categoriesData, loading: categoriesLoading } = useQuery(GET_NOTICE_CATEGORIES);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -131,6 +149,36 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
   const [excludeLoading, setExcludeLoading] = useState(false);
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
   const [restoreLoading, setRestoreLoading] = useState(false);
+
+  // 동적 카테고리 옵션 생성
+  const categoryOptions = React.useMemo(() => {
+    if (categoriesData?.noticeCategoriesActive) {
+      const dynamicCategories = categoriesData.noticeCategoriesActive.map((cat: any) => ({
+        value: cat.category,
+        label: cat.category
+      }));
+      
+      // 무관, 제외 카테고리는 항상 포함
+      const staticCategories = [
+        { value: '무관', label: '무관' },
+        { value: '제외', label: '제외' }
+      ];
+      
+      return [...dynamicCategories, ...staticCategories];
+    }
+    return DEFAULT_CATEGORIES;
+  }, [categoriesData]);
+
+  // 업무 페이지용 카테고리 옵션 (무관, 제외 제외)
+  const workPageCategoryOptions = React.useMemo(() => {
+    if (categoriesData?.noticeCategoriesActive) {
+      return categoriesData.noticeCategoriesActive.map((cat: any) => ({
+        value: cat.category,
+        label: cat.category
+      }));
+    }
+    return DEFAULT_CATEGORIES.filter(cat => !['무관', '제외'].includes(cat.value));
+  }, [categoriesData]);
 
   // 기관명 URL 조회 및 생성 함수
   const getOrganizationUrl = async (orgName: string): Promise<string | null> => {
@@ -893,21 +941,13 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
           <div className="flex items-center gap-4">
             {isWorkPage ? (
               <CheckButtonSet
-                options={[
-                  { value: '공사점검', label: '공사점검' },
-                  { value: '성능평가', label: '성능평가' },
-                  { value: '기타', label: '기타' }
-                ]}
+                options={workPageCategoryOptions}
                 values={localCategories}
                 onChange={handleCategoriesChange}
               />
             ) : (!isIrrelevantPage && !isExcludedPage) ? (
               <RadioButtonSet
-                options={[
-                  { value: '공사점검', label: '공사점검' },
-                  { value: '성능평가', label: '성능평가' },
-                  { value: '기타', label: '기타' }
-                ]}
+                options={workPageCategoryOptions}
                 value={localCategory}
                 onChange={handleCategoryChange}
               />
@@ -1125,7 +1165,7 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
             <div className="grid gap-2">
               <Label>공고 유형</Label>
               <div className="flex flex-wrap gap-4">
-                {CATEGORIES.map((category) => (
+                {categoryOptions.map((category) => (
                   <div key={category.value} className="flex items-center space-x-2">
                     <Checkbox
                       id={`category-${category.value}`}
@@ -1182,7 +1222,7 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
             <div className="grid gap-2">
               <Label>공고 유형</Label>
               <div className="flex flex-wrap gap-4">
-                {CATEGORIES.map((category) => (
+                {categoryOptions.map((category) => (
                   <div key={category.value} className="flex items-center space-x-2">
                     <Checkbox
                       id={`edit-category-${category.value}`}

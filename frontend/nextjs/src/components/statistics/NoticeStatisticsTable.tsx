@@ -12,6 +12,8 @@ import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
 import { useUnifiedLoading } from '@/components/providers/UnifiedLoadingProvider';
+import { useQuery } from '@apollo/client';
+import { gql } from '@apollo/client';
 import { StatisticsTypeSelector } from './StatisticsTypeSelector';
 import { GapSelector } from './GapSelector';
 import { NoticeStatisticsChart } from './NoticeStatisticsChart';
@@ -20,6 +22,20 @@ import { processNoticeStatistics } from '@/lib/utils/statistics';
 import { Table as TableIcon, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+
+const GET_NOTICE_CATEGORIES = gql`
+  query GetNoticeCategories {
+    noticeCategoriesActive {
+      sn
+      category
+      keywords
+      nots
+      minPoint
+      creator
+      use
+    }
+  }
+`;
 
 interface CategoryChartData {
   date: string;
@@ -96,6 +112,9 @@ export function NoticeStatisticsTable({
   const { navigate } = useUnifiedNavigation();
   const { finishLoading } = useUnifiedLoading();
   const searchParams = useSearchParams();
+  
+  // GraphQL 쿼리로 카테고리 데이터 가져오기
+  const { data: categoriesData, loading: categoriesLoading } = useQuery(GET_NOTICE_CATEGORIES);
   const [statisticsType, setStatisticsType] = useState<string>(() => {
     const typeParam = searchParams.get('type');
     return typeParam ? (urlParamToType[typeParam] || defaultType) : defaultType;
@@ -109,6 +128,14 @@ export function NoticeStatisticsTable({
   const [orgStatistics, setOrgStatistics] = useState<any[]>([]);
   const [isLoadingOrg, setIsLoadingOrg] = useState(false);
   const [orgUrls, setOrgUrls] = useState<{ [orgName: string]: string | null }>({});
+
+  // 동적 카테고리 배열 생성
+  const categoryLabels = useMemo(() => {
+    if (categoriesData?.noticeCategoriesActive) {
+      return categoriesData.noticeCategoriesActive.map((cat: any) => cat.category);
+    }
+    return ['공사점검', '성능평가', '기타']; // 기본값
+  }, [categoriesData]);
 
   // 기관명 URL 조회 함수
   const getOrganizationUrl = async (orgName: string): Promise<string | null> => {
@@ -178,10 +205,10 @@ export function NoticeStatisticsTable({
   };
 
   const categoryStatistics = useMemo(() => 
-    processNoticeStatistics.category(initialData, 14), [initialData]);
+    processNoticeStatistics.category(initialData, 14, categoryLabels), [initialData, categoryLabels]);
 
   const regionStatistics = useMemo(() => 
-    processNoticeStatistics.region(initialData), [initialData]);
+    processNoticeStatistics.region(initialData, categoryLabels), [initialData, categoryLabels]);
 
   // URL 파라미터 변경 감지 및 상태 동기화
   useEffect(() => {
@@ -207,7 +234,7 @@ export function NoticeStatisticsTable({
       if (statisticsType === 'organization') {
         setIsLoadingOrg(true);
         try {
-          const orgData = processNoticeStatistics.organization(initialData);
+          const orgData = processNoticeStatistics.organization(initialData, categoryLabels);
           setOrgStatistics(orgData);
         } catch (error) {
           console.error('기관별 통계 데이터 로드 중 오류 발생:', error);
@@ -219,7 +246,7 @@ export function NoticeStatisticsTable({
     };
     
     loadOrgStatistics();
-  }, [statisticsType, initialData]);
+  }, [statisticsType, initialData, categoryLabels]);
 
   // 기관명 URL 로드
   useEffect(() => {
@@ -266,19 +293,19 @@ export function NoticeStatisticsTable({
     switch (statisticsType) {
       case 'category':
         data = categoryStatistics;
-        totals = processNoticeStatistics.calculateTotals(data);
+        totals = processNoticeStatistics.calculateTotals(data, categoryLabels);
         break;
       case 'region':
         data = regionStatistics;
-        totals = processNoticeStatistics.calculateTotals(data.flatMap(d => d.regions));
+        totals = processNoticeStatistics.calculateTotals(data.flatMap(d => d.regions), categoryLabels);
         break;
       case 'organization':
         data = orgStatistics;
-        totals = processNoticeStatistics.calculateTotals(data);
+        totals = processNoticeStatistics.calculateTotals(data, categoryLabels);
         break;
       default:
         data = categoryStatistics;
-        totals = processNoticeStatistics.calculateTotals(data);
+        totals = processNoticeStatistics.calculateTotals(data, categoryLabels);
     }
 
     return { statistics: data, totals };
@@ -496,36 +523,21 @@ export function NoticeStatisticsTable({
                   {statisticsType === 'region' && (
                     <TableHead className="w-[100px]">지역</TableHead>
                   )}
-                  <TableHead 
-                    className={cn(
-                      "text-center", 
-                      statisticsType === 'organization' && "cursor-pointer hover:text-primary",
-                      statisticsType === 'organization' && sortColumn === 'construction' && "text-primary font-medium"
-                    )}
-                    onClick={() => statisticsType === 'organization' && handleSort('construction')}
-                  >
-                    공사점검
-                  </TableHead>
-                  <TableHead 
-                    className={cn(
-                      "text-center", 
-                      statisticsType === 'organization' && "cursor-pointer hover:text-primary",
-                      statisticsType === 'organization' && sortColumn === 'performance' && "text-primary font-medium"
-                    )}
-                    onClick={() => statisticsType === 'organization' && handleSort('performance')}
-                  >
-                    성능평가
-                  </TableHead>
-                  <TableHead 
-                    className={cn(
-                      "text-center", 
-                      statisticsType === 'organization' && "cursor-pointer hover:text-primary",
-                      statisticsType === 'organization' && sortColumn === 'etc' && "text-primary font-medium"
-                    )}
-                    onClick={() => statisticsType === 'organization' && handleSort('etc')}
-                  >
-                    기타
-                  </TableHead>
+                  {categoryLabels.map((label) => {
+                    return (
+                      <TableHead 
+                        key={label}
+                        className={cn(
+                          "text-center", 
+                          statisticsType === 'organization' && "cursor-pointer hover:text-primary",
+                          statisticsType === 'organization' && sortColumn === label && "text-primary font-medium"
+                        )}
+                        onClick={() => statisticsType === 'organization' && handleSort(label)}
+                      >
+                        {label}
+                      </TableHead>
+                    );
+                  })}
                   <TableHead 
                     className={cn(
                       "text-center", 
@@ -558,9 +570,9 @@ export function NoticeStatisticsTable({
                           ({item.dayOfWeek})
                         </div>
                       </TableCell>
-                      <TableCell className="text-center">{item.construction}</TableCell>
-                      <TableCell className="text-center">{item.performance}</TableCell>
-                      <TableCell className="text-center">{item.etc}</TableCell>
+                      {categoryLabels.map((label) => (
+                        <TableCell key={label} className="text-center">{item[label] || 0}</TableCell>
+                      ))}
                       <TableCell className="text-center font-medium">{item.subtotal}</TableCell>
                       <TableCell className="text-center font-medium">{item.total}</TableCell>
                     </TableRow>
@@ -578,9 +590,9 @@ export function NoticeStatisticsTable({
                           </TableCell>
                         )}
                         <TableCell>{stats.region}</TableCell>
-                        <TableCell className="text-center">{stats.construction}</TableCell>
-                        <TableCell className="text-center">{stats.performance}</TableCell>
-                        <TableCell className="text-center">{stats.etc}</TableCell>
+                        {categoryLabels.map((label) => (
+                          <TableCell key={label} className="text-center">{stats[label] || 0}</TableCell>
+                        ))}
                         <TableCell className="text-center font-medium">{stats.subtotal}</TableCell>
                         <TableCell className="text-center font-medium">{stats.total}</TableCell>
                       </TableRow>
@@ -614,21 +626,21 @@ export function NoticeStatisticsTable({
                           }
                         })()}
                       </TableCell>
-                      <TableCell className="text-center">{item.construction}</TableCell>
-                      <TableCell className="text-center">{item.performance}</TableCell>
-                      <TableCell className="text-center">{item.etc}</TableCell>
+                      {categoryLabels.map((label) => (
+                        <TableCell key={label} className="text-center">{item[label] || 0}</TableCell>
+                      ))}
                       <TableCell className="text-center font-medium">{item.subtotal}</TableCell>
                       <TableCell className="text-center font-medium">{item.total}</TableCell>
                     </TableRow>
                   ))
                 )}
                 <TableRow className="bg-color-primary-hovered/50">
-                  <TableCell colSpan={statisticsType === 'organization' ? 2 : 1} className="font-bold">
+                  <TableCell colSpan={statisticsType === 'organization' ? 2 : statisticsType === 'region' ? 2 : 1} className="font-bold">
                     합계
                   </TableCell>
-                  <TableCell className="text-center font-bold">{totals.construction}</TableCell>
-                  <TableCell className="text-center font-bold">{totals.performance}</TableCell>
-                  <TableCell className="text-center font-bold">{totals.etc}</TableCell>
+                  {categoryLabels.map((label) => (
+                    <TableCell key={label} className="text-center font-bold">{totals[label] || 0}</TableCell>
+                  ))}
                   <TableCell className="text-center font-bold">{totals.subtotal}</TableCell>
                   <TableCell className="text-center font-bold">{totals.total}</TableCell>
                 </TableRow>
@@ -650,6 +662,7 @@ export function NoticeStatisticsTable({
             <NoticeStatisticsChart 
               data={statisticsType === 'category' ? statistics as CategoryChartData[] : statistics as RegionChartData[]}
               type={statisticsType as 'category' | 'region'}
+              categoryLabels={categoryLabels}
             />
           )}
         </div>
