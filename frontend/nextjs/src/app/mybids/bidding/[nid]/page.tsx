@@ -3,7 +3,7 @@ import { getClient } from '@/lib/api/graphqlClient';
 import BiddingDetailView from '@/components/mybids/BiddingDetailView';
 import ApolloWrapper from '@/components/providers/ApolloWrapper';
 import { notFound } from 'next/navigation';
-import '../../../themes.css';
+import '@/app/themes.css';
 
 const GET_BID_DETAIL = gql`
   query GetMyBidDetail($nid: Int!) {

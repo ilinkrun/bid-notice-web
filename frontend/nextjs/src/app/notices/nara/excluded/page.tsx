@@ -4,7 +4,7 @@ import { Metadata } from 'next';
 import { getClient } from '@/lib/api/graphqlClient';
 import { gql } from '@apollo/client';
 import { Notice } from '@/types/notice';
-import '../../../themes.css';
+import '@/app/themes.css';
 import { redirect } from 'next/navigation';
 import ExcludedPageClient from './ExcludedPageClient';
 

@@ -4,7 +4,7 @@ import MybidTable from '@/components/mybids/MybidTable';
 import ApolloWrapper from '@/components/providers/ApolloWrapper';
 import UnifiedDataLoadingWrapper from '@/components/shared/UnifiedDataLoadingWrapper';
 import { PageContainer } from '@/components/shared/PageContainer';
-import '../../themes.css';
+import '@/app/themes.css';
 
 const GET_PROGRESS_BIDS = gql`
   query GetProgressBids {

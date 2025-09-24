@@ -3,7 +3,7 @@ import NoticeTableSkeleton from '@/components/notices/NoticeTableSkeleton';
 import { Metadata } from 'next';
 import { getClient } from '@/lib/api/graphqlClient';
 import { gql } from '@apollo/client';
-import '../../../themes.css';
+import '@/app/themes.css';
 import { redirect } from 'next/navigation';
 import NaraPageClient from './NaraPageClient';
 

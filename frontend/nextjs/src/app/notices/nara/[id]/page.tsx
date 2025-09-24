@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 import { getClient } from '@/lib/api/graphqlClient';
 import { gql } from '@apollo/client';
 import { notFound } from 'next/navigation';
-import '../../../../themes.css';
+import '@/app/themes.css';
 import NaraDetailClient from './NaraDetailClient';
 
 interface PageProps {
