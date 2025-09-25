@@ -80,13 +80,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function IrrelevantPage({ params, searchParams }: PageProps) {
   const resolvedSearchParams = await Promise.resolve(searchParams);
 
-  // gap 파라미터가 없으면 리디렉션
+  // gap 파라미터가 없으면 리디렉션 (무관 페이지는 기본값 1 사용)
   if (!resolvedSearchParams.gap) {
-    redirect(`/notices/gov/irrelevant?gap=${process.env.NEXT_PUBLIC_DAY_GAP || '1'}`);
+    redirect(`/notices/gov/irrelevant?gap=1`);
   }
 
   try {
-    const gap = parseInt(resolvedSearchParams.gap as string || process.env.NEXT_PUBLIC_DAY_GAP || '1', 10);
+    const gap = parseInt(resolvedSearchParams.gap as string || '1', 10);
     const sort = resolvedSearchParams.sort as string || '';
     const order = resolvedSearchParams.order as string || 'asc';
 

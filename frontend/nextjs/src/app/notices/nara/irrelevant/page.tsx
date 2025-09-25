@@ -7,15 +7,16 @@ import { Notice } from '@/types/notice';
 import '@/app/themes.css';
 import { redirect } from 'next/navigation';
 import IrrelevantPageClient from './IrrelevantPageClient';
+import { getNoticeDefaults } from '@/lib/utils/appSettings';
 
 interface PageProps {
   params: Promise<{}>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-const GET_NARA_NOTICES = gql`
-  query GetNaraNotices($limit: Int, $offset: Int, $gap: Int) {
-    naraNotices(limit: $limit, offset: $offset, gap: $gap) {
+const GET_NARA_NOTICES_BY_CATEGORY = gql`
+  query GetNaraNoticesByCategory($category: String!, $gap: Int) {
+    naraNoticesByCategory(category: $category, gap: $gap) {
       id
       bidNtceNo
       bidNtceNm
@@ -45,12 +46,12 @@ async function getNaraNoticesByCategory(category: string, gap: number): Promise<
   try {
     const client = getClient();
     const { data } = await client.query({
-      query: GET_NARA_NOTICES,
-      variables: { gap, limit: 100, offset: 0 },
+      query: GET_NARA_NOTICES_BY_CATEGORY,
+      variables: { category, gap },
       fetchPolicy: 'no-cache'
     });
 
-    return data.naraNotices.map((notice: any) => {
+    return data.naraNoticesByCategory.map((notice: any) => {
       // Format date to YYYY-mm-dd
       const formatDate = (dateString: string) => {
         if (!dateString) return '';
@@ -102,13 +103,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function NaraIrrelevantPage({ params, searchParams }: PageProps) {
   const resolvedSearchParams = await Promise.resolve(searchParams);
 
+  // Get dynamic defaults from database
+  const defaults = await getNoticeDefaults();
+  const defaultGap = defaults.gap;
+
   // gap 파라미터가 없으면 리디렉션
   if (!resolvedSearchParams.gap) {
-    redirect(`/notices/nara/irrelevant?gap=${process.env.NEXT_PUBLIC_DAY_GAP || '1'}`);
+    redirect(`/notices/nara/irrelevant?gap=${defaultGap}`);
   }
 
   try {
-    const gap = parseInt(resolvedSearchParams.gap as string || process.env.NEXT_PUBLIC_DAY_GAP || '1', 10);
+    const gap = parseInt(resolvedSearchParams.gap as string || defaultGap, 10);
     const sort = resolvedSearchParams.sort as string || '';
     const order = resolvedSearchParams.order as string || 'asc';
 

@@ -69,7 +69,7 @@ const createGovNotices = (gap: string = '5', categoryDefault: string = '공사�
   },
   {
     title: '무관',
-    href: `/notices/gov/irrelevant?gap=${gap}`,
+    href: `/notices/gov/irrelevant?gap=1`,
     icon: Bookmark,
   },
   {
