@@ -9,7 +9,7 @@ import { parseStringPromise } from 'xml2js';
 export interface ApiRequestParams {
   pageNo?: number;
   numOfRows?: number;
-  inqryDiv?: string;
+  inqryDiv?: '1' | '2' | string;  // Required: 1=공고게시일시, 2=개찰일시
   inqryBgnDt?: string;
   inqryEndDt?: string;
   type?: 'xml' | 'json';
@@ -118,10 +118,14 @@ export class DataGoKrApiClient {
       pageNo: params.pageNo || 1,
       numOfRows: params.numOfRows || 100,
       type: params.type || 'json',
+      inqryDiv: params.inqryDiv || '1', // Required: 1=공고게시일시, 2=개찰일시
       ...params
     };
 
     try {
+      console.log(`[API Debug] Endpoint: ${endpoint}`);
+      console.log(`[API Debug] Params:`, requestParams);
+
       const response: AxiosResponse = await this.httpClient.get(endpoint, {
         params: requestParams,
         timeout: 30000
@@ -176,14 +180,20 @@ export class DataGoKrApiClient {
     let currentPage = 1;
     let hasMore = true;
 
-    // Format dates for API
+    // Format dates for API (YYYYMMDDHHMM format)
     const formatDate = (date: Date): string => {
-      return date.toISOString().slice(0, 10).replace(/-/g, '') + '0000'; // YYYYMMDD0000
+      const year = date.getFullYear();
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const day = date.getDate().toString().padStart(2, '0');
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      return `${year}${month}${day}${hours}${minutes}`;
     };
 
     const baseParams: ApiRequestParams = {
       numOfRows: 100,
-      type: 'json'
+      type: 'json',
+      inqryDiv: '1' // Required: search by announcement posting date
     };
 
     // Add date filters if provided
@@ -277,6 +287,7 @@ export class DataGoKrApiClient {
 
       if (!items) {
         console.warn('[API] No items found in response structure');
+        console.warn('[API] Response structure:', JSON.stringify(data, null, 2));
         return [];
       }
 
