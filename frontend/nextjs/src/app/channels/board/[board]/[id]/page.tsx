@@ -47,7 +47,7 @@ import {
 import Comments from '@/components/board/Comments';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { Button } from '@/components/ui/button';
-import { ButtonWithIcon, ButtonWithColorIcon } from '@/components/shared/FormComponents';
+import { ButtonWithIcon, ButtonWithColorIcon, RadioButtonSet } from '@/components/shared/FormComponents';
 import { Input } from '@/components/ui/input';
 
 import dynamic from 'next/dynamic';
@@ -244,6 +244,7 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isSourceMode, setIsSourceMode] = useState(false);
   const [editorMode, setEditorMode] = useState<'html' | 'markdown'>('html');
+  const [viewMode, setViewMode] = useState<'html' | 'markdown'>('html'); // 보기 모드 상태 추가
   const [error, setError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -666,7 +667,18 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
               )}
             </div>
             {!isEditMode && (
-              <div className="flex space-x-2">
+              <div className="flex items-center space-x-4">
+                {/* 보기 모드 선택 */}
+                <RadioButtonSet
+                  options={[
+                    { value: 'html', label: 'HTML' },
+                    { value: 'markdown', label: 'Markdown' }
+                  ]}
+                  value={viewMode}
+                  onChange={(value) => setViewMode(value as 'html' | 'markdown')}
+                />
+                
+                <div className="flex space-x-2">
                 {/* 답글 버튼 - 모든 사용자에게 표시 */}
                 <ButtonWithIcon
                   icon={<Reply className="h-4 w-4" />}
@@ -691,6 +703,7 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
                     </ButtonWithIcon>
                   </>
                 )}
+                </div>
               </div>
             )}
           </div>
@@ -868,10 +881,22 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
               ) : (
                 <div className="guide-content-container">
                   <div className="guide-content">
-                    {post.content && post.content.trim() ? (
-                      <div dangerouslySetInnerHTML={{ __html: post.content || '' }} />
+                    {viewMode === 'markdown' ? (
+                      // Markdown 보기 모드 - 원문 그대로 표시
+                      originalMarkdownSource && originalMarkdownSource.trim() ? (
+                        <div className="whitespace-pre-wrap font-mono text-sm">
+                          {originalMarkdownSource}
+                        </div>
+                      ) : (
+                        <div className="text-color-primary-muted-foreground italic">마크다운 원본이 없습니다.</div>
+                      )
                     ) : (
-                      <div className="text-color-primary-muted-foreground italic">내용이 없습니다.</div>
+                      // HTML 보기 모드 (기본)
+                      post.content && post.content.trim() ? (
+                        <div dangerouslySetInnerHTML={{ __html: post.content || '' }} />
+                      ) : (
+                        <div className="text-color-primary-muted-foreground italic">내용이 없습니다.</div>
+                      )
                     )}
                   </div>
                 </div>

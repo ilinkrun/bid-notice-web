@@ -14,7 +14,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import {
   ArrowLeft,
   X,
-  Save
+  Save,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { 
   Tabs, 
@@ -35,6 +37,20 @@ import remarkBreaks from 'remark-breaks';
 // MDEditor CSS는 globals.css에서 @import로 로드됨
 
 // GraphQL 쿼리
+const GET_ORIGINAL_POST = `
+  query GetOriginalPost($id: Int!, $board: String!) {
+    boardsPostsOne(id: $id, board: $board) {
+      id
+      title
+      content
+      markdown_source
+      format
+      writer
+      created_at
+    }
+  }
+`;
+
 const CREATE_POST = `
   mutation CreatePost($board: String!, $input: BoardPostInput!) {
     boardsPostCreate(board: $board, input: $input) {
@@ -158,6 +174,8 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
   const [error, setError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [originalPost, setOriginalPost] = useState<any>(null); // 원글 데이터
+  const [isOriginalPostExpanded, setIsOriginalPostExpanded] = useState(false); // 원글 펼침 상태
 
   // board 값이 이미 board_ 접두사를 포함하는지 확인
   const channelBoard = board.startsWith('board_') ? board : `board_${board}`;
@@ -176,6 +194,9 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
         reply_to: parseInt(replyToParam),
         title: titleParam ? decodeURIComponent(titleParam) : ''
       }));
+      
+      // 원글 데이터 조회
+      fetchOriginalPost(parseInt(replyToParam));
     }
   }, [formatParam, replyToParam, titleParam]);
 
@@ -189,6 +210,38 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
       }));
     }
   }, [user]);
+
+  // 원글 데이터 조회 함수
+  const fetchOriginalPost = async (postId: number) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: GET_ORIGINAL_POST,
+          variables: {
+            id: postId,
+            board: channelBoard,
+          },
+        }),
+      });
+      
+      const result = await response.json();
+      
+      if (result.errors) {
+        console.error('원글 조회 오류:', result.errors);
+        return;
+      }
+      
+      if (result.data?.boardsPostsOne) {
+        setOriginalPost(result.data.boardsPostsOne);
+      }
+    } catch (error) {
+      console.error('원글 조회 실패:', error);
+    }
+  };
 
   // 게시글 생성
   const handleCreatePost = async () => {
@@ -332,10 +385,47 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
             <div className="border-b py-2 mb-4">
               {/* 답글 작성 시 원본 게시물 정보 표시 */}
               {newPost.reply_to && (
-                <div className="mb-3 p-3 bg-color-primary-muted rounded border-l-4 border-blue-500">
-                  <p className="text-sm text-color-primary-muted-foreground mb-1">
-                    게시물 #{newPost.reply_to}에 대한 답글
-                  </p>
+                <div className="mb-3">
+                  <div className="border-l-4 border-blue-500 bg-color-primary-muted rounded">
+                    {/* 접고 펼치는 헤더 */}
+                    <button
+                      onClick={() => setIsOriginalPostExpanded(!isOriginalPostExpanded)}
+                      className="w-full p-3 flex items-center justify-between hover:bg-color-primary-hovered transition-colors"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm font-medium text-color-primary-foreground">
+                          원글: {originalPost?.title || `게시물 #${newPost.reply_to}`}
+                        </span>
+                        {originalPost && (
+                          <span className="text-xs text-color-primary-muted-foreground">
+                            by {originalPost.writer}
+                          </span>
+                        )}
+                      </div>
+                      {isOriginalPostExpanded ? (
+                        <ChevronUp className="h-4 w-4 text-color-primary-muted-foreground" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4 text-color-primary-muted-foreground" />
+                      )}
+                    </button>
+                    
+                    {/* 접을 수 있는 원글 내용 */}
+                    {isOriginalPostExpanded && originalPost && (
+                      <div className="px-3 pb-3 border-t border-color-primary-foreground/20">
+                        <div className="mt-3 text-sm">
+                          {originalPost.markdown_source ? (
+                            <div className="whitespace-pre-wrap font-mono text-xs text-color-primary-muted-foreground bg-color-primary-background/50 p-2 rounded max-h-60 overflow-y-auto">
+                              {originalPost.markdown_source}
+                            </div>
+                          ) : (
+                            <div className="text-color-primary-muted-foreground italic">
+                              마크다운 원본이 없습니다.
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
               
