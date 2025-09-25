@@ -427,17 +427,16 @@ def create_comment(data: dict):
     }
 
     try:
-      # insert 함수 직접 호출 대신 exec 사용
+      # 안전한 파라미터화된 쿼리 사용
       fields = ', '.join(insert_data.keys())
-      values = ', '.join([
-          f"'{str(v)}'" if isinstance(v, str) else str(v)
-          for v in insert_data.values()
-      ])
-      sql = f"INSERT INTO comments_board ({fields}) VALUES ({values})"
+      placeholders = ', '.join(['%s'] * len(insert_data))
+      sql = f"INSERT INTO comments_board ({fields}) VALUES ({placeholders})"
+      params = tuple(insert_data.values())
 
       print(f"Executing SQL: {sql}")  # 디버깅용
+      print(f"With params: {params}")  # 디버깅용
 
-      mysql.exec(sql)
+      mysql.exec(sql, params)
 
       # 마지막 삽입된 ID 가져오기
       result = mysql.fetch("SELECT LAST_INSERT_ID()")
