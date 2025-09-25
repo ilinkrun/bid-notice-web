@@ -34,7 +34,8 @@ import {
   Eye,
   Hash,
   X,
-  Save
+  Save,
+  Reply
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -664,20 +665,32 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
                 </div>
               )}
             </div>
-            {!isEditMode && post && user && user.email === post.email && (
+            {!isEditMode && (
               <div className="flex space-x-2">
+                {/* 답글 버튼 - 모든 사용자에게 표시 */}
                 <ButtonWithIcon
-                  icon={<Edit className="h-4 w-4" />}
-                  onClick={handleEditClick}
+                  icon={<Reply className="h-4 w-4" />}
+                  onClick={() => navigate(`/channels/board/${board}/new?reply_to=${post.id}&title=Re: ${encodeURIComponent(post.title)}`)}
                 >
-                  수정
+                  답글
                 </ButtonWithIcon>
-                <ButtonWithIcon
-                  icon={<Trash2 className="h-4 w-4" />}
-                  onClick={handleDeleteClick}
-                >
-                  삭제
-                </ButtonWithIcon>
+                {/* 수정/삭제 버튼 - 작성자에게만 표시 */}
+                {post && user && user.email === post.email && (
+                  <>
+                    <ButtonWithIcon
+                      icon={<Edit className="h-4 w-4" />}
+                      onClick={handleEditClick}
+                    >
+                      수정
+                    </ButtonWithIcon>
+                    <ButtonWithIcon
+                      icon={<Trash2 className="h-4 w-4" />}
+                      onClick={handleDeleteClick}
+                    >
+                      삭제
+                    </ButtonWithIcon>
+                  </>
+                )}
               </div>
             )}
           </div>

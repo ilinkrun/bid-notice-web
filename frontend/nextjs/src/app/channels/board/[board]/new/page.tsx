@@ -139,6 +139,8 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
   const { isAuthenticated, user } = useAuth();
   const searchParams = useSearchParams();
   const formatParam = searchParams.get('format'); // 'format' 파라미터 확인
+  const replyToParam = searchParams.get('reply_to'); // 답글 대상 게시물 ID
+  const titleParam = searchParams.get('title'); // 답글 제목
   
   const [newPost, setNewPost] = useState<any>({
     title: '',
@@ -149,6 +151,7 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
     email: '',
     is_notice: false,
     is_private: false,
+    reply_to: null,
   });
   const [editingMarkdown, setEditingMarkdown] = useState<string>(''); // 편집 중인 마크다운
   const [editorMode, setEditorMode] = useState<'html' | 'markdown'>('markdown'); // 기본값 markdown
@@ -165,7 +168,16 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
       setEditorMode('markdown');
       setNewPost(prev => ({ ...prev, format: 'markdown' }));
     }
-  }, [formatParam]);
+    
+    // 답글 파라미터 처리
+    if (replyToParam) {
+      setNewPost(prev => ({ 
+        ...prev, 
+        reply_to: parseInt(replyToParam),
+        title: titleParam ? decodeURIComponent(titleParam) : ''
+      }));
+    }
+  }, [formatParam, replyToParam, titleParam]);
 
   // 로그인된 사용자의 이름과 이메일을 자동 입력
   useEffect(() => {
@@ -223,6 +235,7 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
         email: user.email,
         is_notice: newPost.is_notice || false,
         is_private: newPost.is_private || false,
+        reply_to: newPost.reply_to || null,
       };
 
       console.log('🚀 Frontend sending createData:', createData);
@@ -317,12 +330,21 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
 
           <div className="border rounded-lg p-4">
             <div className="border-b py-2 mb-4">
+              {/* 답글 작성 시 원본 게시물 정보 표시 */}
+              {newPost.reply_to && (
+                <div className="mb-3 p-3 bg-color-primary-muted rounded border-l-4 border-blue-500">
+                  <p className="text-sm text-color-primary-muted-foreground mb-1">
+                    게시물 #{newPost.reply_to}에 대한 답글
+                  </p>
+                </div>
+              )}
+              
               <h1 className="text-2xl font-bold mb-2">
                 <Input
                   value={newPost.title}
                   onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
                   className={`text-2xl font-bold ${inputClass}`}
-                  placeholder="제목을 입력하세요"
+                  placeholder={newPost.reply_to ? "답글 제목을 입력하세요" : "제목을 입력하세요"}
                 />
               </h1>
               

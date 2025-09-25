@@ -77,6 +77,8 @@ const GET_POSTS = `
       is_visible
       is_notice
       is_private
+      reply_to
+      reply_depth
     }
   }
 `;
@@ -815,6 +817,11 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
                         <DataTableCell className="max-w-[400px] truncate">
                           {post.is_notice && <span className="text-red-600 font-semibold">[공지] </span>}
                           {post.is_private && <span className="text-color-primary-muted-foreground font-semibold">[비공개] </span>}
+                          {post.reply_to && (
+                            <span className="text-blue-600 font-semibold mr-1">
+                              {'└'.repeat(post.reply_depth || 1)} 
+                            </span>
+                          )}
                           {post.title}
                         </DataTableCell>
                         <DataTableCell>{post.writer}</DataTableCell>

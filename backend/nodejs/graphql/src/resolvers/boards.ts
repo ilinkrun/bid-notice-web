@@ -14,6 +14,8 @@ interface BoardPostRow {
   is_visible: boolean;
   is_notice: boolean;
   is_private: boolean;
+  reply_to?: number;
+  reply_depth?: number;
 }
 
 interface BoardCommentRow {
@@ -46,7 +48,9 @@ const transformPostRow = (row: BoardPostRow) => ({
   updated_at: formatDate(row.updated_at),
   is_visible: Boolean(row.is_visible),
   is_notice: Boolean(row.is_notice),
-  is_private: Boolean(row.is_private)
+  is_private: Boolean(row.is_private),
+  reply_to: row.reply_to || null,
+  reply_depth: row.reply_depth || 0
 });
 
 const transformCommentRow = (row: BoardCommentRow) => ({
@@ -72,6 +76,7 @@ export interface PostInput {
   is_visible?: number | boolean;
   is_notice?: boolean;
   is_private?: boolean;
+  reply_to?: number;
 }
 
 export interface CommentInput {
@@ -123,10 +128,13 @@ export const boardsResolvers = {
         const whereClause = conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';
 
         const query = `
-          SELECT id, title, writer, email, created_at, updated_at, is_visible, is_notice, is_private
+          SELECT id, title, writer, email, created_at, updated_at, is_visible, is_notice, is_private, reply_to, reply_depth
           FROM ${board}
           ${whereClause}
-          ORDER BY is_notice DESC, created_at DESC
+          ORDER BY is_notice DESC, 
+                   COALESCE(reply_to, id), 
+                   reply_depth, 
+                   created_at ASC
         `;
 
         const rows = await executeQuery(query, params) as BoardPostRow[];
@@ -142,7 +150,7 @@ export const boardsResolvers = {
 
         const query = `
           SELECT id, title, content, markdown_source, format, writer, email,
-                 created_at, updated_at, is_visible, is_notice, is_private
+                 created_at, updated_at, is_visible, is_notice, is_private, reply_to, reply_depth
           FROM ${board}
           WHERE id = ?
         `;
@@ -241,9 +249,20 @@ export const boardsResolvers = {
           throw new Error('올바르지 않은 format입니다. text, markdown, html 중 하나여야 합니다.');
         }
 
+        // reply_depth 계산
+        let replyDepth = 0;
+        if (input.reply_to) {
+          // 답글 대상의 reply_depth를 조회하여 +1
+          const parentQuery = `SELECT reply_depth FROM ${board} WHERE id = ?`;
+          const parentRows = await executeQuery(parentQuery, [input.reply_to]) as { reply_depth: number }[];
+          if (parentRows.length > 0) {
+            replyDepth = (parentRows[0].reply_depth || 0) + 1;
+          }
+        }
+
         const insertQuery = `
-          INSERT INTO ${board} (title, content, markdown_source, format, writer, email, is_visible, is_notice, is_private)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+          INSERT INTO ${board} (title, content, markdown_source, format, writer, email, is_visible, is_notice, is_private, reply_to, reply_depth)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         const params = [
@@ -255,7 +274,9 @@ export const boardsResolvers = {
           input.email,
           input.is_visible !== false ? 1 : 0,
           input.is_notice ? 1 : 0,
-          input.is_private ? 1 : 0
+          input.is_private ? 1 : 0,
+          input.reply_to || null,
+          replyDepth
         ];
 
         const result = await executeQuery(insertQuery, params) as { insertId: number; affectedRows: number };
@@ -264,7 +285,7 @@ export const boardsResolvers = {
         // 생성된 게시글 조회
         const selectQuery = `
           SELECT id, title, content, markdown_source, format, writer, email,
-                 created_at, updated_at, is_visible, is_notice, is_private
+                 created_at, updated_at, is_visible, is_notice, is_private, reply_to, reply_depth
           FROM ${board}
           WHERE id = ?
         `;
@@ -349,7 +370,7 @@ export const boardsResolvers = {
         // 수정된 게시글 조회
         const selectQuery = `
           SELECT id, title, content, markdown_source, format, writer, email,
-                 created_at, updated_at, is_visible, is_notice, is_private
+                 created_at, updated_at, is_visible, is_notice, is_private, reply_to, reply_depth
           FROM ${board}
           WHERE id = ?
         `;
@@ -380,7 +401,7 @@ export const boardsResolvers = {
         // 이메일 확인 및 기존 게시글 정보 조회
         const selectQuery = `
           SELECT id, title, content, markdown_source, format, writer, email,
-                 created_at, updated_at, is_visible, is_notice, is_private
+                 created_at, updated_at, is_visible, is_notice, is_private, reply_to, reply_depth
           FROM ${board}
           WHERE id = ?
         `;

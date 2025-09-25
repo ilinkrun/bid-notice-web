@@ -12,6 +12,8 @@ export const boardsTypeDefs = `#graphql
     is_visible: Boolean
     is_notice: Boolean
     is_private: Boolean
+    reply_to: Int
+    reply_depth: Int
   }
 
   type BoardComment {
@@ -44,6 +46,7 @@ export const boardsTypeDefs = `#graphql
     is_visible: Boolean
     is_notice: Boolean
     is_private: Boolean
+    reply_to: Int
   }
 
   input BoardCommentInput {
