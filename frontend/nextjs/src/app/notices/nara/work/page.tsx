@@ -7,6 +7,7 @@ import { Notice } from '@/types/notice';
 import '@/app/themes.css';
 import { redirect } from 'next/navigation';
 import WorkPageClient from './WorkPageClient';
+import { getNoticeDefaults } from '@/lib/utils/appSettings';
 
 interface PageProps {
   params: Promise<{}>;
@@ -101,18 +102,23 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function NaraWorkPage({ params, searchParams }: PageProps) {
   const resolvedSearchParams = await Promise.resolve(searchParams);
 
+  // Get dynamic defaults from database
+  const defaults = await getNoticeDefaults();
+  const defaultCategories = defaults.categoryDefault; // Use full category list as default
+  const defaultGap = defaults.gap;
+
   // gap 파라미터가 없으면 리디렉션
   if (!resolvedSearchParams.gap) {
-    redirect(`/notices/nara/work?category=공사점검&gap=${process.env.NEXT_PUBLIC_DAY_GAP || '1'}`);
+    redirect(`/notices/nara/work?category=${defaultCategories}&gap=${defaultGap}`);
   }
 
   // category 파라미터가 없으면 기본값으로 리디렉션
   if (!resolvedSearchParams.category) {
-    redirect(`/notices/nara/work?category=공사점검&gap=${resolvedSearchParams.gap}`);
+    redirect(`/notices/nara/work?category=${defaultCategories}&gap=${resolvedSearchParams.gap}`);
   }
 
   try {
-    const gap = parseInt(resolvedSearchParams.gap as string || process.env.NEXT_PUBLIC_DAY_GAP || '1', 10);
+    const gap = parseInt(resolvedSearchParams.gap as string || defaultGap, 10);
     const sort = resolvedSearchParams.sort as string || '';
     const order = resolvedSearchParams.order as string || 'asc';
 

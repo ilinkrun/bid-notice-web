@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import { useUnifiedNavigation } from '@/hooks/useUnifiedNavigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
-import { useMutation } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import { gql } from '@apollo/client';
 import { getClient } from '@/lib/api/graphqlClient';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -53,40 +53,47 @@ const LOGOUT_MUTATION = gql`
   }
 `;
 
-const govNotices = [
+const GET_NOTICE_DEFAULTS = gql`
+  query GetNoticeDefaults {
+    gap: appSettingValue(area: "frontend", name: "notice_date_gap")
+    categoryDefault: appSettingValue(area: "frontend", name: "category_view_default")
+  }
+`;
+
+const createGovNotices = (gap: string = '5', categoryDefault: string = '공사점검,성능평가,정밀안전진단,정기안전점검,구조설계,구조감리,기타') => [
   {
     title: '업무',
-    href: '/notices/gov/work?category=공사점검&gap=1',
+    href: `/notices/gov/work?category=${categoryDefault}&gap=${gap}`,
     icon: BookmarkPlus,
     description: '공사점검, 성능평가, 기타 통합 페이지',
   },
   {
     title: '무관',
-    href: '/notices/gov/irrelevant?gap=1',
+    href: `/notices/gov/irrelevant?gap=${gap}`,
     icon: Bookmark,
   },
   {
     title: '제외',
-    href: '/notices/gov/excluded?gap=1',
+    href: `/notices/gov/excluded?gap=${gap}`,
     icon: Archive,
   },
 ];
 
-const naraNotices = [
+const createNaraNotices = (gap: string = '5', categoryDefault: string = '공사점검,성능평가,정밀안전진단,정기안전점검,구조설계,구조감리,기타') => [
   {
     title: '업무',
-    href: '/notices/nara/work?category=공사점검&gap=1',
+    href: `/notices/nara/work?category=${categoryDefault}&gap=${gap}`,
     icon: BookmarkPlus,
     description: '공사점검, 성능평가, 기타 통합 페이지',
   },
   {
     title: '무관',
-    href: '/notices/nara/irrelevant?gap=1',
+    href: `/notices/nara/irrelevant?gap=${gap}`,
     icon: Bookmark,
   },
   {
     title: '제외',
-    href: '/notices/nara/excluded?gap=1',
+    href: `/notices/nara/excluded?gap=${gap}`,
     icon: Archive,
   },
 ];
@@ -792,6 +799,19 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
   const { isAuthenticated } = useAuth();
   const { hasRole } = usePermissions();
   const pathname = usePathname();
+
+  // 동적 기본값 로드
+  const { data: noticeDefaults, loading: noticeDefaultsLoading } = useQuery(GET_NOTICE_DEFAULTS, {
+    fetchPolicy: 'cache-first'
+  });
+
+  // 기본값이 로딩 중일 때는 기본값 사용
+  const gap = noticeDefaults?.gap || '5';
+  const categoryDefault = noticeDefaults?.categoryDefault || '공사점검,성능평가,정밀안전진단,정기안전점검,구조설계,구조감리,기타';
+
+  // 동적으로 메뉴 생성
+  const govNotices = createGovNotices(gap, categoryDefault);
+  const naraNotices = createNaraNotices(gap, categoryDefault);
 
   return (
     <header className="sticky top-0 z-[60] w-full border-b bg-slate-200 dark:bg-slate-800 backdrop-blur supports-[backdrop-filter]:bg-slate-200/90 supports-[backdrop-filter]:dark:bg-slate-800/90">

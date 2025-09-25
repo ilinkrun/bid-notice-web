@@ -1,4 +1,24 @@
 import { apiClient } from '../lib/api/backendClient.js';
+import { executeQuery } from '../lib/mysql.js';
+
+// App Settings
+export interface AppSettingData {
+  sn: number;
+  area: string;
+  name: string;
+  value: string;
+  remark?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AppSettingInput {
+  sn?: number;
+  area: string;
+  name: string;
+  value: string;
+  remark?: string;
+}
 
 // Settings Notice List
 export interface SettingsNoticeListData {
@@ -121,22 +141,6 @@ export interface SettingsNasPathInput {
   isActive?: boolean;
 }
 
-// Settings App Default
-export interface SettingsAppDefaultData {
-  id: string;
-  setting_key: string;
-  setting_value: string;
-  description?: string;
-  category?: string;
-}
-
-export interface SettingsAppDefaultInput {
-  id?: string;
-  settingKey: string;
-  settingValue: string;
-  description?: string;
-  category?: string;
-}
 
 export interface NoticeSearchResult {
   nid?: number;
@@ -480,52 +484,95 @@ export const settingsResolvers = {
       }
     },
 
-    // Settings App Default
-    settingsAppDefaultAll: async () => {
+    // App Settings - Direct MySQL queries
+    appSettingsAll: async () => {
       try {
-        const response = await apiClient.get('/settings_app_default');
-        return response.data.map((setting: SettingsAppDefaultData) => ({
-          id: setting.id,
-          settingKey: setting.setting_key,
-          settingValue: setting.setting_value,
-          description: setting.description || '',
-          category: setting.category || ''
+        const rows = await executeQuery(`
+          SELECT sn, area, name, value, remark, created_at, updated_at
+          FROM settings_app_default
+          ORDER BY area ASC, name ASC
+        `) as AppSettingData[];
+
+        return rows.map(row => ({
+          sn: row.sn,
+          area: row.area,
+          name: row.name,
+          value: row.value,
+          remark: row.remark || null,
+          created_at: row.created_at,
+          updated_at: row.updated_at
         }));
       } catch (error) {
-        console.error('Error fetching all app default settings:', error);
-        return [];
+        console.error('Error fetching app settings:', error);
+        throw new Error('Failed to fetch app settings');
       }
     },
 
-    settingsAppDefaultByCategory: async (_: unknown, { category }: { category: string }) => {
+    appSettingsByArea: async (_: unknown, { area }: { area: string }) => {
       try {
-        const response = await apiClient.get(`/settings_app_default/category/${category}`);
-        return response.data.map((setting: SettingsAppDefaultData) => ({
-          id: setting.id,
-          settingKey: setting.setting_key,
-          settingValue: setting.setting_value,
-          description: setting.description || '',
-          category: setting.category || ''
+        const rows = await executeQuery(`
+          SELECT sn, area, name, value, remark, created_at, updated_at
+          FROM settings_app_default
+          WHERE area = ?
+          ORDER BY name ASC
+        `, [area]) as AppSettingData[];
+
+        return rows.map(row => ({
+          sn: row.sn,
+          area: row.area,
+          name: row.name,
+          value: row.value,
+          remark: row.remark || null,
+          created_at: row.created_at,
+          updated_at: row.updated_at
         }));
       } catch (error) {
-        console.error('Error fetching app default settings by category:', error);
-        return [];
+        console.error('Error fetching app settings by area:', error);
+        throw new Error('Failed to fetch app settings by area');
       }
     },
 
-    settingsAppDefaultOne: async (_: unknown, { settingKey }: { settingKey: string }) => {
+    appSettingByName: async (_: unknown, { area, name }: { area: string, name: string }) => {
       try {
-        const response = await apiClient.get(`/settings_app_default/key/${settingKey}`);
-        const setting = response.data;
+        const rows = await executeQuery(`
+          SELECT sn, area, name, value, remark, created_at, updated_at
+          FROM settings_app_default
+          WHERE area = ? AND name = ?
+          LIMIT 1
+        `, [area, name]) as AppSettingData[];
+
+        if (rows.length === 0) {
+          return null;
+        }
+
+        const row = rows[0];
         return {
-          id: setting.id,
-          settingKey: setting.setting_key,
-          settingValue: setting.setting_value,
-          description: setting.description || '',
-          category: setting.category || ''
+          sn: row.sn,
+          area: row.area,
+          name: row.name,
+          value: row.value,
+          remark: row.remark || null,
+          created_at: row.created_at,
+          updated_at: row.updated_at
         };
       } catch (error) {
-        console.error('Error fetching app default settings by key:', error);
+        console.error('Error fetching app setting by name:', error);
+        return null;
+      }
+    },
+
+    appSettingValue: async (_: unknown, { area, name }: { area: string, name: string }) => {
+      try {
+        const rows = await executeQuery(`
+          SELECT value
+          FROM settings_app_default
+          WHERE area = ? AND name = ?
+          LIMIT 1
+        `, [area, name]) as { value: string }[];
+
+        return rows.length > 0 ? rows[0].value : null;
+      } catch (error) {
+        console.error('Error fetching app setting value:', error);
         return null;
       }
     },
@@ -953,56 +1000,90 @@ export const settingsResolvers = {
       }
     },
 
-    // Settings App Default Mutations
-    settingsAppDefaultCreate: async (_: unknown, { input }: { input: SettingsAppDefaultInput }) => {
+    // App Settings Mutations - Direct MySQL
+    appSettingCreate: async (_: unknown, { input }: { input: AppSettingInput }) => {
       try {
-        const response = await apiClient.post('/settings_app_default', {
-          setting_key: input.settingKey,
-          setting_value: input.settingValue,
-          description: input.description || '',
-          category: input.category || ''
-        });
+        const result = await executeQuery(`
+          INSERT INTO settings_app_default (area, name, value, remark)
+          VALUES (?, ?, ?, ?)
+        `, [input.area, input.name, input.value, input.remark || null]);
+
+        const insertId = (result as any).insertId;
+
+        const rows = await executeQuery(`
+          SELECT sn, area, name, value, remark, created_at, updated_at
+          FROM settings_app_default
+          WHERE sn = ?
+        `, [insertId]) as AppSettingData[];
+
+        if (rows.length === 0) {
+          throw new Error('Failed to retrieve created setting');
+        }
+
+        const row = rows[0];
         return {
-          id: response.data.id,
-          settingKey: response.data.setting_key,
-          settingValue: response.data.setting_value,
-          description: response.data.description || '',
-          category: response.data.category || ''
+          sn: row.sn,
+          area: row.area,
+          name: row.name,
+          value: row.value,
+          remark: row.remark || null,
+          created_at: row.created_at,
+          updated_at: row.updated_at
         };
       } catch (error) {
-        console.error('Error creating app default settings:', error);
-        throw new Error('Failed to create app default settings');
+        console.error('Error creating app setting:', error);
+        throw new Error('Failed to create app setting');
       }
     },
 
-    settingsAppDefaultUpdate: async (_: unknown, { input }: { input: SettingsAppDefaultInput }) => {
+    appSettingUpdate: async (_: unknown, { input }: { input: AppSettingInput }) => {
       try {
-        const response = await apiClient.put(`/settings_app_default/${input.id}`, {
-          setting_key: input.settingKey,
-          setting_value: input.settingValue,
-          description: input.description || '',
-          category: input.category || ''
-        });
+        if (!input.sn) {
+          throw new Error('sn is required for update');
+        }
+
+        await executeQuery(`
+          UPDATE settings_app_default
+          SET area = ?, name = ?, value = ?, remark = ?, updated_at = CURRENT_TIMESTAMP
+          WHERE sn = ?
+        `, [input.area, input.name, input.value, input.remark || null, input.sn]);
+
+        const rows = await executeQuery(`
+          SELECT sn, area, name, value, remark, created_at, updated_at
+          FROM settings_app_default
+          WHERE sn = ?
+        `, [input.sn]) as AppSettingData[];
+
+        if (rows.length === 0) {
+          throw new Error('Setting not found after update');
+        }
+
+        const row = rows[0];
         return {
-          id: response.data.id,
-          settingKey: response.data.setting_key,
-          settingValue: response.data.setting_value,
-          description: response.data.description || '',
-          category: response.data.category || ''
+          sn: row.sn,
+          area: row.area,
+          name: row.name,
+          value: row.value,
+          remark: row.remark || null,
+          created_at: row.created_at,
+          updated_at: row.updated_at
         };
       } catch (error) {
-        console.error('Error updating app default settings:', error);
-        throw new Error('Failed to update app default settings');
+        console.error('Error updating app setting:', error);
+        throw new Error('Failed to update app setting');
       }
     },
 
-    settingsAppDefaultDelete: async (_: unknown, { id }: { id: string }) => {
+    appSettingDelete: async (_: unknown, { sn }: { sn: number }) => {
       try {
-        await apiClient.delete(`/settings_app_default/${id}`);
-        return true;
+        const result = await executeQuery(`
+          DELETE FROM settings_app_default WHERE sn = ?
+        `, [sn]);
+
+        return (result as any).affectedRows > 0;
       } catch (error) {
-        console.error('Error deleting app default settings:', error);
-        throw new Error('Failed to delete app default settings');
+        console.error('Error deleting app setting:', error);
+        throw new Error('Failed to delete app setting');
       }
     },
   },

@@ -6,6 +6,7 @@ import { gql } from '@apollo/client';
 import '@/app/themes.css';
 import { redirect } from 'next/navigation';
 import NaraPageClient from './NaraPageClient';
+import { getNoticeDefaults } from '@/lib/utils/appSettings';
 
 interface PageProps {
   params: Promise<{}>;
@@ -96,13 +97,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function NaraPage({ params, searchParams }: PageProps) {
   const resolvedSearchParams = await Promise.resolve(searchParams);
 
+  // Get dynamic defaults from database
+  const defaults = await getNoticeDefaults();
+  const defaultGap = defaults.gap;
+
   // gap 파라미터가 없으면 리디렉션
   if (!resolvedSearchParams.gap) {
-    redirect(`/notices/nara?gap=${process.env.NEXT_PUBLIC_DAY_GAP || '1'}`);
+    redirect(`/notices/nara?gap=${defaultGap}`);
   }
 
   try {
-    const gap = parseInt(resolvedSearchParams.gap as string || process.env.NEXT_PUBLIC_DAY_GAP || '1', 10);
+    const gap = parseInt(resolvedSearchParams.gap as string || defaultGap, 10);
     const sort = resolvedSearchParams.sort as string || '';
     const order = resolvedSearchParams.order as string || 'asc';
     const limit = parseInt(resolvedSearchParams.limit as string || '100', 10);

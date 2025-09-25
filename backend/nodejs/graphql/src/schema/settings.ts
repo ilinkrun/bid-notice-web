@@ -66,12 +66,14 @@ export const settingsTypeDefs = `#graphql
     isActive: Boolean!
   }
 
-  type SettingsAppDefault {
-    id: String!
-    settingKey: String!
-    settingValue: String!
-    description: String
-    category: String
+  type AppSetting {
+    sn: Int!
+    area: String!
+    name: String!
+    value: String!
+    remark: String
+    created_at: String
+    updated_at: String
   }
 
   extend type Query {
@@ -92,9 +94,10 @@ export const settingsTypeDefs = `#graphql
     settingsNasPathAll: [SettingsNasPath!]!
     settingsNasPathOne(id: String!): SettingsNasPath
     
-    settingsAppDefaultAll: [SettingsAppDefault!]!
-    settingsAppDefaultByCategory(category: String!): [SettingsAppDefault!]!
-    settingsAppDefaultOne(settingKey: String!): SettingsAppDefault
+    appSettingsAll: [AppSetting!]!
+    appSettingsByArea(area: String!): [AppSetting!]!
+    appSettingByName(area: String!, name: String!): AppSetting
+    appSettingValue(area: String!, name: String!): String
   }
 
   extend type Mutation {
@@ -128,9 +131,9 @@ export const settingsTypeDefs = `#graphql
     settingsNasPathUpdate(input: SettingsNasPathInput!): SettingsNasPath!
     settingsNasPathDelete(id: String!): Boolean
     
-    settingsAppDefaultCreate(input: SettingsAppDefaultInput!): SettingsAppDefault!
-    settingsAppDefaultUpdate(input: SettingsAppDefaultInput!): SettingsAppDefault!
-    settingsAppDefaultDelete(id: String!): Boolean
+    appSettingCreate(input: AppSettingInput!): AppSetting!
+    appSettingUpdate(input: AppSettingInput!): AppSetting!
+    appSettingDelete(sn: Int!): Boolean
   }
 
   input SettingsNoticeListInput {
@@ -191,12 +194,12 @@ export const settingsTypeDefs = `#graphql
     isActive: Boolean
   }
 
-  input SettingsAppDefaultInput {
-    id: String
-    settingKey: String!
-    settingValue: String!
-    description: String
-    category: String
+  input AppSettingInput {
+    sn: Int
+    area: String!
+    name: String!
+    value: String!
+    remark: String
   }
 
   input CategorySearchInput {
