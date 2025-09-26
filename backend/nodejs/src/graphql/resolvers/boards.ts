@@ -1,4 +1,4 @@
-import { pool, executeQuery } from '../lib/mysql.js';
+import { pool, executeQuery } from '@/utils/mysql';
 
 // MySQL Row interfaces
 interface BoardPostRow {

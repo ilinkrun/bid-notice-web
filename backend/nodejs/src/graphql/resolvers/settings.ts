@@ -1,5 +1,5 @@
-import { apiClient } from '../lib/api/backendClient.js';
-import { executeQuery } from '../lib/mysql.js';
+import { apiClient } from '@/utils/api/backendClient';
+import { executeQuery } from '@/utils/mysql';
 
 // App Settings
 export interface AppSettingData {

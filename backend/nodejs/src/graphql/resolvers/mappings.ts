@@ -1,4 +1,4 @@
-import { executeQuery } from '../lib/mysql.js';
+import { executeQuery } from '@/utils/mysql';
 
 // 간단한 메모리 캐시 구현
 interface CacheItem {

@@ -1,4 +1,4 @@
-import { spiderApiClient } from '../lib/api/backendClient.js';
+import { spiderApiClient } from '@/utils/api/backendClient';
 
 export const spidersResolvers = {
   Query: {

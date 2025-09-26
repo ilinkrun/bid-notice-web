@@ -1,4 +1,4 @@
-import { pool } from '../lib/mysql.js';
+import { pool } from '@/utils/mysql';
 
 interface G2bNoticeRow {
   id: number;

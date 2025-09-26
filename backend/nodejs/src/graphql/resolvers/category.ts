@@ -1,4 +1,4 @@
-import { executeQuery } from '../lib/mysql.js';
+import { executeQuery } from '@/utils/mysql';
 
 export interface NoticeCategoryData {
   sn: number;
