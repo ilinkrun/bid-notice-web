@@ -11,6 +11,11 @@
     "graphql:dev": "tsx --tsconfig tsconfig.json src/graphql/server.ts",
     "graphql:build": "swc src/graphql -d dist/graphql --config-file .swcrc",
     "graphql:start": "node dist/graphql/server.js",
+
+    "spider:gov": "tsx --tsconfig tsconfig.json src/execs/spider-gov.ts",
+    "spider:nara": "tsx --tsconfig tsconfig.json src/execs/spider-nara.ts",
+    "spider:nara:detail": "tsx --tsconfig tsconfig.json src/execs/spider-nara-detail.ts",
+
     "spider:list": "tsx --tsconfig tsconfig.json src/execs/spider_list.ts",
     "spider:detail": "tsx --tsconfig tsconfig.json src/execs/spider_detail.ts",
     "test:gov": "tsx --tsconfig tsconfig.json src/execs/test-gov-scraping.ts",
