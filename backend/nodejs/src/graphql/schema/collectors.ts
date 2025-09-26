@@ -8,11 +8,26 @@ export const collectorsTypeDefs = `#graphql
     errors: [String!]!
   }
 
+  type DetailScrapingData {
+    title: String
+    bodyHtml: String
+    fileName: String
+    fileUrl: String
+    noticeDiv: String
+    noticeNum: String
+    orgDept: String
+    orgMan: String
+    orgTel: String
+    detailUrl: String
+    orgName: String
+  }
+
   type CollectDetailResult {
     success: Boolean!
     processed: Int!
     updated: Int!
     errors: [String!]!
+    data: DetailScrapingData
   }
 
   type ScrapingResult {
@@ -32,6 +47,17 @@ export const collectorsTypeDefs = `#graphql
   input CollectDetailInput {
     orgName: String
     noticeId: String
+    sampleUrl: String
+    title: String
+    bodyHtml: String
+    fileName: String
+    fileUrl: String
+    preview: String
+    noticeDiv: String
+    noticeNum: String
+    orgDept: String
+    orgMan: String
+    orgTel: String
     limit: Int
     dryRun: Boolean
     debug: Boolean

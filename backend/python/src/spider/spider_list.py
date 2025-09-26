@@ -6,7 +6,7 @@ from utils.utils_search import find_nids_for_fetch_notice_details
 from utils.utils_data import save_html, load_html, valid_str, arr_from_csv, dict_from_tuple, dicts_from_tuples, csv_from_dict, csv_from_dicts, csv_added_defaults, fix_encoding_response, _now
 from mysql.mysql_logs import insert_all_logs, insert_all_errors
 from mysql.mysql_notice import find_last_notice, update_all_category
-from mysql.mysql_settings import find_settings_notice_list, find_settings_notice_list_by_org_name
+from mysql.mysql_settings import find_settings_notice_list, find_settings_notice_list_by_org_name, CATEGORIES
 from utils.utils_mysql import Mysql
 from utils.utils_lxml import get_rows, get_dict, get_val, remove_scripts_from_html, remove_els_from_html
 from playwright.sync_api import Playwright, sync_playwright
@@ -196,6 +196,40 @@ def get_scrapping_settings(org_name):
   return find_settings_notice_list_by_org_name(org_name)
 
 
+def find_settings_by_org_name(org_name, output_format='dict'):
+  """
+  기관명을 입력받아 해당 기관의 스크래핑 설정을 반환하는 헬퍼 함수
+
+  Args:
+    org_name (str): 기관명
+    output_format (str): 반환 형식 ('dict' 또는 'tuple')
+
+  Returns:
+    dict or tuple: 스크래핑 설정 또는 None
+  """
+  tuple_settings = find_settings_notice_list_by_org_name(org_name)
+
+  if not tuple_settings:
+    return None
+
+  if output_format == 'tuple':
+    return tuple_settings
+
+  # dict 형식으로 변환
+  field_names = [
+    'oid', 'org_name', 'url', 'iframe', 'rowXpath', 'paging',
+    'startPage', 'endPage', 'login', 'org_region', 'registration',
+    'use', 'company_in_charge', 'org_man', 'exception_row', 'elements'
+  ]
+
+  settings_dict = {}
+  for i, value in enumerate(tuple_settings):
+    if i < len(field_names):
+      settings_dict[field_names[i]] = value
+
+  return settings_dict
+
+
 def set_list_page(url, paging, pageNum):
   """페이징 URL 설정"""
   return (url.replace("${i}", str(pageNum)),
@@ -305,14 +339,15 @@ def _get_rows_after_rows(rows, row, key, rst):
 # ** 메인 스크래핑 함수
 
 
-def scrape_list(org_name, start_page=1, end_page=1, debug=False):
+def scrape_list_by_settings(settings, debug=False):
   """
-  특정 기관의 게시판 목록을 스크래핑
+  스크래핑 설정을 직접 받아서 게시판 목록을 스크래핑
 
   Args:
-    org_name (str): 스크래핑할 기관명
-    start_page (int): 시작 페이지 번호
-    end_page (int): 종료 페이지 번호
+    settings (dict): 스크래핑 설정 딕셔너리 (settings_notice_list 테이블의 필드들)
+                    필수 필드: org_name, url, rowXpath, startPage, endPage, elements
+                    선택 필드: iframe, paging, login, exception_row 등
+    debug (bool): 디버그 모드
 
   Returns:
     dict: {
@@ -321,6 +356,23 @@ def scrape_list(org_name, start_page=1, end_page=1, debug=False):
       'data': 스크래핑된 결과 dictionary 리스트
     }
   """
+  # 설정에서 필요한 값들 추출
+  org_name = settings.get('org_name', '')
+  url = settings.get('url', '')
+  iframe = settings.get('iframe', '')
+  rowXpath = settings.get('rowXpath', '')
+  paging = settings.get('paging', '')
+  config_start_page = settings.get('startPage', 1)
+  config_end_page = settings.get('endPage', 1)
+  login = settings.get('login', '')
+  org_region = settings.get('org_region', '')
+  registration = settings.get('registration', '')
+  use = settings.get('use', 1)
+  company_in_charge = settings.get('company_in_charge', '')
+  org_man = settings.get('org_man', '')
+  exception_row = settings.get('exception_row', '')
+  elements = settings.get('elements', '')
+
   # 반환 객체 초기화
   result = {
       'org_name': org_name,
@@ -329,25 +381,12 @@ def scrape_list(org_name, start_page=1, end_page=1, debug=False):
       'data': []
   }
 
-  # 설정 가져오기
-  settings = get_scrapping_settings(org_name)
-  if not settings:
-    error_msg = f"{org_name}에 대한 설정을 찾을 수 없습니다."
+  # 필수 설정 확인
+  if not org_name or not url or not rowXpath:
+    error_msg = f"필수 설정이 누락되었습니다. org_name: {org_name}, url: {url}, rowXpath: {rowXpath}"
     result['error_code'] = ERROR_CODES["SETTINGS_NOT_FOUND"]
     result['error_message'] = error_msg
     return result
-
-  # print(f"### settings: {settings}")
-
-  # 반환되는 필드 수에 맞게 언패킹 수정
-  (oid, org_name, url, iframe, rowXpath, paging, config_start_page, config_end_page, login,
-   org_region, registration, use, company_in_charge, org_man, exception_row, elements) = settings
-
-  # 사용자 지정 페이지 범위가 있으면 우선 적용
-  if start_page > 0:
-    config_start_page = start_page
-  if end_page > 0 and end_page >= config_start_page:
-    config_end_page = end_page
 
   results_data = []  # 스크랩 결과를 저장할 배열
 
@@ -504,8 +543,8 @@ def scrape_list(org_name, start_page=1, end_page=1, debug=False):
     # requests로 데이터를 가져오지 못한 경우 playwright으로 재시도
     if not all_data or len(all_data) < 5:
       print(f"################# playwright 재시도")
-      playwright_result = scrape_list_with_playwright(org_name, start_page,
-                                                      end_page, url, rowXpath,
+      playwright_result = scrape_list_with_playwright(org_name, config_start_page,
+                                                      config_end_page, url, rowXpath,
                                                       paging, elements)
       all_data = playwright_result['data']
 
@@ -529,6 +568,49 @@ def scrape_list(org_name, start_page=1, end_page=1, debug=False):
     result['error_message'] = error_msg
 
   return result
+
+
+def scrape_list(org_name, start_page=1, end_page=1, debug=False):
+  """
+  특정 기관의 게시판 목록을 스크래핑
+
+  Args:
+    org_name (str): 스크래핑할 기관명
+    start_page (int): 시작 페이지 번호
+    end_page (int): 종료 페이지 번호
+    debug (bool): 디버그 모드
+
+  Returns:
+    dict: {
+      'error_code': 에러 코드 (0은 성공),
+      'error_message': 에러 메시지,
+      'data': 스크래핑된 결과 dictionary 리스트
+    }
+  """
+  # 반환 객체 초기화
+  result = {
+      'org_name': org_name,
+      'error_code': ERROR_CODES["SUCCESS"],
+      'error_message': '',
+      'data': []
+  }
+
+  # 설정 가져오기 (dict 형식으로)
+  settings = find_settings_by_org_name(org_name, output_format='dict')
+  if not settings:
+    error_msg = f"{org_name}에 대한 설정을 찾을 수 없습니다."
+    result['error_code'] = ERROR_CODES["SETTINGS_NOT_FOUND"]
+    result['error_message'] = error_msg
+    return result
+
+  # 사용자 지정 페이지 범위가 있으면 설정에 오버라이드
+  if start_page > 0:
+    settings['startPage'] = start_page
+  if end_page > 0 and end_page >= start_page:
+    settings['endPage'] = end_page
+
+  # scrape_list_by_settings 함수를 사용하여 실제 스크래핑 수행
+  return scrape_list_by_settings(settings, debug)
 
 
 def scrape_list_with_playwright(org_name, start_page, end_page, url, rowXpath,
@@ -858,9 +940,388 @@ def fetch_list_pages(names, save=True):
   return all_results
 
 
+# ** 새로운 워크플로우 함수들
+
+def filter_new_notices(scraped_data, org_name):
+  """
+  스크래핑된 데이터 중 신규 공고만 필터링하는 함수
+
+  Args:
+    scraped_data (list): 스크래핑된 공고 데이터 리스트
+    org_name (str): 기관명
+
+  Returns:
+    list: 신규 공고 데이터 리스트
+  """
+  if not scraped_data:
+    return []
+
+  # 기존 URL 목록 가져오기
+  limit = max(100, len(scraped_data))  # 이전 게시물 find 최소 개수: 100
+  detail_urls = mysql.find(
+      TABLE_NOTICES,
+      fields=['detail_url'],
+      addStr=f"WHERE `org_name`='{org_name}' order by sn DESC limit {limit}")
+  existing_urls = set([url[0] for url in detail_urls])
+
+  # 신규 공고만 필터링
+  new_notices = []
+  processed_urls = set()
+
+  for notice in scraped_data:
+    url = notice.get('detail_url', '')
+    if url and url not in existing_urls and url not in processed_urls:
+      new_notices.append(notice)
+      processed_urls.add(url)
+
+  return new_notices
+
+
+def classify_notices_by_category(notices):
+  """
+  공고 리스트에 대해 카테고리 분류를 수행하는 함수
+
+  Args:
+    notices (list): 분류할 공고 데이터 리스트
+
+  Returns:
+    list: 카테고리가 추가된 공고 데이터 리스트
+  """
+  from mysql.mysql_settings import find_all_settings_notice_category
+  from mysql.mysql_notice import search_notice_list
+
+  if not notices:
+    return []
+
+  # 모든 카테고리 설정 가져오기
+  category_settings = find_all_settings_notice_category()
+
+  # 각 공고에 기본 카테고리 설정
+  for notice in notices:
+    notice['category'] = '무관'
+
+  # 각 카테고리에 대해 매칭 검사
+  for setting in category_settings:
+    category = setting['category']
+    keywords = setting['keywords']
+    nots = setting['nots']
+    min_point = setting['min_point']
+
+    # 임시로 공고들을 CSV 형태로 변환하여 검색
+    # 실제로는 각 공고의 제목을 직접 검사하는 방식으로 최적화할 수 있음
+    for notice in notices:
+      if notice['category'] == '무관':  # 아직 분류되지 않은 공고만 검사
+        title = notice.get('title', '')
+        if title and _matches_category_criteria(title, keywords, nots, min_point):
+          notice['category'] = category
+
+  return notices
+
+
+def _matches_category_criteria(title, keywords, nots, min_point):
+  """
+  제목이 카테고리 기준에 맞는지 확인하는 함수
+
+  Args:
+    title (str): 공고 제목
+    keywords (str): 키워드*가중치,키워드*가중치... 형식
+    nots (str): 제외어1,제외어2... 형식
+    min_point (int): 최소 점수
+
+  Returns:
+    bool: 기준에 맞으면 True
+  """
+  # 제외어 검사
+  if nots:
+    not_words = [word.strip() for word in nots.split(',') if word.strip()]
+    for not_word in not_words:
+      if not_word in title:
+        return False
+
+  # 키워드 점수 계산
+  if not keywords:
+    return False
+
+  total_score = 0
+  keyword_items = [item.strip() for item in keywords.split(',') if item.strip()]
+
+  for item in keyword_items:
+    if '*' in item:
+      parts = item.split('*')
+      if len(parts) == 2:
+        keyword = parts[0].strip()
+        try:
+          weight = int(parts[1].strip())
+          if keyword in title:
+            total_score += weight
+        except ValueError:
+          continue
+    else:
+      # 가중치가 없는 경우 기본 1점
+      if item in title:
+        total_score += 1
+
+  return total_score >= min_point
+
+
+def filter_valid_category_notices(notices):
+  """
+  유효한 카테고리를 가진 공고만 필터링하는 함수
+  '무관' 카테고리는 제외하여 의미있는 카테고리가 분류된 공고만 DB에 저장
+
+  Args:
+    notices (list): 카테고리가 분류된 공고 리스트
+
+  Returns:
+    list: 유효한 카테고리를 가진 공고 리스트 ('무관' 제외)
+  """
+  from mysql.mysql_settings import CATEGORIES
+
+  valid_categories = set(CATEGORIES)  # '무관'은 제외, 실제 업무 카테고리만 포함
+
+  return [notice for notice in notices if notice.get('category', '') in valid_categories]
+
+
+def save_agency_scraping_info(org_name, scraped_count, new_count, inserted_count, error_info=None):
+  """
+  기관별 스크래핑 정보를 저장하는 함수
+
+  Args:
+    org_name (str): 기관명
+    scraped_count (int): 스크래핑된 공고 수
+    new_count (int): 신규 공고 수
+    inserted_count (int): 실제 삽입된 공고 수
+    error_info (dict): 에러 정보 (optional)
+  """
+  log = {
+    "org_name": org_name,
+    "error": error_info,
+    "scraped_count": scraped_count,
+    "new_count": new_count,
+    "inserted_count": inserted_count,
+    "time": _now()
+  }
+  return log
+
+
+def process_single_agency(org_name, debug=False):
+  """
+  단일 기관에 대한 새로운 워크플로우 처리 함수
+
+  Args:
+    org_name (str): 처리할 기관명
+    debug (bool): 디버그 모드
+
+  Returns:
+    dict: {
+      'success': bool,
+      'error_code': int,
+      'error_message': str,
+      'scraped_count': int,
+      'new_count': int,
+      'inserted_count': int,
+      'log': dict
+    }
+  """
+  result = {
+    'success': False,
+    'error_code': ERROR_CODES["SUCCESS"],
+    'error_message': '',
+    'scraped_count': 0,
+    'new_count': 0,
+    'inserted_count': 0,
+    'log': None
+  }
+
+  try:
+    # 1) 게시판 스크래핑
+    (start_page, end_page) = get_start_end_page(org_name)
+    scrape_result = scrape_list(org_name, start_page, end_page, debug)
+
+    if scrape_result['error_code'] != ERROR_CODES["SUCCESS"]:
+      result['error_code'] = scrape_result['error_code']
+      result['error_message'] = scrape_result['error_message']
+      error_info = {
+        "error_code": result['error_code'],
+        "error_message": result['error_message']
+      }
+      result['log'] = save_agency_scraping_info(org_name, 0, 0, 0, error_info)
+      return result
+
+    scraped_data = scrape_result['data']
+    result['scraped_count'] = len(scraped_data)
+
+    # 스크래핑된 데이터가 2개 미만인 경우 에러로 처리 (기존 로직과 동일)
+    if len(scraped_data) < 2:
+      result['success'] = False
+      result['error_code'] = scrape_result['error_code'] if scrape_result['error_code'] != 0 else ERROR_CODES["DATA_PROCESSING_ERROR"]
+      result['error_message'] = scrape_result['error_message'] if scrape_result['error_message'] else "스크래핑된 데이터가 부족합니다."
+      error_info = {
+        "error_code": result['error_code'],
+        "error_message": result['error_message']
+      }
+      result['log'] = save_agency_scraping_info(org_name, result['scraped_count'], 0, 0, error_info)
+      return result
+
+    # 2) 스크래핑된 공고들 중에 신규 공고만 필터링
+    new_notices = filter_new_notices(scraped_data, org_name)
+    result['new_count'] = len(new_notices)
+
+    if not new_notices:
+      result['success'] = True
+      result['log'] = save_agency_scraping_info(org_name, result['scraped_count'], 0, 0)
+      return result
+
+    # 3) 신규 공고들에 대해 공고별 카테고리 분류
+    classified_notices = classify_notices_by_category(new_notices)
+
+    # 4) 분류된 업무 카테고리가 유효한 공고만 필터링
+    valid_notices = filter_valid_category_notices(classified_notices)
+
+    if not valid_notices:
+      result['success'] = True
+      result['log'] = save_agency_scraping_info(org_name, result['scraped_count'], result['new_count'], 0)
+      return result
+
+    # 4) 유효한 공고들을 데이터베이스에 insert
+    # 기존 insertListData 함수를 활용하여 데이터 저장
+    # CSV 형식으로 변환
+    if valid_notices:
+      # 필수 키 추가
+      required_keys = {
+        "title": "",
+        "posted_date": "",
+        "posted_by": "",
+        "detail_url": "",
+        "org_name": org_name,
+        "scraped_at": _now(),
+        "error_code": None,
+        "error_message": None,
+        "category": "무관"
+      }
+
+      for notice in valid_notices:
+        for key, default_value in required_keys.items():
+          notice[key] = notice.get(key, default_value)
+
+      csv_data = csv_from_dicts(valid_notices)
+
+      if csv_data and len(csv_data) > 1:  # 헤더와 데이터가 있는 경우
+        inserted_data = insertListData(csv_data)
+
+        # 삽입된 데이터 개수 계산
+        for inserted in inserted_data:
+          if inserted['org_name'] == org_name:
+            result['inserted_count'] = inserted['inserted_count']
+            break
+
+    # 성공적인 경우 로그 저장
+    result['success'] = True
+    result['log'] = save_agency_scraping_info(
+      org_name,
+      result['scraped_count'],
+      result['new_count'],
+      result['inserted_count']
+    )
+
+  except Exception as e:
+    result['error_code'] = ERROR_CODES["UNKNOWN_ERROR"]
+    result['error_message'] = f"기관 {org_name} 처리 중 오류: {str(e)}"
+    error_info = {
+      "error_code": result['error_code'],
+      "error_message": result['error_message']
+    }
+    result['log'] = save_agency_scraping_info(org_name, result['scraped_count'], result['new_count'], result['inserted_count'], error_info)
+
+  return result
+
+
+def fetch_list_pages_new_workflow(names, save=True):
+  """
+  새로운 워크플로우를 사용하여 기관명 리스트를 처리하는 함수
+
+  Args:
+    names (list): 기관명 리스트
+    save (bool): 결과를 저장할지 여부
+
+  Returns:
+    dict: 처리 결과
+  """
+  print(f"@@@ Scrape Notices (New Workflow) At: {_now()}")
+  print("=" * 100)
+
+  all_logs = []
+  all_errors = []
+  error_orgs = []
+
+  total_scraped = 0
+  total_new = 0
+  total_inserted = 0
+
+  for org_name in names:
+    print(f"Processing agency: {org_name}")
+
+    # 단일 기관 처리
+    result = process_single_agency(org_name)
+
+    total_scraped += result['scraped_count']
+    total_new += result['new_count']
+    total_inserted += result['inserted_count']
+
+    if result['log']:
+      all_logs.append(result['log'])
+
+    if not result['success']:
+      error_orgs.append(org_name)
+      all_errors.append({
+        "org_name": org_name,
+        "error_code": result['error_code'],
+        "error_message": result['error_message']
+      })
+
+    print(f"  - Scraped: {result['scraped_count']}, New: {result['new_count']}, Inserted: {result['inserted_count']}")
+    if not result['success']:
+      print(f"  - Error: {result['error_message']}")
+
+  # 결과 저장
+  if save:
+    # 에러 정보는 항상 저장 (에러가 없어도)
+    error_summary = {"orgs": ','.join(error_orgs), "time": _now()}
+    insert_all_errors(error_summary)
+
+    # 카테고리 업데이트
+    update_all_category()
+
+    # 로그 저장
+    if all_logs:
+      insert_all_logs(all_logs)
+
+  print("-" * 60)
+  print(f"@@@ Summary: Agencies: {len(names)}, Errors: {len(error_orgs)}")
+  print(f"@@@ Total - Scraped: {total_scraped}, New: {total_new}, Inserted: {total_inserted}")
+  print("=" * 100)
+
+  return {
+    "total_agencies": len(names),
+    "error_agencies": len(error_orgs),
+    "total_scraped": total_scraped,
+    "total_new": total_new,
+    "total_inserted": total_inserted,
+    "logs": all_logs,
+    "errors": all_errors
+  }
+
+
 if __name__ == "__main__":
+  # cd /exposed/projects/bid-notice-web/backend/python && PYTHONPATH=src uv run src/spider/spider_list.py
   print("[SCARPING] 공고 고시 게시판(spider_list)")
   names = find_org_names()
-  # names = ["한국공항공사"]
-  # ** save list
-  fetch_list_pages(names)
+  # names = names[:10]
+  # names = ["한국공항공사", "가평군청", "광진구"]
+  # names = ['정부24 지자체소식', "가평군청", '용인시청']
+
+  # 기존 워크플로우 사용
+  # fetch_list_pages(names)
+
+  # 새로운 워크플로우 사용
+  fetch_list_pages_new_workflow(names)

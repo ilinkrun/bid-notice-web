@@ -34,6 +34,17 @@ interface CollectListInput {
 interface CollectDetailInput {
   orgName?: string;
   noticeId?: string;
+  sampleUrl?: string;
+  title?: string;
+  bodyHtml?: string;
+  fileName?: string;
+  fileUrl?: string;
+  preview?: string;
+  noticeDiv?: string;
+  noticeNum?: string;
+  orgDept?: string;
+  orgMan?: string;
+  orgTel?: string;
   limit?: number;
   dryRun?: boolean;
   debug?: boolean;
@@ -118,29 +129,6 @@ function convertToGraphQLNotice(notice: any) {
   };
 }
 
-// Convert internal NoticeDetail to GraphQL NoticeDetail
-function convertToGraphQLNoticeDetail(detail: any) {
-  return {
-    nid: parseInt(detail.nid),
-    title: detail.title,
-    fileName: detail.attachments?.map((a: any) => a.filename).join(',') || null,
-    fileUrl: detail.attachments?.map((a: any) => a.url).join(',') || null,
-    noticeDiv: null,
-    noticeNum: null,
-    orgDept: null,
-    orgMan: null,
-    orgTel: null,
-    scrapedAt: detail.scraped_at,
-    updatedAt: new Date().toISOString(),
-    orgName: detail.org_name,
-    bodyHtml: detail.content,
-    detailUrl: detail.attachments?.[0]?.url || '',
-    createdAt: new Date().toISOString(),
-    postedDate: new Date().toISOString().split('T')[0],
-    postedBy: null,
-    category: null
-  };
-}
 
 export const collectorsResolvers = {
   Query: {
@@ -189,45 +177,142 @@ export const collectorsResolvers = {
 
   Mutation: {
     collectList: async (_: any, { input }: { input: CollectListInput }) => {
-      if (!collectGovNotices) {
+      try {
+        const response = await fetch('http://localhost:11301/scrape_list_by_settings', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            org_name: input.agencies?.[0] || 'default',
+            url: 'https://example.com',
+            rowXpath: '//tr',
+            elements: JSON.stringify({
+              title: 'td[1]',
+              detail_url: 'td[1]/a/@href',
+              posted_date: 'td[2]',
+              posted_by: 'td[3]'
+            }),
+            startPage: 1,
+            endPage: input.limit || 3
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json() as any;
+
+        return {
+          success: result.error_code === 0,
+          totalScraped: result.data?.length || 0,
+          totalInserted: result.data?.length || 0,
+          agencies: 1,
+          errors: result.error_code !== 0 ? [result.error_message] : []
+        };
+      } catch (error) {
         return {
           success: false,
           totalScraped: 0,
           totalInserted: 0,
           agencies: 0,
-          errors: ['Collector not available']
+          errors: [`Failed to call Python scraper: ${error}`]
         };
       }
-
-      const options = {
-        agencies: input.agencies,
-        limit: input.limit || 10,
-        dryRun: input.dryRun || false,
-        debug: input.debug || false
-      };
-
-      return await collectGovNotices(options);
     },
 
     collectDetail: async (_: any, { input }: { input: CollectDetailInput }) => {
-      if (!collectGovNoticeDetails) {
+      try {
+        if (input.noticeId) {
+          // NID로 상세 정보 가져오기
+          const response = await fetch(`http://localhost:11301/fetch_detail_by_nid?nid=${input.noticeId}&debug=${input.debug || false}`);
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const result = await response.json() as any;
+
+          return {
+            success: result.error_code === 0,
+            processed: result.error_code === 0 ? 1 : 0,
+            updated: result.error_code === 0 ? 1 : 0,
+            errors: result.error_code !== 0 ? [result.error_message] : [],
+            data: result.error_code === 0 ? {
+              title: result.data?.title || null,
+              bodyHtml: result.data?.body_html || null,
+              fileName: result.data?.file_name || null,
+              fileUrl: result.data?.file_url || null,
+              noticeDiv: result.data?.notice_div || null,
+              noticeNum: result.data?.notice_num || null,
+              orgDept: result.data?.org_dept || null,
+              orgMan: result.data?.org_man || null,
+              orgTel: result.data?.org_tel || null,
+              detailUrl: result.data?.detail_url || null,
+              orgName: result.data?.org_name || null
+            } : null
+          };
+        } else {
+          // 설정을 사용한 상세 페이지 스크래핑
+          const url = input.sampleUrl || 'https://example.com/detail/1';
+          const debug = input.debug || false;
+
+          const response = await fetch(`http://localhost:11301/scrape_detail_by_settings?url=${encodeURIComponent(url)}&debug=${debug}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              org_name: input.orgName || 'default',
+              title: input.title || '',
+              body_html: input.bodyHtml || '',
+              file_name: input.fileName || '',
+              file_url: input.fileUrl || '',
+              preview: input.preview || '',
+              notice_div: input.noticeDiv || '',
+              notice_num: input.noticeNum || '',
+              org_dept: input.orgDept || '',
+              org_man: input.orgMan || '',
+              org_tel: input.orgTel || ''
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const result = await response.json() as any;
+
+          return {
+            success: result.error_code === 0,
+            processed: result.error_code === 0 ? 1 : 0,
+            updated: result.error_code === 0 ? 1 : 0,
+            errors: result.error_code !== 0 ? [result.error_message] : [],
+            data: result.error_code === 0 ? {
+              title: result.data?.title || null,
+              bodyHtml: result.data?.body_html || null,
+              fileName: result.data?.file_name || null,
+              fileUrl: result.data?.file_url || null,
+              noticeDiv: result.data?.notice_div || null,
+              noticeNum: result.data?.notice_num || null,
+              orgDept: result.data?.org_dept || null,
+              orgMan: result.data?.org_man || null,
+              orgTel: result.data?.org_tel || null,
+              detailUrl: result.data?.detail_url || null,
+              orgName: result.data?.org_name || null
+            } : null
+          };
+        }
+      } catch (error) {
         return {
           success: false,
           processed: 0,
           updated: 0,
-          errors: ['Detail collector not available']
+          errors: [`Failed to call Python scraper: ${error}`],
+          data: null
         };
       }
-
-      const options = {
-        orgName: input.orgName,
-        noticeId: input.noticeId,
-        limit: input.limit || 10,
-        dryRun: input.dryRun || false,
-        debug: input.debug || false
-      };
-
-      return await collectGovNoticeDetails(options);
     },
 
     collectListWithSettings: async (_: any, { settings }: { settings: SettingsNoticeListInput }) => {

@@ -534,84 +534,6 @@ def _fetch_detail_by_org_name_playwright(url,
   # return get_dict(html, unpack_settings_elements(settings), cb_on_key)
 
 
-def scrape_detail_by_settings(url, org_name, settings, debug=False):
-  """
-  스크래핑 설정을 직접 받아서 공고 상세 페이지를 스크래핑
-
-  Args:
-    url (str): 스크래핑할 상세 페이지 URL
-    settings (dict): 스크래핑 설정 딕셔너리 (settings_notice_detail 테이블의 필드들)
-                    필수 필드: title, body_html 등
-    org_name (str): 기관명
-    debug (bool): 디버그 모드
-
-  Returns:
-    dict: {
-      'error_code': 에러 코드 (0은 성공),
-      'error_message': 에러 메시지,
-      'data': 스크래핑된 결과 dictionary
-    }
-  """
-  # 반환 객체 초기화
-  result = {
-      'org_name': org_name,
-      'error_code': 0,  # SUCCESS
-      'error_message': '',
-      'data': {}
-  }
-
-  # 필수 설정 확인
-  if not org_name or not url:
-    error_msg = f"필수 설정이 누락되었습니다. org_name: {org_name}, url: {url}"
-    result['error_code'] = 100  # SETTINGS_NOT_FOUND
-    result['error_message'] = error_msg
-    return result
-
-  try:
-    # 먼저 requests로 시도
-    html = _fetch_html_by_requests(url)
-
-    if len(html) < 10:
-      # requests로 실패한 경우 playwright로 재시도
-      print(f"################# playwright 재시도 for detail: {org_name}")
-      html = _fetch_html_by_playwright(url)
-
-    if len(html) < 10:
-      error_msg = f"페이지 로딩 실패: {url}"
-      result['error_code'] = 200  # PAGE_ACCESS_ERROR
-      result['error_message'] = error_msg
-      return result
-
-    # HTML 저장 (디버그 모드)
-    if debug:
-      os.makedirs("./downloads", exist_ok=True)
-      with open(f"./downloads/{org_name}_detail.html", 'w', encoding='utf-8') as file:
-        file.write(html)
-
-    # 콜백 함수 설정
-    cb_on_key = {
-        "file_url": _cb_on_key_file_url,
-        "file_name": _cb_on_key_file_name
-    }
-
-    # HTML 파싱 및 데이터 추출
-    unpack = unpack_settings_elements(settings)
-    detail_data = get_dict(html, unpack, cb_on_key)
-
-    # 기본 정보 추가
-    detail_data["detail_url"] = url
-    detail_data["org_name"] = org_name
-
-    result['data'] = detail_data
-
-  except Exception as e:
-    error_msg = f"상세 페이지 스크래핑 과정 중 오류: {str(e)}"
-    result['error_code'] = 900  # UNKNOWN_ERROR
-    result['error_message'] = error_msg
-
-  return result
-
-
 def _fetch_detail_by_org_name(url, name, required_keys=["title"]):
   # !! wait_for_selector 추가 필요
   data = _fetch_detail_by_org_name_requests(url, name)
@@ -627,7 +549,7 @@ def _fetch_detail_by_org_name(url, name, required_keys=["title"]):
   return data
 
 
-def _fetch_detail_by_nid(nid, required_keys=["title"], debug=False):
+def _fetch_detail_by_nid(nid, required_keys=["title"]):
   # 417236
   mysql = Mysql()  # 로컬 MySQL 객체 생성
   fields = [
@@ -635,7 +557,7 @@ def _fetch_detail_by_nid(nid, required_keys=["title"], debug=False):
       "category"
   ]
   find1 = mysql.find("notice_list", fields, addStr=f"WHERE `nid` = '{nid}'")
-
+  mysql.close()
   if find1:
     url = find1[0][0]
     name = find1[0][1]
@@ -652,33 +574,12 @@ def _fetch_detail_by_nid(nid, required_keys=["title"], debug=False):
         find1[0][5] if len(find1[0]) > 5 else "공사점검",
     }
 
+
     print(f"{db_data=}")
     print(url, name, required_keys)
 
-    # 상세 페이지 설정 가져오기
-    settings = _find_settings_notice_detail_by_org_name(
-        name,
-        fields=SETTINGS_NOTICE_DETAIL_CONFIG_FIELDS,
-        table_name="settings_notice_detail",
-        out_type="dict")
-
-    mysql.close()
-
-    if not settings:
-      # 설정이 없는 경우 기존 방식 사용
-      print(f"@@@ Settings not found for {name}, using legacy method")
-      detail_result = _fetch_detail_by_org_name(url, name, required_keys)
-    else:
-      # scrape_detail_by_settings 사용
-      print(f"@@@ Using scrape_detail_by_settings for {name}")
-      scrape_result = scrape_detail_by_settings(url, name, settings, debug)
-
-      if scrape_result['error_code'] == 0:
-        detail_result = scrape_result['data']
-      else:
-        # 에러 발생시 기존 방식으로 fallback
-        print(f"@@@ scrape_detail_by_settings failed, falling back to legacy method: {scrape_result['error_message']}")
-        detail_result = _fetch_detail_by_org_name(url, name, required_keys)
+    # _fetch_detail_by_org_name의 결과를 가져와서 db_data와 합침
+    detail_result = _fetch_detail_by_org_name(url, name, required_keys)
 
     print(f"{detail_result=}")
 
@@ -689,8 +590,7 @@ def _fetch_detail_by_nid(nid, required_keys=["title"], debug=False):
       result = {"detail": detail_result, **db_data}
 
     return result
-
-  mysql.close()
+  # return url
   return None
 
 
@@ -858,14 +758,7 @@ if __name__ == "__main__":
   nid = 6224
   # _fetch_detail_by_nid(nid)
   # upsert_detail_by_nid(nid)
-  # notice_to_progress(nid)
-
-  url = "https://www.gp.go.kr/portal/selectGosiData.do?key=2148&not_ancmt_mgt_no=51458&not_ancmt_se_code=01"
-  org_name = "가평군청"
-  settings = _find_settings_notice_detail_by_org_name(org_name, fields=SETTINGS_NOTICE_DETAIL_CONFIG_FIELDS, out_type="dict")
-  print(settings)
-  result = scrape_detail_by_settings(url, org_name, settings, debug=False)
-  print(f"{result=}")
+  notice_to_progress(nid)
 
 
   # url = 'https://www.gangnam.go.kr/notice/view.do?not_ancmt_mgt_no=60240'

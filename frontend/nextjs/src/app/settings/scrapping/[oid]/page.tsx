@@ -127,6 +127,30 @@ const TEST_COLLECT_LIST = gql`
   }
 `;
 
+const TEST_COLLECT_DETAIL = gql`
+  mutation TestCollectDetail($input: CollectDetailInput!) {
+    collectDetail(input: $input) {
+      success
+      processed
+      updated
+      errors
+      data {
+        title
+        bodyHtml
+        fileName
+        fileUrl
+        noticeDiv
+        noticeNum
+        orgDept
+        orgMan
+        orgTel
+        detailUrl
+        orgName
+      }
+    }
+  }
+`;
+
 export default function ScrappingSettingsPage() {
   const params = useParams();
   const searchParams = useSearchParams();
@@ -187,6 +211,12 @@ export default function ScrappingSettingsPage() {
   const [testResults, setTestResults] = useState<any>(null);
   const [testSettings, setTestSettings] = useState<any>(null);
 
+  // Detail test modal states
+  const [showDetailTestModal, setShowDetailTestModal] = useState(false);
+  const [detailTestLoading, setDetailTestLoading] = useState(false);
+  const [detailTestResults, setDetailTestResults] = useState<any>(null);
+  const [detailTestSettings, setDetailTestSettings] = useState<any>(null);
+
   // Tab states
   const [activeListTab, setActiveListTab] = useState('all');
   const [activeDetailTab, setActiveDetailTab] = useState('all');
@@ -216,6 +246,7 @@ export default function ScrappingSettingsPage() {
   const [updateSettingsList] = useMutation(UPDATE_SETTINGS_LIST, { client: getClient() });
   const [updateSettingsDetail] = useMutation(UPDATE_SETTINGS_DETAIL, { client: getClient() });
   const [testCollectList] = useMutation(TEST_COLLECT_LIST, { client: getClient() });
+  const [testCollectDetail] = useMutation(TEST_COLLECT_DETAIL, { client: getClient() });
 
   useEffect(() => {
     if (data || error) {
@@ -527,6 +558,71 @@ export default function ScrappingSettingsPage() {
       });
     } finally {
       setTestLoading(false);
+    }
+  };
+
+  // Test function for collectDetail
+  const handleTestCollectDetail = async () => {
+    setDetailTestLoading(true);
+    setDetailTestResults(null);
+    setDetailTestSettings(null);
+    setShowDetailTestModal(true);
+
+    try {
+      // Store settings for modal display
+      const settings = {
+        orgName: detailEditData.orgName,
+        sampleUrl: detailEditData.sampleUrl,
+        title: detailEditData.title,
+        bodyHtml: detailEditData.bodyHtml,
+        fileName: detailEditData.fileName,
+        fileUrl: detailEditData.fileUrl,
+        preview: detailEditData.preview,
+        noticeDiv: detailEditData.noticeDiv,
+        noticeNum: detailEditData.noticeNum,
+        orgDept: detailEditData.orgDept,
+        orgMan: detailEditData.orgMan,
+        orgTel: detailEditData.orgTel
+      };
+
+      setDetailTestSettings(settings);
+      console.log('Detail test settings stored for modal:', settings);
+
+      const result = await testCollectDetail({
+        variables: {
+          input: {
+            orgName: detailEditData.orgName,
+            sampleUrl: detailEditData.sampleUrl,
+            // Use sampleUrl if available, otherwise use noticeId for NID-based collection
+            noticeId: detailEditData.sampleUrl ? undefined : "1",
+            title: detailEditData.title,
+            bodyHtml: detailEditData.bodyHtml,
+            fileName: detailEditData.fileName,
+            fileUrl: detailEditData.fileUrl,
+            preview: detailEditData.preview,
+            noticeDiv: detailEditData.noticeDiv,
+            noticeNum: detailEditData.noticeNum,
+            orgDept: detailEditData.orgDept,
+            orgMan: detailEditData.orgMan,
+            orgTel: detailEditData.orgTel,
+            limit: 1,
+            dryRun: true,
+            debug: true
+          }
+        }
+      });
+
+      setDetailTestResults(result.data.collectDetail);
+    } catch (error) {
+      console.error('Detail test failed:', error);
+      setDetailTestResults({
+        success: false,
+        processed: 0,
+        updated: 0,
+        errors: [error instanceof Error ? error.message : 'Unknown error']
+      });
+    } finally {
+      setDetailTestLoading(false);
     }
   };
 
@@ -1120,6 +1216,17 @@ export default function ScrappingSettingsPage() {
           accentColor="#6366f1"
           category="운영가이드"
           pageTitle="스크래핑 설정"
+          rightButton={
+            <ButtonWithColorIcon
+              icon={<TestTube className="h-4 w-4" />}
+              onClick={handleTestCollectDetail}
+              color="secondary"
+              mode="outline"
+              disabled={detailTestLoading}
+            >
+              T
+            </ButtonWithColorIcon>
+          }
         >
           <div className="space-y-0">
             {/* 서브탭 헤더 */}
@@ -1511,6 +1618,246 @@ export default function ScrappingSettingsPage() {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowTestModal(false)}>
+              닫기
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Detail Test Results Modal */}
+      <Dialog open={showDetailTestModal} onOpenChange={setShowDetailTestModal}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <TestTube className="h-5 w-5" />
+              상세 스크래핑 테스트 결과
+            </DialogTitle>
+            <DialogDescription>
+              현재 설정으로 실행한 상세 스크래핑 테스트 결과입니다.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Always show settings if available */}
+            {detailTestSettings && (
+              <div className="border rounded-lg p-4 bg-green-50/50">
+                <h4 className="font-medium text-sm text-green-700 mb-3">테스트 실행 설정</h4>
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-4 text-xs">
+                    <div>
+                      <span className="font-medium text-muted-foreground">기관명:</span>
+                      <p className="mt-1">{detailTestSettings.orgName || '미설정'}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-muted-foreground">샘플 URL:</span>
+                      <p className="mt-1 break-all">{detailTestSettings.sampleUrl || '미설정'}</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="font-medium text-muted-foreground text-xs">요소 설정:</span>
+                    <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+                      <div className="bg-white p-2 rounded border">
+                        <span className="font-medium text-gray-600">제목:</span>
+                        <p className="font-mono text-xs mt-1">{detailTestSettings.title || '미설정'}</p>
+                      </div>
+                      <div className="bg-white p-2 rounded border">
+                        <span className="font-medium text-gray-600">본문:</span>
+                        <p className="font-mono text-xs mt-1">{detailTestSettings.bodyHtml || '미설정'}</p>
+                      </div>
+                      <div className="bg-white p-2 rounded border">
+                        <span className="font-medium text-gray-600">파일이름:</span>
+                        <p className="font-mono text-xs mt-1">{detailTestSettings.fileName || '미설정'}</p>
+                      </div>
+                      <div className="bg-white p-2 rounded border">
+                        <span className="font-medium text-gray-600">파일주소:</span>
+                        <p className="font-mono text-xs mt-1">{detailTestSettings.fileUrl || '미설정'}</p>
+                      </div>
+                      <div className="bg-white p-2 rounded border">
+                        <span className="font-medium text-gray-600">공고구분:</span>
+                        <p className="font-mono text-xs mt-1">{detailTestSettings.noticeDiv || '미설정'}</p>
+                      </div>
+                      <div className="bg-white p-2 rounded border">
+                        <span className="font-medium text-gray-600">공고번호:</span>
+                        <p className="font-mono text-xs mt-1">{detailTestSettings.noticeNum || '미설정'}</p>
+                      </div>
+                      <div className="bg-white p-2 rounded border">
+                        <span className="font-medium text-gray-600">담당부서:</span>
+                        <p className="font-mono text-xs mt-1">{detailTestSettings.orgDept || '미설정'}</p>
+                      </div>
+                      <div className="bg-white p-2 rounded border">
+                        <span className="font-medium text-gray-600">담당자:</span>
+                        <p className="font-mono text-xs mt-1">{detailTestSettings.orgMan || '미설정'}</p>
+                      </div>
+                      <div className="bg-white p-2 rounded border">
+                        <span className="font-medium text-gray-600">연락처:</span>
+                        <p className="font-mono text-xs mt-1">{detailTestSettings.orgTel || '미설정'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {detailTestLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="text-center">
+                  <Skeleton className="h-6 w-48 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">상세 테스트를 실행하고 있습니다...</p>
+                </div>
+              </div>
+            ) : detailTestResults ? (
+              <>
+                {/* Test Summary */}
+                <div className="border rounded-lg p-4 bg-muted/50">
+                  <div className="grid grid-cols-3 gap-4 text-sm">
+                    <div>
+                      <span className="font-medium text-muted-foreground">성공 여부:</span>
+                      <p className={`mt-1 ${detailTestResults.success ? 'text-green-600' : 'text-red-600'}`}>
+                        {detailTestResults.success ? '성공' : '실패'}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-muted-foreground">처리 건수:</span>
+                      <p className="mt-1 font-semibold">{detailTestResults.processed || 0}건</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-muted-foreground">업데이트 건수:</span>
+                      <p className="mt-1 font-semibold">{detailTestResults.updated || 0}건</p>
+                    </div>
+                  </div>
+
+                  {detailTestResults.errors && detailTestResults.errors.length > 0 && (
+                    <div className="mt-4">
+                      <span className="font-medium text-muted-foreground">오류 메시지:</span>
+                      <div className="mt-1">
+                        {detailTestResults.errors.map((error: string, index: number) => (
+                          <p key={index} className="text-red-600 text-sm bg-red-50 p-2 rounded mb-1">
+                            {error}
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {!detailTestResults.success && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>상세 스크래핑 테스트가 실패했습니다.</p>
+                    <p className="text-sm mt-1">설정을 확인하고 다시 시도해주세요.</p>
+                  </div>
+                )}
+
+                {detailTestResults.success && detailTestResults.data && (
+                  <>
+                    <div className="text-center py-4 text-green-600">
+                      <p className="font-medium">상세 스크래핑 테스트가 성공적으로 완료되었습니다!</p>
+                      <p className="text-sm mt-1">설정이 올바르게 구성되었습니다.</p>
+                    </div>
+
+                    {/* 스크래핑된 데이터 표시 */}
+                    <div className="border rounded-lg p-4 bg-green-50/50">
+                      <h4 className="font-medium text-sm text-green-700 mb-3">스크래핑된 데이터</h4>
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-1 gap-3">
+                          {detailTestResults.data.title && (
+                            <div className="bg-white p-3 rounded border">
+                              <span className="font-medium text-gray-600 text-sm">제목:</span>
+                              <p className="mt-1 text-sm">{detailTestResults.data.title}</p>
+                            </div>
+                          )}
+
+                          {detailTestResults.data.bodyHtml && (
+                            <div className="bg-white p-3 rounded border">
+                              <span className="font-medium text-gray-600 text-sm">본문 HTML:</span>
+                              <div className="mt-1 text-xs bg-gray-100 p-2 rounded max-h-32 overflow-y-auto">
+                                <pre className="whitespace-pre-wrap break-words">
+                                  {detailTestResults.data.bodyHtml.length > 200
+                                    ? detailTestResults.data.bodyHtml.substring(0, 200) + '...'
+                                    : detailTestResults.data.bodyHtml}
+                                </pre>
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="grid grid-cols-2 gap-3">
+                            {detailTestResults.data.noticeDiv && (
+                              <div className="bg-white p-2 rounded border">
+                                <span className="font-medium text-gray-600 text-xs">공고구분:</span>
+                                <p className="mt-1 text-xs">{detailTestResults.data.noticeDiv}</p>
+                              </div>
+                            )}
+
+                            {detailTestResults.data.noticeNum && (
+                              <div className="bg-white p-2 rounded border">
+                                <span className="font-medium text-gray-600 text-xs">공고번호:</span>
+                                <p className="mt-1 text-xs">{detailTestResults.data.noticeNum}</p>
+                              </div>
+                            )}
+
+                            {detailTestResults.data.orgDept && (
+                              <div className="bg-white p-2 rounded border">
+                                <span className="font-medium text-gray-600 text-xs">담당부서:</span>
+                                <p className="mt-1 text-xs">{detailTestResults.data.orgDept}</p>
+                              </div>
+                            )}
+
+                            {detailTestResults.data.orgMan && (
+                              <div className="bg-white p-2 rounded border">
+                                <span className="font-medium text-gray-600 text-xs">담당자:</span>
+                                <p className="mt-1 text-xs">{detailTestResults.data.orgMan}</p>
+                              </div>
+                            )}
+
+                            {detailTestResults.data.orgTel && (
+                              <div className="bg-white p-2 rounded border">
+                                <span className="font-medium text-gray-600 text-xs">연락처:</span>
+                                <p className="mt-1 text-xs">{detailTestResults.data.orgTel}</p>
+                              </div>
+                            )}
+                          </div>
+
+                          {(detailTestResults.data.fileName || detailTestResults.data.fileUrl) && (
+                            <div className="bg-white p-3 rounded border">
+                              <span className="font-medium text-gray-600 text-sm">첨부파일:</span>
+                              <div className="mt-1 space-y-1">
+                                {detailTestResults.data.fileName && (
+                                  <p className="text-xs"><span className="font-medium">파일명:</span> {detailTestResults.data.fileName}</p>
+                                )}
+                                {detailTestResults.data.fileUrl && (
+                                  <p className="text-xs">
+                                    <span className="font-medium">URL:</span>
+                                    <a href={detailTestResults.data.fileUrl} target="_blank" rel="noopener noreferrer"
+                                       className="text-blue-600 hover:underline ml-1 break-all">
+                                      {detailTestResults.data.fileUrl}
+                                    </a>
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {detailTestResults.success && !detailTestResults.data && (
+                  <div className="text-center py-8 text-green-600">
+                    <p className="font-medium">상세 스크래핑 테스트가 성공적으로 완료되었습니다!</p>
+                    <p className="text-sm mt-1">설정이 올바르게 구성되었습니다.</p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>테스트 결과가 없습니다.</p>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDetailTestModal(false)}>
               닫기
             </Button>
           </DialogFooter>

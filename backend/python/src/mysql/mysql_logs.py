@@ -31,12 +31,15 @@ def insert_all_logs(logs):
         error_code = log["error"].get("error_code")
         error_message = log["error"].get("error_message")
 
+      # new_count 값 가져오기
+      new_count = log.get("new_count", 0)
+
       # SQL 쿼리 문자열 직접 구성
       sql = f"""
-      INSERT INTO logs_notice_scraping (org_name, error_code, error_message, scraped_count, inserted_count, time)
+      INSERT INTO logs_notice_scraping (org_name, error_code, error_message, scraped_count, new_count, inserted_count, time)
       VALUES ('{log["org_name"]}', {error_code if error_code is not None else 'NULL'},
       '{error_message.replace("'", "''") if error_message else ''}',
-      {log["scraped_count"]}, {log["inserted_count"]}, '{log["time"]}')
+      {log["scraped_count"]}, {new_count}, {log["inserted_count"]}, '{log["time"]}')
       """
 
       mysql.exec(sql)
