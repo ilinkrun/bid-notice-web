@@ -1,4 +1,4 @@
-import { pool } from '@/utils/mysql';
+import { pool } from '@/utils/database/mysql';
 
 interface G2bNoticeRow {
   id: number;

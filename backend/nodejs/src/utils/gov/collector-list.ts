@@ -436,7 +436,7 @@ async function scrapePage(
  * Get scraping settings for an agency from database
  */
 export async function getScrapingSettings(agencyName: string): Promise<ScrapingSettings | null> {
-  const { executeQuery } = await import('@/utils/mysql');
+  const { executeQuery } = await import('@/utils/database/mysql');
 
   try {
     // Get basic configuration fields
@@ -532,7 +532,7 @@ export async function getScrapingSettings(agencyName: string): Promise<ScrapingS
  * Get default agencies list from database
  */
 async function getDefaultAgencies(): Promise<string[]> {
-  const { executeQuery } = await import('@/utils/mysql');
+  const { executeQuery } = await import('@/utils/database/mysql');
 
   try {
     const query = `

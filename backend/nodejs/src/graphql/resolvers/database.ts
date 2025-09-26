@@ -55,7 +55,7 @@ export const databaseResolvers = {
         }
         finalQuery += ` ${orderClause}`;
 
-        const results = await executeQuery<{ nid?: number; title: string; org_name: string; posted_date: string; detail_url: string; category?: string; org_region?: string }>(finalQuery);
+        const results = await executeQuery(finalQuery) as { nid?: number; title: string; org_name: string; posted_date: string; detail_url: string; category?: string; org_region?: string }[];
 
         return results.map(notice => ({
           nid: notice.nid?.toString(),

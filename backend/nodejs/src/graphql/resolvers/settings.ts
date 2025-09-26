@@ -1,5 +1,5 @@
 import { apiClient } from '@/utils/api/backendClient';
-import { executeQuery } from '@/utils/mysql';
+import { executeQuery } from '@/utils/database/mysql';
 
 // App Settings
 export interface AppSettingData {

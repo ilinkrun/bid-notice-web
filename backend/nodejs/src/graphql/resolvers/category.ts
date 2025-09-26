@@ -1,4 +1,4 @@
-import { executeQuery } from '@/utils/mysql';
+import { executeQuery } from '@/utils/database/mysql';
 
 export interface NoticeCategoryData {
   sn: number;
