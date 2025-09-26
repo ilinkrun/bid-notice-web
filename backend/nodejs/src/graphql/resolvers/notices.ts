@@ -1,4 +1,4 @@
-import { apiClient, mysqlApiClient } from '@/utils/api/backendClient';
+import { apiClient } from '@/utils/api/backendClient';
 
 interface NoticeData {
   nid: string;
