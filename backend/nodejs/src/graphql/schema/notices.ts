@@ -22,6 +22,27 @@ export const noticesTypeDefs = `#graphql
     noticeCount: Int!
   }
 
+  type NoticeDetail {
+    nid: Int!
+    title: String
+    fileName: String
+    fileUrl: String
+    noticeDiv: String
+    noticeNum: String
+    orgDept: String
+    orgMan: String
+    orgTel: String
+    scrapedAt: String!
+    updatedAt: String!
+    orgName: String
+    bodyHtml: String
+    detailUrl: String
+    createdAt: String
+    postedDate: String
+    postedBy: String
+    category: String
+  }
+
   extend type Query {
     noticesByCategory(category: String!, gap: Int): [Notice!]!
     noticesByCategories(categories: [String!]!, gap: Int): [Notice!]!

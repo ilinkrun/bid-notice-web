@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import { useUnifiedLoading } from '@/components/providers/UnifiedLoadingProvider';
 import { SectionWithGuide } from '@/components/shared/SectionWithGuide';
 import { ScrappingSettingsLayout } from '@/components/settings/ScrappingSettingsLayout';
-import { List, FileText, Edit, Eye, Save, HelpCircle, Settings, Puzzle, Wrench, List as ListIcon } from 'lucide-react';
+import { List, FileText, Edit, Eye, Save, HelpCircle, Settings, Puzzle, Wrench, List as ListIcon, TestTube } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -111,6 +111,22 @@ const UPDATE_SETTINGS_DETAIL = gql`
   }
 `;
 
+const TEST_COLLECT_LIST = gql`
+  mutation TestCollectListWithSettings($settings: SettingsNoticeListInput!) {
+    collectListWithSettings(settings: $settings) {
+      orgName
+      errorCode
+      errorMessage
+      data {
+        title
+        detailUrl
+        postedAt
+        orgName
+      }
+    }
+  }
+`;
+
 export default function ScrappingSettingsPage() {
   const params = useParams();
   const searchParams = useSearchParams();
@@ -165,6 +181,12 @@ export default function ScrappingSettingsPage() {
   const [listChanges, setListChanges] = useState<string[]>([]);
   const [detailChanges, setDetailChanges] = useState<string[]>([]);
 
+  // Test modal states
+  const [showTestModal, setShowTestModal] = useState(false);
+  const [testLoading, setTestLoading] = useState(false);
+  const [testResults, setTestResults] = useState<any>(null);
+  const [testSettings, setTestSettings] = useState<any>(null);
+
   // Tab states
   const [activeListTab, setActiveListTab] = useState('all');
   const [activeDetailTab, setActiveDetailTab] = useState('all');
@@ -193,6 +215,7 @@ export default function ScrappingSettingsPage() {
   // Mutations
   const [updateSettingsList] = useMutation(UPDATE_SETTINGS_LIST, { client: getClient() });
   const [updateSettingsDetail] = useMutation(UPDATE_SETTINGS_DETAIL, { client: getClient() });
+  const [testCollectList] = useMutation(TEST_COLLECT_LIST, { client: getClient() });
 
   useEffect(() => {
     if (data || error) {
@@ -388,6 +411,125 @@ export default function ScrappingSettingsPage() {
     }));
   };
 
+  // Test function for collectListWithSettings
+  const handleTestCollectList = async () => {
+    setTestLoading(true);
+    setTestResults(null);
+    setTestSettings(null); // Reset settings
+    setShowTestModal(true);
+
+    try {
+      // Helper function to format element value with |- separator
+      const formatElementValue = (xpath: string, target: string = '', callback: string = '') => {
+        if (!xpath || xpath.trim() === '') return undefined;
+
+        let formatted = xpath.trim();
+
+        // Only add target if it exists and is not empty
+        if (target && target.trim() !== '') {
+          formatted += `|-${target.trim()}`;
+
+          // Only add callback if target exists and callback is not empty
+          if (callback && callback.trim() !== '') {
+            formatted += `|-${callback.trim()}`;
+          }
+        }
+
+        return formatted;
+      };
+
+      // Debug: Log all available element keys
+      console.log('Available elements:', listEditData.elements.map(e => ({ key: e.key, xpath: e.xpath, target: e.target, callback: e.callback })));
+
+      // Find elements by key and format them properly (using actual DB keys)
+      const titleElement = listEditData.elements.find(e => e.key === 'title');
+      const linkElement = listEditData.elements.find(e => e.key === 'detail_url');
+      const dateElement = listEditData.elements.find(e => e.key === 'posted_date');
+      const orgElement = listEditData.elements.find(e => e.key === 'posted_by');
+
+      console.log('Found elements:', {
+        titleElement,
+        linkElement,
+        dateElement,
+        orgElement
+      });
+
+      // Convert current form data to GraphQL input format
+      const settings = {
+        oid: oid || undefined,
+        orgName: listEditData.orgName,
+        url: listEditData.detailUrl, // Using detailUrl as main URL field
+        iframe: listEditData.iframe || undefined,
+        rowXpath: listEditData.rowXpath || undefined,
+        paging: listEditData.paging || undefined,
+        startPage: parseInt(listEditData.startPage) || 1,
+        endPage: parseInt(listEditData.endPage) || 1,
+        login: undefined,
+        use: parseInt(listEditData.use) || 1,
+        orgRegion: listEditData.orgRegion || undefined,
+        registration: "1", // Always string as per schema
+        // Format elements with |- separator for backend processing
+        title: formatElementValue(
+          titleElement?.xpath || '',
+          titleElement?.target || '',
+          titleElement?.callback || ''
+        ),
+        detailUrl: formatElementValue(
+          linkElement?.xpath || '',
+          linkElement?.target || '',
+          linkElement?.callback || ''
+        ),
+        postedDate: formatElementValue(
+          dateElement?.xpath || '',
+          dateElement?.target || '',
+          dateElement?.callback || ''
+        ),
+        postedBy: formatElementValue(
+          orgElement?.xpath || '',
+          orgElement?.target || '',
+          orgElement?.callback || ''
+        ),
+        companyInCharge: listEditData.companyInCharge || undefined,
+        orgMan: listEditData.orgMan || undefined,
+        exceptionRow: listEditData.exceptionRow || undefined
+      };
+
+      console.log('Testing with settings:', settings);
+      console.log('Element mapping:', {
+        title: { element: titleElement, formatted: settings.title },
+        detailUrl: { element: linkElement, formatted: settings.detailUrl },
+        postedDate: { element: dateElement, formatted: settings.postedDate },
+        postedBy: { element: orgElement, formatted: settings.postedBy }
+      });
+      console.log('Form data values:', {
+        mainUrl: listEditData.detailUrl,
+        orgName: listEditData.orgName,
+        rowXpath: listEditData.rowXpath,
+        elementsCount: listEditData.elements.length
+      });
+
+      // Store settings for modal display
+      setTestSettings(settings);
+      console.log('Settings stored for modal:', settings);
+
+      const result = await testCollectList({
+        variables: { settings }
+      });
+
+      setTestResults(result.data.collectListWithSettings);
+    } catch (error) {
+      console.error('Test failed:', error);
+      setTestResults({
+        orgName: listEditData.orgName,
+        errorCode: 999,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+        data: []
+      });
+    } finally {
+      setTestLoading(false);
+    }
+  };
+
   return (
     <ScrappingSettingsLayout
       orgName={orgName}
@@ -403,6 +545,17 @@ export default function ScrappingSettingsPage() {
           accentColor="#6366f1"
           category="운영가이드"
           pageTitle="스크래핑 설정"
+          rightButton={
+            <ButtonWithColorIcon
+              icon={<TestTube className="h-4 w-4" />}
+              onClick={handleTestCollectList}
+              color="secondary"
+              mode="outline"
+              disabled={testLoading}
+            >
+              T
+            </ButtonWithColorIcon>
+          }
         >
           <div className="space-y-0">
             {/* 서브탭 헤더 */}
@@ -1185,6 +1338,185 @@ export default function ScrappingSettingsPage() {
           </div>
         </SectionWithGuide>
       </div>
+
+      {/* Test Results Modal */}
+      <Dialog open={showTestModal} onOpenChange={setShowTestModal}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <TestTube className="h-5 w-5" />
+              스크래핑 테스트 결과
+            </DialogTitle>
+            <DialogDescription>
+              현재 설정으로 실행한 스크래핑 테스트 결과입니다.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Always show settings if available */}
+            {testSettings && (
+              <div className="border rounded-lg p-4 bg-blue-50/50">
+                <h4 className="font-medium text-sm text-blue-700 mb-3">테스트 실행 설정</h4>
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-4 text-xs">
+                    <div>
+                      <span className="font-medium text-muted-foreground">기관명:</span>
+                      <p className="mt-1">{testSettings.orgName || '미설정'}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-muted-foreground">URL:</span>
+                      <p className="mt-1 break-all">{testSettings.url || '미설정'}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-muted-foreground">행 XPath:</span>
+                      <p className="mt-1 font-mono text-xs bg-gray-100 p-1 rounded">{testSettings.rowXpath || '미설정'}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-muted-foreground">페이지 범위:</span>
+                      <p className="mt-1">{testSettings.startPage} ~ {testSettings.endPage}</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="font-medium text-muted-foreground text-xs">요소 설정:</span>
+                    <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+                      <div className="bg-white p-2 rounded border">
+                        <span className="font-medium text-gray-600">제목:</span>
+                        <p className="font-mono text-xs mt-1">{testSettings.title || '미설정'}</p>
+                      </div>
+                      <div className="bg-white p-2 rounded border">
+                        <span className="font-medium text-gray-600">상세 URL:</span>
+                        <p className="font-mono text-xs mt-1">{testSettings.detailUrl || '미설정'}</p>
+                      </div>
+                      <div className="bg-white p-2 rounded border">
+                        <span className="font-medium text-gray-600">게시일:</span>
+                        <p className="font-mono text-xs mt-1">{testSettings.postedDate || '미설정'}</p>
+                      </div>
+                      <div className="bg-white p-2 rounded border">
+                        <span className="font-medium text-gray-600">작성자:</span>
+                        <p className="font-mono text-xs mt-1">{testSettings.postedBy || '미설정'}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {testSettings.paging && (
+                    <div>
+                      <span className="font-medium text-muted-foreground text-xs">페이징:</span>
+                      <p className="mt-1 font-mono text-xs bg-gray-100 p-2 rounded">{testSettings.paging}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {testLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="text-center">
+                  <Skeleton className="h-6 w-48 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">테스트를 실행하고 있습니다...</p>
+                </div>
+              </div>
+            ) : testResults ? (
+              <>
+                {/* Test Summary */}
+                <div className="border rounded-lg p-4 bg-muted/50">
+                  <div className="grid grid-cols-3 gap-4 text-sm">
+                    <div>
+                      <span className="font-medium text-muted-foreground">기관명:</span>
+                      <p className="mt-1">{testResults.orgName}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-muted-foreground">오류 코드:</span>
+                      <p className={`mt-1 ${testResults.errorCode === 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {testResults.errorCode}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-muted-foreground">수집 건수:</span>
+                      <p className="mt-1 font-semibold">{testResults.data?.length || 0}건</p>
+                    </div>
+                  </div>
+
+                  {testResults.errorMessage && (
+                    <div className="mt-4">
+                      <span className="font-medium text-muted-foreground">오류 메시지:</span>
+                      <p className="mt-1 text-red-600 text-sm bg-red-50 p-2 rounded">
+                        {testResults.errorMessage}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Test Results Data */}
+                {testResults.data && testResults.data.length > 0 && (
+                  <div className="border rounded-lg overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-12">#</TableHead>
+                          <TableHead>제목</TableHead>
+                          <TableHead className="w-32">게시일</TableHead>
+                          <TableHead className="w-48">상세 URL</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {testResults.data.map((item: any, index: number) => (
+                          <TableRow key={index}>
+                            <TableCell className="font-mono text-xs">{index + 1}</TableCell>
+                            <TableCell>
+                              <div className="max-w-md">
+                                <p className="text-sm truncate" title={item.title}>
+                                  {item.title || '(제목 없음)'}
+                                </p>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-xs text-muted-foreground">
+                              {item.postedAt ? new Date(item.postedAt).toLocaleDateString('ko-KR') : '-'}
+                            </TableCell>
+                            <TableCell>
+                              {item.detailUrl ? (
+                                <a
+                                  href={item.detailUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-xs text-blue-600 hover:underline truncate block max-w-48"
+                                  title={item.detailUrl}
+                                >
+                                  {item.detailUrl}
+                                </a>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">-</span>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+
+                {testResults.data && testResults.data.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>수집된 데이터가 없습니다.</p>
+                    <p className="text-sm mt-1">설정을 확인하고 다시 시도해주세요.</p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>테스트 결과가 없습니다.</p>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowTestModal(false)}>
+              닫기
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </ScrappingSettingsLayout>
   );
 }

@@ -1306,7 +1306,7 @@ def fetch_list_pages_new_workflow(names, save=True):
 if __name__ == "__main__":
   print("[SCARPING] 공고 고시 게시판(spider_list)")
   # names = find_org_names()
-  names = ["한국공항공사", "가평군청"]
+  names = ["한국공항공사", "가평군청", "광진구"]
 
   # 기존 워크플로우 사용
   # fetch_list_pages(names)

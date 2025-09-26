@@ -12,6 +12,7 @@ import { authTypeDefs } from './auth.js';
 import { permissionsTypeDefs } from './permissions.js';
 import { mappingsTypeDefs } from './mappings.js';
 import { categoryTypeDefs } from './category.js';
+import { collectorsTypeDefs } from './collectors.js';
 
 const baseTypeDefs = gql`
   type Query {
@@ -38,4 +39,5 @@ export const typeDefs = [
   permissionsTypeDefs,
   mappingsTypeDefs,
   categoryTypeDefs,
+  collectorsTypeDefs,
 ];

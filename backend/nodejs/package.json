@@ -12,14 +12,11 @@
     "graphql:build": "swc src/graphql -d dist/graphql --config-file .swcrc",
     "graphql:start": "node dist/graphql/server.js",
 
-    "spider:gov": "tsx --tsconfig tsconfig.json src/execs/spider-gov.ts",
-    "spider:nara": "tsx --tsconfig tsconfig.json src/execs/spider-nara.ts",
-    "spider:nara:detail": "tsx --tsconfig tsconfig.json src/execs/spider-nara-detail.ts",
-
-    "spider:list": "tsx --tsconfig tsconfig.json src/execs/spider_list.ts",
-    "spider:detail": "tsx --tsconfig tsconfig.json src/execs/spider_detail.ts",
-    "test:gov": "tsx --tsconfig tsconfig.json src/execs/test-gov-scraping.ts",
+    "spider:gov:list": "tsx --tsconfig tsconfig.json src/execs/spider-gov-list.ts",
+    "spider:gov:detail": "tsx --tsconfig tsconfig.json src/execs/spider-gov-detail.ts",
+    "spider:nara:list": "tsx --tsconfig tsconfig.json src/execs/spider-nara-list.ts",
     "test:scrape": "tsx --tsconfig tsconfig.json src/test/test-scrape.ts",
+    "test:gov": "tsx --tsconfig tsconfig.json src/tests/test-gov-scraping.ts",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "type-check": "tsc --noEmit",

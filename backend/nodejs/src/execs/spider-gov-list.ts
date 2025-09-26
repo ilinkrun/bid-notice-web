@@ -22,7 +22,7 @@ async function main() {
 
   try {
     // Import GOV collector dynamically
-    const { collectGovNotices } = await import('@/utils/gov/collector');
+    const { collectGovNotices } = await import('@/utils/gov/collector-list');
 
     const result = await collectGovNotices({
       agencies: options.orgName ? [options.orgName] : undefined,

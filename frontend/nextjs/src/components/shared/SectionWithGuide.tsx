@@ -17,6 +17,7 @@ interface SectionWithGuideProps {
   onToggle?: (expanded: boolean) => void;
   children: React.ReactNode;
   className?: string;
+  rightButton?: React.ReactNode;
 }
 
 export function SectionWithGuide({
@@ -30,7 +31,8 @@ export function SectionWithGuide({
   isExpanded: controlledExpanded,
   onToggle,
   children,
-  className = ""
+  className = "",
+  rightButton
 }: SectionWithGuideProps) {
   const [internalExpanded, setInternalExpanded] = useState(true);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
@@ -68,6 +70,11 @@ export function SectionWithGuide({
           isOpen={isGuideOpen}
           onToggle={() => setIsGuideOpen(!isGuideOpen)}
         />
+        {rightButton && (
+          <div className="ml-auto">
+            {rightButton}
+          </div>
+        )}
       </div>
 
       {/* 가이드 슬라이드 */}

@@ -12,6 +12,7 @@ import { authResolvers } from './auth.js';
 import { permissionsResolvers } from './permissions.js';
 import { mappingsResolvers } from './mappings.js';
 import { categoryResolvers } from './category.js';
+import { collectorsResolvers } from './collectors.js';
 
 export const resolvers = [
   baseResolvers,
@@ -28,4 +29,5 @@ export const resolvers = [
   permissionsResolvers,
   mappingsResolvers,
   categoryResolvers,
+  collectorsResolvers,
 ];

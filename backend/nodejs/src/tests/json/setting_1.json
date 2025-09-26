@@ -1,0 +1,28 @@
+{
+  oid: 11,
+  org_name: '관악구',
+  url: 'https://www.gwanak.go.kr/site/gwanak/ex/bbsNew/List.do?typeCode=1&pageIndex=${i}',
+  iframe: '',
+  rowXpath: '//*[@id="boardDivId"]/table/tbody/tr',
+  paging: '//div[@class="paging"]/a[contains(text(),"${i}")]',
+  startPage: 1,
+  endPage: 3,
+  login: '',
+  org_region: '서울',
+  registration: 1,
+  use: 1,
+  company_in_charge: '일맥',
+  org_man: '전영서',
+  exception_row: '',
+  elements: [
+    { key: 'title', xpath: 'td[3]/a' },
+    {
+      key: 'detail_url',
+      xpath: 'td[3]/a',
+      target: 'onclick',
+      callback: `"https://www.gwanak.go.kr/site/gwanak/ex/bbsNew/View.do?typeCode=1&not_ancmt_mgt_no=" + rst.split("'")[1]`
+    },
+    { key: 'posted_date', xpath: 'td[7]' },
+    { key: 'posted_by', xpath: 'td[6]' }
+  ]
+}

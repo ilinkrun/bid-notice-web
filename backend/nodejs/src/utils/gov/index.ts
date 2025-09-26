@@ -1,2 +1,2 @@
 // Government notice utilities
-export * from './collector';
+export * from './collector-list';
