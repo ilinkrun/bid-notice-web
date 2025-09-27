@@ -52,6 +52,9 @@ MAX_RETRY = 20
 
 STOP_KEY = "title"
 
+# 결과통보 키워드 상수
+DONE_NOTICE_KEYWORDS = ["결과"]
+
 mysql = Mysql()
 
 # ** 에러 코드 정의
@@ -1064,6 +1067,26 @@ def _matches_category_criteria(title, keywords, nots, min_point):
   return total_score >= min_point
 
 
+def is_done_notice(title):
+  """
+  공고 제목을 확인하여 결과통보 공고인지 판단하는 함수
+
+  Args:
+    title (str): 공고 제목
+
+  Returns:
+    bool: 결과통보 공고이면 True, 아니면 False
+  """
+  if not title:
+    return False
+
+  for keyword in DONE_NOTICE_KEYWORDS:
+    if keyword in title:
+      return True
+
+  return False
+
+
 def filter_valid_category_notices(notices):
   """
   유효한 카테고리를 가진 공고만 필터링하는 함수
@@ -1177,6 +1200,13 @@ def process_single_agency(org_name, debug=False):
 
     # 4) 분류된 업무 카테고리가 유효한 공고만 필터링
     valid_notices = filter_valid_category_notices(classified_notices)
+
+    # 5) 결과통보 공고 처리 - is_selected = 9로 업데이트
+    done_notices = []
+    for notice in valid_notices:
+      if is_done_notice(notice.get('title', '')):
+        notice['is_selected'] = 9
+        done_notices.append(notice)
 
     if not valid_notices:
       result['success'] = True

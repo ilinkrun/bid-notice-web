@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -60,17 +60,25 @@ const GET_NOTICE_DEFAULTS = gql`
   }
 `;
 
+const GET_ACTIVE_CATEGORIES = gql`
+  query GetActiveCategories {
+    noticeCategoriesActive {
+      category
+    }
+  }
+`;
+
 const createGovNotices = (gap: string = '5', categoryDefault: string = '공사점검,성능평가,정밀안전진단,정기안전점검,구조설계,구조감리,기타') => [
   {
-    title: '업무',
+    title: '신규공고',
     href: `/notices/gov/work?category=${categoryDefault}&gap=${gap}`,
     icon: BookmarkPlus,
     description: '공사점검, 성능평가, 기타 통합 페이지',
   },
   {
-    title: '무관',
-    href: `/notices/gov/irrelevant?gap=1`,
-    icon: Bookmark,
+    title: '결과통보',
+    href: `/notices/gov/done?category=${categoryDefault}&gap=7`,
+    icon: CheckCircle,
   },
   {
     title: '제외',
@@ -81,15 +89,15 @@ const createGovNotices = (gap: string = '5', categoryDefault: string = '공사�
 
 const createNaraNotices = (gap: string = '5', categoryDefault: string = '공사점검,성능평가,정밀안전진단,정기안전점검,구조설계,구조감리,기타') => [
   {
-    title: '업무',
+    title: '신규공고',
     href: `/notices/nara/work?category=${categoryDefault}&gap=${gap}`,
     icon: BookmarkPlus,
     description: '공사점검, 성능평가, 기타 통합 페이지',
   },
   {
-    title: '무관',
-    href: `/notices/nara/irrelevant?gap=${gap}`,
-    icon: Bookmark,
+    title: '결과통보',
+    href: `/notices/nara/done?category=${categoryDefault}&gap=7`,
+    icon: CheckCircle,
   },
   {
     title: '제외',
@@ -805,9 +813,25 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
     fetchPolicy: 'cache-first'
   });
 
+  // 활성 카테고리들 로드
+  const { data: activeCategoriesData, loading: categoriesLoading } = useQuery(GET_ACTIVE_CATEGORIES, {
+    fetchPolicy: 'cache-first'
+  });
+
   // 기본값이 로딩 중일 때는 기본값 사용
   const gap = noticeDefaults?.gap || '5';
-  const categoryDefault = noticeDefaults?.categoryDefault || '공사점검,성능평가,정밀안전진단,정기안전점검,구조설계,구조감리,기타';
+
+  // 활성 카테고리들을 쉼표로 구분된 문자열로 변환
+  const categoryDefault = React.useMemo(() => {
+    if (activeCategoriesData?.noticeCategoriesActive) {
+      const activeCategories = activeCategoriesData.noticeCategoriesActive
+        .map((item: any) => item.category)
+        .filter((category: string) => category && category !== '무관' && category !== '제외')
+        .join(',');
+      return activeCategories || '공사점검,성능평가,정밀안전진단,정기안전점검,구조설계,구조감리,기타';
+    }
+    return noticeDefaults?.categoryDefault || '공사점검,성능평가,정밀안전진단,정기안전점검,구조설계,구조감리,기타';
+  }, [activeCategoriesData, noticeDefaults]);
 
   // 동적으로 메뉴 생성
   const govNotices = createGovNotices(gap, categoryDefault);

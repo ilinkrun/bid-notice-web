@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Star, Loader2, Edit3, Minus, Plus } from 'lucide-react';
+import { Star, Loader2, Edit3, Minus, Plus, Check } from 'lucide-react';
 import { type Notice } from '@/types/notice';
 import { Checkbox } from '@/components/ui/checkbox';
 import { UnifiedSelect } from '@/components/shared/UnifiedSelect';
@@ -61,6 +61,15 @@ const RESTORE_NOTICES = gql`
   }
 `;
 
+const CONFIRM_DONE_NOTICES = gql`
+  mutation ConfirmDoneNotices($nids: [Int!]!) {
+    confirmDoneNotices(nids: $nids) {
+      success
+      message
+    }
+  }
+`;
+
 const GET_NOTICE_CATEGORIES = gql`
   query GetNoticeCategories {
     noticeCategoriesActive {
@@ -89,6 +98,7 @@ interface NoticeTableProps {
   isWorkPage?: boolean;
   isIrrelevantPage?: boolean;
   isExcludedPage?: boolean;
+  isDonePage?: boolean;
 }
 
 // 기본 카테고리 (GraphQL 데이터가 로딩되지 않은 경우 사용)
@@ -110,7 +120,7 @@ const BID_STAGES = [
 // DAY_GAP 환경변수 가져오기
 const DEFAULT_GAP = process.env.NEXT_PUBLIC_DAY_GAP || '1';
 
-export default function NoticeTable({ notices, currentCategory, currentCategories, gap: initialGap, sort: initialSort, order: initialOrder, isWorkPage = false, isIrrelevantPage = false, isExcludedPage = false }: NoticeTableProps) {
+export default function NoticeTable({ notices, currentCategory, currentCategories, gap: initialGap, sort: initialSort, order: initialOrder, isWorkPage = false, isIrrelevantPage = false, isExcludedPage = false, isDonePage = false }: NoticeTableProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { navigate } = useUnifiedNavigation();
@@ -119,6 +129,7 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
   const [updateNoticeCategory] = useMutation(UPDATE_NOTICE_CATEGORY);
   const [excludeNotices] = useMutation(EXCLUDE_NOTICES);
   const [restoreNotices] = useMutation(RESTORE_NOTICES);
+  const [confirmDoneNotices] = useMutation(CONFIRM_DONE_NOTICES);
   
   // GraphQL 쿼리로 카테고리 데이터 가져오기
   const { data: categoriesData, loading: categoriesLoading } = useQuery(GET_NOTICE_CATEGORIES);
@@ -149,6 +160,8 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
   const [excludeLoading, setExcludeLoading] = useState(false);
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
   const [restoreLoading, setRestoreLoading] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
 
   // 동적 카테고리 옵션 생성
   const categoryOptions = React.useMemo(() => {
@@ -368,6 +381,13 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
         newUrl = `${baseUrl}/irrelevant?${newSearchParams.toString()}`;
       } else if (value === '제외') {
         newUrl = `${baseUrl}/excluded?${newSearchParams.toString()}`;
+      } else if (isDonePage) {
+        // 결과통보 페이지에서는 done 페이지 내에서 필터링
+        newSearchParams.delete('category');
+        const otherParams = newSearchParams.toString();
+        const categoryParam = `category=${value}`;
+        const queryString = otherParams ? `${categoryParam}&${otherParams}` : categoryParam;
+        newUrl = `${baseUrl}/done?${queryString}`;
       } else {
         // 공사점검, 성능평가, 기타 -> work 페이지로 이동
         newSearchParams.delete('category');
@@ -413,7 +433,8 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
       // 3. URL 히스토리 업데이트 (페이지 새로고침 없이)
       const isNaraPage = pathname.includes('/notices/nara');
       const baseUrl = isNaraPage ? '/notices/nara' : '/notices/gov';
-      const newUrl = `${baseUrl}/work?${queryString}`;
+      const pageType = isDonePage ? 'done' : 'work';
+      const newUrl = `${baseUrl}/${pageType}?${queryString}`;
       navigate(newUrl);
     } catch (error) {
       console.error('카테고리 변경 중 오류 발생:', error);
@@ -811,6 +832,48 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
     }
   };
 
+  // 확인 모달 열기
+  const handleConfirm = () => {
+    if (selectedNids.length === 0) {
+      alert('선택된 공고가 없습니다.');
+      return;
+    }
+    setIsConfirmModalOpen(true);
+  };
+
+  // 확인 처리
+  const handleConfirmDone = async () => {
+    if (selectedNids.length === 0) return;
+
+    setConfirmLoading(true);
+
+    try {
+      const { data } = await confirmDoneNotices({
+        variables: {
+          nids: selectedNids
+        }
+      });
+
+      if (data?.confirmDoneNotices?.success) {
+        // 성공 후 모달 닫기 및 선택 초기화
+        setIsConfirmModalOpen(false);
+        setSelectedNids([]);
+
+        // 페이지 새로고침하여 목록에서 제거된 공고들을 반영
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } else {
+        throw new Error(data?.confirmDoneNotices?.message || '확인 처리에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('확인 처리 중 오류 발생:', error);
+      alert('확인 처리 중 오류가 발생했습니다.');
+    } finally {
+      setConfirmLoading(false);
+    }
+  };
+
   // 행 클릭 핸들러
   const handleRowClick = (notice: Notice, event: React.MouseEvent) => {
     // 체크박스와 제목 링크를 클릭한 경우는 제외
@@ -837,6 +900,11 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
       pageTitle = isNaraPage ? '나라장터(업무)' : '관공서 공고(업무)';
       finalBreadcrumb = '업무';
       href = isNaraPage ? '/notices/nara/work?category=공사점검' : '/notices/gov/work?category=공사점검';
+    } else if (isDonePage) {
+      const isNaraPage = pathname.includes('/notices/nara');
+      pageTitle = isNaraPage ? '나라장터(결과통보)' : '관공서 공고(결과통보)';
+      finalBreadcrumb = '결과통보';
+      href = isNaraPage ? '/notices/nara/done' : '/notices/gov/done';
     } else if (isIrrelevantPage) {
       const isNaraPage = pathname.includes('/notices/nara');
       pageTitle = isNaraPage ? '나라장터(무관)' : '관공서 공고(무관)';
@@ -939,7 +1007,7 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
             </div>
           </div>
           <div className="flex items-center gap-4">
-            {isWorkPage ? (
+            {isWorkPage || isDonePage ? (
               <CheckButtonSet
                 options={workPageCategoryOptions}
                 values={localCategories}
@@ -953,29 +1021,40 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
               />
             ) : null}
             <div className="flex items-center gap-2">
-            {currentCategory === '제외' ? (
-              <IconButton
-                icon={<Plus className="h-4 w-4" />}
-                onClick={handleRestore}
-                title="업무에 복원"
-              />
-            ) : currentCategory !== '무관' && !(pathname.includes('/notices/nara') && isIrrelevantPage) && (
-              <IconButton
-                icon={<Minus className="h-4 w-4" />}
-                onClick={handleExclude}
-                title="업무에서 제외"
-              />
+            {!isDonePage && (
+              <>
+                {currentCategory === '제외' ? (
+                  <IconButton
+                    icon={<Plus className="h-4 w-4" />}
+                    onClick={handleRestore}
+                    title="업무에 복원"
+                  />
+                ) : currentCategory !== '무관' && !(pathname.includes('/notices/nara') && isIrrelevantPage) && (
+                  <IconButton
+                    icon={<Minus className="h-4 w-4" />}
+                    onClick={handleExclude}
+                    title="업무에서 제외"
+                  />
+                )}
+                <IconButton
+                  icon={<Edit3 className="h-4 w-4" />}
+                  onClick={handleCategoryEdit}
+                  title="유형 변경"
+                />
+                {currentCategory !== '무관' && currentCategory !== '제외' && !(pathname.includes('/notices/nara') && isIrrelevantPage) && (
+                  <IconButton
+                    icon={<Star className="h-4 w-4" />}
+                    onClick={handleBidProcess}
+                    title="입찰 진행"
+                  />
+                )}
+              </>
             )}
-            <IconButton
-              icon={<Edit3 className="h-4 w-4" />}
-              onClick={handleCategoryEdit}
-              title="유형 변경"
-            />
-            {currentCategory !== '무관' && currentCategory !== '제외' && !(pathname.includes('/notices/nara') && isIrrelevantPage) && (
+            {isDonePage && (
               <IconButton
-                icon={<Star className="h-4 w-4" />}
-                onClick={handleBidProcess}
-                title="입찰 진행"
+                icon={<Check className="h-4 w-4" />}
+                onClick={handleConfirm}
+                title="확인"
               />
             )}
             </div>
@@ -1374,6 +1453,48 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
               disabled={restoreLoading}
             >
               {restoreLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  처리 중...
+                </>
+              ) : (
+                '확인'
+              )}
+            </ButtonWithColorIcon>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 확인 모달 */}
+      <Dialog open={isConfirmModalOpen} onOpenChange={setIsConfirmModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>결과통보 확인</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-color-primary-muted-foreground">
+              선택된 {selectedNids.length}개 공고를 확인 처리하시겠습니까?
+            </p>
+            <p className="text-xs text-color-primary-muted-foreground mt-2">
+              확인된 공고는 더 이상 결과통보 목록에 표시되지 않습니다.
+            </p>
+          </div>
+          <DialogFooter>
+            <ButtonWithColorIcon
+              color="tertiary"
+              mode="base"
+              onClick={() => setIsConfirmModalOpen(false)}
+              disabled={confirmLoading}
+            >
+              취소
+            </ButtonWithColorIcon>
+            <ButtonWithColorIcon
+              color="green"
+              mode="active"
+              onClick={handleConfirmDone}
+              disabled={confirmLoading}
+            >
+              {confirmLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   처리 중...

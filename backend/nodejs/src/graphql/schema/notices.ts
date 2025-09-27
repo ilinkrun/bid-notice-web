@@ -49,6 +49,7 @@ export const noticesTypeDefs = `#graphql
     notices(category: String, gap: Int): [Notice!]!
     noticesStatistics(gap: Int): [NoticeStatistics]!
     noticesRegionStatistics(gap: Int): [NoticeRegionStatistics]!
+    doneNotices(gap: Int): [Notice!]!
     searchNotices(
       keywords: String!
       nots: String!
@@ -64,6 +65,7 @@ export const noticesTypeDefs = `#graphql
     updateNoticeCategory(nids: [Int!]!, category: String!): UpdateResult!
     excludeNotices(nids: [Int!]!): UpdateResult!
     restoreNotices(nids: [Int!]!): UpdateResult!
+    confirmDoneNotices(nids: [Int!]!): UpdateResult!
   }
 
   input NoticeInput {

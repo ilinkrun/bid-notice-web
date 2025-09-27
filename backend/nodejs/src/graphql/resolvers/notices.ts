@@ -103,15 +103,15 @@ export const noticesResolvers = {
     noticesRegionStatistics: async (_: unknown, { gap }: { gap?: number }) => {
       try {
         const response = await apiClient.get('/notice_list_statistics', { params: { gap: gap || 15 } });
-        
+
         // 지역별로 공고 수 집계
         const regionStats: { [key: string]: number } = {};
-        
+
         response.data.forEach((item: StatisticsData) => {
           const region = item.org_region || item.region || item.지역 || '미지정';
           regionStats[region] = (regionStats[region] || 0) + 1;
         });
-        
+
         // 객체를 배열로 변환하여 반환
         return Object.entries(regionStats).map(([region, noticeCount]) => ({
           region,
@@ -119,6 +119,25 @@ export const noticesResolvers = {
         }));
       } catch (error) {
         console.error('Error fetching notice region statistics:', error);
+        return [];
+      }
+    },
+
+    doneNotices: async (_: unknown, { gap }: { gap?: number }) => {
+      try {
+        const response = await apiClient.post('/done_notices', {}, { params: { gap: gap || 15 } });
+        return response.data.map((notice: NoticeData) => ({
+          nid: parseInt(notice.nid),
+          title: notice.title,
+          orgName: notice.org_name,
+          postedAt: notice.posted_date,
+          detailUrl: notice.detail_url,
+          category: notice.category || notice.카테고리 || "",
+          region: notice.org_region || "미지정",
+          registration: notice.registration
+        }));
+      } catch (error) {
+        console.error('Error fetching done notices:', error);
         return [];
       }
     },
@@ -230,7 +249,7 @@ export const noticesResolvers = {
 
     restoreNotices: async (_: unknown, { nids }: { nids: number[] }) => {
       try {
-        const response = await apiClient.post('/restore_notices', { 
+        const response = await apiClient.post('/restore_notices', {
           nids: nids
         });
         return {
@@ -242,6 +261,24 @@ export const noticesResolvers = {
         return {
           success: false,
           message: '공고 복원 처리 중 오류가 발생했습니다.'
+        };
+      }
+    },
+
+    confirmDoneNotices: async (_: unknown, { nids }: { nids: number[] }) => {
+      try {
+        const response = await apiClient.post('/confirm_done_notices', {
+          nids: nids
+        });
+        return {
+          success: response.data.success || true,
+          message: response.data.message || `${nids.length}개의 공고가 확인 처리되었습니다.`
+        };
+      } catch (error) {
+        console.error('Error confirming done notices:', error);
+        return {
+          success: false,
+          message: '공고 확인 처리 중 오류가 발생했습니다.'
         };
       }
     },

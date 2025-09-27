@@ -500,6 +500,54 @@ def get_notice_list_for_statistics(
     raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.post("/done_notices")
+def get_done_notices(
+    gap: int = Query(
+        None,
+        description="몇 일 전까지의 공고를 가져올지 지정합니다. 지정하지 않으면 DAY_GAP 값을 사용합니다.")):
+  """
+  결과통보 공고 목록을 반환합니다 (is_selected = 9).
+  """
+  try:
+    mysql = Mysql()
+
+    # gap이 None이면 DAY_GAP 사용
+    if gap is None:
+      gap = int(DAY_GAP)
+
+    # is_selected = 9인 공고들 조회
+    add_where = f"`is_selected` = 9 AND `posted_date` >= DATE_SUB(NOW(), INTERVAL {gap} DAY)"
+    result = mysql.find(
+        TABLE_NOTICES,
+        fields=["nid", "title", "posted_date", "posted_by", "org_name", "detail_url", "category", "scraped_at"],
+        addStr=f"WHERE {add_where} ORDER BY nid DESC"
+    )
+
+    mysql.close()
+
+    # 딕셔너리 형태로 변환
+    notices = []
+    for row in result:
+      notices.append({
+        "nid": row[0],
+        "title": row[1],
+        "posted_date": row[2],
+        "posted_by": row[3],
+        "org_name": row[4],
+        "detail_url": row[5],
+        "category": row[6],
+        "scraped_at": row[7]
+      })
+
+    # 각 row의 org_name에 해당하는 'org_region', 'registration' 필드값을 가져오기
+    for item in notices:
+      add_settings_to_notice(item)
+
+    return notices
+  except Exception as e:
+    raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/last_notice/{org_name}")
 def get_last_notice(org_name: str, field: str = "title"):
   """
@@ -658,7 +706,7 @@ def restore_notices_endpoint(request: RestoreNoticesRequest):
   """
   try:
     updated_count = restore_notices_by_nids(request.nids)
-    
+
     if updated_count > 0:
       return {
         "success": True,
@@ -673,6 +721,48 @@ def restore_notices_endpoint(request: RestoreNoticesRequest):
   except Exception as e:
     print(f"Error in restore_notices_endpoint: {str(e)}")
     raise HTTPException(status_code=500, detail=f"공고 복원 처리 중 오류가 발생했습니다: {str(e)}")
+
+
+class ConfirmDoneNoticesRequest(BaseModel):
+  nids: List[int]
+
+
+@app.post("/confirm_done_notices")
+def confirm_done_notices_endpoint(request: ConfirmDoneNoticesRequest):
+  """
+  결과통보 공고들을 확인 처리합니다 (is_selected=-9로 설정).
+  """
+  try:
+    mysql = Mysql()
+
+    if not request.nids:
+      return {
+        "success": False,
+        "message": "확인할 공고가 선택되지 않았습니다."
+      }
+
+    # nids를 쉼표로 구분된 문자열로 변환
+    nids_str = ','.join(map(str, request.nids))
+
+    # is_selected = -9로 업데이트
+    sql = f"UPDATE notice_list SET is_selected = -9 WHERE nid IN ({nids_str})"
+    updated_count = mysql.exec(sql)
+    mysql.close()
+
+    if updated_count > 0:
+      return {
+        "success": True,
+        "message": f"{updated_count}개의 공고가 확인 처리되었습니다.",
+        "updated_count": updated_count
+      }
+    else:
+      return {
+        "success": False,
+        "message": "확인 처리된 공고가 없습니다. 해당 nid들이 존재하지 않을 수 있습니다."
+      }
+  except Exception as e:
+    print(f"Error in confirm_done_notices_endpoint: {str(e)}")
+    raise HTTPException(status_code=500, detail=f"공고 확인 처리 중 오류가 발생했습니다: {str(e)}")
 
 
 # ** bids
