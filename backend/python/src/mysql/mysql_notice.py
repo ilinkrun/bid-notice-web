@@ -9,7 +9,7 @@ from utils.utils_mysql import Mysql, _where_like_unit, _where_eq_unit
 from utils.utils_data import arr_from_csv, dict_from_tuple, dicts_from_tuples, csv_from_dicts, csv_added_defaults, _now
 from mysql.mysql_settings import (CATEGORIES, find_settings_notice_category,
                             get_search_weight, filter_by_not,
-                            add_settings_to_notice)
+                            add_settings_to_notice, get_categories_by_priority)
 
 DELTA_HOURS = 46
 
@@ -318,6 +318,8 @@ def update_category_batch(category, delta_hours=DELTA_HOURS, start_time=None):
   """
   카테고리별로 notices를 검색하고 category 필드를 업데이트하는 함수
 
+  Priority 기반 처리: 높은 priority부터 처리되어, 낮은 priority 카테고리가 덮어쓸 수 있음
+
   Args:
       category (str): 카테고리명
       delta_hours (int): 현재 시간으로부터 몇 시간 전까지 검색할지 (기본값: 1시간)
@@ -362,12 +364,25 @@ def update_category_batch(category, delta_hours=DELTA_HOURS, start_time=None):
       return
 
     # 검색된 notices에 대해 category 업데이트
+    updated_count = 0
+    overwritten_count = 0
+
     for notice in matched_notice_list:
       for nid, data in notice.items():
-        mysql.update("notice_list", {"category": category}, f"nid = {nid}")
+        # 기존 카테고리 확인 (덮어쓰기 감지용)
+        existing = mysql.find("notice_list", ["category"], f"WHERE nid = {nid}")
+        old_category = existing[0][0] if existing and existing[0] else None
 
-    print(
-        f"카테고리 '{category}'에 대한 category 업데이트 완료: {len(matched_notice_list)}개")
+        # 카테고리 업데이트
+        mysql.update("notice_list", {"category": category}, f"nid = {nid}")
+        updated_count += 1
+
+        # 덮어쓰기 발생 시 로그
+        if old_category and old_category != '무관' and old_category != category:
+          overwritten_count += 1
+          print(f"  [덮어쓰기] nid {nid}: '{old_category}' → '{category}'")
+
+    print(f"카테고리 '{category}' 업데이트 완료: {updated_count}개 (덮어쓰기: {overwritten_count}개)")
 
   except Exception as e:
     print(f"category 업데이트 중 오류 발생: {str(e)}")
@@ -490,16 +505,18 @@ def restore_notices_by_nids(nids):
 
 def update_all_category(delta_hours=DELTA_HOURS, start_time=None):
   """
-  모든 카테고리에 대해 category 업데이트를 수행하는 함수
+  모든 카테고리에 대해 priority 순서로 category 업데이트를 수행하는 함수
 
   Args:
-      categories (list): 카테고리명 리스트 (사용하지 않음, 모든 카테고리에 대해 업데이트)
       delta_hours (int): 현재 시간으로부터 몇 시간 전까지 검색할지 (기본값: DELTA_HOURS시간)
       start_time (str, optional): 검색 시작 시간 (UTC). 기본값: 현재 시간 - delta_hours
   """
-  mysql = Mysql()
   try:
-    for category in CATEGORIES:
+    # priority 순서로 카테고리 목록 가져오기 (높은 priority부터)
+    categories = get_categories_by_priority()
+    print(f"Priority 순서로 처리할 카테고리: {categories}")
+
+    for category in categories:
       print(f"\n카테고리 '{category}' 업데이트 시작...")
       update_category_batch(category,
                             delta_hours=delta_hours,

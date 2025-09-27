@@ -68,6 +68,26 @@ def find_all_settings_notice_category(fields=SETTINGS_NOTICE_CATEGORY_FIELDS,
   return dicts_from_tuples(fields, result)
 
 
+def get_categories_by_priority():
+  """
+  priority 순서대로 카테고리 목록을 가져오는 함수 (높은 priority부터)
+  Returns:
+      list: ["카테고리1", "카테고리2", ...] (priority DESC 순서)
+  """
+  mysql = Mysql()
+  try:
+    result = mysql.find("settings_notice_category",
+                       fields=["category"],
+                       addStr="WHERE `use` = 1 ORDER BY priority DESC, sn ASC")
+    return [row[0] for row in result]
+  except Exception as e:
+    print(f"priority 기반 카테고리 조회 중 오류: {str(e)}")
+    # 기본값으로 CATEGORIES 반환
+    return CATEGORIES
+  finally:
+    mysql.close()
+
+
 def find_settings_notice_category(category,
                                   fields=["keywords", "nots", "min_point"]):
   """

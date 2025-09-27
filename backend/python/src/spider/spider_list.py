@@ -6,7 +6,9 @@ from utils.utils_search import find_nids_for_fetch_notice_details
 from utils.utils_data import save_html, load_html, valid_str, arr_from_csv, dict_from_tuple, dicts_from_tuples, csv_from_dict, csv_from_dicts, csv_added_defaults, fix_encoding_response, _now
 from mysql.mysql_logs import insert_all_logs, insert_all_errors
 from mysql.mysql_notice import find_last_notice, update_all_category
-from mysql.mysql_settings import find_settings_notice_list, find_settings_notice_list_by_org_name, CATEGORIES
+from mysql.mysql_settings import (find_settings_notice_list, find_settings_notice_list_by_org_name,
+                                  CATEGORIES, get_categories_by_priority, find_settings_notice_category,
+                                  get_search_weight, filter_by_not)
 from utils.utils_mysql import Mysql
 from utils.utils_lxml import get_rows, get_dict, get_val, remove_scripts_from_html, remove_els_from_html
 from playwright.sync_api import Playwright, sync_playwright
@@ -1342,16 +1344,167 @@ def fetch_list_pages_new_workflow(names, save=True):
   }
 
 
+def update_all_category_selected():
+  """
+  notice_list 테이블의 모든 공고에 대해:
+  1. 수정된 유형 분류 로직을 적용하여 새로 유형 분류
+  2. 결과통보에 해당하는 공고는 is_selected = 9로 설정
+  """
+  mysql = Mysql()
+
+  try:
+    print("=" * 80)
+    print("전체 공고 카테고리 재분류 및 결과통보 처리 시작")
+    print("=" * 80)
+
+    # 1. 모든 공고 조회
+    print("\n1. 전체 공고 데이터 조회 중...")
+    all_notices = mysql.find("notice_list",
+                            fields=["nid", "title", "category", "is_selected"],
+                            addStr="ORDER BY nid")
+
+    if not all_notices:
+      print("처리할 공고가 없습니다.")
+      return
+
+    print(f"총 {len(all_notices)}개 공고 발견")
+
+    # 2. Priority 순서로 카테고리 목록 가져오기
+    print("\n2. Priority 순서로 카테고리 목록 가져오기...")
+    categories = get_categories_by_priority()
+    print(f"처리할 카테고리 (priority 순): {categories}")
+
+    # 3. 모든 공고를 먼저 '무관'으로 초기화
+    print("\n3. 모든 공고 카테고리를 '무관'으로 초기화...")
+    mysql.exec("UPDATE notice_list SET category = '무관'")
+
+    # 4. Priority 순서로 카테고리 분류
+    print("\n4. Priority 순서로 카테고리 분류 시작...")
+    total_classified = 0
+    classification_results = {}
+
+    for category in categories:
+      print(f"\n4-{categories.index(category)+1}. 카테고리 '{category}' 분류 중...")
+
+      # 카테고리별 키워드 설정 가져오기
+      keywords = find_settings_notice_category(category)
+      if keywords is None:
+        print(f"  카테고리 '{category}'에 대한 키워드 설정이 없습니다.")
+        continue
+
+      # 키워드 매칭으로 해당 공고 검색
+      matched_notices = get_search_weight(
+        keywords["keywords"],
+        min_point=keywords["min_point"],
+        add_fields=["nid", "title"],
+        add_where=""
+      )
+
+      # 제외어 필터링
+      if keywords["nots"]:
+        matched_notices = filter_by_not(keywords["nots"], matched_notices, "title")
+
+      if not matched_notices:
+        print(f"  카테고리 '{category}'에 해당하는 공고가 없습니다.")
+        classification_results[category] = 0
+        continue
+
+      # 분류 결과 업데이트
+      updated_count = 0
+      overwritten_count = 0
+
+      for notice_dict in matched_notices:
+        for nid, data in notice_dict.items():
+          # 기존 카테고리 확인
+          existing = mysql.find("notice_list", ["category"], f"WHERE nid = {nid}")
+          old_category = existing[0][0] if existing and existing[0] else None
+
+          # 카테고리 업데이트
+          mysql.update("notice_list", {"category": category}, f"nid = {nid}")
+          updated_count += 1
+
+          # 덮어쓰기 감지
+          if old_category and old_category != '무관' and old_category != category:
+            overwritten_count += 1
+            title = data.get('title', '')[:50] + '...' if len(data.get('title', '')) > 50 else data.get('title', '')
+            print(f"    [덮어쓰기] nid {nid}: '{old_category}' → '{category}' | {title}")
+
+      print(f"  완료: {updated_count}개 분류 (덮어쓰기: {overwritten_count}개)")
+      classification_results[category] = updated_count
+      total_classified += updated_count
+
+    # 5. 결과통보 공고 처리
+    print("\n5. 결과통보 공고 처리 중...")
+
+    # 제목에 '결과' 키워드가 포함된 공고 검색
+    done_notices = mysql.find("notice_list",
+                             fields=["nid", "title", "is_selected"],
+                             addStr="WHERE title LIKE '%결과%'")
+
+    done_count = 0
+    updated_done_count = 0
+
+    for notice in done_notices:
+      nid, title, current_is_selected = notice
+
+      # is_done_notice 함수로 결과통보 여부 확인
+      if is_done_notice(title):
+        done_count += 1
+
+        # is_selected가 9가 아닌 경우에만 업데이트
+        if current_is_selected != 9:
+          mysql.update("notice_list", {"is_selected": 9}, f"nid = {nid}")
+          updated_done_count += 1
+          short_title = title[:50] + '...' if len(title) > 50 else title
+          print(f"  [결과통보] nid {nid}: is_selected = 9 | {short_title}")
+
+    print(f"결과통보 공고 처리 완료: 총 {done_count}개 발견, {updated_done_count}개 업데이트")
+
+    # 6. 최종 결과 요약
+    print("\n" + "=" * 80)
+    print("전체 공고 재분류 완료")
+    print("=" * 80)
+    print(f"총 처리 공고 수: {len(all_notices)}개")
+    print(f"카테고리별 분류 결과:")
+    for category, count in classification_results.items():
+      print(f"  - {category}: {count}개")
+    print(f"총 분류된 공고: {total_classified}개")
+    print(f"결과통보 공고: {done_count}개 (업데이트: {updated_done_count}개)")
+
+    # 7. 분류 상태 확인
+    print(f"\n최종 분류 상태:")
+    final_stats = mysql.find("notice_list",
+                           fields=["category", "COUNT(*) as count"],
+                           addStr="GROUP BY category ORDER BY COUNT(*) DESC")
+
+    for category, count in final_stats:
+      print(f"  - {category}: {count}개")
+
+  except Exception as e:
+    print(f"전체 재분류 중 오류 발생: {str(e)}")
+    raise e
+  finally:
+    mysql.close()
+
+
 if __name__ == "__main__":
-  # cd /exposed/projects/bid-notice-web/backend/python && PYTHONPATH=src uv run src/spider/spider_list.py
-  print("[SCARPING] 공고 고시 게시판(spider_list)")
-  names = find_org_names()
-  # names = names[:10]
-  # names = ["한국공항공사", "가평군청", "광진구"]
-  # names = ['정부24 지자체소식', "가평군청", '용인시청']
+  import sys
 
-  # 기존 워크플로우 사용
-  # fetch_list_pages(names)
+  # 실행 인수 확인
+  if len(sys.argv) > 1 and sys.argv[1] == "update_categories":
+    # 전체 공고 카테고리 재분류 실행
+    print("[BATCH] 전체 공고 카테고리 재분류 및 결과통보 처리")
+    update_all_category_selected()
+  else:
+    # 기본 스크래핑 작업
+    # cd /exposed/projects/bid-notice-web/backend/python && PYTHONPATH=src uv run src/spider/spider_list.py
+    print("[SCARPING] 공고 고시 게시판(spider_list)")
+    names = find_org_names()
+    # names = names[:10]
+    # names = ["한국공항공사", "가평군청", "광진구"]
+    # names = ['정부24 지자체소식', "가평군청", '용인시청']
 
-  # 새로운 워크플로우 사용
-  fetch_list_pages_new_workflow(names)
+    # 새로운 워크플로우 사용
+    # fetch_list_pages_new_workflow(names)
+
+    update_all_category_selected()
