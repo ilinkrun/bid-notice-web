@@ -3,6 +3,7 @@ import { executeQuery } from '@/utils/database/mysql';
 export interface NoticeCategoryData {
   sn: number;
   category: string;
+  division?: string;
   keywords: string;
   nots: string;
   min_point: number;
@@ -15,7 +16,7 @@ export const categoryResolvers = {
     noticeCategoriesAll: async () => {
       try {
         const rows = await executeQuery(`
-          SELECT sn, category, keywords, nots, min_point, creator, \`use\`
+          SELECT sn, category, division, keywords, nots, min_point, creator, \`use\`
           FROM settings_notice_category
           ORDER BY sn ASC
         `);
@@ -23,6 +24,7 @@ export const categoryResolvers = {
         return (rows as NoticeCategoryData[]).map((category: NoticeCategoryData) => ({
           sn: category.sn,
           category: category.category,
+          division: category.division,
           keywords: category.keywords,
           nots: category.nots,
           minPoint: category.min_point,
@@ -38,7 +40,7 @@ export const categoryResolvers = {
     noticeCategoriesActive: async () => {
       try {
         const rows = await executeQuery(`
-          SELECT sn, category, keywords, nots, min_point, creator, \`use\`
+          SELECT sn, category, division, keywords, nots, min_point, creator, \`use\`
           FROM settings_notice_category
           WHERE \`use\` = 1
           ORDER BY sn ASC
@@ -47,6 +49,7 @@ export const categoryResolvers = {
         return (rows as NoticeCategoryData[]).map((category: NoticeCategoryData) => ({
           sn: category.sn,
           category: category.category,
+          division: category.division,
           keywords: category.keywords,
           nots: category.nots,
           minPoint: category.min_point,

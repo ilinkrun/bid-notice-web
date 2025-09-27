@@ -2,6 +2,7 @@ export const categoryTypeDefs = `#graphql
   type NoticeCategory {
     sn: Int!
     category: String!
+    division: String
     keywords: String!
     nots: String!
     minPoint: Int!

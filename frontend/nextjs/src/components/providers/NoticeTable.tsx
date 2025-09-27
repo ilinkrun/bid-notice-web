@@ -75,6 +75,7 @@ const GET_NOTICE_CATEGORIES = gql`
     noticeCategoriesActive {
       sn
       category
+      division
       keywords
       nots
       minPoint
@@ -151,7 +152,7 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
   const [isCategoryEditModalOpen, setIsCategoryEditModalOpen] = useState(false);
   const [isBidProcessModalOpen, setIsBidProcessModalOpen] = useState(false);
   const [localCategory, setLocalCategory] = useState(currentCategory || '공사점검');
-  const [localCategories, setLocalCategories] = useState(currentCategories || ['공사점검']);
+  const [localCategories, setLocalCategories] = useState(['공사점검']);
   const [selectedBidStage, setSelectedBidStage] = useState<string>(currentCategory === '무관' ? '무관' : '관심');
   const [isComposing, setIsComposing] = useState(false);
   const [progressLoading, setProgressLoading] = useState(false);
@@ -182,15 +183,79 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
     return DEFAULT_CATEGORIES;
   }, [categoriesData]);
 
-  // 업무 페이지용 카테고리 옵션 (무관, 제외 제외)
+  // 업무 페이지용 division 옵션
   const workPageCategoryOptions = React.useMemo(() => {
     if (categoriesData?.noticeCategoriesActive) {
-      return categoriesData.noticeCategoriesActive.map((cat: any) => ({
-        value: cat.category,
-        label: cat.category
+      // division별로 그룹핑
+      const divisions = [...new Set(categoriesData.noticeCategoriesActive.map((cat: any) => cat.division).filter(Boolean))];
+      return divisions.map((division: string) => ({
+        value: division,
+        label: division
       }));
     }
-    return DEFAULT_CATEGORIES.filter(cat => !['무관', '제외'].includes(cat.value));
+    return [
+      { value: '공사점검', label: '공사점검' },
+      { value: '진단/점검', label: '진단/점검' },
+      { value: '설계/감리', label: '설계/감리' },
+      { value: '기타', label: '기타' }
+    ];
+  }, [categoriesData]);
+
+  // division을 해당하는 categories로 매핑하는 함수
+  const mapDivisionsToCategories = React.useMemo(() => {
+    return (divisions: string[]): string[] => {
+      if (!categoriesData?.noticeCategoriesActive) {
+        // 기본 매핑 (데이터가 없을 때)
+        const divisionMap: { [key: string]: string[] } = {
+          '공사점검': ['공사점검'],
+          '진단/점검': ['정밀안전진단', '정밀안전점검', '정기안전점검'],
+          '설계/감리': ['구조설계', '구조감리'],
+          '기타': ['기타']
+        };
+        return divisions.flatMap(division => divisionMap[division] || []);
+      }
+
+      // 데이터베이스에서 division별 카테고리 매핑
+      const categories: string[] = [];
+      divisions.forEach(division => {
+        const matchingCategories = categoriesData.noticeCategoriesActive
+          .filter((cat: any) => cat.division === division)
+          .map((cat: any) => cat.category);
+        categories.push(...matchingCategories);
+      });
+      return categories;
+    };
+  }, [categoriesData]);
+
+  // categories를 해당하는 divisions로 매핑하는 함수 (역방향)
+  const mapCategoriesToDivisions = React.useMemo(() => {
+    return (categories: string[]): string[] => {
+      if (!categoriesData?.noticeCategoriesActive) {
+        // 기본 역매핑 (데이터가 없을 때)
+        const categoryToDivisionMap: { [key: string]: string } = {
+          '공사점검': '공사점검',
+          '정밀안전진단': '진단/점검',
+          '정밀안전점검': '진단/점검',
+          '정기안전점검': '진단/점검',
+          '구조설계': '설계/감리',
+          '구조감리': '설계/감리',
+          '기타': '기타'
+        };
+        const divisions = categories.map(category => categoryToDivisionMap[category]).filter(Boolean);
+        return [...new Set(divisions)]; // 중복 제거
+      }
+
+      // 데이터베이스에서 category별 division 매핑
+      const divisions: string[] = [];
+      categories.forEach(category => {
+        const matchingCategory = categoriesData.noticeCategoriesActive
+          .find((cat: any) => cat.category === category);
+        if (matchingCategory?.division) {
+          divisions.push(matchingCategory.division);
+        }
+      });
+      return [...new Set(divisions)]; // 중복 제거
+    };
   }, [categoriesData]);
 
   // 기관명 URL 조회 및 생성 함수
@@ -291,6 +356,14 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
     setLocalCategory(currentCategory || '공사점검');
     setSelectedBidStage(currentCategory === '무관' ? '무관' : '관심');
   }, [currentCategory]);
+
+  // currentCategories 변경시 localCategories를 divisions으로 동기화
+  useEffect(() => {
+    if (currentCategories && currentCategories.length > 0) {
+      const mappedDivisions = mapCategoriesToDivisions(currentCategories);
+      setLocalCategories(mappedDivisions.length > 0 ? mappedDivisions : ['공사점검']);
+    }
+  }, [currentCategories, mapCategoriesToDivisions]);
 
   // 페이지 로딩 공통 함수
   const loadPage = async (url: string) => {
@@ -410,17 +483,20 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
   // 다중 카테고리 변경 핸들러 (업무 페이지용)
   const handleCategoriesChange = async (values: string[]) => {
     try {
-      // 1. UI 상태 즉시 업데이트
+      // 1. UI 상태 즉시 업데이트 (divisions)
       setLocalCategories(values);
 
-      // 2. URL 업데이트 준비 - 쉼표를 인코딩하지 않도록 수동으로 구성
+      // 2. divisions를 실제 categories로 변환
+      const actualCategories = mapDivisionsToCategories(values);
+
+      // 3. URL 업데이트 준비 - 쉼표를 인코딩하지 않도록 수동으로 구성
       const currentParams = new URLSearchParams(window.location.search);
 
       // category 파라미터 제거
       currentParams.delete('category');
 
-      // 카테고리를 쉼표로 구분하여 설정 (URL 인코딩 방지)
-      const categoryValue = values.length > 0 ? values.join(',') : '공사점검';
+      // 실제 카테고리를 쉼표로 구분하여 설정 (URL 인코딩 방지)
+      const categoryValue = actualCategories.length > 0 ? actualCategories.join(',') : '공사점검';
 
       // 기존 파라미터들과 새 category 파라미터를 결합
       const otherParams = currentParams.toString();

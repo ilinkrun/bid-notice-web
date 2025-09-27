@@ -64,6 +64,7 @@ const GET_ACTIVE_CATEGORIES = gql`
   query GetActiveCategories {
     noticeCategoriesActive {
       category
+      division
     }
   }
 `;
@@ -821,14 +822,15 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
   // 기본값이 로딩 중일 때는 기본값 사용
   const gap = noticeDefaults?.gap || '5';
 
-  // 활성 카테고리들을 쉼표로 구분된 문자열로 변환
+  // 활성 divisions를 categories로 변환하여 쉼표로 구분된 문자열로 변환
   const categoryDefault = React.useMemo(() => {
     if (activeCategoriesData?.noticeCategoriesActive) {
-      const activeCategories = activeCategoriesData.noticeCategoriesActive
-        .map((item: any) => item.category)
-        .filter((category: string) => category && category !== '무관' && category !== '제외')
-        .join(',');
-      return activeCategories || '공사점검,성능평가,정밀안전진단,정기안전점검,구조설계,구조감리,기타';
+      // division별로 그룹핑하여 카테고리 목록 생성
+      const divisions = [...new Set(activeCategoriesData.noticeCategoriesActive.map((cat: any) => cat.division).filter(Boolean))];
+      const allCategories = activeCategoriesData.noticeCategoriesActive
+        .filter((cat: any) => cat.category && cat.category !== '무관' && cat.category !== '제외')
+        .map((cat: any) => cat.category);
+      return allCategories.join(',') || '공사점검,성능평가,정밀안전진단,정기안전점검,구조설계,구조감리,기타';
     }
     return noticeDefaults?.categoryDefault || '공사점검,성능평가,정밀안전진단,정기안전점검,구조설계,구조감리,기타';
   }, [activeCategoriesData, noticeDefaults]);
