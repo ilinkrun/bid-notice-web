@@ -131,10 +131,10 @@ export const boardsResolvers = {
           SELECT id, title, writer, email, created_at, updated_at, is_visible, is_notice, is_private, reply_to, reply_depth
           FROM ${board}
           ${whereClause}
-          ORDER BY is_notice DESC, 
-                   COALESCE(reply_to, id), 
-                   reply_depth, 
-                   created_at ASC
+          ORDER BY is_notice DESC,
+                   COALESCE(reply_to, id) DESC,
+                   reply_depth,
+                   created_at DESC
         `;
 
         const rows = await executeQuery(query, params) as BoardPostRow[];

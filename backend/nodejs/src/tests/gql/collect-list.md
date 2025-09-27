@@ -37,11 +37,9 @@ mutation {
   collectListWithSettings(settings: {
     oid: 107
     orgName: "한국공항공사"
-    url: "https://www.airport.co.kr/www/cms/frCon/inde
-x.do?MENU_ID=870"
+    url: "https://www.airport.co.kr/www/cms/frCon/index.do?MENU_ID=870"
     rowXpath: "//*[@id=\"tbody\"]/tr"
-    paging: "//ul[@class=\"paging\"]/li/button[contain
-s(text(),\"${i}\")]"
+    paging: "//ul[@class=\"paging\"]/li/button[contains(text(),\"${i}\")]"
     startPage: 1
     endPage: 3
     use: 1
