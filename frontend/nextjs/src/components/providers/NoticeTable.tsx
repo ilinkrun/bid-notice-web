@@ -544,6 +544,14 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
           order: orderParam,
         });
       }
+    } else {
+      // URL 파라미터가 없으면 기본 정렬 설정 (게시일 내림차순)
+      if (sortConfig.field !== '작성일' || sortConfig.order !== 'desc') {
+        setSortConfig({
+          field: '작성일',
+          order: 'desc',
+        });
+      }
     }
   }, [searchParams]);
 
@@ -579,6 +587,9 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
   // 검색 및 정렬된 데이터
   const filteredAndSortedNotices = notices
     .filter((notice) => {
+      // 등록이 1인 공고만 표시
+      if (String(notice.등록) !== "1") return false;
+
       if (!debouncedSearchTerm) return true;
       const searchLower = debouncedSearchTerm.toLowerCase();
       return (
@@ -593,7 +604,7 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
     searchTerm,
     totalNotices: notices.length,
     filteredNotices: filteredAndSortedNotices.length,
-    notices: notices.map(n => ({ title: n.제목, org: n.기관명 }))
+    notices: notices.map(n => ({ title: n.제목, org: n.기관명, registration: n.등록 }))
   });
 
   const filteredNotices = filterNotices(filteredAndSortedNotices, filter);
@@ -1164,6 +1175,22 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
                   유형
                 </TableHead>
                 <TableHead
+                  className="w-[80px] cursor-pointer"
+                  data-sortable="true"
+                  data-sort-active={sortConfig.field === 'region'}
+                  onClick={() => toggleSort('region')}
+                >
+                  지역
+                </TableHead>
+                <TableHead
+                  className="w-[120px] cursor-pointer"
+                  data-sortable="true"
+                  data-sort-active={sortConfig.field === '기관명'}
+                  onClick={() => toggleSort('기관명')}
+                >
+                  기관명
+                </TableHead>
+                <TableHead
                   className="w-auto cursor-pointer"
                   data-sortable="true"
                   data-sort-active={sortConfig.field === '제목'}
@@ -1177,40 +1204,14 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
                   data-sort-active={sortConfig.field === '작성일'}
                   onClick={() => toggleSort('작성일')}
                 >
-                  작성일
+                  게시일
                 </TableHead>
-                <TableHead
-                  className="w-[120px] cursor-pointer"
-                  data-sortable="true"
-                  data-sort-active={sortConfig.field === '기관명'}
-                  onClick={() => toggleSort('기관명')}
-                >
-                  기관명
-                </TableHead>
-                <TableHead
-                  className="w-[80px] cursor-pointer"
-                  data-sortable="true"
-                  data-sort-active={sortConfig.field === 'region'}
-                  onClick={() => toggleSort('region')}
-                >
-                  지역
-                </TableHead>
-                {!(pathname.includes('/notices/nara') && (isIrrelevantPage || isWorkPage || isExcludedPage)) && (
-                  <TableHead
-                    className="w-[60px] cursor-pointer"
-                    data-sortable="true"
-                    data-sort-active={sortConfig.field === 'registration'}
-                    onClick={() => toggleSort('registration')}
-                  >
-                    등록
-                  </TableHead>
-                )}
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedNotices.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={pathname.includes('/notices/nara') && (isIrrelevantPage || isWorkPage || isExcludedPage) ? 6 : 7} className="h-[300px]" />
+                  <TableCell colSpan={6} className="h-[300px]" />
                 </TableRow>
               ) : (
                 paginatedNotices.map((notice) => (
@@ -1228,27 +1229,8 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
                     <TableCell className="w-[80px] whitespace-nowrap">
                       {notice.category}
                     </TableCell>
-                    <TableCell className="w-auto max-w-0">
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <a
-                              href={`${notice.상세페이지주소}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-sm font-medium text-color-primary-foreground hover:text-blue-600 truncate cursor-pointer"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                              }}
-                            >
-                              {notice.제목}
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="w-[100px] whitespace-nowrap">
-                      {notice.작성일}
+                    <TableCell className="w-[80px] whitespace-nowrap">
+                      {notice.지역}
                     </TableCell>
                     <TableCell className="w-[120px] whitespace-nowrap">
                       {(() => {
@@ -1279,14 +1261,28 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
                         }
                       })()}
                     </TableCell>
-                    <TableCell className="w-[80px] whitespace-nowrap">
-                      {notice.지역}
+                    <TableCell className="w-auto max-w-0">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <a
+                              href={`${notice.상세페이지주소}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm font-medium text-color-primary-foreground hover:text-blue-600 truncate cursor-pointer"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                              }}
+                            >
+                              {notice.제목}
+                            </a>
+                          </div>
+                        </div>
+                      </div>
                     </TableCell>
-                    {!(pathname.includes('/notices/nara') && (isIrrelevantPage || isWorkPage || isExcludedPage)) && (
-                      <TableCell className="w-[60px] whitespace-nowrap">
-                        {notice.등록}
-                      </TableCell>
-                    )}
+                    <TableCell className="w-[100px] whitespace-nowrap">
+                      {notice.작성일}
+                    </TableCell>
                   </TableRow>
                 ))
               )}
