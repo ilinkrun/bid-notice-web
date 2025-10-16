@@ -1,4 +1,7 @@
-import { apiClient } from '@/utils/api/backendClient';
+import {
+  getLogsNoticeScraping,
+  getErrorsNoticeScraping
+} from '@/utils/utilsGovBid';
 
 export interface LogScrapingInput {
   orgName?: string;
@@ -13,10 +16,10 @@ export const logsResolvers = {
   Query: {
     logsScrapingAll: async (_: unknown, { gap }: { gap?: number }) => {
       try {
-        const response = await apiClient.get('/logs_notice_scraping', { params: { gap } });
-        return response.data.map((log: { org_name: string; error_code?: string; error_message?: string; scraped_count?: number; inserted_count?: number; time: string }) => ({
+        const logs = await getLogsNoticeScraping(gap || 15);
+        return logs.map((log) => ({
           orgName: log.org_name || '',
-          errorCode: log.error_code || null,
+          errorCode: log.error_code !== null ? String(log.error_code) : null,
           errorMessage: log.error_message || null,
           scrapedCount: log.scraped_count || 0,
           insertedCount: log.inserted_count || 0,
@@ -30,8 +33,8 @@ export const logsResolvers = {
 
     logsErrorAll: async (_: unknown, { gap }: { gap?: number }) => {
       try {
-        const response = await apiClient.get('/errors_notice_scraping', { params: { gap } });
-        return response.data.map((log: { orgs: string; time: string }, index: number) => ({
+        const errors = await getErrorsNoticeScraping(gap || 15);
+        return errors.map((log, index) => ({
           id: `error_${index}_${Date.now()}`,
           orgName: log.orgs || '',
           errorMessage: `Error occurred in organization: ${log.orgs}`,
@@ -43,7 +46,7 @@ export const logsResolvers = {
       }
     },
   },
-  
+
   Mutation: {
     logCreate: async (_: unknown, { input }: { input: LogScrapingInput }) => {
       try {

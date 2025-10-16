@@ -1,36 +1,31 @@
-import { apiClient } from '@/utils/api/backendClient';
-
-interface BidData {
-  mid: string;
-  nid: string;
-  title: string;
-  status: string;
-  started_at: string;
-  ended_at: string;
-  memo: string;
-  org_name: string;
-  posted_date: string;
-  detail: string;
-  detail_url: string;
-  category?: string;
-  org_region?: string;
-}
+import {
+  getMyBids,
+  getMyBidsByStatus,
+  getMyBidByNid,
+  createMyBid,
+  updateMyBid,
+  upsertMyBid,
+  deleteMyBid,
+  getNoticeFiles,
+  getNoticeDetails,
+  updateNoticeDetails
+} from '@/utils/utilsGovBid';
 
 export const mybidsResolvers = {
   Query: {
     mybidsAll: async () => {
       try {
-        const response = await apiClient.get('/my_bids');
-        return response.data.map((bd: BidData) => ({
-          mid: parseInt(bd.mid),
-          nid: parseInt(bd.nid),
+        const bids = await getMyBids();
+        return bids.map((bd) => ({
+          mid: bd.mid,
+          nid: bd.nid,
           title: bd.title,
           status: bd.status,
           startedAt: bd.started_at || null,
           endedAt: bd.ended_at || null,
           memo: bd.memo || "",
-          orgName: bd.org_name,
-          postedAt: bd.posted_date,
+          orgName: bd.org_name || "",
+          postedAt: bd.posted_date || "",
           detail: bd.detail || "",
           detailUrl: bd.detail_url || "",
           category: bd.category || "",
@@ -44,17 +39,17 @@ export const mybidsResolvers = {
 
     mybidsByStatus: async (_: unknown, { status }: { status: string }) => {
       try {
-        const response = await apiClient.get(`/my_bids/${status}`);
-        return response.data.map((bd: BidData) => ({
-          mid: parseInt(bd.mid),
-          nid: parseInt(bd.nid),
+        const bids = await getMyBidsByStatus(status);
+        return bids.map((bd) => ({
+          mid: bd.mid,
+          nid: bd.nid,
           title: bd.title,
           status: bd.status,
           startedAt: bd.started_at || null,
           endedAt: bd.ended_at || null,
           memo: bd.memo || "",
-          orgName: bd.org_name,
-          postedAt: bd.posted_date,
+          orgName: bd.org_name || "",
+          postedAt: bd.posted_date || "",
           detail: bd.detail || "",
           detailUrl: bd.detail_url || "",
           category: bd.category || "",
@@ -68,18 +63,20 @@ export const mybidsResolvers = {
 
     mybidsOne: async (_: unknown, { nid }: { nid: number }) => {
       try {
-        const response = await apiClient.get(`/my_bids/detail/${nid}`);
-        const bd = response.data;
+        const bd = await getMyBidByNid(nid);
+        if (!bd) {
+          return null;
+        }
         return {
-          mid: parseInt(bd.mid),
-          nid: parseInt(bd.nid),
+          mid: bd.mid,
+          nid: bd.nid,
           title: bd.title,
           status: bd.status,
           startedAt: bd.started_at || null,
           endedAt: bd.ended_at || null,
           memo: bd.memo || "",
-          orgName: bd.org_name,
-          postedAt: bd.posted_date,
+          orgName: bd.org_name || "",
+          postedAt: bd.posted_date || "",
           detail: bd.detail || "",
           detailUrl: bd.detail_url || "",
           category: bd.category || "",
@@ -93,8 +90,8 @@ export const mybidsResolvers = {
 
     noticeFiles: async (_: unknown, { nid }: { nid: number }) => {
       try {
-        const response = await apiClient.get(`/notice_files/${nid}`);
-        return response.data;
+        const result = await getNoticeFiles(nid);
+        return result;
       } catch (error) {
         console.error('Error fetching notice files:', error);
         return {
@@ -108,8 +105,8 @@ export const mybidsResolvers = {
 
     noticeDetails: async (_: unknown, { nid }: { nid: number }) => {
       try {
-        const response = await apiClient.get(`/notice_details/${nid}`);
-        return response.data;
+        const result = await getNoticeDetails(nid);
+        return result;
       } catch (error) {
         console.error('Error fetching notice details:', error);
         return {
@@ -133,8 +130,8 @@ export const mybidsResolvers = {
   Mutation: {
     mybidCreate: async (_: unknown, { input }: { input: any }) => {
       try {
-        const response = await apiClient.post('/my_bids', input);
-        return response.data;
+        const insertId = await createMyBid(input);
+        return { success: true, mid: insertId };
       } catch (error) {
         console.error('Error creating bid:', error);
         throw new Error('Failed to create bid');
@@ -143,26 +140,24 @@ export const mybidsResolvers = {
 
     mybidUpdate: async (_: unknown, { input }: { input: { nid: number; status: string; memo?: string; detail?: string } }) => {
       try {
-        const requestData: any = {
-          nid: input.nid,
-          status: input.status
-        };
-        
-        if (input.memo) {
-          requestData.memo = input.memo;
-        }
-        
+        let parsedDetail: any = undefined;
+
         if (input.detail) {
           try {
-            requestData.detail = JSON.parse(input.detail);
+            parsedDetail = JSON.parse(input.detail);
           } catch (e) {
             console.error('Failed to parse detail JSON:', e);
-            requestData.detail = null;
+            parsedDetail = null;
           }
         }
-        
-        const response = await apiClient.put(`/my_bids/${input.nid}`, requestData);
-        return response.data;
+
+        const result = await updateMyBid(input.nid, {
+          status: input.status,
+          memo: input.memo || null,
+          detail: parsedDetail
+        });
+
+        return result;
       } catch (error) {
         console.error('Error updating bid:', error);
         throw new Error('Failed to update bid');
@@ -171,8 +166,8 @@ export const mybidsResolvers = {
 
     mybidUpsert: async (_: unknown, { input }: { input: any }) => {
       try {
-        const response = await apiClient.post('/my_bids/upsert', input);
-        return response.data;
+        await upsertMyBid(input);
+        return { success: true };
       } catch (error) {
         console.error('Error upserting bid:', error);
         throw new Error('Failed to upsert bid');
@@ -181,9 +176,8 @@ export const mybidsResolvers = {
 
     mybidDelete: async (_: unknown, { mid }: { mid: number }) => {
       try {
-        // TODO: Implement bid deletion API call
-        await apiClient.delete(`/my_bids/${mid}`);
-        return true;
+        const success = await deleteMyBid(mid);
+        return success;
       } catch (error) {
         console.error('Error deleting bid:', error);
         throw new Error('Failed to delete bid');
@@ -192,8 +186,8 @@ export const mybidsResolvers = {
 
     noticeDetailsUpdate: async (_: unknown, { nid, input }: { nid: number; input: any }) => {
       try {
-        const response = await apiClient.put(`/notice_details/${nid}`, input);
-        return response.data;
+        const result = await updateNoticeDetails(nid, input);
+        return result;
       } catch (error) {
         console.error('Error updating notice details:', error);
         return {

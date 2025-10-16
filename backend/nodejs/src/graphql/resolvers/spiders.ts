@@ -1,28 +1,27 @@
-import { spiderApiClient } from '@/utils/api/backendClient';
+import { scrapeList, ERROR_CODES } from '@/utils/spiderGovBidList';
 
 export const spidersResolvers = {
   Query: {
     spidersCheckFetchList: async (_: unknown, { orgName }: { orgName: string }) => {
       try {
-        const response = await spiderApiClient.get('/check_fetch_list', {
-          params: { org_name: orgName }
-        });
-        
+        // Use TypeScript utility function instead of Python API
+        const result = await scrapeList(orgName, 1, 2);
+
         return {
-          orgName: response.data.org_name,
-          success: response.data.success || response.data.error_code === 0,
-          errorCode: response.data.error_code,
-          errorMessage: response.data.error_message,
-          dataCount: response.data.data_count,
-          data: response.data.data || []
+          orgName: result.org_name,
+          success: result.error_code === ERROR_CODES.SUCCESS,
+          errorCode: result.error_code,
+          errorMessage: result.error_message,
+          dataCount: result.data.length,
+          data: result.data
         };
       } catch (error) {
         console.error('Error checking fetch list:', error);
         return {
           orgName,
           success: false,
-          errorCode: 999,
-          errorMessage: 'Frontend request failed',
+          errorCode: ERROR_CODES.UNKNOWN_ERROR,
+          errorMessage: error instanceof Error ? error.message : 'Unknown error occurred',
           dataCount: 0,
           data: []
         };
@@ -30,23 +29,16 @@ export const spidersResolvers = {
     },
 
     spidersHello: async () => {
-      try {
-        const response = await spiderApiClient.get('/hello');
-        return response.data;
-      } catch (error) {
-        console.error('Error calling spider hello:', error);
-        return { message: 'Error connecting to spider server' };
-      }
+      // Simple test endpoint - no need for external API
+      return { message: 'Hello, World!' };
     },
   },
 
   Mutation: {
     spidersTestCsv: async (_: unknown, { csvData }: { csvData: string }) => {
+      // Simple CSV echo endpoint - no need for external API
       try {
-        const response = await spiderApiClient.post('/test_csv/', {
-          csv: csvData
-        });
-        return response.data;
+        return csvData;
       } catch (error) {
         console.error('Error testing CSV:', error);
         throw new Error('Failed to test CSV data');

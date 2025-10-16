@@ -1,5 +1,24 @@
-import { apiClient } from '@/utils/api/backendClient';
 import { executeQuery } from '@/utils/database/mysql';
+import {
+  getSettingsNoticeList,
+  getSettingsNoticeListByOid,
+  getSettingsNoticeListByOrgName,
+  upsertSettingsNoticeListByOid,
+  getSettingsNoticeDetail,
+  getSettingsNoticeDetailByOid,
+  getSettingsNoticeDetailByOrgName,
+  upsertSettingsNoticeDetailByOid,
+  getAllNoticeCategorySettings,
+  getNoticeCategorySetting,
+  parseKeywordWeights,
+  searchNoticeList,
+  filterNoticeList,
+  getNasPathSettings,
+  getNasPathSettingById,
+  createNasPathSetting,
+  updateNasPathSetting,
+  deleteNasPathSetting
+} from '@/utils/utilsGovBid';
 
 // App Settings
 export interface AppSettingData {
@@ -157,8 +176,8 @@ export const settingsResolvers = {
     // Settings Notice List
     settingsNoticeListAll: async () => {
       try {
-        const response = await apiClient.get('/settings_notice_list');
-        return response.data.map((setting: SettingsNoticeListData) => ({
+        const settings = await getSettingsNoticeList();
+        return settings.map((setting) => ({
           oid: setting.oid,
           orgName: setting.org_name,
           url: setting.url,
@@ -168,7 +187,7 @@ export const settingsResolvers = {
           startPage: setting.startPage || 0,
           endPage: setting.endPage || 0,
           login: setting.login || '',
-          use: setting.use,
+          use: setting.use || 0,
           orgRegion: setting.org_region || '',
           registration: setting.registration || '',
           title: setting.title || '',
@@ -187,8 +206,10 @@ export const settingsResolvers = {
 
     settingsNoticeListOne: async (_: unknown, { oid }: { oid: number }) => {
       try {
-        const response = await apiClient.get(`/settings_notice_list_by_oid/${oid}`);
-        const setting = response.data;
+        const setting = await getSettingsNoticeListByOid(oid);
+        if (!setting) {
+          return null;
+        }
         return {
           oid: setting.oid,
           orgName: setting.org_name,
@@ -199,7 +220,7 @@ export const settingsResolvers = {
           startPage: setting.startPage || 0,
           endPage: setting.endPage || 0,
           login: setting.login || '',
-          use: setting.use,
+          use: setting.use || 0,
           orgRegion: setting.org_region || '',
           registration: setting.registration || '',
           title: setting.title || '',
@@ -209,7 +230,7 @@ export const settingsResolvers = {
           companyInCharge: setting.company_in_charge || '',
           orgMan: setting.org_man || '',
           exceptionRow: setting.exception_row || '',
-          elements: setting.elements || []
+          elements: []
         };
       } catch (error) {
         console.error('Error fetching notice list settings by oid:', error);
@@ -219,8 +240,10 @@ export const settingsResolvers = {
 
     settingListByOid: async (_: unknown, { oid }: { oid: number }) => {
       try {
-        const response = await apiClient.get(`/settings_notice_list_by_oid/${oid}`);
-        const setting = response.data;
+        const setting = await getSettingsNoticeListByOid(oid);
+        if (!setting) {
+          return null;
+        }
         return {
           oid: setting.oid,
           orgName: setting.org_name,
@@ -232,7 +255,7 @@ export const settingsResolvers = {
           startPage: setting.startPage || 0,
           endPage: setting.endPage || 0,
           login: setting.login || '',
-          use: setting.use,
+          use: setting.use || 0,
           orgRegion: setting.org_region || '',
           registration: setting.registration || '',
           title: setting.title || '',
@@ -241,7 +264,7 @@ export const settingsResolvers = {
           companyInCharge: setting.company_in_charge || '',
           orgMan: setting.org_man || '',
           exceptionRow: setting.exception_row || '',
-          elements: setting.elements || []
+          elements: []
         };
       } catch (error) {
         console.error('Error fetching setting list by oid:', error);
@@ -252,20 +275,14 @@ export const settingsResolvers = {
     settingsNoticeListByOrg: async (_: unknown, { orgName }: { orgName: string }) => {
       try {
         console.log(`Fetching settings for organization: ${orgName}`);
-        const response = await apiClient.get(`/settings_notice_list_by_org_name/${orgName}`);
-        
-        console.log('Raw response from Python backend:', response.data);
-        
-        // Handle the response structure from the Python endpoint
-        if (response.data.error) {
-          console.error('Python backend returned error:', response.data.error);
+        const setting = await getSettingsNoticeListByOrgName(orgName);
+
+        if (!setting) {
+          console.error('No settings found for organization:', orgName);
           return [];
         }
 
-        // If response.data is a single object (not an array), wrap it in an array
-        const dataArray = Array.isArray(response.data) ? response.data : [response.data];
-        
-        return dataArray.map((setting: SettingsNoticeListData) => ({
+        return [{
           oid: setting.oid,
           orgName: setting.org_name,
           url: setting.url,
@@ -275,7 +292,7 @@ export const settingsResolvers = {
           startPage: setting.startPage || 0,
           endPage: setting.endPage || 0,
           login: setting.login || '',
-          use: setting.use,
+          use: setting.use || 0,
           orgRegion: setting.org_region || '',
           registration: setting.registration || '',
           title: setting.title || '',
@@ -285,7 +302,7 @@ export const settingsResolvers = {
           companyInCharge: setting.company_in_charge || '',
           orgMan: setting.org_man || '',
           exceptionRow: setting.exception_row || ''
-        }));
+        }];
       } catch (error) {
         console.error('Error fetching notice list settings by org:', error);
         return [];
@@ -295,23 +312,39 @@ export const settingsResolvers = {
     // Settings Notice Detail
     settingsNoticeDetailAll: async () => {
       try {
-        const response = await apiClient.get('/settings_notice_detail');
-        return response.data.map((setting: SettingsNoticeDetailData) => ({
+        const settings = await getSettingsNoticeDetail();
+        return settings.map((setting) => ({
           oid: setting.oid,
-          orgName: setting.org_name,
-          title: setting.title || '',
-          bodyHtml: setting.body_html || '',
-          fileName: setting.file_name || '',
-          fileUrl: setting.file_url || '',
-          preview: setting.preview || '',
-          noticeDiv: setting.notice_div || '',
-          noticeNum: setting.notice_num || '',
-          orgDept: setting.org_dept || '',
-          orgMan: setting.org_man || '',
-          orgTel: setting.org_tel || '',
+          orgName: setting.org_name || '',
           use: setting.use,
-          sampleUrl: setting.sample_url || '',
-          down: setting.down || ''
+          url: setting.url || '',
+          naverMapKeyword: setting.naver_map_keyword || '',
+          xPath: setting.x_path || '',
+          xPathNoticeNum: setting.x_path_notice_num || '',
+          xPathTitle: setting.x_path_title || '',
+          xPathOrg: setting.x_path_org || '',
+          xPathDemandOrg: setting.x_path_demand_org || '',
+          xPathBidType: setting.x_path_bid_type || '',
+          xPathAnnounceDate: setting.x_path_announce_date || '',
+          xPathDeadlineDate: setting.x_path_deadline_date || '',
+          xPathDepositDeadlineDate: setting.x_path_deposit_deadline_date || '',
+          xPathDemandDeadlineDate: setting.x_path_demand_deadline_date || '',
+          xPathProduct: setting.x_path_product || '',
+          xPathBasePrice: setting.x_path_base_price || '',
+          xPathFiles: setting.x_path_files || '',
+          xPathTargetIndex: setting.x_path_target_index !== null ? setting.x_path_target_index : null,
+          xPathNoticeNumTargetIndex: setting.x_path_notice_num_target_index !== null ? setting.x_path_notice_num_target_index : null,
+          xPathTitleTargetIndex: setting.x_path_title_target_index !== null ? setting.x_path_title_target_index : null,
+          xPathOrgTargetIndex: setting.x_path_org_target_index !== null ? setting.x_path_org_target_index : null,
+          xPathDemandOrgTargetIndex: setting.x_path_demand_org_target_index !== null ? setting.x_path_demand_org_target_index : null,
+          xPathBidTypeTargetIndex: setting.x_path_bid_type_target_index !== null ? setting.x_path_bid_type_target_index : null,
+          xPathAnnounceDateTargetIndex: setting.x_path_announce_date_target_index !== null ? setting.x_path_announce_date_target_index : null,
+          xPathDeadlineDateTargetIndex: setting.x_path_deadline_date_target_index !== null ? setting.x_path_deadline_date_target_index : null,
+          xPathDepositDeadlineDateTargetIndex: setting.x_path_deposit_deadline_date_target_index !== null ? setting.x_path_deposit_deadline_date_target_index : null,
+          xPathDemandDeadlineDateTargetIndex: setting.x_path_demand_deadline_date_target_index !== null ? setting.x_path_demand_deadline_date_target_index : null,
+          xPathProductTargetIndex: setting.x_path_product_target_index !== null ? setting.x_path_product_target_index : null,
+          xPathBasePriceTargetIndex: setting.x_path_base_price_target_index !== null ? setting.x_path_base_price_target_index : null,
+          xPathFilesTargetIndex: setting.x_path_files_target_index !== null ? setting.x_path_files_target_index : null,
         }));
       } catch (error) {
         console.error('Error fetching all notice detail settings:', error);
@@ -321,24 +354,42 @@ export const settingsResolvers = {
 
     settingsNoticeDetailOne: async (_: unknown, { oid }: { oid: number }) => {
       try {
-        const response = await apiClient.get(`/settings_notice_detail_by_oid/${oid}`);
-        const setting = response.data;
+        const setting = await getSettingsNoticeDetailByOid(oid);
+        if (!setting) {
+          return null;
+        }
         return {
           oid: setting.oid,
-          orgName: setting.org_name,
-          title: setting.title || '',
-          bodyHtml: setting.body_html || '',
-          fileName: setting.file_name || '',
-          fileUrl: setting.file_url || '',
-          preview: setting.preview || '',
-          noticeDiv: setting.notice_div || '',
-          noticeNum: setting.notice_num || '',
-          orgDept: setting.org_dept || '',
-          orgMan: setting.org_man || '',
-          orgTel: setting.org_tel || '',
+          orgName: setting.org_name || '',
           use: setting.use,
-          sampleUrl: setting.sample_url || '',
-          down: setting.down || ''
+          url: setting.url || '',
+          naverMapKeyword: setting.naver_map_keyword || '',
+          xPath: setting.x_path || '',
+          xPathNoticeNum: setting.x_path_notice_num || '',
+          xPathTitle: setting.x_path_title || '',
+          xPathOrg: setting.x_path_org || '',
+          xPathDemandOrg: setting.x_path_demand_org || '',
+          xPathBidType: setting.x_path_bid_type || '',
+          xPathAnnounceDate: setting.x_path_announce_date || '',
+          xPathDeadlineDate: setting.x_path_deadline_date || '',
+          xPathDepositDeadlineDate: setting.x_path_deposit_deadline_date || '',
+          xPathDemandDeadlineDate: setting.x_path_demand_deadline_date || '',
+          xPathProduct: setting.x_path_product || '',
+          xPathBasePrice: setting.x_path_base_price || '',
+          xPathFiles: setting.x_path_files || '',
+          xPathTargetIndex: setting.x_path_target_index !== null ? setting.x_path_target_index : null,
+          xPathNoticeNumTargetIndex: setting.x_path_notice_num_target_index !== null ? setting.x_path_notice_num_target_index : null,
+          xPathTitleTargetIndex: setting.x_path_title_target_index !== null ? setting.x_path_title_target_index : null,
+          xPathOrgTargetIndex: setting.x_path_org_target_index !== null ? setting.x_path_org_target_index : null,
+          xPathDemandOrgTargetIndex: setting.x_path_demand_org_target_index !== null ? setting.x_path_demand_org_target_index : null,
+          xPathBidTypeTargetIndex: setting.x_path_bid_type_target_index !== null ? setting.x_path_bid_type_target_index : null,
+          xPathAnnounceDateTargetIndex: setting.x_path_announce_date_target_index !== null ? setting.x_path_announce_date_target_index : null,
+          xPathDeadlineDateTargetIndex: setting.x_path_deadline_date_target_index !== null ? setting.x_path_deadline_date_target_index : null,
+          xPathDepositDeadlineDateTargetIndex: setting.x_path_deposit_deadline_date_target_index !== null ? setting.x_path_deposit_deadline_date_target_index : null,
+          xPathDemandDeadlineDateTargetIndex: setting.x_path_demand_deadline_date_target_index !== null ? setting.x_path_demand_deadline_date_target_index : null,
+          xPathProductTargetIndex: setting.x_path_product_target_index !== null ? setting.x_path_product_target_index : null,
+          xPathBasePriceTargetIndex: setting.x_path_base_price_target_index !== null ? setting.x_path_base_price_target_index : null,
+          xPathFilesTargetIndex: setting.x_path_files_target_index !== null ? setting.x_path_files_target_index : null,
         };
       } catch (error) {
         console.error('Error fetching notice detail settings by oid:', error);
@@ -348,24 +399,42 @@ export const settingsResolvers = {
 
     settingsDetailByOid: async (_: unknown, { oid }: { oid: number }) => {
       try {
-        const response = await apiClient.get(`/settings_notice_detail_by_oid/${oid}`);
-        const setting = response.data;
+        const setting = await getSettingsNoticeDetailByOid(oid);
+        if (!setting) {
+          return null;
+        }
         return {
           oid: setting.oid,
-          orgName: setting.org_name,
-          title: setting.title || '',
-          bodyHtml: setting.body_html || '',
-          fileName: setting.file_name || '',
-          fileUrl: setting.file_url || '',
-          preview: setting.preview || '',
-          noticeDiv: setting.notice_div || '',
-          noticeNum: setting.notice_num || '',
-          orgDept: setting.org_dept || '',
-          orgMan: setting.org_man || '',
-          orgTel: setting.org_tel || '',
+          orgName: setting.org_name || '',
           use: setting.use,
-          sampleUrl: setting.sample_url || '',
-          down: setting.down || ''
+          url: setting.url || '',
+          naverMapKeyword: setting.naver_map_keyword || '',
+          xPath: setting.x_path || '',
+          xPathNoticeNum: setting.x_path_notice_num || '',
+          xPathTitle: setting.x_path_title || '',
+          xPathOrg: setting.x_path_org || '',
+          xPathDemandOrg: setting.x_path_demand_org || '',
+          xPathBidType: setting.x_path_bid_type || '',
+          xPathAnnounceDate: setting.x_path_announce_date || '',
+          xPathDeadlineDate: setting.x_path_deadline_date || '',
+          xPathDepositDeadlineDate: setting.x_path_deposit_deadline_date || '',
+          xPathDemandDeadlineDate: setting.x_path_demand_deadline_date || '',
+          xPathProduct: setting.x_path_product || '',
+          xPathBasePrice: setting.x_path_base_price || '',
+          xPathFiles: setting.x_path_files || '',
+          xPathTargetIndex: setting.x_path_target_index !== null ? setting.x_path_target_index : null,
+          xPathNoticeNumTargetIndex: setting.x_path_notice_num_target_index !== null ? setting.x_path_notice_num_target_index : null,
+          xPathTitleTargetIndex: setting.x_path_title_target_index !== null ? setting.x_path_title_target_index : null,
+          xPathOrgTargetIndex: setting.x_path_org_target_index !== null ? setting.x_path_org_target_index : null,
+          xPathDemandOrgTargetIndex: setting.x_path_demand_org_target_index !== null ? setting.x_path_demand_org_target_index : null,
+          xPathBidTypeTargetIndex: setting.x_path_bid_type_target_index !== null ? setting.x_path_bid_type_target_index : null,
+          xPathAnnounceDateTargetIndex: setting.x_path_announce_date_target_index !== null ? setting.x_path_announce_date_target_index : null,
+          xPathDeadlineDateTargetIndex: setting.x_path_deadline_date_target_index !== null ? setting.x_path_deadline_date_target_index : null,
+          xPathDepositDeadlineDateTargetIndex: setting.x_path_deposit_deadline_date_target_index !== null ? setting.x_path_deposit_deadline_date_target_index : null,
+          xPathDemandDeadlineDateTargetIndex: setting.x_path_demand_deadline_date_target_index !== null ? setting.x_path_demand_deadline_date_target_index : null,
+          xPathProductTargetIndex: setting.x_path_product_target_index !== null ? setting.x_path_product_target_index : null,
+          xPathBasePriceTargetIndex: setting.x_path_base_price_target_index !== null ? setting.x_path_base_price_target_index : null,
+          xPathFilesTargetIndex: setting.x_path_files_target_index !== null ? setting.x_path_files_target_index : null,
         };
       } catch (error) {
         console.error('Error fetching settings detail by oid:', error);
@@ -375,24 +444,43 @@ export const settingsResolvers = {
 
     settingsNoticeDetailByOrg: async (_: unknown, { orgName }: { orgName: string }) => {
       try {
-        const response = await apiClient.get(`/settings_notice_detail/org/${orgName}`);
-        return response.data.map((setting: SettingsNoticeDetailData) => ({
+        const setting = await getSettingsNoticeDetailByOrgName(orgName);
+        if (!setting) {
+          return [];
+        }
+        return [{
           oid: setting.oid,
-          orgName: setting.org_name,
-          title: setting.title || '',
-          bodyHtml: setting.body_html || '',
-          fileName: setting.file_name || '',
-          fileUrl: setting.file_url || '',
-          preview: setting.preview || '',
-          noticeDiv: setting.notice_div || '',
-          noticeNum: setting.notice_num || '',
-          orgDept: setting.org_dept || '',
-          orgMan: setting.org_man || '',
-          orgTel: setting.org_tel || '',
+          orgName: setting.org_name || '',
           use: setting.use,
-          sampleUrl: setting.sample_url || '',
-          down: setting.down || ''
-        }));
+          url: setting.url || '',
+          naverMapKeyword: setting.naver_map_keyword || '',
+          xPath: setting.x_path || '',
+          xPathNoticeNum: setting.x_path_notice_num || '',
+          xPathTitle: setting.x_path_title || '',
+          xPathOrg: setting.x_path_org || '',
+          xPathDemandOrg: setting.x_path_demand_org || '',
+          xPathBidType: setting.x_path_bid_type || '',
+          xPathAnnounceDate: setting.x_path_announce_date || '',
+          xPathDeadlineDate: setting.x_path_deadline_date || '',
+          xPathDepositDeadlineDate: setting.x_path_deposit_deadline_date || '',
+          xPathDemandDeadlineDate: setting.x_path_demand_deadline_date || '',
+          xPathProduct: setting.x_path_product || '',
+          xPathBasePrice: setting.x_path_base_price || '',
+          xPathFiles: setting.x_path_files || '',
+          xPathTargetIndex: setting.x_path_target_index !== null ? setting.x_path_target_index : null,
+          xPathNoticeNumTargetIndex: setting.x_path_notice_num_target_index !== null ? setting.x_path_notice_num_target_index : null,
+          xPathTitleTargetIndex: setting.x_path_title_target_index !== null ? setting.x_path_title_target_index : null,
+          xPathOrgTargetIndex: setting.x_path_org_target_index !== null ? setting.x_path_org_target_index : null,
+          xPathDemandOrgTargetIndex: setting.x_path_demand_org_target_index !== null ? setting.x_path_demand_org_target_index : null,
+          xPathBidTypeTargetIndex: setting.x_path_bid_type_target_index !== null ? setting.x_path_bid_type_target_index : null,
+          xPathAnnounceDateTargetIndex: setting.x_path_announce_date_target_index !== null ? setting.x_path_announce_date_target_index : null,
+          xPathDeadlineDateTargetIndex: setting.x_path_deadline_date_target_index !== null ? setting.x_path_deadline_date_target_index : null,
+          xPathDepositDeadlineDateTargetIndex: setting.x_path_deposit_deadline_date_target_index !== null ? setting.x_path_deposit_deadline_date_target_index : null,
+          xPathDemandDeadlineDateTargetIndex: setting.x_path_demand_deadline_date_target_index !== null ? setting.x_path_demand_deadline_date_target_index : null,
+          xPathProductTargetIndex: setting.x_path_product_target_index !== null ? setting.x_path_product_target_index : null,
+          xPathBasePriceTargetIndex: setting.x_path_base_price_target_index !== null ? setting.x_path_base_price_target_index : null,
+          xPathFilesTargetIndex: setting.x_path_files_target_index !== null ? setting.x_path_files_target_index : null,
+        }];
       } catch (error) {
         console.error('Error fetching notice detail settings by org:', error);
         return [];
@@ -402,9 +490,9 @@ export const settingsResolvers = {
     // Settings Notice Category
     settingsNoticeCategoryAll: async () => {
       try {
-        const response = await apiClient.get('/settings_notice_categorys');
-        return response.data
-          .map((category: SettingsNoticeCategoryData) => ({
+        const categories = await getAllNoticeCategorySettings();
+        return categories
+          .map((category) => ({
             sn: category.sn,
             keywords: category.keywords,
             nots: category.nots,
@@ -413,7 +501,7 @@ export const settingsResolvers = {
             creator: category.creator || '',
             memo: category.memo || ''
           }))
-          .sort((a: SettingsNoticeCategoryData, b: SettingsNoticeCategoryData) => a.sn - b.sn);
+          .sort((a, b) => a.sn - b.sn);
       } catch (error) {
         console.error('Error fetching notice category settings:', error);
         return [];
@@ -422,16 +510,19 @@ export const settingsResolvers = {
 
     settingsNoticeCategoryByCategory: async (_: unknown, { category }: { category: string }) => {
       try {
-        const response = await apiClient.get(`/settings_notice_categorys/${category}`);
-        return response.data.map((item: SettingsNoticeCategoryData) => ({
-          sn: item.sn,
-          keywords: item.keywords,
-          nots: item.nots,
-          minPoint: item.min_point,
-          category: item.category,
-          creator: item.creator || '',
-          memo: item.memo || ''
-        }));
+        const setting = await getNoticeCategorySetting(category);
+        if (!setting) {
+          return [];
+        }
+        return [{
+          sn: setting.sn,
+          keywords: setting.keywords,
+          nots: setting.nots,
+          minPoint: setting.min_point,
+          category: setting.category,
+          creator: setting.creator || '',
+          memo: setting.memo || ''
+        }];
       } catch (error) {
         console.error('Error fetching notice category settings by category:', error);
         return [];
@@ -440,10 +531,7 @@ export const settingsResolvers = {
 
     settingsNoticeCategoryParseKeywordWeights: async (_: unknown, { keywordWeightStr }: { keywordWeightStr: string }) => {
       try {
-        const response = await apiClient.get('/parse_keyword_weights', {
-          params: { keyword_weight_str: keywordWeightStr }
-        });
-        return response.data;
+        return parseKeywordWeights(keywordWeightStr);
       } catch (error) {
         console.error('Error parsing keyword weights:', error);
         return [];
@@ -453,8 +541,8 @@ export const settingsResolvers = {
     // Settings NAS Path
     settingsNasPathAll: async () => {
       try {
-        const response = await apiClient.get('/settings_nas_path');
-        return response.data.map((setting: SettingsNasPathData) => ({
+        const settings = await getNasPathSettings();
+        return settings.map((setting) => ({
           id: setting.id.toString(),
           pathName: setting.name,
           pathValue: setting.folder,
@@ -469,14 +557,16 @@ export const settingsResolvers = {
 
     settingsNasPathOne: async (_: unknown, { id }: { id: string }) => {
       try {
-        const response = await apiClient.get(`/settings_nas_path/${id}`);
-        const setting = response.data;
+        const setting = await getNasPathSettingById(Number(id));
+        if (!setting) {
+          return null;
+        }
         return {
-          id: setting.id,
-          pathName: setting.path_name,
-          pathValue: setting.path_value,
-          description: setting.description || '',
-          isActive: setting.is_active
+          id: setting.id.toString(),
+          pathName: setting.name,
+          pathValue: setting.folder,
+          description: setting.remark || '',
+          isActive: setting.area !== 'disabled'
         };
       } catch (error) {
         console.error('Error fetching NAS path settings by id:', error);
@@ -579,10 +669,11 @@ export const settingsResolvers = {
   },
 
   Mutation: {
-    // Settings Notice List Mutations
+    // Settings Notice List Mutations - Use upsert for create/update
     settingsNoticeListCreate: async (_: unknown, { input }: { input: SettingsNoticeListInput }) => {
       try {
-        const response = await apiClient.post('/settings_notice_list', {
+        // Create by inserting
+        const data = {
           org_name: input.orgName,
           url: input.url,
           iframe: input.iframe || '',
@@ -601,27 +692,39 @@ export const settingsResolvers = {
           company_in_charge: input.companyInCharge || '',
           org_man: input.orgMan || '',
           exception_row: input.exceptionRow || ''
-        });
+        };
+
+        const result = await executeQuery(\`
+          INSERT INTO settings_notice_list SET ?
+        \`, [data]);
+
+        const oid = (result as any).insertId;
+        const created = await getSettingsNoticeListByOid(oid);
+
+        if (!created) {
+          throw new Error('Failed to retrieve created setting');
+        }
+
         return {
-          oid: response.data.oid,
-          orgName: response.data.org_name,
-          url: response.data.url,
-          iframe: response.data.iframe || '',
-          rowXpath: response.data.rowXpath || '',
-          paging: response.data.paging || '',
-          startPage: response.data.startPage || 0,
-          endPage: response.data.endPage || 0,
-          login: response.data.login || '',
-          use: response.data.use,
-          orgRegion: response.data.org_region || '',
-          registration: response.data.registration || '',
-          title: response.data.title || '',
-          detailUrl: response.data.detail_url || '',
-          postedDate: response.data.posted_date || '',
-          postedBy: response.data.posted_by || '',
-          companyInCharge: response.data.company_in_charge || '',
-          orgMan: response.data.org_man || '',
-          exceptionRow: response.data.exception_row || ''
+          oid: created.oid,
+          orgName: created.org_name,
+          url: created.url,
+          iframe: created.iframe || '',
+          rowXpath: created.rowXpath || '',
+          paging: created.paging || '',
+          startPage: created.startPage || 0,
+          endPage: created.endPage || 0,
+          login: created.login || '',
+          use: created.use || 0,
+          orgRegion: created.org_region || '',
+          registration: created.registration || '',
+          title: created.title || '',
+          detailUrl: created.detail_url || '',
+          postedDate: created.posted_date || '',
+          postedBy: created.posted_by || '',
+          companyInCharge: created.company_in_charge || '',
+          orgMan: created.org_man || '',
+          exceptionRow: created.exception_row || ''
         };
       } catch (error) {
         console.error('Error creating notice list settings:', error);
@@ -631,46 +734,56 @@ export const settingsResolvers = {
 
     settingsNoticeListUpdate: async (_: unknown, { input }: { input: SettingsNoticeListInput }) => {
       try {
-        const response = await apiClient.post(`/settings_notice_list_by_oid/${input.oid}`, {
+        if (!input.oid) {
+          throw new Error('oid is required for update');
+        }
+
+        await upsertSettingsNoticeListByOid(input.oid, {
           org_name: input.orgName,
           url: input.url,
-          iframe: input.iframe || '',
-          rowXpath: input.rowXpath || '',
-          paging: input.paging || '',
-          startPage: input.startPage || 0,
-          endPage: input.endPage || 0,
-          login: input.login || '',
-          use: input.use !== undefined ? input.use : 1,
-          org_region: input.orgRegion || '',
-          registration: input.registration || '',
-          title: input.title || '',
-          detail_url: input.detailUrl || '',
-          posted_date: input.postedDate || '',
-          posted_by: input.postedBy || '',
-          company_in_charge: input.companyInCharge || '',
-          org_man: input.orgMan || '',
-          exception_row: input.exceptionRow || ''
+          iframe: input.iframe,
+          rowXpath: input.rowXpath,
+          paging: input.paging,
+          startPage: input.startPage,
+          endPage: input.endPage,
+          login: input.login,
+          use: input.use,
+          org_region: input.orgRegion,
+          registration: input.registration,
+          title: input.title,
+          detail_url: input.detailUrl,
+          posted_date: input.postedDate,
+          posted_by: input.postedBy,
+          company_in_charge: input.companyInCharge,
+          org_man: input.orgMan,
+          exception_row: input.exceptionRow,
         });
+
+        const updated = await getSettingsNoticeListByOid(input.oid);
+        if (!updated) {
+          throw new Error('Failed to retrieve updated setting');
+        }
+
         return {
-          oid: response.data.oid,
-          orgName: response.data.org_name,
-          url: response.data.url,
-          iframe: response.data.iframe || '',
-          rowXpath: response.data.rowXpath || '',
-          paging: response.data.paging || '',
-          startPage: response.data.startPage || 0,
-          endPage: response.data.endPage || 0,
-          login: response.data.login || '',
-          use: response.data.use,
-          orgRegion: response.data.org_region || '',
-          registration: response.data.registration || '',
-          title: response.data.title || '',
-          detailUrl: response.data.detail_url || '',
-          postedDate: response.data.posted_date || '',
-          postedBy: response.data.posted_by || '',
-          companyInCharge: response.data.company_in_charge || '',
-          orgMan: response.data.org_man || '',
-          exceptionRow: response.data.exception_row || ''
+          oid: updated.oid,
+          orgName: updated.org_name,
+          url: updated.url,
+          iframe: updated.iframe || '',
+          rowXpath: updated.rowXpath || '',
+          paging: updated.paging || '',
+          startPage: updated.startPage || 0,
+          endPage: updated.endPage || 0,
+          login: updated.login || '',
+          use: updated.use || 0,
+          orgRegion: updated.org_region || '',
+          registration: updated.registration || '',
+          title: updated.title || '',
+          detailUrl: updated.detail_url || '',
+          postedDate: updated.posted_date || '',
+          postedBy: updated.posted_by || '',
+          companyInCharge: updated.company_in_charge || '',
+          orgMan: updated.org_man || '',
+          exceptionRow: updated.exception_row || ''
         };
       } catch (error) {
         console.error('Error updating notice list settings:', error);
@@ -680,8 +793,10 @@ export const settingsResolvers = {
 
     settingsNoticeListDelete: async (_: unknown, { oid }: { oid: number }) => {
       try {
-        await apiClient.delete(`/settings_notice_list_by_oid/${oid}`);
-        return true;
+        const result = await executeQuery(\`
+          DELETE FROM settings_notice_list WHERE oid = ?
+        \`, [oid]);
+        return (result as any).affectedRows > 0;
       } catch (error) {
         console.error('Error deleting notice list settings:', error);
         throw new Error('Failed to delete notice list settings');
@@ -691,7 +806,7 @@ export const settingsResolvers = {
     // Settings Notice Detail Mutations
     settingsNoticeDetailCreate: async (_: unknown, { input }: { input: SettingsNoticeDetailInput }) => {
       try {
-        const response = await apiClient.post('/settings_notice_detail', {
+        const data = {
           org_name: input.orgName,
           title: input.title || '',
           body_html: input.bodyHtml || '',
@@ -706,23 +821,38 @@ export const settingsResolvers = {
           use: input.use !== undefined ? input.use : 1,
           sample_url: input.sampleUrl || '',
           down: input.down || ''
-        });
+        };
+
+        const result = await executeQuery(\`
+          INSERT INTO settings_notice_detail SET ?
+        \`, [data]);
+
+        const oid = (result as any).insertId;
+        const created = await getSettingsNoticeDetailByOid(oid);
+
+        if (!created) {
+          throw new Error('Failed to retrieve created detail setting');
+        }
+
         return {
-          oid: response.data.oid,
-          orgName: response.data.org_name,
-          title: response.data.title || '',
-          bodyHtml: response.data.body_html || '',
-          fileName: response.data.file_name || '',
-          fileUrl: response.data.file_url || '',
-          preview: response.data.preview || '',
-          noticeDiv: response.data.notice_div || '',
-          noticeNum: response.data.notice_num || '',
-          orgDept: response.data.org_dept || '',
-          orgMan: response.data.org_man || '',
-          orgTel: response.data.org_tel || '',
-          use: response.data.use,
-          sampleUrl: response.data.sample_url || '',
-          down: response.data.down || ''
+          oid: created.oid,
+          orgName: created.org_name || '',
+          use: created.use,
+          url: created.url || '',
+          naverMapKeyword: created.naver_map_keyword || '',
+          xPath: created.x_path || '',
+          xPathNoticeNum: created.x_path_notice_num || '',
+          xPathTitle: created.x_path_title || '',
+          xPathOrg: created.x_path_org || '',
+          xPathDemandOrg: created.x_path_demand_org || '',
+          xPathBidType: created.x_path_bid_type || '',
+          xPathAnnounceDate: created.x_path_announce_date || '',
+          xPathDeadlineDate: created.x_path_deadline_date || '',
+          xPathDepositDeadlineDate: created.x_path_deposit_deadline_date || '',
+          xPathDemandDeadlineDate: created.x_path_demand_deadline_date || '',
+          xPathProduct: created.x_path_product || '',
+          xPathBasePrice: created.x_path_base_price || '',
+          xPathFiles: created.x_path_files || '',
         };
       } catch (error) {
         console.error('Error creating notice detail settings:', error);
@@ -732,38 +862,51 @@ export const settingsResolvers = {
 
     settingsNoticeDetailUpdate: async (_: unknown, { input }: { input: SettingsNoticeDetailInput }) => {
       try {
-        const response = await apiClient.post(`/settings_notice_detail_by_oid/${input.oid}`, {
+        if (!input.oid) {
+          throw new Error('oid is required for update');
+        }
+
+        await upsertSettingsNoticeDetailByOid(input.oid, {
           org_name: input.orgName,
-          title: input.title || '',
-          body_html: input.bodyHtml || '',
-          file_name: input.fileName || '',
-          file_url: input.fileUrl || '',
-          preview: input.preview || '',
-          notice_div: input.noticeDiv || '',
-          notice_num: input.noticeNum || '',
-          org_dept: input.orgDept || '',
-          org_man: input.orgMan || '',
-          org_tel: input.orgTel || '',
-          use: input.use !== undefined ? input.use : 1,
-          sample_url: input.sampleUrl || '',
-          down: input.down || ''
+          title: input.title,
+          body_html: input.bodyHtml,
+          file_name: input.fileName,
+          file_url: input.fileUrl,
+          preview: input.preview,
+          notice_div: input.noticeDiv,
+          notice_num: input.noticeNum,
+          org_dept: input.orgDept,
+          org_man: input.orgMan,
+          org_tel: input.orgTel,
+          use: input.use,
+          sample_url: input.sampleUrl,
+          down: input.down,
         });
+
+        const updated = await getSettingsNoticeDetailByOid(input.oid);
+        if (!updated) {
+          throw new Error('Failed to retrieve updated detail setting');
+        }
+
         return {
-          oid: response.data.oid,
-          orgName: response.data.org_name,
-          title: response.data.title || '',
-          bodyHtml: response.data.body_html || '',
-          fileName: response.data.file_name || '',
-          fileUrl: response.data.file_url || '',
-          preview: response.data.preview || '',
-          noticeDiv: response.data.notice_div || '',
-          noticeNum: response.data.notice_num || '',
-          orgDept: response.data.org_dept || '',
-          orgMan: response.data.org_man || '',
-          orgTel: response.data.org_tel || '',
-          use: response.data.use,
-          sampleUrl: response.data.sample_url || '',
-          down: response.data.down || ''
+          oid: updated.oid,
+          orgName: updated.org_name || '',
+          use: updated.use,
+          url: updated.url || '',
+          naverMapKeyword: updated.naver_map_keyword || '',
+          xPath: updated.x_path || '',
+          xPathNoticeNum: updated.x_path_notice_num || '',
+          xPathTitle: updated.x_path_title || '',
+          xPathOrg: updated.x_path_org || '',
+          xPathDemandOrg: updated.x_path_demand_org || '',
+          xPathBidType: updated.x_path_bid_type || '',
+          xPathAnnounceDate: updated.x_path_announce_date || '',
+          xPathDeadlineDate: updated.x_path_deadline_date || '',
+          xPathDepositDeadlineDate: updated.x_path_deposit_deadline_date || '',
+          xPathDemandDeadlineDate: updated.x_path_demand_deadline_date || '',
+          xPathProduct: updated.x_path_product || '',
+          xPathBasePrice: updated.x_path_base_price || '',
+          xPathFiles: updated.x_path_files || '',
         };
       } catch (error) {
         console.error('Error updating notice detail settings:', error);
@@ -773,8 +916,10 @@ export const settingsResolvers = {
 
     settingsNoticeDetailDelete: async (_: unknown, { oid }: { oid: number }) => {
       try {
-        await apiClient.delete(`/settings_notice_detail_by_oid/${oid}`);
-        return true;
+        const result = await executeQuery(\`
+          DELETE FROM settings_notice_detail WHERE oid = ?
+        \`, [oid]);
+        return (result as any).affectedRows > 0;
       } catch (error) {
         console.error('Error deleting notice detail settings:', error);
         throw new Error('Failed to delete notice detail settings');
@@ -783,38 +928,47 @@ export const settingsResolvers = {
 
     upsertSettingsDetailByOid: async (_: unknown, { oid, input }: { oid: number; input: SettingsNoticeDetailInput }) => {
       try {
-        const response = await apiClient.post(`/settings_notice_detail_by_oid/${oid}`, {
+        await upsertSettingsNoticeDetailByOid(oid, {
           org_name: input.orgName,
-          title: input.title || '',
-          body_html: input.bodyHtml || '',
-          file_name: input.fileName || '',
-          file_url: input.fileUrl || '',
-          preview: input.preview || '',
-          notice_div: input.noticeDiv || '',
-          notice_num: input.noticeNum || '',
-          org_dept: input.orgDept || '',
-          org_man: input.orgMan || '',
-          org_tel: input.orgTel || '',
-          use: input.use !== undefined ? input.use : 1,
-          sample_url: input.sampleUrl || '',
-          down: input.down || ''
+          title: input.title,
+          body_html: input.bodyHtml,
+          file_name: input.fileName,
+          file_url: input.fileUrl,
+          preview: input.preview,
+          notice_div: input.noticeDiv,
+          notice_num: input.noticeNum,
+          org_dept: input.orgDept,
+          org_man: input.orgMan,
+          org_tel: input.orgTel,
+          use: input.use,
+          sample_url: input.sampleUrl,
+          down: input.down,
         });
+
+        const updated = await getSettingsNoticeDetailByOid(oid);
+        if (!updated) {
+          throw new Error('Failed to retrieve upserted detail setting');
+        }
+
         return {
-          oid: response.data.oid,
-          orgName: response.data.org_name,
-          title: response.data.title || '',
-          bodyHtml: response.data.body_html || '',
-          fileName: response.data.file_name || '',
-          fileUrl: response.data.file_url || '',
-          preview: response.data.preview || '',
-          noticeDiv: response.data.notice_div || '',
-          noticeNum: response.data.notice_num || '',
-          orgDept: response.data.org_dept || '',
-          orgMan: response.data.org_man || '',
-          orgTel: response.data.org_tel || '',
-          use: response.data.use,
-          sampleUrl: response.data.sample_url || '',
-          down: response.data.down || ''
+          oid: updated.oid,
+          orgName: updated.org_name || '',
+          use: updated.use,
+          url: updated.url || '',
+          naverMapKeyword: updated.naver_map_keyword || '',
+          xPath: updated.x_path || '',
+          xPathNoticeNum: updated.x_path_notice_num || '',
+          xPathTitle: updated.x_path_title || '',
+          xPathOrg: updated.x_path_org || '',
+          xPathDemandOrg: updated.x_path_demand_org || '',
+          xPathBidType: updated.x_path_bid_type || '',
+          xPathAnnounceDate: updated.x_path_announce_date || '',
+          xPathDeadlineDate: updated.x_path_deadline_date || '',
+          xPathDepositDeadlineDate: updated.x_path_deposit_deadline_date || '',
+          xPathDemandDeadlineDate: updated.x_path_demand_deadline_date || '',
+          xPathProduct: updated.x_path_product || '',
+          xPathBasePrice: updated.x_path_base_price || '',
+          xPathFiles: updated.x_path_files || '',
         };
       } catch (error) {
         console.error('Error upserting settings detail by oid:', error);
@@ -825,23 +979,21 @@ export const settingsResolvers = {
     // Settings Notice Category Mutations
     settingsNoticeCategoryCreate: async (_: unknown, { input }: { input: SettingsNoticeCategoryInput }) => {
       try {
-        const response = await apiClient.post('/settings_notice_categorys', {
-          sn: input.sn,
+        const result = await executeQuery(\`
+          INSERT INTO settings_notice_category (keywords, nots, min_point, category, creator, memo)
+          VALUES (?, ?, ?, ?, ?, ?)
+        \`, [input.keywords, input.nots, input.minPoint, input.category, input.creator || '', input.memo || '']);
+
+        const sn = (result as any).insertId;
+
+        return {
+          sn,
           keywords: input.keywords,
           nots: input.nots,
-          min_point: input.minPoint,
+          minPoint: input.minPoint,
           category: input.category,
           creator: input.creator || '',
           memo: input.memo || ''
-        });
-        return {
-          sn: response.data.sn,
-          keywords: response.data.keywords,
-          nots: response.data.nots,
-          minPoint: response.data.min_point,
-          category: response.data.category,
-          creator: response.data.creator || '',
-          memo: response.data.memo || ''
         };
       } catch (error) {
         console.error('Error creating notice category settings:', error);
@@ -851,23 +1003,24 @@ export const settingsResolvers = {
 
     settingsNoticeCategoryUpdate: async (_: unknown, { input }: { input: SettingsNoticeCategoryInput }) => {
       try {
-        const response = await apiClient.put(`/settings_notice_categorys/${input.category}`, {
+        if (!input.sn) {
+          throw new Error('sn is required for update');
+        }
+
+        await executeQuery(\`
+          UPDATE settings_notice_category
+          SET keywords = ?, nots = ?, min_point = ?, category = ?, creator = ?, memo = ?
+          WHERE sn = ?
+        \`, [input.keywords, input.nots, input.minPoint, input.category, input.creator || '', input.memo || '', input.sn]);
+
+        return {
           sn: input.sn,
           keywords: input.keywords,
           nots: input.nots,
-          min_point: input.minPoint,
+          minPoint: input.minPoint,
           category: input.category,
           creator: input.creator || '',
           memo: input.memo || ''
-        });
-        return {
-          sn: response.data.sn,
-          keywords: response.data.keywords,
-          nots: response.data.nots,
-          minPoint: response.data.min_point,
-          category: response.data.category,
-          creator: response.data.creator || '',
-          memo: response.data.memo || ''
         };
       } catch (error) {
         console.error('Error updating notice category settings:', error);
@@ -877,16 +1030,18 @@ export const settingsResolvers = {
 
     settingsNoticeCategoryDelete: async (_: unknown, { sn }: { sn: number }) => {
       try {
-        await apiClient.delete(`/settings_notice_categorys/${sn}`);
-        return true;
+        const result = await executeQuery(\`
+          DELETE FROM settings_notice_category WHERE sn = ?
+        \`, [sn]);
+        return (result as any).affectedRows > 0;
       } catch (error) {
         console.error('Error deleting notice category settings:', error);
         throw new Error('Failed to delete notice category settings');
       }
     },
 
-    settingsNoticeCategoryWeightSearch: async (_: unknown, { 
-      keywords, minPoint, field, tableName, addFields, addWhere 
+    settingsNoticeCategoryWeightSearch: async (_: unknown, {
+      keywords, minPoint, field, tableName, addFields, addWhere
     }: {
       keywords: string;
       minPoint: number;
@@ -896,23 +1051,22 @@ export const settingsResolvers = {
       addWhere?: string;
     }) => {
       try {
-        const response = await apiClient.post('/category_weight_search', {
+        const results = await searchNoticeList({
           keywords,
-          min_point: minPoint,
+          minPoint: minPoint || 4,
           field: field || 'title',
-          table_name: tableName || 'notice_list',
-          add_fields: addFields || ['detail_url', 'posted_date', 'org_name'],
-          add_where: addWhere || ''
+          addFields: addFields || ['detail_url', 'posted_date', 'org_name'],
+          addWhere: addWhere || ''
         });
-        
-        return response.data.map((notice: NoticeSearchResult) => ({
+
+        return results.map((notice: any) => ({
           nid: notice.nid?.toString(),
-          title: notice.title,
-          orgName: notice.org_name,
-          postedAt: notice.posted_date,
-          detailUrl: notice.detail_url,
-          category: notice.category || "",
-          region: notice.org_region || "미지정",
+          title: notice.title || '',
+          orgName: notice.org_name || '',
+          postedAt: notice.posted_date || '',
+          detailUrl: notice.detail_url || '',
+          category: notice.category || '',
+          region: notice.org_region || '미지정',
         }));
       } catch (error) {
         console.error('Error in category weight search:', error);
@@ -926,20 +1080,16 @@ export const settingsResolvers = {
       field?: string;
     }) => {
       try {
-        const response = await apiClient.post('/filter_notice_list', {
-          not_str: notStr,
-          dicts,
-          field: field || 'title'
-        });
-        
-        return response.data.map((notice: NoticeSearchResult) => ({
+        const filtered = filterNoticeList(notStr, dicts as any[], field || 'title');
+
+        return filtered.map((notice: any) => ({
           nid: notice.nid?.toString(),
-          title: notice.title,
-          orgName: notice.org_name,
-          postedAt: notice.posted_date,
-          detailUrl: notice.detail_url,
-          category: notice.category || "",
-          region: notice.org_region || "미지정",
+          title: notice.title || '',
+          orgName: notice.org_name || '',
+          postedAt: notice.posted_date || '',
+          detailUrl: notice.detail_url || '',
+          category: notice.category || '',
+          region: notice.org_region || '미지정',
         }));
       } catch (error) {
         console.error('Error filtering notice list:', error);
@@ -950,18 +1100,25 @@ export const settingsResolvers = {
     // Settings NAS Path Mutations
     settingsNasPathCreate: async (_: unknown, { input }: { input: SettingsNasPathInput }) => {
       try {
-        const response = await apiClient.post('/settings_nas_path', {
-          path_name: input.pathName,
-          path_value: input.pathValue,
-          description: input.description || '',
-          is_active: input.isActive !== undefined ? input.isActive : true
+        const id = await createNasPathSetting({
+          name: input.pathName,
+          folder: input.pathValue,
+          area: input.isActive !== false ? 'active' : 'disabled',
+          depth: 1,
+          remark: input.description || ''
         });
+
+        const created = await getNasPathSettingById(id);
+        if (!created) {
+          throw new Error('Failed to retrieve created NAS path setting');
+        }
+
         return {
-          id: response.data.id,
-          pathName: response.data.path_name,
-          pathValue: response.data.path_value,
-          description: response.data.description || '',
-          isActive: response.data.is_active
+          id: created.id?.toString() || '',
+          pathName: created.name,
+          pathValue: created.folder,
+          description: created.remark || '',
+          isActive: created.area !== 'disabled'
         };
       } catch (error) {
         console.error('Error creating NAS path settings:', error);
@@ -971,18 +1128,28 @@ export const settingsResolvers = {
 
     settingsNasPathUpdate: async (_: unknown, { input }: { input: SettingsNasPathInput }) => {
       try {
-        const response = await apiClient.put(`/settings_nas_path/${input.id}`, {
-          path_name: input.pathName,
-          path_value: input.pathValue,
-          description: input.description || '',
-          is_active: input.isActive !== undefined ? input.isActive : true
+        if (!input.id) {
+          throw new Error('id is required for update');
+        }
+
+        await updateNasPathSetting(Number(input.id), {
+          name: input.pathName,
+          folder: input.pathValue,
+          area: input.isActive !== false ? 'active' : 'disabled',
+          remark: input.description || ''
         });
+
+        const updated = await getNasPathSettingById(Number(input.id));
+        if (!updated) {
+          throw new Error('Failed to retrieve updated NAS path setting');
+        }
+
         return {
-          id: response.data.id,
-          pathName: response.data.path_name,
-          pathValue: response.data.path_value,
-          description: response.data.description || '',
-          isActive: response.data.is_active
+          id: updated.id?.toString() || '',
+          pathName: updated.name,
+          pathValue: updated.folder,
+          description: updated.remark || '',
+          isActive: updated.area !== 'disabled'
         };
       } catch (error) {
         console.error('Error updating NAS path settings:', error);
@@ -992,8 +1159,7 @@ export const settingsResolvers = {
 
     settingsNasPathDelete: async (_: unknown, { id }: { id: string }) => {
       try {
-        await apiClient.delete(`/settings_nas_path/${id}`);
-        return true;
+        return await deleteNasPathSetting(Number(id));
       } catch (error) {
         console.error('Error deleting NAS path settings:', error);
         throw new Error('Failed to delete NAS path settings');
@@ -1003,18 +1169,18 @@ export const settingsResolvers = {
     // App Settings Mutations - Direct MySQL
     appSettingCreate: async (_: unknown, { input }: { input: AppSettingInput }) => {
       try {
-        const result = await executeQuery(`
+        const result = await executeQuery(\`
           INSERT INTO settings_app_default (area, name, value, remark)
           VALUES (?, ?, ?, ?)
-        `, [input.area, input.name, input.value, input.remark || null]);
+        \`, [input.area, input.name, input.value, input.remark || null]);
 
         const insertId = (result as any).insertId;
 
-        const rows = await executeQuery(`
+        const rows = await executeQuery(\`
           SELECT sn, area, name, value, remark, created_at, updated_at
           FROM settings_app_default
           WHERE sn = ?
-        `, [insertId]) as AppSettingData[];
+        \`, [insertId]) as AppSettingData[];
 
         if (rows.length === 0) {
           throw new Error('Failed to retrieve created setting');
@@ -1042,17 +1208,17 @@ export const settingsResolvers = {
           throw new Error('sn is required for update');
         }
 
-        await executeQuery(`
+        await executeQuery(\`
           UPDATE settings_app_default
           SET area = ?, name = ?, value = ?, remark = ?, updated_at = CURRENT_TIMESTAMP
           WHERE sn = ?
-        `, [input.area, input.name, input.value, input.remark || null, input.sn]);
+        \`, [input.area, input.name, input.value, input.remark || null, input.sn]);
 
-        const rows = await executeQuery(`
+        const rows = await executeQuery(\`
           SELECT sn, area, name, value, remark, created_at, updated_at
           FROM settings_app_default
           WHERE sn = ?
-        `, [input.sn]) as AppSettingData[];
+        \`, [input.sn]) as AppSettingData[];
 
         if (rows.length === 0) {
           throw new Error('Setting not found after update');
@@ -1076,9 +1242,9 @@ export const settingsResolvers = {
 
     appSettingDelete: async (_: unknown, { sn }: { sn: number }) => {
       try {
-        const result = await executeQuery(`
+        const result = await executeQuery(\`
           DELETE FROM settings_app_default WHERE sn = ?
-        `, [sn]);
+        \`, [sn]);
 
         return (result as any).affectedRows > 0;
       } catch (error) {

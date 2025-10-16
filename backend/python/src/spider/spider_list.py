@@ -1505,6 +1505,6 @@ if __name__ == "__main__":
     # names = ['정부24 지자체소식', "가평군청", '용인시청']
 
     # 새로운 워크플로우 사용
-    # fetch_list_pages_new_workflow(names)
+    fetch_list_pages_new_workflow(names)
 
     update_all_category_selected()
