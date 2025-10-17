@@ -17,13 +17,6 @@ const SETTINGS_DEFAULT_QUERY = `
       description
       isActive
     }
-    settingsAppDefaultAll {
-      id
-      settingKey
-      settingValue
-      description
-      category
-    }
     mappingsLangAll {
       id
       area
@@ -157,24 +150,8 @@ export default function DefaultSettingsPage() {
         setLangMappings(data.mappingsLangAll || []);
         setDocsManuals(data.docsManualAll?.manuals || []);
 
-        // 앱 기본값에서 UI 설정 추출 (예시)
-        const appDefaults = data.settingsAppDefaultAll || [];
-        const uiDefaults = appDefaults.filter(item => item.category === 'ui');
-        const themeDefaults = appDefaults.filter(item => item.category === 'theme');
-        const scrapingDefaults = appDefaults.filter(item => item.category === 'scraping');
-
-        // 기본값 설정 (실제 값이 없으면 초기값 사용)
-        setUiSettings({
-          darkMode: uiDefaults.find(item => item.settingKey === 'darkMode')?.settingValue === 'true' || false,
-          language: uiDefaults.find(item => item.settingKey === 'language')?.settingValue || 'ko',
-          timezone: uiDefaults.find(item => item.settingKey === 'timezone')?.settingValue || 'Asia/Seoul'
-        });
-
-        setThemeSettings({
-          defaultTheme: themeDefaults.find(item => item.settingKey === 'defaultTheme')?.settingValue || 'gray',
-          noticeTheme: themeDefaults.find(item => item.settingKey === 'noticeTheme')?.settingValue || 'green',
-          bidTheme: themeDefaults.find(item => item.settingKey === 'bidTheme')?.settingValue || 'blue'
-        });
+        // UI 설정과 테마 설정은 초기값 사용 (settingsAppDefaultAll이 없으므로)
+        // 향후 필요시 별도 쿼리나 localStorage에서 가져올 수 있음
       }
     } catch (err) {
       console.error('Error fetching settings data:', err);

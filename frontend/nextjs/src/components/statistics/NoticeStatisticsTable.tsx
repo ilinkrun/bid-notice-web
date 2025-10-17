@@ -32,7 +32,7 @@ const GET_NOTICE_CATEGORIES = gql`
       nots
       minPoint
       creator
-      use
+      isActive
     }
   }
 `;

@@ -57,11 +57,17 @@ export default async function LogScrapingStatisticsPage({ searchParams }: PagePr
 
   // 유효하지 않은 gap 값 처리
   const validGap = isNaN(gap) || gap < 1 ? 2 : gap;
-  
+
+  // keyword 파라미터 처리
+  const keyword = typeof resolvedSearchParams?.keyword === 'string' ? resolvedSearchParams.keyword : '';
+
   const logScrapings = await getLogScrapings(validGap);
 
   return (
-    <PageContainer title="스크래핑 로그 통계">
+    <PageContainer>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">스크래핑 로그 통계</h1>
+      </div>
       <div className="statistics-cell">
         <ApolloWrapper>
           <LogScrapingStatisticsTable

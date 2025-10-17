@@ -41,7 +41,7 @@ const GET_NOTICE_CATEGORIES = gql`
       nots
       minPoint
       creator
-      use
+      isActive
     }
   }
 `;
@@ -62,12 +62,12 @@ const processNoticeStatistics = (notices: any[] = [], categoryLabels: string[] =
       });
     }
 
-    // 카테고리별 카운트
+    // 카테고리별 카운트 - 실제 데이터의 category 값이 있는 경우에만
     if (curr.category && categoryLabels.includes(curr.category)) {
       acc[date][curr.category]++;
+      acc[date].subtotal++;
     }
 
-    acc[date].subtotal++;
     acc[date].total++;
 
     return acc;

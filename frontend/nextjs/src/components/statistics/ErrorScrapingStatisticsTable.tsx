@@ -17,110 +17,52 @@ import {
 import { formatDate } from '@/lib/utils';
 import { ArrowUpDown, ArrowUp, ArrowDown, Search } from 'lucide-react';
 
-interface LogScraping {
-  time: string;
-  scrapedCount: number;
+interface ErrorScraping {
+  id: string;
   orgName: string;
-  insertedCount: number;
+  errorMessage: string;
+  time: string;
 }
 
-interface LogScrapingStatisticsTableProps {
-  initialData: LogScraping[];
+interface ErrorScrapingStatisticsTableProps {
+  initialData: ErrorScraping[];
   defaultGap: string;
 }
 
 // 컬럼 타입 및 표시 이름 매핑
-type SortableColumn = 'time' | 'orgName' | 'scrapedCount' | 'insertedCount' | 'successRate';
+type SortableColumn = 'time' | 'orgName' | 'errorMessage';
 type SortDirection = 'asc' | 'desc';
 
 const columnDisplayNames: Record<SortableColumn, string> = {
   'time': '시간',
   'orgName': '기관명',
-  'scrapedCount': '스크랩건수',
-  'insertedCount': '신규추가건수',
-  'successRate': '신규비율'
+  'errorMessage': '오류 메시지'
 };
 
-export function LogScrapingStatisticsTable({
+export function ErrorScrapingStatisticsTable({
   initialData,
   defaultGap,
-}: LogScrapingStatisticsTableProps) {
+}: ErrorScrapingStatisticsTableProps) {
   const { navigate } = useUnifiedNavigation();
   const { finishLoading } = useUnifiedLoading();
   const searchParams = useSearchParams();
-
-  // 기관명별 URL 캐시
-  const [orgUrls, setOrgUrls] = useState<{ [orgName: string]: string | null }>({});
-
-  // 기관명 URL 조회 함수
-  const getOrganizationUrl = async (orgName: string): Promise<string | null> => {
-    try {
-      if (!orgName || typeof orgName !== 'string') {
-        return null;
-      }
-
-      const requestBody = {
-        query: `
-          query SettingsNoticeListByOrg($orgName: String!) {
-            settingsNoticeListByOrg(orgName: $orgName) {
-              oid
-              orgName
-              url
-            }
-          }
-        `,
-        variables: { orgName }
-      };
-
-      const response = await fetch('/api/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody)
-      });
-
-      if (!response.ok) {
-        console.error(`GraphQL request failed: ${response.status} ${response.statusText}`);
-        return null;
-      }
-
-      const result = await response.json();
-
-      if (result.errors) {
-        console.error('GraphQL errors:', result.errors);
-        return null;
-      }
-
-      if (result.data?.settingsNoticeListByOrg?.length > 0) {
-        const orgSettings = result.data.settingsNoticeListByOrg[0];
-        if (orgSettings.url) {
-          return orgSettings.url.replace(/\$\{i\}/g, '1');
-        }
-      }
-      return null;
-    } catch (error) {
-      console.error('기관 정보 조회 중 오류 발생:', error);
-      return null;
-    }
-  };
 
   // URL 파라미터에서 초기값 가져오기
   const [gap, setGap] = useState(() => {
     const gapParam = searchParams.get('gap');
     return gapParam || defaultGap;
   });
-  
+
   const [sortColumn, setSortColumn] = useState<SortableColumn | null>(() => {
     const sort = searchParams.get('sort') as SortableColumn | null;
     return sort || null;
   });
-  
+
   const [sortDirection, setSortDirection] = useState<SortDirection>(() => {
     const order = searchParams.get('order') as SortDirection | null;
     return order === 'desc' ? 'desc' : 'asc';
   });
-  
+
   const [searchQuery, setSearchQuery] = useState(() => {
     const keyword = searchParams.get('keyword');
     return keyword || '';
@@ -138,34 +80,6 @@ export function LogScrapingStatisticsTable({
     if (order) setSortDirection(order === 'desc' ? 'desc' : 'asc');
     if (keyword !== null) setSearchQuery(keyword);
   }, [searchParams]);
-
-  // 기관명 URL 로드
-  useEffect(() => {
-    const loadOrgUrls = async () => {
-      const uniqueOrgNames = Array.from(new Set(initialData.map(item => item.orgName).filter(Boolean))) as string[];
-      const urlCache: { [orgName: string]: string | null } = {};
-
-      for (const orgName of uniqueOrgNames) {
-        if (orgUrls[orgName] === undefined) {
-          try {
-            const url = await getOrganizationUrl(orgName);
-            urlCache[orgName] = url;
-          } catch (error) {
-            console.error(`Error loading URL for ${orgName}:`, error);
-            urlCache[orgName] = null;
-          }
-        }
-      }
-
-      if (Object.keys(urlCache).length > 0) {
-        setOrgUrls(prev => ({ ...prev, ...urlCache }));
-      }
-    };
-
-    if (initialData.length > 0) {
-      loadOrgUrls().catch(console.error);
-    }
-  }, [initialData]);
 
   // 초기 데이터가 있거나 렌더링 완료시 로딩 해제
   useEffect(() => {
@@ -188,7 +102,7 @@ export function LogScrapingStatisticsTable({
     });
 
     // 페이지 리로드
-    window.location.href = `/statistics/logs_scraping?${newParams.toString()}`;
+    window.location.href = `/statistics/errors_scraping?${newParams.toString()}`;
   };
 
   // URL 업데이트 함수 (정렬용 - 리로드 없이)
@@ -204,7 +118,7 @@ export function LogScrapingStatisticsTable({
       }
     });
 
-    navigate(`/statistics/logs_scraping?${newParams.toString()}`);
+    navigate(`/statistics/errors_scraping?${newParams.toString()}`);
   };
 
   // 폼 제출 핸들러 (gap 변경 시 페이지 리로드)
@@ -228,15 +142,15 @@ export function LogScrapingStatisticsTable({
   // 정렬 핸들러
   const handleSort = (column: SortableColumn) => {
     let newDirection: SortDirection = 'asc';
-    
+
     if (sortColumn === column) {
       // 같은 컬럼을 다시 클릭하면 정렬 방향을 반대로 변경
       newDirection = sortDirection === 'asc' ? 'desc' : 'asc';
     }
-    
+
     setSortColumn(column);
     setSortDirection(newDirection);
-    
+
     // URL 업데이트
     updateURL({
       sort: column,
@@ -246,32 +160,23 @@ export function LogScrapingStatisticsTable({
 
   // 필터링 및 정렬된 데이터 계산
   const filteredAndSortedData = useMemo(() => {
-    // successRate 계산
-    const dataWithSuccessRate = initialData.map((item) => {
-      const successRate = item.scrapedCount > 0 
-        ? (item.insertedCount / item.scrapedCount) * 100
-        : 0;
-      
-      return {
-        ...item,
-        successRate,
-      };
-    });
-
     // 검색어로 필터링
-    let filteredData = dataWithSuccessRate;
-    
+    let filteredData = initialData;
+
     if (searchQuery.trim() !== '') {
       const query = searchQuery.toLowerCase().trim();
-      filteredData = dataWithSuccessRate.filter(item => {
+      filteredData = initialData.filter(item => {
         // 기관명에서 검색
         const orgNameMatch = item.orgName.toLowerCase().includes(query);
-        
+
+        // 오류 메시지에서 검색
+        const errorMessageMatch = item.errorMessage.toLowerCase().includes(query);
+
         // 날짜에서 검색 (원본 time과 포맷된 날짜 모두 검색)
         const formattedDate = formatDate(item.time);
         const timeMatch = item.time.toLowerCase().includes(query) || formattedDate.toLowerCase().includes(query);
-        
-        return orgNameMatch || timeMatch;
+
+        return orgNameMatch || errorMessageMatch || timeMatch;
       });
     }
 
@@ -282,19 +187,14 @@ export function LogScrapingStatisticsTable({
     return [...filteredData].sort((a, b) => {
       const aValue = a[sortColumn];
       const bValue = b[sortColumn];
-      
+
       // 문자열 비교
       if (typeof aValue === 'string' && typeof bValue === 'string') {
-        return sortDirection === 'asc' 
-          ? aValue.localeCompare(bValue) 
+        return sortDirection === 'asc'
+          ? aValue.localeCompare(bValue)
           : bValue.localeCompare(aValue);
       }
-      
-      // 숫자 비교
-      if (typeof aValue === 'number' && typeof bValue === 'number') {
-        return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
-      }
-      
+
       return 0;
     });
   }, [initialData, sortColumn, sortDirection, searchQuery]);
@@ -304,8 +204,8 @@ export function LogScrapingStatisticsTable({
     if (sortColumn !== column) {
       return <ArrowUpDown className="ml-1 h-4 w-4 inline" />;
     }
-    return sortDirection === 'asc' 
-      ? <ArrowUp className="ml-1 h-4 w-4 inline" /> 
+    return sortDirection === 'asc'
+      ? <ArrowUp className="ml-1 h-4 w-4 inline" />
       : <ArrowDown className="ml-1 h-4 w-4 inline" />;
   };
 
@@ -346,7 +246,7 @@ export function LogScrapingStatisticsTable({
               value={searchQuery}
               onChange={handleSearchChange}
               className="pl-8 w-full md:w-64"
-              placeholder="기관명 또는 날짜 검색..."
+              placeholder="기관명 또는 오류 메시지 검색..."
             />
             {searchQuery && (
               <Button
@@ -389,77 +289,48 @@ export function LogScrapingStatisticsTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead 
+              <TableHead
                 onClick={() => handleSort('time')}
                 className="cursor-pointer hover:bg-color-primary-hovered"
               >
                 시간 {renderSortIcon('time')}
               </TableHead>
-              <TableHead 
+              <TableHead
                 onClick={() => handleSort('orgName')}
                 className="cursor-pointer hover:bg-color-primary-hovered"
               >
                 기관명 {renderSortIcon('orgName')}
               </TableHead>
-              <TableHead 
-                onClick={() => handleSort('scrapedCount')}
-                className="cursor-pointer hover:text-right"
+              <TableHead
+                onClick={() => handleSort('errorMessage')}
+                className="cursor-pointer hover:bg-color-primary-hovered"
               >
-                스크랩 건수 {renderSortIcon('scrapedCount')}
-              </TableHead>
-              <TableHead 
-                onClick={() => handleSort('insertedCount')}
-                className="cursor-pointer hover:text-right"
-              >
-                신규 추가 건수 {renderSortIcon('insertedCount')}
-              </TableHead>
-              <TableHead 
-                onClick={() => handleSort('successRate')}
-                className="cursor-pointer hover:text-right"
-              >
-                신규 비율 {renderSortIcon('successRate')}
+                오류 메시지 {renderSortIcon('errorMessage')}
               </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredAndSortedData.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-6">
+                <TableCell colSpan={3} className="text-center py-6">
                   {searchQuery ? '검색 결과가 없습니다.' : '데이터가 없습니다.'}
                 </TableCell>
               </TableRow>
             ) : (
-              filteredAndSortedData.map((item, index) => {
+              filteredAndSortedData.map((item) => {
                 return (
-                  <TableRow key={`${item.time}-${item.orgName}-${index}`}>
+                  <TableRow key={item.id}>
                     <TableCell>{formatDate(item.time)}</TableCell>
                     <TableCell>
-                      {(() => {
-                        const orgUrl = orgUrls[item.orgName];
-                        if (orgUrl) {
-                          return (
-                            <a
-                              href={orgUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-sm font-medium text-color-primary-foreground hover:text-blue-600 hover:underline cursor-pointer"
-                              title="기관 게시판 페이지로 이동"
-                            >
-                              {item.orgName}
-                            </a>
-                          );
-                        } else {
-                          return (
-                            <span className="text-sm font-medium text-color-primary-foreground">
-                              {item.orgName}
-                            </span>
-                          );
-                        }
-                      })()}
+                      <span className="text-sm font-medium text-color-primary-foreground">
+                        {item.orgName || '에러 없음'}
+                      </span>
                     </TableCell>
-                    <TableCell className="text-right">{item.scrapedCount.toLocaleString()}</TableCell>
-                    <TableCell className="text-right">{item.insertedCount.toLocaleString()}</TableCell>
-                    <TableCell className="text-right">{item.successRate.toFixed(1)}%</TableCell>
+                    <TableCell>
+                      <div className="max-w-md overflow-hidden text-ellipsis whitespace-nowrap">
+                        {item.errorMessage}
+                      </div>
+                    </TableCell>
                   </TableRow>
                 );
               })
@@ -467,7 +338,7 @@ export function LogScrapingStatisticsTable({
           </TableBody>
         </Table>
       </div>
-      
+
       {/* 검색 결과 요약 */}
       <div className="mt-2 text-sm text-color-primary-muted-foreground flex justify-between items-center">
         <div>
