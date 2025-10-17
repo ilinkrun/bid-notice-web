@@ -366,10 +366,18 @@ async function scrapeListWithPlaywright(
   try {
     const browser = new PlaywrightChromeBasic();
 
-    await browser.initialize({
+    // Use CHROMIUM_EXECUTABLE_PATH from environment variable
+    const initOptions: any = {
       headless: true,
       arguments: []
-    });
+    };
+
+    if (process.env.CHROMIUM_EXECUTABLE_PATH) {
+      initOptions.executablePath = process.env.CHROMIUM_EXECUTABLE_PATH;
+      console.log(`[PlaywrightChromeBasic] Using CHROMIUM_EXECUTABLE_PATH: ${process.env.CHROMIUM_EXECUTABLE_PATH}`);
+    }
+
+    await browser.initialize(initOptions);
 
     const allData: NoticeItem[] = [];
     const page = (browser as any).page;
@@ -441,39 +449,82 @@ async function parseRowsFromPage(
   const rows: NoticeItem[] = [];
 
   try {
+    console.log(`[parseRowsFromPage] Starting to parse rows for ${orgName}`);
+    console.log(`[parseRowsFromPage] rowXpath: ${rowXpath}`);
+    console.log(`[parseRowsFromPage] elements: ${elements}`);
+
     const playwrightSelector = `xpath=${rowXpath}`;
     const rowLocators = await page.locator(playwrightSelector).all();
-    const elementMappings = parseElements(elements);
+    console.log(`[parseRowsFromPage] Found ${rowLocators.length} rows`);
 
-    for (const rowLocator of rowLocators) {
+    const elementMappings = parseElements(elements);
+    console.log(`[parseRowsFromPage] Element mappings:`, elementMappings);
+
+    for (let rowIdx = 0; rowIdx < rowLocators.length; rowIdx++) {
+      const rowLocator = rowLocators[rowIdx];
       const row: Partial<NoticeItem> = {
         org_name: orgName,
         scraped_at: getNow()
       };
 
+      console.log(`[parseRowsFromPage] Processing row ${rowIdx + 1}/${rowLocators.length}`);
+
       for (const [key, xpathExpr] of Object.entries(elementMappings)) {
         try {
           let value: string = '';
 
-          if (key === 'detail_url' && xpathExpr.includes('|-')) {
-            // Special handling for detail_url with format: "td[2]/a|-data-idno|-\"url\" + rst"
+          // Check if expression contains |- separator (field extraction configuration)
+          if (xpathExpr.includes('|-')) {
             const parts = xpathExpr.split('|-');
             const elementPath = parts[0].trim();
-            const attribute = parts[1]?.trim() || '';
-            const urlTemplate = parts[2]?.trim() || '';
+            const target = parts[1]?.trim() || 'text';
+            const callback = parts[2]?.trim() || '';
 
-            // Get the element and its attribute
+            console.log(`[parseRowsFromPage] Row ${rowIdx + 1} - ${key} parts:`, { elementPath, target, callback });
+
+            // Get the element using XPath with shorter timeout
             const element = rowLocator.locator(`xpath=${elementPath}`);
-            const attrValue = await element.getAttribute(attribute);
 
-            // Replace template
-            if (urlTemplate && attrValue) {
-              value = urlTemplate.replace(/["']/g, '').replace('rst', attrValue).trim();
+            // Extract value based on target type
+            if (target === 'text') {
+              value = await element.textContent({ timeout: 3000 }) || '';
+            } else if (target === 'href' || target.startsWith('@')) {
+              // Extract attribute (href or other attributes like @data-id)
+              const attrName = target.startsWith('@') ? target.substring(1) : target;
+              const attrValue = await element.getAttribute(attrName, { timeout: 3000 });
+
+              console.log(`[parseRowsFromPage] Row ${rowIdx + 1} - ${key} attrValue: ${attrValue}`);
+
+              // Apply callback template if exists
+              if (callback && attrValue) {
+                try {
+                  // Define rst variable for use in the callback expression
+                  const rst = attrValue;
+                  // Eval the callback as-is (no quote removal) - safe here as it's our own template
+                  value = eval(callback);
+                  console.log(`[parseRowsFromPage] Row ${rowIdx + 1} - ${key} callback eval result: ${value}`);
+                } catch (evalErr) {
+                  console.error(`[parseRowsFromPage] Row ${rowIdx + 1} - Failed to eval callback "${callback}":`, evalErr);
+                  // Fallback: if callback is simple text replacement pattern, try simple replacement
+                  if (callback.includes('rst') && !callback.includes('+') && !callback.includes('.split(')) {
+                    value = callback.replace(/["']/g, '').replace('rst', attrValue).trim();
+                  } else {
+                    value = attrValue || '';
+                  }
+                }
+              } else {
+                value = attrValue || '';
+              }
+            } else if (target === 'html') {
+              value = await element.innerHTML({ timeout: 3000 }) || '';
             }
+
+            console.log(`[parseRowsFromPage] Row ${rowIdx + 1} - ${key} final value: ${value}`);
           } else {
-            // Normal xpath value extraction
+            // Simple XPath without configuration - assume it's a CSS selector or simple XPath
             const element = rowLocator.locator(`xpath=${xpathExpr}`);
-            value = await element.textContent() || '';
+            value = await element.textContent({ timeout: 3000 }) || '';
+            console.log(`[parseRowsFromPage] Row ${rowIdx + 1} - ${key} value: ${value}`);
           }
 
           if (key === 'posted_date') {
@@ -486,6 +537,7 @@ async function parseRowsFromPage(
             row.posted_by = validStr(value, 100); // Limit posted_by length
           }
         } catch (e) {
+          console.error(`[parseRowsFromPage] Row ${rowIdx + 1} - Error extracting ${key}:`, e);
           if (key === 'posted_date') {
             row[key] = getNow('%Y-%m-%d');
           }
@@ -494,11 +546,16 @@ async function parseRowsFromPage(
 
       // Only add if we have required fields
       if (row.title && row.detail_url) {
+        console.log(`[parseRowsFromPage] Row ${rowIdx + 1} - Added to results:`, { title: row.title, detail_url: row.detail_url });
         rows.push(row as NoticeItem);
+      } else {
+        console.log(`[parseRowsFromPage] Row ${rowIdx + 1} - Skipped (missing required fields):`, { title: row.title, detail_url: row.detail_url });
       }
     }
+
+    console.log(`[parseRowsFromPage] Total rows collected: ${rows.length}`);
   } catch (e) {
-    console.error('Error parsing rows from page:', e);
+    console.error('[parseRowsFromPage] Error parsing rows from page:', e);
   }
 
   return rows;

@@ -17,7 +17,7 @@ export const settingsTypeDefs = `#graphql
     startPage: Int
     endPage: Int
     login: String
-    use: Int!
+    isActive: Int!
     orgRegion: String
     registration: String
     title: String
@@ -43,7 +43,7 @@ export const settingsTypeDefs = `#graphql
     orgDept: String
     orgMan: String
     orgTel: String
-    use: Int!
+    isActive: Int!
     sampleUrl: String
     down: String
   }
@@ -146,7 +146,7 @@ export const settingsTypeDefs = `#graphql
     startPage: Int
     endPage: Int
     login: String
-    use: Int
+    isActive: Int
     orgRegion: String
     registration: String
     title: String
@@ -171,7 +171,7 @@ export const settingsTypeDefs = `#graphql
     orgDept: String
     orgMan: String
     orgTel: String
-    use: Int
+    isActive: Int
     sampleUrl: String
     down: String
   }

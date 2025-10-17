@@ -33,7 +33,7 @@ const GET_BASIC_INFO = gql`
     settingListByOid(oid: $oid) {
       orgName
       orgRegion
-      use
+      isActive
     }
   }
 `;
@@ -58,7 +58,7 @@ const GET_SETTINGS_LIST = gql`
       }
       orgRegion
       registration
-      use
+      isActive
       companyInCharge
       orgMan
       exceptionRow
@@ -81,7 +81,7 @@ const GET_SETTINGS_DETAIL = gql`
       orgDept
       orgMan
       orgTel
-      use
+      isActive
       sampleUrl
       down
     }
@@ -96,7 +96,7 @@ const UPDATE_SETTINGS_LIST = gql`
       detailUrl
       orgRegion
       registration
-      use
+      isActive
     }
   }
 `;
@@ -106,7 +106,7 @@ const UPDATE_SETTINGS_DETAIL = gql`
     upsertSettingsDetailByOid(oid: $oid, input: $input) {
       oid
       orgName
-      use
+      isActive
     }
   }
 `;
@@ -174,7 +174,7 @@ export default function ScrappingSettingsPage() {
     iframe: '',
     rowXpath: '',
     orgRegion: '',
-    use: '',
+    isActive: '',
     orgMan: '',
     companyInCharge: '',
     exceptionRow: '',
@@ -194,7 +194,7 @@ export default function ScrappingSettingsPage() {
     orgDept: '',
     orgMan: '',
     orgTel: '',
-    use: '',
+    isActive: '',
     sampleUrl: '',
     down: ''
   });
@@ -283,7 +283,7 @@ export default function ScrappingSettingsPage() {
       iframe: settings?.iframe || '',
       rowXpath: settings?.rowXpath || '',
       orgRegion: settings?.orgRegion || '',
-      use: settings?.use?.toString() || '1',
+      isActive: settings?.isActive?.toString() || '1',
       orgMan: settings?.orgMan || '',
       companyInCharge: settings?.companyInCharge || '',
       exceptionRow: settings?.exceptionRow || '',
@@ -317,7 +317,7 @@ export default function ScrappingSettingsPage() {
                 orgDept: '',
                 orgMan: '',
                 orgTel: '',
-                use: 1,
+                isActive: 1,
                 sampleUrl: '',
                 down: ''
               }
@@ -345,7 +345,7 @@ export default function ScrappingSettingsPage() {
         orgDept: settings?.orgDept || '',
         orgMan: settings?.orgMan || '',
         orgTel: settings?.orgTel || '',
-        use: settings?.use?.toString() || '1',
+        isActive: settings?.isActive?.toString() || '1',
         sampleUrl: settings?.sampleUrl || '',
         down: settings?.down || ''
       });
@@ -496,7 +496,7 @@ export default function ScrappingSettingsPage() {
         startPage: parseInt(listEditData.startPage) || 1,
         endPage: parseInt(listEditData.endPage) || 1,
         login: undefined,
-        use: parseInt(listEditData.use) || 1,
+        isActive: parseInt(listEditData.isActive) || 1,
         orgRegion: listEditData.orgRegion || undefined,
         registration: "1", // Always string as per schema
         // Format elements with |- separator for backend processing
@@ -546,6 +546,22 @@ export default function ScrappingSettingsPage() {
       const result = await testCollectList({
         variables: { settings }
       });
+
+      // Log full result to browser console for debugging
+      console.log('====== 스크래핑 테스트 결과 ======');
+      console.log('전체 결과:', result);
+      console.log('스크랩 데이터:', result.data.collectListWithSettings);
+      console.log('데이터 개수:', result.data.collectListWithSettings?.data?.length || 0);
+      if (result.data.collectListWithSettings?.data) {
+        console.log('수집된 게시물 목록:');
+        result.data.collectListWithSettings.data.forEach((item: any, index: number) => {
+          console.log(`  ${index + 1}. ${item.title}`);
+          console.log(`     - URL: ${item.detailUrl}`);
+          console.log(`     - 날짜: ${item.postedAt}`);
+          console.log(`     - 기관: ${item.orgName}`);
+        });
+      }
+      console.log('===============================');
 
       setTestResults(result.data.collectListWithSettings);
     } catch (error) {
@@ -629,7 +645,7 @@ export default function ScrappingSettingsPage() {
   return (
     <ScrappingSettingsLayout
       orgName={orgName}
-      isActive={orgInfo?.use === '사용'}
+      isActive={orgInfo?.isActive === 1}
       region={orgInfo?.orgRegion || ''}
     >
       <div className="space-y-8">
@@ -888,8 +904,8 @@ export default function ScrappingSettingsPage() {
                                 <div className="flex items-center">
                                   <span className="text-gray-500 text-sm" style={{ width: '80px' }}>사용</span>
                                   <Input
-                                    value={listEditData.use}
-                                    onChange={(e) => handleListInputChange('use', e.target.value)}
+                                    value={listEditData.isActive}
+                                    onChange={(e) => handleListInputChange('isActive', e.target.value)}
                                     className="w-20 text-sm"
                                     style={{ color: 'var(--color-primary-foreground)' }}
                                     disabled={!isListEditMode}
@@ -1134,8 +1150,8 @@ export default function ScrappingSettingsPage() {
                               <div className="flex items-center">
                                 <span className="text-gray-500 text-sm" style={{ width: '80px' }}>사용</span>
                                 <Input
-                                  value={listEditData.use}
-                                  onChange={(e) => handleListInputChange('use', e.target.value)}
+                                  value={listEditData.isActive}
+                                  onChange={(e) => handleListInputChange('isActive', e.target.value)}
                                   className="w-20 text-sm"
                                   style={{ color: 'var(--color-primary-foreground)' }}
                                   disabled={!isListEditMode}
@@ -1476,7 +1492,7 @@ export default function ScrappingSettingsPage() {
                     </div>
                     <div>
                       <span className="font-medium text-muted-foreground">행 XPath:</span>
-                      <p className="mt-1 font-mono text-xs bg-gray-100 p-1 rounded">{testSettings.rowXpath || '미설정'}</p>
+                      <p className="mt-1 font-mono text-xs bg-gray-100 dark:bg-gray-800 dark:text-gray-100 p-1 rounded">{testSettings.rowXpath || '미설정'}</p>
                     </div>
                     <div>
                       <span className="font-medium text-muted-foreground">페이지 범위:</span>
@@ -1487,21 +1503,21 @@ export default function ScrappingSettingsPage() {
                   <div>
                     <span className="font-medium text-muted-foreground text-xs">요소 설정:</span>
                     <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
-                      <div className="bg-white p-2 rounded border">
-                        <span className="font-medium text-gray-600">제목:</span>
-                        <p className="font-mono text-xs mt-1">{testSettings.title || '미설정'}</p>
+                      <div className="bg-white dark:bg-gray-800 p-2 rounded border dark:border-gray-700">
+                        <span className="font-medium text-gray-600 dark:text-gray-400">제목:</span>
+                        <p className="font-mono text-xs mt-1 dark:text-gray-200">{testSettings.title || '미설정'}</p>
                       </div>
-                      <div className="bg-white p-2 rounded border">
-                        <span className="font-medium text-gray-600">상세 URL:</span>
-                        <p className="font-mono text-xs mt-1">{testSettings.detailUrl || '미설정'}</p>
+                      <div className="bg-white dark:bg-gray-800 p-2 rounded border dark:border-gray-700">
+                        <span className="font-medium text-gray-600 dark:text-gray-400">상세 URL:</span>
+                        <p className="font-mono text-xs mt-1 dark:text-gray-200">{testSettings.detailUrl || '미설정'}</p>
                       </div>
-                      <div className="bg-white p-2 rounded border">
-                        <span className="font-medium text-gray-600">게시일:</span>
-                        <p className="font-mono text-xs mt-1">{testSettings.postedDate || '미설정'}</p>
+                      <div className="bg-white dark:bg-gray-800 p-2 rounded border dark:border-gray-700">
+                        <span className="font-medium text-gray-600 dark:text-gray-400">게시일:</span>
+                        <p className="font-mono text-xs mt-1 dark:text-gray-200">{testSettings.postedDate || '미설정'}</p>
                       </div>
-                      <div className="bg-white p-2 rounded border">
-                        <span className="font-medium text-gray-600">작성자:</span>
-                        <p className="font-mono text-xs mt-1">{testSettings.postedBy || '미설정'}</p>
+                      <div className="bg-white dark:bg-gray-800 p-2 rounded border dark:border-gray-700">
+                        <span className="font-medium text-gray-600 dark:text-gray-400">작성자:</span>
+                        <p className="font-mono text-xs mt-1 dark:text-gray-200">{testSettings.postedBy || '미설정'}</p>
                       </div>
                     </div>
                   </div>
@@ -1509,7 +1525,7 @@ export default function ScrappingSettingsPage() {
                   {testSettings.paging && (
                     <div>
                       <span className="font-medium text-muted-foreground text-xs">페이징:</span>
-                      <p className="mt-1 font-mono text-xs bg-gray-100 p-2 rounded">{testSettings.paging}</p>
+                      <p className="mt-1 font-mono text-xs bg-gray-100 dark:bg-gray-800 dark:text-gray-100 p-2 rounded">{testSettings.paging}</p>
                     </div>
                   )}
                 </div>
@@ -1657,41 +1673,41 @@ export default function ScrappingSettingsPage() {
                   <div>
                     <span className="font-medium text-muted-foreground text-xs">요소 설정:</span>
                     <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
-                      <div className="bg-white p-2 rounded border">
-                        <span className="font-medium text-gray-600">제목:</span>
-                        <p className="font-mono text-xs mt-1">{detailTestSettings.title || '미설정'}</p>
+                      <div className="bg-white dark:bg-gray-800 p-2 rounded border dark:border-gray-700">
+                        <span className="font-medium text-gray-600 dark:text-gray-400">제목:</span>
+                        <p className="font-mono text-xs mt-1 dark:text-gray-200">{detailTestSettings.title || '미설정'}</p>
                       </div>
-                      <div className="bg-white p-2 rounded border">
-                        <span className="font-medium text-gray-600">본문:</span>
-                        <p className="font-mono text-xs mt-1">{detailTestSettings.bodyHtml || '미설정'}</p>
+                      <div className="bg-white dark:bg-gray-800 p-2 rounded border dark:border-gray-700">
+                        <span className="font-medium text-gray-600 dark:text-gray-400">본문:</span>
+                        <p className="font-mono text-xs mt-1 dark:text-gray-200">{detailTestSettings.bodyHtml || '미설정'}</p>
                       </div>
-                      <div className="bg-white p-2 rounded border">
-                        <span className="font-medium text-gray-600">파일이름:</span>
-                        <p className="font-mono text-xs mt-1">{detailTestSettings.fileName || '미설정'}</p>
+                      <div className="bg-white dark:bg-gray-800 p-2 rounded border dark:border-gray-700">
+                        <span className="font-medium text-gray-600 dark:text-gray-400">파일이름:</span>
+                        <p className="font-mono text-xs mt-1 dark:text-gray-200">{detailTestSettings.fileName || '미설정'}</p>
                       </div>
-                      <div className="bg-white p-2 rounded border">
-                        <span className="font-medium text-gray-600">파일주소:</span>
-                        <p className="font-mono text-xs mt-1">{detailTestSettings.fileUrl || '미설정'}</p>
+                      <div className="bg-white dark:bg-gray-800 p-2 rounded border dark:border-gray-700">
+                        <span className="font-medium text-gray-600 dark:text-gray-400">파일주소:</span>
+                        <p className="font-mono text-xs mt-1 dark:text-gray-200">{detailTestSettings.fileUrl || '미설정'}</p>
                       </div>
-                      <div className="bg-white p-2 rounded border">
-                        <span className="font-medium text-gray-600">공고구분:</span>
-                        <p className="font-mono text-xs mt-1">{detailTestSettings.noticeDiv || '미설정'}</p>
+                      <div className="bg-white dark:bg-gray-800 p-2 rounded border dark:border-gray-700">
+                        <span className="font-medium text-gray-600 dark:text-gray-400">공고구분:</span>
+                        <p className="font-mono text-xs mt-1 dark:text-gray-200">{detailTestSettings.noticeDiv || '미설정'}</p>
                       </div>
-                      <div className="bg-white p-2 rounded border">
-                        <span className="font-medium text-gray-600">공고번호:</span>
-                        <p className="font-mono text-xs mt-1">{detailTestSettings.noticeNum || '미설정'}</p>
+                      <div className="bg-white dark:bg-gray-800 p-2 rounded border dark:border-gray-700">
+                        <span className="font-medium text-gray-600 dark:text-gray-400">공고번호:</span>
+                        <p className="font-mono text-xs mt-1 dark:text-gray-200">{detailTestSettings.noticeNum || '미설정'}</p>
                       </div>
-                      <div className="bg-white p-2 rounded border">
-                        <span className="font-medium text-gray-600">담당부서:</span>
-                        <p className="font-mono text-xs mt-1">{detailTestSettings.orgDept || '미설정'}</p>
+                      <div className="bg-white dark:bg-gray-800 p-2 rounded border dark:border-gray-700">
+                        <span className="font-medium text-gray-600 dark:text-gray-400">담당부서:</span>
+                        <p className="font-mono text-xs mt-1 dark:text-gray-200">{detailTestSettings.orgDept || '미설정'}</p>
                       </div>
-                      <div className="bg-white p-2 rounded border">
-                        <span className="font-medium text-gray-600">담당자:</span>
-                        <p className="font-mono text-xs mt-1">{detailTestSettings.orgMan || '미설정'}</p>
+                      <div className="bg-white dark:bg-gray-800 p-2 rounded border dark:border-gray-700">
+                        <span className="font-medium text-gray-600 dark:text-gray-400">담당자:</span>
+                        <p className="font-mono text-xs mt-1 dark:text-gray-200">{detailTestSettings.orgMan || '미설정'}</p>
                       </div>
-                      <div className="bg-white p-2 rounded border">
-                        <span className="font-medium text-gray-600">연락처:</span>
-                        <p className="font-mono text-xs mt-1">{detailTestSettings.orgTel || '미설정'}</p>
+                      <div className="bg-white dark:bg-gray-800 p-2 rounded border dark:border-gray-700">
+                        <span className="font-medium text-gray-600 dark:text-gray-400">연락처:</span>
+                        <p className="font-mono text-xs mt-1 dark:text-gray-200">{detailTestSettings.orgTel || '미설정'}</p>
                       </div>
                     </div>
                   </div>
@@ -1761,16 +1777,16 @@ export default function ScrappingSettingsPage() {
                       <div className="space-y-3">
                         <div className="grid grid-cols-1 gap-3">
                           {detailTestResults.data.title && (
-                            <div className="bg-white p-3 rounded border">
-                              <span className="font-medium text-gray-600 text-sm">제목:</span>
-                              <p className="mt-1 text-sm">{detailTestResults.data.title}</p>
+                            <div className="bg-white dark:bg-gray-800 p-3 rounded border dark:border-gray-700">
+                              <span className="font-medium text-gray-600 dark:text-gray-400 text-sm">제목:</span>
+                              <p className="mt-1 text-sm dark:text-gray-200">{detailTestResults.data.title}</p>
                             </div>
                           )}
 
                           {detailTestResults.data.bodyHtml && (
-                            <div className="bg-white p-3 rounded border">
-                              <span className="font-medium text-gray-600 text-sm">본문 HTML:</span>
-                              <div className="mt-1 text-xs bg-gray-100 p-2 rounded max-h-32 overflow-y-auto">
+                            <div className="bg-white dark:bg-gray-800 p-3 rounded border dark:border-gray-700">
+                              <span className="font-medium text-gray-600 dark:text-gray-400 text-sm">본문 HTML:</span>
+                              <div className="mt-1 text-xs bg-gray-100 dark:bg-gray-900 dark:text-gray-300 p-2 rounded max-h-32 overflow-y-auto">
                                 <pre className="whitespace-pre-wrap break-words">
                                   {detailTestResults.data.bodyHtml.length > 200
                                     ? detailTestResults.data.bodyHtml.substring(0, 200) + '...'
@@ -1782,53 +1798,53 @@ export default function ScrappingSettingsPage() {
 
                           <div className="grid grid-cols-2 gap-3">
                             {detailTestResults.data.noticeDiv && (
-                              <div className="bg-white p-2 rounded border">
-                                <span className="font-medium text-gray-600 text-xs">공고구분:</span>
-                                <p className="mt-1 text-xs">{detailTestResults.data.noticeDiv}</p>
+                              <div className="bg-white dark:bg-gray-800 p-2 rounded border dark:border-gray-700">
+                                <span className="font-medium text-gray-600 dark:text-gray-400 text-xs">공고구분:</span>
+                                <p className="mt-1 text-xs dark:text-gray-200">{detailTestResults.data.noticeDiv}</p>
                               </div>
                             )}
 
                             {detailTestResults.data.noticeNum && (
-                              <div className="bg-white p-2 rounded border">
-                                <span className="font-medium text-gray-600 text-xs">공고번호:</span>
-                                <p className="mt-1 text-xs">{detailTestResults.data.noticeNum}</p>
+                              <div className="bg-white dark:bg-gray-800 p-2 rounded border dark:border-gray-700">
+                                <span className="font-medium text-gray-600 dark:text-gray-400 text-xs">공고번호:</span>
+                                <p className="mt-1 text-xs dark:text-gray-200">{detailTestResults.data.noticeNum}</p>
                               </div>
                             )}
 
                             {detailTestResults.data.orgDept && (
-                              <div className="bg-white p-2 rounded border">
-                                <span className="font-medium text-gray-600 text-xs">담당부서:</span>
-                                <p className="mt-1 text-xs">{detailTestResults.data.orgDept}</p>
+                              <div className="bg-white dark:bg-gray-800 p-2 rounded border dark:border-gray-700">
+                                <span className="font-medium text-gray-600 dark:text-gray-400 text-xs">담당부서:</span>
+                                <p className="mt-1 text-xs dark:text-gray-200">{detailTestResults.data.orgDept}</p>
                               </div>
                             )}
 
                             {detailTestResults.data.orgMan && (
-                              <div className="bg-white p-2 rounded border">
-                                <span className="font-medium text-gray-600 text-xs">담당자:</span>
-                                <p className="mt-1 text-xs">{detailTestResults.data.orgMan}</p>
+                              <div className="bg-white dark:bg-gray-800 p-2 rounded border dark:border-gray-700">
+                                <span className="font-medium text-gray-600 dark:text-gray-400 text-xs">담당자:</span>
+                                <p className="mt-1 text-xs dark:text-gray-200">{detailTestResults.data.orgMan}</p>
                               </div>
                             )}
 
                             {detailTestResults.data.orgTel && (
-                              <div className="bg-white p-2 rounded border">
-                                <span className="font-medium text-gray-600 text-xs">연락처:</span>
-                                <p className="mt-1 text-xs">{detailTestResults.data.orgTel}</p>
+                              <div className="bg-white dark:bg-gray-800 p-2 rounded border dark:border-gray-700">
+                                <span className="font-medium text-gray-600 dark:text-gray-400 text-xs">연락처:</span>
+                                <p className="mt-1 text-xs dark:text-gray-200">{detailTestResults.data.orgTel}</p>
                               </div>
                             )}
                           </div>
 
                           {(detailTestResults.data.fileName || detailTestResults.data.fileUrl) && (
-                            <div className="bg-white p-3 rounded border">
-                              <span className="font-medium text-gray-600 text-sm">첨부파일:</span>
+                            <div className="bg-white dark:bg-gray-800 p-3 rounded border dark:border-gray-700">
+                              <span className="font-medium text-gray-600 dark:text-gray-400 text-sm">첨부파일:</span>
                               <div className="mt-1 space-y-1">
                                 {detailTestResults.data.fileName && (
-                                  <p className="text-xs"><span className="font-medium">파일명:</span> {detailTestResults.data.fileName}</p>
+                                  <p className="text-xs dark:text-gray-200"><span className="font-medium">파일명:</span> {detailTestResults.data.fileName}</p>
                                 )}
                                 {detailTestResults.data.fileUrl && (
-                                  <p className="text-xs">
+                                  <p className="text-xs dark:text-gray-200">
                                     <span className="font-medium">URL:</span>
                                     <a href={detailTestResults.data.fileUrl} target="_blank" rel="noopener noreferrer"
-                                       className="text-blue-600 hover:underline ml-1 break-all">
+                                       className="text-blue-600 dark:text-blue-400 hover:underline ml-1 break-all">
                                       {detailTestResults.data.fileUrl}
                                     </a>
                                   </p>

@@ -7,7 +7,7 @@ export const categoryTypeDefs = `#graphql
     nots: String!
     minPoint: Int!
     creator: String
-    use: Int!
+    isActive: Int!
   }
 
   extend type Query {

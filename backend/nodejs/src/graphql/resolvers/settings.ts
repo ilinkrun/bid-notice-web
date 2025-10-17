@@ -72,7 +72,7 @@ export interface SettingsNoticeListInput {
   startPage?: number;
   endPage?: number;
   login?: string;
-  use?: number;
+  isActive?: number;
   orgRegion?: string;
   registration?: string;
   title?: string;
@@ -116,7 +116,7 @@ export interface SettingsNoticeDetailInput {
   orgDept?: string;
   orgMan?: string;
   orgTel?: string;
-  use?: number;
+  isActive?: number;
   sampleUrl?: string;
   down?: string;
 }
@@ -189,7 +189,7 @@ export const settingsResolvers = {
           startPage: setting.startPage || 0,
           endPage: setting.endPage || 0,
           login: setting.login || '',
-          use: setting.use || 0,
+          isActive: setting.is_active || 0,
           orgRegion: setting.org_region || '',
           registration: setting.registration || '',
           title: setting.title || '',
@@ -222,7 +222,7 @@ export const settingsResolvers = {
           startPage: setting.startPage || 0,
           endPage: setting.endPage || 0,
           login: setting.login || '',
-          use: setting.use || 0,
+          isActive: setting.is_active || 0,
           orgRegion: setting.org_region || '',
           registration: setting.registration || '',
           title: setting.title || '',
@@ -246,6 +246,40 @@ export const settingsResolvers = {
         if (!setting) {
           return null;
         }
+
+        // Parse elements from individual fields (title, detail_url, posted_date, posted_by)
+        // Each field may contain xpath, target, and callback separated by "|-"
+        const elements = [];
+
+        // Helper to parse xpath format: "xpath|-target|-callback"
+        const parseXpathField = (fieldValue: string | null) => {
+          if (!fieldValue) return { xpath: '', target: 'text', callback: '' };
+          const parts = fieldValue.split('|-');
+          return {
+            xpath: parts[0] || '',
+            target: parts[1] || 'text',
+            callback: parts[2] || ''
+          };
+        };
+
+        // Build elements array from database fields
+        if (setting.title) {
+          const parsed = parseXpathField(setting.title);
+          elements.push({ key: 'title', ...parsed });
+        }
+        if (setting.detail_url) {
+          const parsed = parseXpathField(setting.detail_url);
+          elements.push({ key: 'detail_url', ...parsed });
+        }
+        if (setting.posted_date) {
+          const parsed = parseXpathField(setting.posted_date);
+          elements.push({ key: 'posted_date', ...parsed });
+        }
+        if (setting.posted_by) {
+          const parsed = parseXpathField(setting.posted_by);
+          elements.push({ key: 'posted_by', ...parsed });
+        }
+
         return {
           oid: setting.oid,
           orgName: setting.org_name,
@@ -257,7 +291,7 @@ export const settingsResolvers = {
           startPage: setting.startPage || 0,
           endPage: setting.endPage || 0,
           login: setting.login || '',
-          use: setting.use || 0,
+          isActive: setting.is_active || 0,
           orgRegion: setting.org_region || '',
           registration: setting.registration || '',
           title: setting.title || '',
@@ -266,7 +300,7 @@ export const settingsResolvers = {
           companyInCharge: setting.company_in_charge || '',
           orgMan: setting.org_man || '',
           exceptionRow: setting.exception_row || '',
-          elements: []
+          elements
         };
       } catch (error) {
         console.error('Error fetching setting list by oid:', error);
@@ -294,7 +328,7 @@ export const settingsResolvers = {
           startPage: setting.startPage || 0,
           endPage: setting.endPage || 0,
           login: setting.login || '',
-          use: setting.use || 0,
+          isActive: setting.is_active || 0,
           orgRegion: setting.org_region || '',
           registration: setting.registration || '',
           title: setting.title || '',
@@ -318,7 +352,7 @@ export const settingsResolvers = {
         return settings.map((setting) => ({
           oid: setting.oid,
           orgName: setting.org_name || '',
-          use: setting.use,
+          isActive: setting.is_active,
           url: setting.url || '',
           naverMapKeyword: setting.naver_map_keyword || '',
           xPath: setting.x_path || '',
@@ -363,7 +397,7 @@ export const settingsResolvers = {
         return {
           oid: setting.oid,
           orgName: setting.org_name || '',
-          use: setting.use,
+          isActive: setting.is_active,
           url: setting.url || '',
           naverMapKeyword: setting.naver_map_keyword || '',
           xPath: setting.x_path || '',
@@ -408,35 +442,19 @@ export const settingsResolvers = {
         return {
           oid: setting.oid,
           orgName: setting.org_name || '',
-          use: setting.use,
-          url: setting.url || '',
-          naverMapKeyword: setting.naver_map_keyword || '',
-          xPath: setting.x_path || '',
-          xPathNoticeNum: setting.x_path_notice_num || '',
-          xPathTitle: setting.x_path_title || '',
-          xPathOrg: setting.x_path_org || '',
-          xPathDemandOrg: setting.x_path_demand_org || '',
-          xPathBidType: setting.x_path_bid_type || '',
-          xPathAnnounceDate: setting.x_path_announce_date || '',
-          xPathDeadlineDate: setting.x_path_deadline_date || '',
-          xPathDepositDeadlineDate: setting.x_path_deposit_deadline_date || '',
-          xPathDemandDeadlineDate: setting.x_path_demand_deadline_date || '',
-          xPathProduct: setting.x_path_product || '',
-          xPathBasePrice: setting.x_path_base_price || '',
-          xPathFiles: setting.x_path_files || '',
-          xPathTargetIndex: setting.x_path_target_index !== null ? setting.x_path_target_index : null,
-          xPathNoticeNumTargetIndex: setting.x_path_notice_num_target_index !== null ? setting.x_path_notice_num_target_index : null,
-          xPathTitleTargetIndex: setting.x_path_title_target_index !== null ? setting.x_path_title_target_index : null,
-          xPathOrgTargetIndex: setting.x_path_org_target_index !== null ? setting.x_path_org_target_index : null,
-          xPathDemandOrgTargetIndex: setting.x_path_demand_org_target_index !== null ? setting.x_path_demand_org_target_index : null,
-          xPathBidTypeTargetIndex: setting.x_path_bid_type_target_index !== null ? setting.x_path_bid_type_target_index : null,
-          xPathAnnounceDateTargetIndex: setting.x_path_announce_date_target_index !== null ? setting.x_path_announce_date_target_index : null,
-          xPathDeadlineDateTargetIndex: setting.x_path_deadline_date_target_index !== null ? setting.x_path_deadline_date_target_index : null,
-          xPathDepositDeadlineDateTargetIndex: setting.x_path_deposit_deadline_date_target_index !== null ? setting.x_path_deposit_deadline_date_target_index : null,
-          xPathDemandDeadlineDateTargetIndex: setting.x_path_demand_deadline_date_target_index !== null ? setting.x_path_demand_deadline_date_target_index : null,
-          xPathProductTargetIndex: setting.x_path_product_target_index !== null ? setting.x_path_product_target_index : null,
-          xPathBasePriceTargetIndex: setting.x_path_base_price_target_index !== null ? setting.x_path_base_price_target_index : null,
-          xPathFilesTargetIndex: setting.x_path_files_target_index !== null ? setting.x_path_files_target_index : null,
+          title: setting.title || '',
+          bodyHtml: setting.body_html || '',
+          fileName: setting.file_name || '',
+          fileUrl: setting.file_url || '',
+          preview: setting.preview || '',
+          noticeDiv: setting.notice_div || '',
+          noticeNum: setting.notice_num || '',
+          orgDept: setting.org_dept || '',
+          orgMan: setting.org_man || '',
+          orgTel: setting.org_tel || '',
+          isActive: setting.is_active || 0,
+          sampleUrl: setting.sample_url || '',
+          down: setting.down || ''
         };
       } catch (error) {
         console.error('Error fetching settings detail by oid:', error);
@@ -453,7 +471,7 @@ export const settingsResolvers = {
         return [{
           oid: setting.oid,
           orgName: setting.org_name || '',
-          use: setting.use,
+          isActive: setting.is_active,
           url: setting.url || '',
           naverMapKeyword: setting.naver_map_keyword || '',
           xPath: setting.x_path || '',
@@ -684,7 +702,7 @@ export const settingsResolvers = {
           startPage: input.startPage || 0,
           endPage: input.endPage || 0,
           login: input.login || '',
-          use: input.use !== undefined ? input.use : 1,
+          is_active: input.isActive !== undefined ? input.isActive : 1,
           org_region: input.orgRegion || '',
           registration: input.registration || '',
           title: input.title || '',
@@ -717,7 +735,7 @@ export const settingsResolvers = {
           startPage: created.startPage || 0,
           endPage: created.endPage || 0,
           login: created.login || '',
-          use: created.use || 0,
+          isActive: created.is_active || 0,
           orgRegion: created.org_region || '',
           registration: created.registration || '',
           title: created.title || '',
@@ -740,26 +758,28 @@ export const settingsResolvers = {
           throw new Error('oid is required for update');
         }
 
-        await upsertSettingsNoticeListByOid(input.oid, {
-          org_name: input.orgName,
-          url: input.url,
-          iframe: input.iframe,
-          rowXpath: input.rowXpath,
-          paging: input.paging,
-          startPage: input.startPage,
-          endPage: input.endPage,
-          login: input.login,
-          use: input.use,
-          org_region: input.orgRegion,
-          registration: input.registration,
-          title: input.title,
-          detail_url: input.detailUrl,
-          posted_date: input.postedDate,
-          posted_by: input.postedBy,
-          company_in_charge: input.companyInCharge,
-          org_man: input.orgMan,
-          exception_row: input.exceptionRow,
-        });
+        // Build update object with only defined fields
+        const updateData: Record<string, unknown> = {};
+        if (input.orgName !== undefined) updateData.org_name = input.orgName;
+        if (input.url !== undefined) updateData.url = input.url;
+        if (input.iframe !== undefined) updateData.iframe = input.iframe;
+        if (input.rowXpath !== undefined) updateData.rowXpath = input.rowXpath;
+        if (input.paging !== undefined) updateData.paging = input.paging;
+        if (input.startPage !== undefined) updateData.startPage = input.startPage;
+        if (input.endPage !== undefined) updateData.endPage = input.endPage;
+        if (input.login !== undefined) updateData.login = input.login;
+        if (input.isActive !== undefined) updateData.is_active = input.isActive;
+        if (input.orgRegion !== undefined) updateData.org_region = input.orgRegion;
+        if (input.registration !== undefined) updateData.registration = input.registration;
+        if (input.title !== undefined) updateData.title = input.title;
+        if (input.detailUrl !== undefined) updateData.detail_url = input.detailUrl;
+        if (input.postedDate !== undefined) updateData.posted_date = input.postedDate;
+        if (input.postedBy !== undefined) updateData.posted_by = input.postedBy;
+        if (input.companyInCharge !== undefined) updateData.company_in_charge = input.companyInCharge;
+        if (input.orgMan !== undefined) updateData.org_man = input.orgMan;
+        if (input.exceptionRow !== undefined) updateData.exception_row = input.exceptionRow;
+
+        await upsertSettingsNoticeListByOid(input.oid, updateData);
 
         const updated = await getSettingsNoticeListByOid(input.oid);
         if (!updated) {
@@ -776,7 +796,7 @@ export const settingsResolvers = {
           startPage: updated.startPage || 0,
           endPage: updated.endPage || 0,
           login: updated.login || '',
-          use: updated.use || 0,
+          isActive: updated.is_active || 0,
           orgRegion: updated.org_region || '',
           registration: updated.registration || '',
           title: updated.title || '',
@@ -820,7 +840,7 @@ export const settingsResolvers = {
           org_dept: input.orgDept || '',
           org_man: input.orgMan || '',
           org_tel: input.orgTel || '',
-          use: input.use !== undefined ? input.use : 1,
+          is_active: input.isActive !== undefined ? input.isActive : 1,
           sample_url: input.sampleUrl || '',
           down: input.down || ''
         };
@@ -839,7 +859,7 @@ export const settingsResolvers = {
         return {
           oid: created.oid,
           orgName: created.org_name || '',
-          use: created.use,
+          isActive: created.is_active,
           url: created.url || '',
           naverMapKeyword: created.naver_map_keyword || '',
           xPath: created.x_path || '',
@@ -880,7 +900,7 @@ export const settingsResolvers = {
           org_dept: input.orgDept,
           org_man: input.orgMan,
           org_tel: input.orgTel,
-          use: input.use,
+          is_active: input.isActive,
           sample_url: input.sampleUrl,
           down: input.down,
         });
@@ -893,7 +913,7 @@ export const settingsResolvers = {
         return {
           oid: updated.oid,
           orgName: updated.org_name || '',
-          use: updated.use,
+          isActive: updated.is_active,
           url: updated.url || '',
           naverMapKeyword: updated.naver_map_keyword || '',
           xPath: updated.x_path || '',
@@ -942,7 +962,7 @@ export const settingsResolvers = {
           org_dept: input.orgDept,
           org_man: input.orgMan,
           org_tel: input.orgTel,
-          use: input.use,
+          is_active: input.isActive,
           sample_url: input.sampleUrl,
           down: input.down,
         });
@@ -955,7 +975,7 @@ export const settingsResolvers = {
         return {
           oid: updated.oid,
           orgName: updated.org_name || '',
-          use: updated.use,
+          isActive: updated.is_active,
           url: updated.url || '',
           naverMapKeyword: updated.naver_map_keyword || '',
           xPath: updated.x_path || '',

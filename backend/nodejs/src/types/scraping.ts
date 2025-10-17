@@ -12,7 +12,7 @@ export interface ScrapingSettings {
   login?: string;
   org_region?: string;
   registration?: number;
-  use: number;
+  is_active: number;
   company_in_charge?: string;
   org_man?: string;
   exception_row?: string;

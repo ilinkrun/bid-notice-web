@@ -8,7 +8,7 @@ export interface NoticeCategoryData {
   nots: string;
   min_point: number;
   creator?: string;
-  use: number;
+  is_active: number;
 }
 
 export const categoryResolvers = {
@@ -16,11 +16,11 @@ export const categoryResolvers = {
     noticeCategoriesAll: async () => {
       try {
         const rows = await executeQuery(`
-          SELECT sn, category, division, keywords, nots, min_point, creator, \`use\`
+          SELECT sn, category, division, keywords, nots, min_point, creator, is_active
           FROM settings_notice_category
           ORDER BY sn ASC
         `);
-        
+
         return (rows as NoticeCategoryData[]).map((category: NoticeCategoryData) => ({
           sn: category.sn,
           category: category.category,
@@ -29,7 +29,7 @@ export const categoryResolvers = {
           nots: category.nots,
           minPoint: category.min_point,
           creator: category.creator || '',
-          use: category.use
+          isActive: category.is_active
         }));
       } catch (error) {
         console.error('Error fetching all notice categories:', error);
@@ -40,12 +40,12 @@ export const categoryResolvers = {
     noticeCategoriesActive: async () => {
       try {
         const rows = await executeQuery(`
-          SELECT sn, category, division, keywords, nots, min_point, creator, \`use\`
+          SELECT sn, category, division, keywords, nots, min_point, creator, is_active
           FROM settings_notice_category
-          WHERE \`use\` = 1
+          WHERE is_active = 1
           ORDER BY sn ASC
         `);
-        
+
         return (rows as NoticeCategoryData[]).map((category: NoticeCategoryData) => ({
           sn: category.sn,
           category: category.category,
@@ -54,7 +54,7 @@ export const categoryResolvers = {
           nots: category.nots,
           minPoint: category.min_point,
           creator: category.creator || '',
-          use: category.use
+          isActive: category.is_active
         }));
       } catch (error) {
         console.error('Error fetching active notice categories:', error);

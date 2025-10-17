@@ -21,7 +21,7 @@ const GET_SETTINGS_NOTICE_LISTS = gql`
       orgName
       url
       detailUrl
-      use
+      isActive
       orgRegion
       companyInCharge
       orgMan

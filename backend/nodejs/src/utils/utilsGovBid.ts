@@ -256,7 +256,7 @@ async function getSettingsNoticeList(): Promise<SettingsNoticeListRecord[]> {
       startPage,
       endPage,
       login,
-      \`use\`,
+      is_active,
       org_region,
       registration,
       title,
@@ -272,7 +272,11 @@ async function getSettingsNoticeList(): Promise<SettingsNoticeListRecord[]> {
   const rows = await runQuery<RowDataPacket & SettingsNoticeListRecord>(sql);
   return rows.map((row) => ({
     ...row,
-    posted_date: row.posted_date ? normalizeDate(row.posted_date) : null,
+    // Keep posted_date as-is if it's an XPath expression
+    posted_date: row.posted_date && typeof row.posted_date === 'string' &&
+      (row.posted_date.includes('td[') || row.posted_date.includes('//') || row.posted_date.includes('|-'))
+      ? row.posted_date
+      : (row.posted_date ? normalizeDate(row.posted_date) : null),
   }));
 }
 
@@ -288,7 +292,7 @@ async function getSettingsNoticeListByOrgName(orgName: string): Promise<Settings
       startPage,
       endPage,
       login,
-      \`use\`,
+      is_active,
       org_region,
       registration,
       title,
@@ -308,7 +312,11 @@ async function getSettingsNoticeListByOrgName(orgName: string): Promise<Settings
   }
   return {
     ...row,
-    posted_date: row.posted_date ? normalizeDate(row.posted_date) : null,
+    // Keep posted_date as-is if it's an XPath expression
+    posted_date: row.posted_date && typeof row.posted_date === 'string' &&
+      (row.posted_date.includes('td[') || row.posted_date.includes('//') || row.posted_date.includes('|-'))
+      ? row.posted_date
+      : (row.posted_date ? normalizeDate(row.posted_date) : null),
   };
 }
 
@@ -324,7 +332,7 @@ async function getSettingsNoticeListByOid(oid: number): Promise<SettingsNoticeLi
       startPage,
       endPage,
       login,
-      \`use\`,
+      is_active,
       org_region,
       registration,
       title,
@@ -344,7 +352,11 @@ async function getSettingsNoticeListByOid(oid: number): Promise<SettingsNoticeLi
   }
   return {
     ...row,
-    posted_date: row.posted_date ? normalizeDate(row.posted_date) : null,
+    // Keep posted_date as-is if it's an XPath expression
+    posted_date: row.posted_date && typeof row.posted_date === 'string' &&
+      (row.posted_date.includes('td[') || row.posted_date.includes('//') || row.posted_date.includes('|-'))
+      ? row.posted_date
+      : (row.posted_date ? normalizeDate(row.posted_date) : null),
   };
 }
 
@@ -355,8 +367,13 @@ async function upsertSettingsNoticeListByOrgName(orgName: string, data: Partial<
     updated_at: currentTimestamp(),
     ...data,
   };
-  if ('posted_date' in payload && payload.posted_date) {
-    payload.posted_date = normalizeDate(payload.posted_date);
+  // Don't normalize posted_date if it's an XPath expression (contains 'td[' or other XPath indicators)
+  if ('posted_date' in payload && payload.posted_date && typeof payload.posted_date === 'string') {
+    const value = payload.posted_date.trim();
+    // Only normalize if it looks like a date, not an XPath or configuration string
+    if (!value.includes('td[') && !value.includes('//') && !value.includes('|-')) {
+      payload.posted_date = normalizeDate(payload.posted_date);
+    }
   }
   const result = await db.upsert('settings_notice_list', {
     data: payload,
@@ -374,8 +391,13 @@ async function upsertSettingsNoticeListByOid(oid: number, data: Partial<Settings
     updated_at: currentTimestamp(),
     ...data,
   };
-  if ('posted_date' in payload && payload.posted_date) {
-    payload.posted_date = normalizeDate(payload.posted_date);
+  // Don't normalize posted_date if it's an XPath expression (contains 'td[' or other XPath indicators)
+  if ('posted_date' in payload && payload.posted_date && typeof payload.posted_date === 'string') {
+    const value = payload.posted_date.trim();
+    // Only normalize if it looks like a date, not an XPath or configuration string
+    if (!value.includes('td[') && !value.includes('//') && !value.includes('|-')) {
+      payload.posted_date = normalizeDate(payload.posted_date);
+    }
   }
   const result = await db.upsert('settings_notice_list', {
     data: payload,
@@ -401,7 +423,7 @@ async function getSettingsNoticeDetail(): Promise<SettingsNoticeDetailRecord[]> 
       org_dept,
       org_man,
       org_tel,
-      \`use\`,
+      is_active,
       sample_url,
       down
     FROM settings_notice_detail
@@ -429,7 +451,7 @@ async function getSettingsNoticeDetailByOrgName(orgName: string): Promise<Settin
       org_dept,
       org_man,
       org_tel,
-      \`use\`,
+      is_active,
       sample_url,
       down
     FROM settings_notice_detail
@@ -461,7 +483,7 @@ async function getSettingsNoticeDetailByOid(oid: number): Promise<SettingsNotice
       org_dept,
       org_man,
       org_tel,
-      \`use\`,
+      is_active,
       sample_url,
       down
     FROM settings_notice_detail
@@ -503,7 +525,7 @@ async function getDetailConfigByOrgName(orgName: string): Promise<Record<string,
       org_name,
       sample_url,
       down,
-      \`use\`
+      is_active
     FROM settings_notice_detail
     WHERE org_name = ?
     LIMIT 1
@@ -516,7 +538,7 @@ async function getDetailConfigByOrgName(orgName: string): Promise<Record<string,
     org_name: row.org_name,
     sample_url: row.sample_url,
     down: row.down,
-    use: row.use,
+    is_active: row.is_active,
   };
 }
 
@@ -982,7 +1004,7 @@ interface NoticeCategorySetting {
 
 async function getAllNoticeCategorySettings(includeInactive = true): Promise<NoticeCategorySetting[]> {
   const sql = `
-    SELECT sn, keywords, nots, min_point, category, creator, memo, \`use\`, priority
+    SELECT sn, keywords, nots, min_point, category, creator, memo, is_active, priority
     FROM settings_notice_category
     ${includeInactive ? '' : 'WHERE \\`use\\` = 1'}
     ORDER BY priority DESC, sn ASC
@@ -992,7 +1014,7 @@ async function getAllNoticeCategorySettings(includeInactive = true): Promise<Not
 
 async function getNoticeCategorySetting(category: string): Promise<NoticeCategorySetting | null> {
   const sql = `
-    SELECT sn, keywords, nots, min_point, category, creator, memo, \`use\`, priority
+    SELECT sn, keywords, nots, min_point, category, creator, memo, is_active, priority
     FROM settings_notice_category
     WHERE category = ?
     LIMIT 1
@@ -1004,7 +1026,7 @@ async function getNoticeCategoriesByPriority(): Promise<string[]> {
   const sql = `
     SELECT category
     FROM settings_notice_category
-    WHERE \`use\` = 1
+    WHERE is_active = 1
     ORDER BY priority DESC, sn ASC
   `;
   const rows = await runQuery<RowDataPacket & { category: string }>(sql);

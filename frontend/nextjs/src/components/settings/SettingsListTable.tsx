@@ -12,7 +12,7 @@ interface SettingsListTableProps {
     orgName: string;
     url: string;
     detailUrl: string;
-    use: number;
+    isActive: number;
     orgRegion: string;
     companyInCharge: string;
     orgMan: string;
@@ -157,7 +157,7 @@ export function SettingsListTable({ initialData }: SettingsListTableProps) {
                 <DataTableCell>{item.companyInCharge || '-'}</DataTableCell>
                 <DataTableCell>{item.orgRegion || '-'}</DataTableCell>
                 <DataTableCell>
-                  <IsActive value={item.use === 1} />
+                  <IsActive value={item.isActive === 1} />
                 </DataTableCell>
               </DataTableRow>
             ))
