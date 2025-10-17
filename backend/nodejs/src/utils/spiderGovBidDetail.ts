@@ -40,7 +40,7 @@ function createMySQLPool(config?: {
       port: 20201,
       user: 'root',
       password: 'mysqlIlmac123',
-      database: 'ubuntu_ilmac__ubuntu_project_1_db'
+      database: 'ubuntu_ilmac__ilmac_bid_web_db'
     };
 
     mysqlInstance = new Mysql(dbConfig);

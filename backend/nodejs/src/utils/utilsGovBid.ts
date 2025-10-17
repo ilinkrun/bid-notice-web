@@ -143,7 +143,7 @@ const DEFAULT_DB_CONFIG: MysqlConfig = {
   port: Number(envCache.MYSQL_PORT ?? process.env.MYSQL_PORT ?? 20201),
   user: (envCache.MYSQL_USER ?? process.env.MYSQL_USER ?? 'root') as string,
   password: (envCache.MYSQL_PASSWORD ?? process.env.MYSQL_PASSWORD ?? 'mysqlIlmac123') as string,
-  database: (envCache.MYSQL_DATABASE ?? process.env.MYSQL_DATABASE ?? 'ubuntu_ilmac__ubuntu_project_1_db') as string,
+  database: (envCache.MYSQL_DATABASE ?? process.env.MYSQL_DATABASE ?? 'ubuntu_ilmac__ilmac_bid_web_db') as string,
   connectionLimit: Number(envCache.MYSQL_POOL_SIZE ?? process.env.MYSQL_POOL_SIZE ?? 8),
 };
 
@@ -971,7 +971,7 @@ async function scrapeListByOrgName(orgName: string, startPage = 1, endPage = 2):
     port: DEFAULT_DB_CONFIG.port ?? 20201,
     user: DEFAULT_DB_CONFIG.user ?? 'root',
     password: DEFAULT_DB_CONFIG.password ?? '',
-    database: DEFAULT_DB_CONFIG.database ?? 'ubuntu_ilmac__ubuntu_project_1_db',
+    database: DEFAULT_DB_CONFIG.database ?? 'ubuntu_ilmac__ilmac_bid_web_db',
   });
 
   return scrapeList(orgName, startPage, endPage);
