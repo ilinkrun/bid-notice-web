@@ -1,12 +1,10 @@
 // Import collector functions
-let collectGovNotices: any;
 let scrapeListBySettingsUtil: any;
 let scrapeDetailBySettingsUtil: any;
 
 // Dynamic imports to handle file path issues
 async function loadCollectors() {
   try {
-    // Use spiderGovBidList instead of gov/collector-list
     const govCollector = await import('@/utils/spiderGovBidList');
     scrapeListBySettingsUtil = govCollector.scrapeListBySettings;
     console.log('Loaded scrapeListBySettings from spiderGovBidList');
@@ -136,46 +134,24 @@ function convertToGraphQLNotice(notice: any) {
 
 export const collectorsResolvers = {
   Query: {
+    // Legacy test queries - no longer used, kept for backwards compatibility
     testCollectList: async (_: any, { input }: { input: CollectListInput }) => {
-      if (!collectGovNotices) {
-        return {
-          success: false,
-          totalScraped: 0,
-          totalInserted: 0,
-          agencies: 0,
-          errors: ['Collector not available']
-        };
-      }
-
-      const options = {
-        agencies: input.agencies,
-        limit: input.limit || 10,
-        dryRun: true, // Always dry run for tests
-        debug: input.debug || false
+      return {
+        success: false,
+        totalScraped: 0,
+        totalInserted: 0,
+        agencies: 0,
+        errors: ['This query is deprecated. Use collectListWithSettings mutation instead.']
       };
-
-      return await collectGovNotices(options);
     },
 
     testCollectDetail: async (_: any, { input }: { input: CollectDetailInput }) => {
-      if (!collectGovNoticeDetails) {
-        return {
-          success: false,
-          processed: 0,
-          updated: 0,
-          errors: ['Detail collector not available']
-        };
-      }
-
-      const options = {
-        orgName: input.orgName,
-        noticeId: input.noticeId,
-        limit: input.limit || 10,
-        dryRun: true, // Always dry run for tests
-        debug: input.debug || false
+      return {
+        success: false,
+        processed: 0,
+        updated: 0,
+        errors: ['This query is deprecated. Use collectDetailWithSettings mutation instead.']
       };
-
-      return await collectGovNoticeDetails(options);
     }
   },
 
