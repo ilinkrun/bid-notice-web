@@ -2,13 +2,17 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { startGraphQLServer } from '@/graphql/server';
+import config from '../env.config.js';
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = config.server.port;
 
 // Middleware
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: config.cors.origin,
+  credentials: config.cors.credentials,
+}));
 app.use(express.json());
 
 // Health check endpoint

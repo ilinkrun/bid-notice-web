@@ -214,7 +214,7 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
   // 원글 데이터 조회 함수
   const fetchOriginalPost = async (postId: number) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_GRAPHQL_URL || process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || `http://localhost:${process.env.NEXT_PUBLIC_API_GRAPHQL_PORT || '21023'}/graphql`}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -297,7 +297,7 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
         throw new Error('필수 입력값이 누락되었습니다.');
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_GRAPHQL_URL || process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || `http://localhost:${process.env.NEXT_PUBLIC_API_GRAPHQL_PORT || '21023'}/graphql`}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

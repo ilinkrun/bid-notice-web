@@ -130,30 +130,38 @@ export function SettingsListTable({ initialData }: SettingsListTableProps) {
           </DataTableRow>
         </DataTableHeader>
         <DataTableBody>
-          {sortedData.map((item, index) => (
-            <DataTableRow
-              key={index}
-              onClick={() => handleRowClick(item.oid)}
-            >
-              <DataTableCell>{item.orgName}</DataTableCell>
-              <DataTableCell>
-                <a
-                  href={detailUrlHref(item.url)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline dark:text-blue-400"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {detailUrlA(item.url)}
-                </a>
-              </DataTableCell>
-              <DataTableCell>{item.companyInCharge || '-'}</DataTableCell>
-              <DataTableCell>{item.orgRegion || '-'}</DataTableCell>
-              <DataTableCell>
-                <IsActive value={item.use === 1} />
+          {sortedData.length === 0 ? (
+            <DataTableRow isHoverable={false}>
+              <DataTableCell colSpan={5} className="text-center py-8 text-color-primary-muted-foreground">
+                등록된 스크랩 설정이 없습니다. 추가 버튼을 눌러 새로운 설정을 등록하세요.
               </DataTableCell>
             </DataTableRow>
-          ))}
+          ) : (
+            sortedData.map((item, index) => (
+              <DataTableRow
+                key={index}
+                onClick={() => handleRowClick(item.oid)}
+              >
+                <DataTableCell>{item.orgName}</DataTableCell>
+                <DataTableCell>
+                  <a
+                    href={detailUrlHref(item.url)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline dark:text-blue-400"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {detailUrlA(item.url)}
+                  </a>
+                </DataTableCell>
+                <DataTableCell>{item.companyInCharge || '-'}</DataTableCell>
+                <DataTableCell>{item.orgRegion || '-'}</DataTableCell>
+                <DataTableCell>
+                  <IsActive value={item.use === 1} />
+                </DataTableCell>
+              </DataTableRow>
+            ))
+          )}
         </DataTableBody>
       </DataTable>
     </div>

@@ -176,7 +176,9 @@ export const settingsResolvers = {
     // Settings Notice List
     settingsNoticeListAll: async () => {
       try {
+        console.log('[settingsNoticeListAll] 호출됨');
         const settings = await getSettingsNoticeList();
+        console.log('[settingsNoticeListAll] 조회된 설정 개수:', settings.length);
         return settings.map((setting) => ({
           oid: setting.oid,
           orgName: setting.org_name,
@@ -694,9 +696,9 @@ export const settingsResolvers = {
           exception_row: input.exceptionRow || ''
         };
 
-        const result = await executeQuery(\`
+        const result = await executeQuery(`
           INSERT INTO settings_notice_list SET ?
-        \`, [data]);
+        `, [data]);
 
         const oid = (result as any).insertId;
         const created = await getSettingsNoticeListByOid(oid);
@@ -793,9 +795,9 @@ export const settingsResolvers = {
 
     settingsNoticeListDelete: async (_: unknown, { oid }: { oid: number }) => {
       try {
-        const result = await executeQuery(\`
+        const result = await executeQuery(`
           DELETE FROM settings_notice_list WHERE oid = ?
-        \`, [oid]);
+        `, [oid]);
         return (result as any).affectedRows > 0;
       } catch (error) {
         console.error('Error deleting notice list settings:', error);
@@ -823,9 +825,9 @@ export const settingsResolvers = {
           down: input.down || ''
         };
 
-        const result = await executeQuery(\`
+        const result = await executeQuery(`
           INSERT INTO settings_notice_detail SET ?
-        \`, [data]);
+        `, [data]);
 
         const oid = (result as any).insertId;
         const created = await getSettingsNoticeDetailByOid(oid);
@@ -916,9 +918,9 @@ export const settingsResolvers = {
 
     settingsNoticeDetailDelete: async (_: unknown, { oid }: { oid: number }) => {
       try {
-        const result = await executeQuery(\`
+        const result = await executeQuery(`
           DELETE FROM settings_notice_detail WHERE oid = ?
-        \`, [oid]);
+        `, [oid]);
         return (result as any).affectedRows > 0;
       } catch (error) {
         console.error('Error deleting notice detail settings:', error);
@@ -979,10 +981,10 @@ export const settingsResolvers = {
     // Settings Notice Category Mutations
     settingsNoticeCategoryCreate: async (_: unknown, { input }: { input: SettingsNoticeCategoryInput }) => {
       try {
-        const result = await executeQuery(\`
+        const result = await executeQuery(`
           INSERT INTO settings_notice_category (keywords, nots, min_point, category, creator, memo)
           VALUES (?, ?, ?, ?, ?, ?)
-        \`, [input.keywords, input.nots, input.minPoint, input.category, input.creator || '', input.memo || '']);
+        `, [input.keywords, input.nots, input.minPoint, input.category, input.creator || '', input.memo || '']);
 
         const sn = (result as any).insertId;
 
@@ -1007,11 +1009,11 @@ export const settingsResolvers = {
           throw new Error('sn is required for update');
         }
 
-        await executeQuery(\`
+        await executeQuery(`
           UPDATE settings_notice_category
           SET keywords = ?, nots = ?, min_point = ?, category = ?, creator = ?, memo = ?
           WHERE sn = ?
-        \`, [input.keywords, input.nots, input.minPoint, input.category, input.creator || '', input.memo || '', input.sn]);
+        `, [input.keywords, input.nots, input.minPoint, input.category, input.creator || '', input.memo || '', input.sn]);
 
         return {
           sn: input.sn,
@@ -1030,9 +1032,9 @@ export const settingsResolvers = {
 
     settingsNoticeCategoryDelete: async (_: unknown, { sn }: { sn: number }) => {
       try {
-        const result = await executeQuery(\`
+        const result = await executeQuery(`
           DELETE FROM settings_notice_category WHERE sn = ?
-        \`, [sn]);
+        `, [sn]);
         return (result as any).affectedRows > 0;
       } catch (error) {
         console.error('Error deleting notice category settings:', error);
@@ -1169,18 +1171,18 @@ export const settingsResolvers = {
     // App Settings Mutations - Direct MySQL
     appSettingCreate: async (_: unknown, { input }: { input: AppSettingInput }) => {
       try {
-        const result = await executeQuery(\`
+        const result = await executeQuery(`
           INSERT INTO settings_app_default (area, name, value, remark)
           VALUES (?, ?, ?, ?)
-        \`, [input.area, input.name, input.value, input.remark || null]);
+        `, [input.area, input.name, input.value, input.remark || null]);
 
         const insertId = (result as any).insertId;
 
-        const rows = await executeQuery(\`
+        const rows = await executeQuery(`
           SELECT sn, area, name, value, remark, created_at, updated_at
           FROM settings_app_default
           WHERE sn = ?
-        \`, [insertId]) as AppSettingData[];
+        `, [insertId]) as AppSettingData[];
 
         if (rows.length === 0) {
           throw new Error('Failed to retrieve created setting');
@@ -1208,17 +1210,17 @@ export const settingsResolvers = {
           throw new Error('sn is required for update');
         }
 
-        await executeQuery(\`
+        await executeQuery(`
           UPDATE settings_app_default
           SET area = ?, name = ?, value = ?, remark = ?, updated_at = CURRENT_TIMESTAMP
           WHERE sn = ?
-        \`, [input.area, input.name, input.value, input.remark || null, input.sn]);
+        `, [input.area, input.name, input.value, input.remark || null, input.sn]);
 
-        const rows = await executeQuery(\`
+        const rows = await executeQuery(`
           SELECT sn, area, name, value, remark, created_at, updated_at
           FROM settings_app_default
           WHERE sn = ?
-        \`, [input.sn]) as AppSettingData[];
+        `, [input.sn]) as AppSettingData[];
 
         if (rows.length === 0) {
           throw new Error('Setting not found after update');
@@ -1242,9 +1244,9 @@ export const settingsResolvers = {
 
     appSettingDelete: async (_: unknown, { sn }: { sn: number }) => {
       try {
-        const result = await executeQuery(\`
+        const result = await executeQuery(`
           DELETE FROM settings_app_default WHERE sn = ?
-        \`, [sn]);
+        `, [sn]);
 
         return (result as any).affectedRows > 0;
       } catch (error) {

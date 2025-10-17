@@ -256,7 +256,7 @@ async function getSettingsNoticeList(): Promise<SettingsNoticeListRecord[]> {
       startPage,
       endPage,
       login,
-      use,
+      \`use\`,
       org_region,
       registration,
       title,
@@ -288,7 +288,7 @@ async function getSettingsNoticeListByOrgName(orgName: string): Promise<Settings
       startPage,
       endPage,
       login,
-      use,
+      \`use\`,
       org_region,
       registration,
       title,
@@ -324,7 +324,7 @@ async function getSettingsNoticeListByOid(oid: number): Promise<SettingsNoticeLi
       startPage,
       endPage,
       login,
-      use,
+      \`use\`,
       org_region,
       registration,
       title,
@@ -401,7 +401,7 @@ async function getSettingsNoticeDetail(): Promise<SettingsNoticeDetailRecord[]> 
       org_dept,
       org_man,
       org_tel,
-      use,
+      \`use\`,
       sample_url,
       down
     FROM settings_notice_detail
@@ -429,7 +429,7 @@ async function getSettingsNoticeDetailByOrgName(orgName: string): Promise<Settin
       org_dept,
       org_man,
       org_tel,
-      use,
+      \`use\`,
       sample_url,
       down
     FROM settings_notice_detail
@@ -461,7 +461,7 @@ async function getSettingsNoticeDetailByOid(oid: number): Promise<SettingsNotice
       org_dept,
       org_man,
       org_tel,
-      use,
+      \`use\`,
       sample_url,
       down
     FROM settings_notice_detail
@@ -503,7 +503,7 @@ async function getDetailConfigByOrgName(orgName: string): Promise<Record<string,
       org_name,
       sample_url,
       down,
-      use
+      \`use\`
     FROM settings_notice_detail
     WHERE org_name = ?
     LIMIT 1
@@ -982,9 +982,9 @@ interface NoticeCategorySetting {
 
 async function getAllNoticeCategorySettings(includeInactive = true): Promise<NoticeCategorySetting[]> {
   const sql = `
-    SELECT sn, keywords, nots, min_point, category, creator, memo, use, priority
+    SELECT sn, keywords, nots, min_point, category, creator, memo, \`use\`, priority
     FROM settings_notice_category
-    ${includeInactive ? '' : 'WHERE use = 1'}
+    ${includeInactive ? '' : 'WHERE \\`use\\` = 1'}
     ORDER BY priority DESC, sn ASC
   `;
   return runQuery<RowDataPacket & NoticeCategorySetting>(sql);
@@ -992,7 +992,7 @@ async function getAllNoticeCategorySettings(includeInactive = true): Promise<Not
 
 async function getNoticeCategorySetting(category: string): Promise<NoticeCategorySetting | null> {
   const sql = `
-    SELECT sn, keywords, nots, min_point, category, creator, memo, use, priority
+    SELECT sn, keywords, nots, min_point, category, creator, memo, \`use\`, priority
     FROM settings_notice_category
     WHERE category = ?
     LIMIT 1
@@ -1004,7 +1004,7 @@ async function getNoticeCategoriesByPriority(): Promise<string[]> {
   const sql = `
     SELECT category
     FROM settings_notice_category
-    WHERE use = 1
+    WHERE \`use\` = 1
     ORDER BY priority DESC, sn ASC
   `;
   const rows = await runQuery<RowDataPacket & { category: string }>(sql);

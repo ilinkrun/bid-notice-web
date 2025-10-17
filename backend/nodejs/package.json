@@ -11,10 +11,10 @@
     "graphql:dev": "tsx --tsconfig tsconfig.json src/graphql/server.ts",
     "graphql:build": "swc src/graphql -d dist/graphql --config-file .swcrc",
     "graphql:start": "node dist/graphql/server.js",
-
     "spider:gov:list": "tsx --tsconfig tsconfig.json src/execs/spider-gov-list.ts",
     "spider:gov:detail": "tsx --tsconfig tsconfig.json src/execs/spider-gov-detail.ts",
     "spider:nara:list": "tsx --tsconfig tsconfig.json src/execs/spider-nara-list.ts",
+    "cron:fetch-notices": "tsx --tsconfig tsconfig.json src/execs/cron-fetch-notices.ts",
     "test:scrape": "tsx --tsconfig tsconfig.json src/test/test-scrape.ts",
     "test:gov": "tsx --tsconfig tsconfig.json src/tests/test-gov-scraping.ts",
     "test": "vitest",
@@ -35,6 +35,10 @@
     "graphql": "^16.10.0",
     "graphql-tag": "^2.12.6",
     "helmet": "^7.1.0",
+    "jnu-abc": "^0.0.19",
+    "jnu-db": "^0.0.10",
+    "jnu-doc": "^0.0.10",
+    "jnu-web": "^0.0.13",
     "mysql2": "^3.14.0",
     "playwright": "^1.47.0",
     "xml2js": "^0.6.2"

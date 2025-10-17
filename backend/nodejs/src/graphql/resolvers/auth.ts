@@ -2,10 +2,10 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
-const DATABASE_PATH = '/exposed/projects/bid-notice-web/database/json';
+const DATABASE_PATH = '/exposed/projects/ilmac-bid-web/database/json';
 const USERS_FILE = path.join(DATABASE_PATH, 'users.json');
 const SESSIONS_FILE = path.join(DATABASE_PATH, 'sessions.json');
-const AVATAR_DIR = '/exposed/projects/bid-notice-web/frontend/nextjs/public/images/avatars';
+const AVATAR_DIR = '/exposed/projects/ilmac-bid-web/frontend/nextjs/public/images/avatars';
 
 export interface User {
   id: string;
@@ -255,10 +255,15 @@ export const authResolvers = {
   Mutation: {
     login: async (_: unknown, { email, password }: { email: string; password: string }) => {
       try {
+        console.log(`[Login] Attempting login for email: ${email}`);
         const users = readJsonFile<User>(USERS_FILE);
+        console.log(`[Login] Total users found: ${users.length}`);
+
         const user = users.find(u => u.email === email && u.password === password && u.isActive);
-        
+
         if (!user) {
+          const emailExists = users.find(u => u.email === email);
+          console.log(`[Login] Email exists: ${!!emailExists}, Active: ${emailExists?.isActive}`);
           return {
             user: null,
             token: null,
@@ -266,6 +271,8 @@ export const authResolvers = {
             success: false
           };
         }
+
+        console.log(`[Login] Login successful for user: ${user.email}`);
 
         // 세션 생성
         const token = generateToken();

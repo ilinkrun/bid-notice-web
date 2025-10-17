@@ -4,6 +4,8 @@ import { registerApolloClient } from '@apollo/experimental-nextjs-app-support/rs
 export const { getClient } = registerApolloClient(() => {
   return new ApolloClient({
     cache: new InMemoryCache(),
-    uri: process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql',
+    uri: process.env.NEXT_PUBLIC_GRAPHQL_URL ||
+         process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL ||
+         `http://localhost:${process.env.NEXT_PUBLIC_API_GRAPHQL_PORT || '21023'}/graphql`,
   });
 });

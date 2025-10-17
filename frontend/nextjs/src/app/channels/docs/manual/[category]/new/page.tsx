@@ -155,7 +155,7 @@ function NewManualContent() {
   useEffect(() => {
     const fetchLangMappings = async () => {
       try {
-        const graphqlUrl = process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql';
+        const graphqlUrl = process.env.NEXT_PUBLIC_GRAPHQL_URL || process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || `http://localhost:${process.env.NEXT_PUBLIC_API_GRAPHQL_PORT || '21023'}/graphql`;
         const response = await fetch(graphqlUrl, {
           method: 'POST',
           headers: {
@@ -264,7 +264,7 @@ function NewManualContent() {
         throw new Error('필수 입력값이 누락되었습니다.');
       }
 
-      const graphqlUrl = process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql';
+      const graphqlUrl = process.env.NEXT_PUBLIC_GRAPHQL_URL || process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || `http://localhost:${process.env.NEXT_PUBLIC_API_GRAPHQL_PORT || '21023'}/graphql`;
       const response = await fetch(graphqlUrl, {
         method: 'POST',
         headers: {

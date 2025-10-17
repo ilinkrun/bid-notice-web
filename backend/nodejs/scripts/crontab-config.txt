@@ -1,0 +1,28 @@
+# Crontab configuration for ilmac-bid-web notice fetching
+#
+# This cron job runs twice daily:
+# - 11:00 AM (11:00)
+# - 11:00 PM (23:00)
+#
+# To install this crontab:
+# 1. Make sure the shell script is executable:
+#    chmod +x /exposed/projects/ilmac-bid-web/backend/nodejs/scripts/cron-fetch-notices.sh
+#
+# 2. Install the crontab:
+#    crontab /exposed/projects/ilmac-bid-web/backend/nodejs/scripts/crontab-config.txt
+#
+# 3. Verify the crontab is installed:
+#    crontab -l
+#
+# To view logs:
+#    tail -f /exposed/projects/ilmac-bid-web/backend/nodejs/logs/cron-fetch-notices-$(date +%Y%m%d).log
+#
+
+# Set PATH to include node and npm
+PATH=/root/.nvm/versions/node/v22.20.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# Fetch bid notices at 11:00 AM daily
+0 11 * * * /exposed/projects/ilmac-bid-web/backend/nodejs/scripts/cron-fetch-notices.sh
+
+# Fetch bid notices at 11:00 PM daily
+0 23 * * * /exposed/projects/ilmac-bid-web/backend/nodejs/scripts/cron-fetch-notices.sh

@@ -7,6 +7,7 @@ import cors from 'cors';
 import http from 'http';
 import { typeDefs } from './schema/index.js';
 import { resolvers } from './resolvers/index.js';
+import config from '../../env.config.js';
 
 interface MyContext {
   token?: string;
@@ -20,14 +21,8 @@ async function startServer() {
 
   // Enable CORS for all routes
   app.use(cors({
-    origin: [
-      process.env.FRONTEND_URL || 'http://localhost:11501',
-      'http://1.231.118.217:11501',
-      'http://localhost:3000',
-      'http://127.0.0.1:3000',
-      'https://bid.ilmaceng.com'
-    ],
-    credentials: true,
+    origin: config.cors.origin,
+    credentials: config.cors.credentials,
   }));
 
   // Create Apollo Server
@@ -38,7 +33,7 @@ async function startServer() {
       ApolloServerPluginDrainHttpServer({ httpServer }),
       ApolloServerPluginLandingPageLocalDefault({ embed: true }),
     ],
-    introspection: process.env.NODE_ENV !== 'production',
+    introspection: config.graphql.introspection,
     formatError: (error) => {
       console.error('GraphQL Error:', error);
       return {
@@ -67,8 +62,8 @@ async function startServer() {
     res.json({ status: 'OK', timestamp: new Date().toISOString() });
   });
 
-  const PORT = process.env.PORT || 11401;
-  const HOST = process.env.HOST || '0.0.0.0';
+  const PORT = config.graphql.port;
+  const HOST = config.server.host;
 
   await new Promise<void>((resolve) => httpServer.listen({ port: PORT, host: HOST }, resolve));
 

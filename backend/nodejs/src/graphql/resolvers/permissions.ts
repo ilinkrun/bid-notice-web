@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-const DATABASE_PATH = '/exposed/projects/bid-notice-web/database/json';
+const DATABASE_PATH = '/exposed/projects/ilmac-bid-web/database/json';
 const PERMISSIONS_FILE = path.join(DATABASE_PATH, 'permissions.json');
 const USERS_FILE = path.join(DATABASE_PATH, 'users.json');
 const SESSIONS_FILE = path.join(DATABASE_PATH, 'sessions.json');
@@ -178,14 +178,17 @@ export const permissionsResolvers = {
 
     checkPageAccess: async (_: unknown, { path, token }: { path: string; token?: string }) => {
       try {
+        console.log(`[checkPageAccess] Checking access for path: ${path}, token: ${token ? 'provided' : 'none'}`);
+
         // 정적 파일과 업로드 파일은 항상 접근 허용
         const staticPaths = ['/uploads/', '/images/', '/_next/', '/api/', '/favicon'];
         const isStaticPath = staticPaths.some(staticPath => path.startsWith(staticPath)) ||
                             path.includes('.png') || path.includes('.jpg') || path.includes('.jpeg') ||
                             path.includes('.gif') || path.includes('.svg') || path.includes('.ico') ||
                             path.includes('.pdf') || path.includes('.xlsx') || path.includes('.docx');
-        
+
         if (isStaticPath) {
+          console.log(`[checkPageAccess] Static path detected: ${path}`);
           return {
             hasAccess: true,
             role: 'guest',
@@ -193,9 +196,9 @@ export const permissionsResolvers = {
             redirectTo: null
           };
         }
-        
+
         let userRole = 'guest';
-        
+
         if (token) {
           const user = getUserByToken(token);
           if (user) {
@@ -203,8 +206,10 @@ export const permissionsResolvers = {
           }
         }
 
+        console.log(`[checkPageAccess] User role: ${userRole}`);
         const result = checkPageAccess(userRole, path);
-        
+        console.log(`[checkPageAccess] Result:`, result);
+
         return {
           hasAccess: result.hasAccess,
           role: userRole,
@@ -212,7 +217,7 @@ export const permissionsResolvers = {
           redirectTo: result.redirectTo || null
         };
       } catch (error) {
-        console.error('Error checking page access:', error);
+        console.error('[checkPageAccess] Error checking page access:', error);
         return {
           hasAccess: false,
           role: 'guest',

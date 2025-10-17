@@ -1,6 +1,26 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load environment variables from parent directory
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   env: {
+    // Server-side env vars
+    BE_NODEJS_PORT: process.env.BE_NODEJS_PORT,
+    API_GRAPHQL_PORT: process.env.API_GRAPHQL_PORT,
+    API_REST_PORT: process.env.API_REST_PORT,
+
+    // Make them available on client-side by re-exporting with NEXT_PUBLIC_ prefix
+    NEXT_PUBLIC_BE_NODEJS_PORT: process.env.BE_NODEJS_PORT,
+    NEXT_PUBLIC_API_GRAPHQL_PORT: process.env.API_GRAPHQL_PORT,
+    NEXT_PUBLIC_API_REST_PORT: process.env.API_REST_PORT,
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
   },
   typescript: {
@@ -47,8 +67,15 @@ const nextConfig = {
         },
       });
     }
-    
-    
+
+    // Ignore node_modules from file watching
+    config.watchOptions = {
+      ...config.watchOptions,
+      ignored: /node_modules/,
+      aggregateTimeout: 300,
+      poll: 1000,
+    };
+
     return config;
   },
 };

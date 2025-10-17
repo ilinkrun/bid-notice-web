@@ -196,7 +196,9 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
         setCustomMessage('게시글 목록을 불러오는 중입니다...');
         setError(null);
         
-        const graphqlUrl = process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://1.231.118.217:11401/graphql';
+        const graphqlUrl = process.env.NEXT_PUBLIC_GRAPHQL_URL ||
+                           process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL ||
+                           `http://localhost:${process.env.NEXT_PUBLIC_API_GRAPHQL_PORT || '21023'}/graphql`;
         console.log('GraphQL URL:', graphqlUrl);
         console.log('Sending board variable:', channelBoard);
         console.log('Original board param:', board);
@@ -313,7 +315,9 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
         postId: selectedPost.id
       });
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}`, {
+      const response = await fetch(process.env.NEXT_PUBLIC_GRAPHQL_URL ||
+                                   process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL ||
+                                   `http://localhost:${process.env.NEXT_PUBLIC_API_GRAPHQL_PORT || '21023'}/graphql`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -337,7 +341,9 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
       }
       
       // 게시글 목록 새로고침
-      const refreshResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}`, {
+      const refreshResponse = await fetch(process.env.NEXT_PUBLIC_GRAPHQL_URL ||
+                                   process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL ||
+                                   `http://localhost:${process.env.NEXT_PUBLIC_API_GRAPHQL_PORT || '21023'}/graphql`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -401,7 +407,9 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
 
       console.log('게시글 수정 요청:', channelBoard, updateData);
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}`, {
+      const response = await fetch(process.env.NEXT_PUBLIC_GRAPHQL_URL ||
+                                   process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL ||
+                                   `http://localhost:${process.env.NEXT_PUBLIC_API_GRAPHQL_PORT || '21023'}/graphql`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -460,7 +468,9 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
     try {
       setCustomMessage('게시글을 작성하는 중입니다...');
       startLoading();
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}`, {
+      const response = await fetch(process.env.NEXT_PUBLIC_GRAPHQL_URL ||
+                                   process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL ||
+                                   `http://localhost:${process.env.NEXT_PUBLIC_API_GRAPHQL_PORT || '21023'}/graphql`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -488,7 +498,9 @@ export default function BoardPage({ params }: { params: Promise<any> }) {
       }
 
       // 게시글 목록 새로고침
-      const refreshResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}`, {
+      const refreshResponse = await fetch(process.env.NEXT_PUBLIC_GRAPHQL_URL ||
+                                   process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL ||
+                                   `http://localhost:${process.env.NEXT_PUBLIC_API_GRAPHQL_PORT || '21023'}/graphql`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

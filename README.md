@@ -3,3 +3,11 @@
 ```sh
 root@e93f39a81a26:/exposed/projects/bid-notice-web# /exposed/_scripts/restart_next.sh
 ```
+
+```sh
+# graphql server
+cd /exposed/projects/ilmac-bid-web/backend/nodejs &&  npm run graphql:dev
+
+# nextjs server
+cd /exposed/projects/ilmac-bid-web/frontend/nextjs && npm run dev
+```

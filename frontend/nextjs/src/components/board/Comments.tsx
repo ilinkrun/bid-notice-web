@@ -120,7 +120,9 @@ export default function Comments({ board, postId, onCommentCountChange }: Commen
   const fetchComments = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}`, {
+      const response = await fetch(process.env.NEXT_PUBLIC_GRAPHQL_URL ||
+                                   process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL ||
+                                   `http://localhost:${process.env.NEXT_PUBLIC_API_GRAPHQL_PORT || '21023'}/graphql`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -197,7 +199,9 @@ export default function Comments({ board, postId, onCommentCountChange }: Commen
       
       console.log('GraphQL 요청:', JSON.stringify(requestBody, null, 2));
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}`, {
+      const response = await fetch(process.env.NEXT_PUBLIC_GRAPHQL_URL ||
+                                   process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL ||
+                                   `http://localhost:${process.env.NEXT_PUBLIC_API_GRAPHQL_PORT || '21023'}/graphql`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -248,7 +252,9 @@ export default function Comments({ board, postId, onCommentCountChange }: Commen
     }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}`, {
+      const response = await fetch(process.env.NEXT_PUBLIC_GRAPHQL_URL ||
+                                   process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL ||
+                                   `http://localhost:${process.env.NEXT_PUBLIC_API_GRAPHQL_PORT || '21023'}/graphql`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -300,7 +306,9 @@ export default function Comments({ board, postId, onCommentCountChange }: Commen
     if (!targetCommentId || !user) return;
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}`, {
+      const response = await fetch(process.env.NEXT_PUBLIC_GRAPHQL_URL ||
+                                   process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL ||
+                                   `http://localhost:${process.env.NEXT_PUBLIC_API_GRAPHQL_PORT || '21023'}/graphql`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

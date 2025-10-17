@@ -210,7 +210,7 @@ export default function ManualDetailPage({ params }: { params: Promise<any> }) {
   useEffect(() => {
     const fetchLangMappings = async () => {
       try {
-        const graphqlUrl = process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql';
+        const graphqlUrl = process.env.NEXT_PUBLIC_GRAPHQL_URL || process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || `http://localhost:${process.env.NEXT_PUBLIC_API_GRAPHQL_PORT || '21023'}/graphql`;
         const response = await fetch(graphqlUrl, {
           method: 'POST',
           headers: {
@@ -248,7 +248,7 @@ export default function ManualDetailPage({ params }: { params: Promise<any> }) {
         setCustomMessage('매뉴얼을 불러오는 중입니다...');
         setError(null);
         
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_GRAPHQL_URL || process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || `http://localhost:${process.env.NEXT_PUBLIC_API_GRAPHQL_PORT || '21023'}/graphql`}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -465,7 +465,7 @@ export default function ManualDetailPage({ params }: { params: Promise<any> }) {
         throw new Error('필수 입력값이 누락되었습니다.');
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_GRAPHQL_URL || process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || `http://localhost:${process.env.NEXT_PUBLIC_API_GRAPHQL_PORT || '21023'}/graphql`}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -550,7 +550,7 @@ export default function ManualDetailPage({ params }: { params: Promise<any> }) {
       startLoading();
       setError(null);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:11401/graphql'}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_GRAPHQL_URL || process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || `http://localhost:${process.env.NEXT_PUBLIC_API_GRAPHQL_PORT || '21023'}/graphql`}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
