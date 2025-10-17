@@ -843,7 +843,7 @@ async function findAllCategorySettings(): Promise<CategorySettings[]> {
   const result = await db.find<any[]>(TABLE_CATEGORY_SETTINGS, {
     where: { use: 1 },
     fields: ['sn', 'keywords', 'nots', 'min_point', 'category'],
-    orderBy: 'priority DESC, sn ASC'
+    orderBy: 'priority ASC, sn ASC'
   });
 
   if (!result.success || !result.data) return [];

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const GRAPHQL_ENDPOINT = process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:4000/graphql';
+const GRAPHQL_ENDPOINT = process.env.NEXT_PUBLIC_BACKEND_GRAPHQL_URL || 'http://localhost:21023/graphql';
 
 export async function POST(request: NextRequest) {
   try {
