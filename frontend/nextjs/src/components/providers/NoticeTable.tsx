@@ -187,7 +187,7 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
   const workPageCategoryOptions = React.useMemo(() => {
     if (categoriesData?.noticeCategoriesActive) {
       // division별로 그룹핑
-      const divisions = [...new Set(categoriesData.noticeCategoriesActive.map((cat: any) => cat.division).filter(Boolean))];
+      const divisions = Array.from(new Set(categoriesData.noticeCategoriesActive.map((cat: any) => cat.division).filter(Boolean))) as string[];
       return divisions.map((division: string) => ({
         value: division,
         label: division
@@ -242,7 +242,7 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
           '기타': '기타'
         };
         const divisions = categories.map(category => categoryToDivisionMap[category]).filter(Boolean);
-        return [...new Set(divisions)]; // 중복 제거
+        return Array.from(new Set(divisions)) as string[]; // 중복 제거
       }
 
       // 데이터베이스에서 category별 division 매핑
@@ -254,7 +254,7 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
           divisions.push(matchingCategory.division);
         }
       });
-      return [...new Set(divisions)]; // 중복 제거
+      return Array.from(new Set(divisions)) as string[]; // 중복 제거
     };
   }, [categoriesData]);
 
@@ -1005,7 +1005,7 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
     } else {
       // Fallback for legacy routes
       const isNaraPage = pathname.includes('/notices/nara');
-      const categoryLabel = CATEGORIES.find(cat => cat.value === currentCategory)?.label || currentCategory || '공사점검';
+      const categoryLabel = categoryOptions.find(cat => cat.value === currentCategory)?.label || currentCategory || '공사점검';
       pageTitle = isNaraPage ? `나라장터(${categoryLabel})` : `관공서 공고(${categoryLabel})`;
       finalBreadcrumb = categoryLabel;
       if (isNaraPage) {
@@ -1347,14 +1347,14 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
           <DialogFooter>
             <ButtonWithColorIcon
               color="tertiary"
-              mode="base"
+              mode="outline"
               onClick={() => setIsFavoriteModalOpen(false)}
             >
               취소
             </ButtonWithColorIcon>
             <ButtonWithColorIcon
               color="secondary"
-              mode="active"
+              mode="filled"
               onClick={handleSaveFavorites}
             >
               저장
@@ -1389,7 +1389,7 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
           <DialogFooter>
             <ButtonWithColorIcon
               color="tertiary"
-              mode="base"
+              mode="outline"
               onClick={() => setIsCategoryEditModalOpen(false)}
               disabled={categoryLoading}
             >
@@ -1397,7 +1397,7 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
             </ButtonWithColorIcon>
             <ButtonWithColorIcon
               color="secondary"
-              mode="active"
+              mode="filled"
               onClick={handleSaveCategoryChange}
               disabled={categoryLoading}
             >
@@ -1428,7 +1428,7 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
           <DialogFooter>
             <ButtonWithColorIcon
               color="tertiary"
-              mode="base"
+              mode="outline"
               onClick={() => setIsBidProcessModalOpen(false)}
               disabled={progressLoading}
             >
@@ -1436,7 +1436,7 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
             </ButtonWithColorIcon>
             <ButtonWithColorIcon
               color="secondary"
-              mode="active"
+              mode="filled"
               onClick={handleConfirmBidProcess}
               disabled={progressLoading}
             >
@@ -1470,7 +1470,7 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
           <DialogFooter>
             <ButtonWithColorIcon
               color="tertiary"
-              mode="base"
+              mode="outline"
               onClick={() => setIsExcludeModalOpen(false)}
               disabled={excludeLoading}
             >
@@ -1478,7 +1478,7 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
             </ButtonWithColorIcon>
             <ButtonWithColorIcon
               color="red"
-              mode="active"
+              mode="filled"
               onClick={handleConfirmExclude}
               disabled={excludeLoading}
             >
@@ -1512,7 +1512,7 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
           <DialogFooter>
             <ButtonWithColorIcon
               color="tertiary"
-              mode="base"
+              mode="outline"
               onClick={() => setIsRestoreModalOpen(false)}
               disabled={restoreLoading}
             >
@@ -1520,7 +1520,7 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
             </ButtonWithColorIcon>
             <ButtonWithColorIcon
               color="green"
-              mode="active"
+              mode="filled"
               onClick={handleConfirmRestore}
               disabled={restoreLoading}
             >
@@ -1554,7 +1554,7 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
           <DialogFooter>
             <ButtonWithColorIcon
               color="tertiary"
-              mode="base"
+              mode="outline"
               onClick={() => setIsConfirmModalOpen(false)}
               disabled={confirmLoading}
             >
@@ -1562,7 +1562,7 @@ export default function NoticeTable({ notices, currentCategory, currentCategorie
             </ButtonWithColorIcon>
             <ButtonWithColorIcon
               color="green"
-              mode="active"
+              mode="filled"
               onClick={handleConfirmDone}
               disabled={confirmLoading}
             >

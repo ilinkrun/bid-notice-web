@@ -826,7 +826,7 @@ export function Header({ isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) {
   const categoryDefault = React.useMemo(() => {
     if (activeCategoriesData?.noticeCategoriesActive) {
       // division별로 그룹핑하여 카테고리 목록 생성
-      const divisions = [...new Set(activeCategoriesData.noticeCategoriesActive.map((cat: any) => cat.division).filter(Boolean))];
+      const divisions = Array.from(new Set(activeCategoriesData.noticeCategoriesActive.map((cat: any) => cat.division).filter(Boolean))) as string[];
       const allCategories = activeCategoriesData.noticeCategoriesActive
         .filter((cat: any) => cat.category && cat.category !== '무관' && cat.category !== '제외')
         .map((cat: any) => cat.category);

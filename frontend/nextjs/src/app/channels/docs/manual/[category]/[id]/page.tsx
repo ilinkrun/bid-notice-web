@@ -720,7 +720,7 @@ export default function ManualDetailPage({ params }: { params: Promise<any> }) {
               accentColor="#3b82f6"
               category="운영가이드"
               pageTitle="매뉴얼 상세"
-              guideClassName="bg-blue-50 border-blue-200"
+
             >
               <div className="min-h-[300px] mb-4">
                 {isEditMode ? (
@@ -784,7 +784,7 @@ export default function ManualDetailPage({ params }: { params: Promise<any> }) {
                             setEditingMarkdown(newMarkdown);
                             console.log('✏️ Markdown content updated:', newMarkdown);
                           }}
-                          data-color-mode="auto"
+                          data-color-mode="light"
                           height={400}
                           preview="live"
                         />
@@ -809,7 +809,7 @@ export default function ManualDetailPage({ params }: { params: Promise<any> }) {
               accentColor="#10b981"
               category="운영가이드"
               pageTitle="매뉴얼 상세"
-              guideClassName="bg-green-50 border-green-200"
+
             >
               <div className="p-4 bg-gray-50 rounded-lg">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

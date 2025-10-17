@@ -824,7 +824,7 @@ export default function PostDetailPage({ params }: { params: Promise<any> }) {
                                 });
                                 console.log('✏️ Markdown content updated:', newMarkdown);
                               }}
-                              data-color-mode="auto"
+                              data-color-mode="light"
                               height={400}
                               preview="live"
                             />

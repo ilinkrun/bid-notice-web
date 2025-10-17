@@ -568,7 +568,7 @@ export default function NewPostPage({ params }: { params: Promise<any> }) {
                           setEditingMarkdown(newMarkdown);
                           console.log('✏️ Markdown content updated:', newMarkdown);
                         }}
-                        data-color-mode="auto"
+                        data-color-mode="light"
                         height={400}
                         preview="live"
                         previewOptions={{

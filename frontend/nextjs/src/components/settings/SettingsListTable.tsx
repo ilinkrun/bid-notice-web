@@ -122,8 +122,8 @@ export function SettingsListTable({ initialData }: SettingsListTableProps) {
             </DataTableCell>
             <DataTableCell
               isHeader
-              onClick={() => handleSort('use')}
-              className={`cursor-pointer ${sortConfig.key === 'use' ? 'text-primary' : ''}`}
+              onClick={() => handleSort('isActive')}
+              className={`cursor-pointer ${sortConfig.key === 'isActive' ? 'text-primary' : ''}`}
             >
               상태
             </DataTableCell>

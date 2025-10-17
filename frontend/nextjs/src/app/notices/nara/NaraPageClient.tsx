@@ -81,13 +81,13 @@ export default function NaraPageClient({
 
   // NoticeTable 컴포넌트와 호환되는 포맷으로 변환
   const formattedNotices = notices.map(notice => ({
-    nid: notice.id,
+    nid: parseInt(notice.id, 10),
     제목: notice.제목,
     기관명: notice.기관명,
     작성일: notice.작성일,
     상세페이지주소: notice.상세페이지주소,
     지역: notice.지역,
-    등록: notice.등록,
+    등록: parseInt(notice.등록, 10),
     title: notice.title,
     orgName: notice.orgName,
     postedAt: notice.postedAt,
@@ -163,7 +163,6 @@ export default function NaraPageClient({
             gap={gap}
             sort={sort}
             order={order}
-            isNaraPage={true}
           />
         </div>
 

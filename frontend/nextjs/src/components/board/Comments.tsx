@@ -482,8 +482,6 @@ export default function Comments({ board, postId, onCommentCountChange }: Commen
                       <ButtonWithIcon
                         icon={<Edit className="h-3 w-3" />}
                         onClick={() => handleEditClick(comment)}
-                        size="sm"
-                        variant="ghost"
                         className="h-8 px-2 text-xs"
                       >
                         수정
@@ -491,8 +489,6 @@ export default function Comments({ board, postId, onCommentCountChange }: Commen
                       <ButtonWithIcon
                         icon={<Trash2 className="h-3 w-3" />}
                         onClick={() => handleDeleteClick(comment)}
-                        size="sm"
-                        variant="ghost"
                         className="h-8 px-2 text-xs text-red-600 hover:text-red-800"
                       >
                         삭제

@@ -31,8 +31,6 @@ const convertMarkdownToHtml = (markdown: string): string => {
     marked.setOptions({
       breaks: true, // 줄바꿈을 <br>로 변환하여 편집창 줄바꿈이 HTML에 반영되도록 함
       gfm: true, // GitHub Flavored Markdown 사용
-      headerIds: false, // 헤더 ID 생성 안함
-      mangle: false, // 이메일 주소 인코딩 안함
     });
 
     let result = marked(markdown || '');
@@ -419,7 +417,7 @@ export function GuideSlide({
       setIsEditing(false);
       refetch(); // 데이터 새로고침
       alert('저장이 완료되었습니다.');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Help 문서 저장 실패:', error);
       console.error('Error details:', {
         message: error.message,
